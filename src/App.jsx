@@ -65,9 +65,11 @@ const DOCX_TEMPLATES = {
   tor: {
     url: "/templates/Template_TOR.docx",
     buildData: (r) => ({
+      judulProgramRKA: r.judulProgramRKA || "",
       judulKegiatan: r.judulKegiatan || "",
       latarBelakang: r.latarBelakang || "",
-      tujuanList: [...splitLines(r.tujuanUmum), ...splitLines(r.tujuanKhusus)],
+      tujuanUmum: r.tujuanUmum || "",
+      tujuanKhususList: splitLines(r.tujuanKhusus),
       sasaranList: splitLines(r.sasaran),
       hariTanggal: tanggalDenganHari(r.hariTanggal) || r.hariTanggal || "",
       tempat: r.tempat || "",
