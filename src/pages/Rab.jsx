@@ -6,6 +6,7 @@ import {
   Check,
   CheckCircle2,
   Download,
+  Eye,
   Pencil,
   Plus,
   Trash2,
@@ -130,6 +131,8 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [detailRow, setDetailRow] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [rabPreview, setRabPreview] = useState(null);
+  const [selectedId, setSelectedId] = useState("");
 
   const headerFields = buildHeaderFields(vendors);
   const totalEvaluasi = items.reduce((s, r) => s + (r.totalEvaluasi || 0), 0);
@@ -195,7 +198,7 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
     notify("Data RAB berhasil disimpan!", "success", "RAB");
   };
 
-  const downloadRabPdf = async (record) => {
+  const doDownloadRabPdf = async (record) => {
     const recFields = buildHeaderFields(vendors);
     await generateSikasPdf({
       title: "Rencana Anggaran Biaya (RAB)",
@@ -204,6 +207,78 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
       table: record.items || [],
       filename: `RAB-${record.idNumber || "record"}`,
     });
+  };
+
+  const openRabPreview = (record) => {
+    setDetailRow(null);
+    setRabPreview(record);
+  };
+  const closeRabPreview = () => {
+    setRabPreview(null);
+    setSelectedId("");
+  };
+
+  const renderRabPreview = () => {
+    if (!rabPreview) return null;
+    const idText = rabPreview.idNumber || "";
+    return (
+      <Modal
+        open={!!rabPreview}
+        onClose={closeRabPreview}
+        title={idText ? "Preview RAB — " + idText : "Preview RAB"}
+        icon={Eye}
+        width={640}
+      >
+        <p style={{ color: T.muted, fontSize: 13, marginBottom: 16, lineHeight: 1.6 }}>
+          Periksa data di bawah sebelum mengunduh PDF.
+        </p>
+        <ReviewList fields={headerFields} values={rabPreview} />
+        {(rabPreview.items || []).length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ fontFamily: font.display, fontSize: 13, marginBottom: 8 }}>
+              Uraian RAB ({rabPreview.items.length} item)
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+                <thead>
+                  <tr style={{ background: T.tableHead }}>
+                    {["Uraian", "Qty", "Satuan", "Harga", "Total Evaluasi"].map((h) => (
+                      <th key={h} style={{ padding: "6px 10px", textAlign: "left", borderBottom: `1px solid ${T.border}`, color: T.muted, fontWeight: 600 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rabPreview.items.map((item, i) => (
+                    <tr key={item.id || i} style={{ borderBottom: `1px solid ${T.border}` }}>
+                      <td style={{ padding: "6px 10px" }}>{item.uraian || "—"}</td>
+                      <td style={{ padding: "6px 10px" }}>{item.qtyEvaluasi || item.qty || "—"}</td>
+                      <td style={{ padding: "6px 10px" }}>{item.satuan || "—"}</td>
+                      <td style={{ padding: "6px 10px" }}>{rupiah(item.hargaEvaluasi || item.harga || 0)}</td>
+                      <td style={{ padding: "6px 10px" }}>{rupiah(item.totalEvaluasi || 0)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ textAlign: "right", marginTop: 8, fontWeight: 700, fontSize: 13 }}>
+              Total: {rupiah(rabPreview.totalEvaluasi || 0)}
+            </div>
+          </div>
+        )}
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20, flexWrap: "wrap" }}>
+          <Button variant="ghost" onClick={closeRabPreview}>Batal</Button>
+          <Button
+            icon={Download}
+            onClick={async () => {
+              await doDownloadRabPdf(rabPreview);
+              closeRabPreview();
+            }}
+          >
+            Download PDF
+          </Button>
+        </div>
+      </Modal>
+    );
   };
 
   if (mode === "list") {
@@ -220,9 +295,48 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
             </Button>
           }
         />
+        {rab.length > 0 && (
+          <Card style={{ marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 260px", minWidth: 0 }}>
+                <div style={{ fontFamily: font.display, fontSize: 14, marginBottom: 4 }}>
+                  Preview &amp; Download berdasarkan ID
+                </div>
+                <div style={{ color: T.muted, fontSize: 12.5, lineHeight: 1.5 }}>
+                  Pilih ID RAB untuk melihat preview data, lalu unduh sebagai PDF.
+                </div>
+              </div>
+              <select
+                value={selectedId}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedId(val);
+                  const rec = rab.find((r) => r.idNumber === val);
+                  if (rec) openRabPreview(rec);
+                }}
+                style={{
+                  flex: "1 1 260px",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: `1px solid ${T.border}`,
+                  background: T.inputBg,
+                  color: T.text,
+                  fontSize: 13.5,
+                }}
+              >
+                <option value="">— Pilih ID RAB —</option>
+                {rab.map((r) => (
+                  <option key={r.idNumber} value={r.idNumber}>
+                    {r.idNumber}{r.judulKegiatan ? ` — ${r.judulKegiatan}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </Card>
+        )}
         <Card padded={false}>
           <DataTable
-            emptyLabel="Belum ada RAB. Klik “Add New RAB” untuk membuat pengajuan pertama."
+            emptyLabel={'Belum ada RAB. Klik “Add New RAB” untuk membuat pengajuan pertama.'}
             columns={LIST_COLUMNS}
             rows={rab}
             onRowClick={setDetailRow}
@@ -237,8 +351,9 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
             setRab((prev) => prev.map((r) => (r === detailRow ? { ...r, ...draft } : r)));
             notify("Data RAB berhasil diperbarui!");
           }}
-          onDownloadPdf={downloadRabPdf}
+          onDownloadPdf={openRabPreview}
         />
+        {renderRabPreview()}
       </div>
     );
   }
@@ -354,8 +469,9 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
         open={showSuccessModal}
         message={`RAB ${header.idNumber} sudah tercatat di daftar RAB.`}
         onDone={finish}
-        onDownloadPdf={() => downloadRabPdf({ ...header, items, totalEvaluasi })}
+        onDownloadPdf={() => openRabPreview({ ...header, items, totalEvaluasi })}
       />
+      {renderRabPreview()}
     </div>
   );
 }
@@ -564,7 +680,7 @@ function StepUraian({
         Input Uraian RAB (per item)
       </h3>
       <p style={{ fontSize: 12.5, color: T.muted, marginBottom: 16 }}>
-        Isi satu baris untuk tiap barang/jasa, lalu tekan “Tambah baris” untuk
+        Isi satu baris untuk tiap barang/jasa, lalu tekan "Tambah baris" untuk
         menambahkannya ke tabel di bawah.
       </p>
 
@@ -702,7 +818,7 @@ function StepUraian({
         Catatan: evaluasi = harga/jumlah pembanding fiks yang benar-benar digunakan.
         {editingId && (
           <b style={{ color: T.blue, marginLeft: 6 }}>
-            · Sedang mengedit baris — perubahan akan tersimpan setelah tekan “Update baris”.
+            · Sedang mengedit baris — perubahan akan tersimpan setelah tekan "Update baris".
           </b>
         )}
       </p>
@@ -1050,11 +1166,11 @@ export function SuccessModal({ open, message, onDone, onDownloadPdf, onDownloadD
         {onDownloadPdf && (
           <Button
             variant="ghost"
-            icon={Download}
+            icon={Eye}
             style={{ width: "100%", justifyContent: "center", marginBottom: 8 }}
             onClick={onDownloadPdf}
           >
-            Unduh sebagai PDF
+            Preview &amp; Unduh PDF
           </Button>
         )}
         <Button style={{ width: "100%", justifyContent: "center" }} onClick={onDone}>
