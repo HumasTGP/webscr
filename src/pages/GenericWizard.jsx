@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowLeft, ArrowRight, Check, Plus } from "lucide-react"
 import { T, font } from "../lib/theme";
 import { nextIdFor, uid } from "../lib/utils";
 import { generateSikasPdf, rowsFromFields } from "../lib/pdf";
+import { generateDocxFromTemplate } from "../lib/docxGenerate";
 import Button from "../components/Button";
 import Card from "../components/Card";
 import Modal from "../components/Modal";
@@ -29,6 +30,7 @@ export default function GenericWizard({
   autoFrom,
   notify,
   pdfEnabled = false,
+  docxTemplate,
 }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(opsiOptions ? 0 : 1);
@@ -90,6 +92,21 @@ export default function GenericWizard({
     });
   };
 
+  const downloadDocx = async (record) => {
+    if (!docxTemplate) return;
+    const idText = record.id || record.idNumber || "record";
+    try {
+      await generateDocxFromTemplate(
+        docxTemplate.url,
+        docxTemplate.buildData(record),
+        `${title.replace(/\s+/g, "-")}-${idText}.docx`
+      );
+      notify(`${title} (.docx) berhasil diunduh.`, "success");
+    } catch (e) {
+      notify(`Gagal membuat ${title}: ${e.message}`, "error");
+    }
+  };
+
   if (mode === "list") {
     const detailColumns = buildFields(
       detailRow?.opsi ?? null,
@@ -129,6 +146,7 @@ export default function GenericWizard({
             notify(`Data ${title} berhasil diperbarui!`);
           }}
           onDownloadPdf={pdfEnabled ? downloadPdf : undefined}
+          onDownloadDocx={docxTemplate ? downloadDocx : undefined}
         />
       </div>
     );
@@ -284,6 +302,11 @@ export default function GenericWizard({
         onDownloadPdf={
           pdfEnabled
             ? () => downloadPdf({ ...values, opsi, id: values.id })
+            : undefined
+        }
+        onDownloadDocx={
+          docxTemplate
+            ? () => downloadDocx({ ...values, opsi, id: values.id })
             : undefined
         }
       />

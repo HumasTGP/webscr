@@ -11,6 +11,7 @@ export default function DetailModal({
   columns,
   onSave,
   onDownloadPdf,
+  onDownloadDocx,
   startEditing = false,
 }) {
   const [editing, setEditing] = useState(false);
@@ -97,6 +98,11 @@ export default function DetailModal({
       </div>
 
       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" }}>
+        {onDownloadDocx && !editing && (
+          <Button variant="ghost" icon={Download} onClick={() => onDownloadDocx(data)}>
+            Unduh Word
+          </Button>
+        )}
         {onDownloadPdf && !editing && (
           <Button variant="ghost" icon={Download} onClick={() => onDownloadPdf(data)}>
             Unduh PDF

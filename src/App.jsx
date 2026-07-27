@@ -8,6 +8,7 @@ import {
   VENDOR_SEED,
 } from "./lib/data";
 import { uid } from "./lib/utils";
+import { formatTanggalPanjang } from "./lib/docxGenerate";
 import {
   autoFromRab,
   bastFields,
@@ -37,6 +38,61 @@ const seed = (prefix, rows) =>
     ...v,
     id: `${prefix}-${String(i + 1).padStart(3, "0")}`,
   }));
+
+// Pisah textarea multi-baris jadi array butir (untuk list TUJUAN/SASARAN di TOR).
+const splitLines = (s) =>
+  String(s || "")
+    .split(/\r?\n/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+// Tanggal "YYYY-MM-DD" -> "Selasa, 20 April 2026" (dengan nama hari).
+const tanggalDenganHari = (iso) => {
+  if (!iso) return "";
+  const d = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+// Mapping data wizard -> placeholder di masing-masing template .docx.
+const DOCX_TEMPLATES = {
+  tor: {
+    url: "/templates/Template_TOR.docx",
+    buildData: (r) => ({
+      judulKegiatan: r.judulKegiatan || "",
+      latarBelakang: r.latarBelakang || "",
+      tujuanList: [...splitLines(r.tujuanUmum), ...splitLines(r.tujuanKhusus)],
+      sasaranList: splitLines(r.sasaran),
+      hariTanggal: tanggalDenganHari(r.hariTanggal) || r.hariTanggal || "",
+      tempat: r.tempat || "",
+      narasumber: r.narasumber || "-",
+    }),
+  },
+  bast: {
+    url: "/templates/Template_BAST.docx",
+    buildData: (r) => ({
+      nomor: r.nomor || "",
+      judulBantuan: r.judulBantuan || "",
+      tanggal: formatTanggalPanjang(r.tanggal) || r.tanggal || "",
+      namaPihakKedua: r.namaPihakKedua || "",
+      jabatanPihakKedua: r.jabatanPihakKedua || "",
+      instansiPihakKedua: r.instansiPihakKedua || "",
+    }),
+  },
+  pakta: {
+    url: "/templates/Template_Pakta_Integritas.docx",
+    buildData: (r) => ({
+      judulKegiatan: r.judulBantuan || "",
+      tanggalPi: formatTanggalPanjang(r.tanggalPi) || r.tanggalPi || "",
+      namaPenerima: r.namaPenerima || "",
+    }),
+  },
+};
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -139,6 +195,7 @@ export default function App() {
           setList={setTor}
           notify={notify}
           pdfEnabled
+          docxTemplate={DOCX_TEMPLATES.tor}
           columns={[
             { key: "id", label: "ID TOR" },
             { key: "kategori", label: "Kategori" },
@@ -160,6 +217,7 @@ export default function App() {
           setList={setBast}
           notify={notify}
           pdfEnabled
+          docxTemplate={DOCX_TEMPLATES.bast}
           columns={[
             { key: "id", label: "ID" },
             { key: "kategori", label: "Kategori" },
@@ -180,6 +238,7 @@ export default function App() {
           setList={setPakta}
           notify={notify}
           pdfEnabled
+          docxTemplate={DOCX_TEMPLATES.pakta}
           columns={[
             { key: "id", label: "ID" },
             { key: "kategori", label: "Kategori" },

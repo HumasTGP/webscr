@@ -113,6 +113,7 @@ export const torFields = (rabIdOptions) => (_opsi, _values, _autoFrom) => [
     hint: "otomatis dari ID RAB",
     full: true,
   },
+  { key: "latarBelakang", label: "Latar Belakang", type: "textarea", section: "Latar Belakang", full: true },
   { key: "tujuanUmum", label: "Tujuan Umum", type: "textarea", section: "Tujuan & Sasaran", full: true },
   { key: "tujuanKhusus", label: "Tujuan Khusus", type: "textarea", full: true },
   { key: "sasaran", label: "Sasaran", type: "textarea", full: true },
@@ -139,8 +140,9 @@ export const bastFields = (rabIdOptions) => () => [
   { key: "nomor", label: "Nomor" },
   { key: "judulBantuan", label: "Judul Bantuan", disabled: true, hint: "otomatis dari ID RAB" },
   { key: "tanggal", label: "Tanggal", type: "date" },
-  { key: "jabatanPihakKedua", label: "Jabatan Pihak Kedua", section: "Pihak Kedua" },
-  { key: "instansiPihakKedua", label: "Instansi Pihak Kedua" },
+  { key: "namaPihakKedua", label: "Nama Pihak Kedua", section: "Pihak Kedua" },
+  { key: "jabatanPihakKedua", label: "Jabatan Pihak Kedua" },
+  { key: "instansiPihakKedua", label: "Instansi/Kedudukan Pihak Kedua" },
   {
     key: "jumlahBantuan",
     label: "Jumlah Bantuan",
@@ -166,6 +168,7 @@ export const paktaFields = (rabIdOptions) => () => [
     hint: "otomatis dari ID RAB — NON PO / Cash Card",
   },
   { key: "judulBantuan", label: "Judul Bantuan", disabled: true, hint: "otomatis dari ID RAB" },
+  { key: "tanggalPi", label: "Tanggal PI", type: "date" },
   {
     key: "lembagaPenerima",
     label: "Lembaga Penerima Bantuan",

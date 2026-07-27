@@ -1016,7 +1016,7 @@ function SectionHeader({ children, dashed }) {
   );
 }
 
-export function SuccessModal({ open, message, onDone, onDownloadPdf }) {
+export function SuccessModal({ open, message, onDone, onDownloadPdf, onDownloadDocx }) {
   return (
     <Modal open={open} width={420}>
       <div style={{ textAlign: "center", padding: "12px 0" }}>
@@ -1037,6 +1037,16 @@ export function SuccessModal({ open, message, onDone, onDownloadPdf }) {
           Data Anda Telah Berhasil Disimpan!
         </h3>
         <p style={{ color: T.muted, fontSize: 13, margin: "0 0 20px" }}>{message}</p>
+        {onDownloadDocx && (
+          <Button
+            variant="ghost"
+            icon={Download}
+            style={{ width: "100%", justifyContent: "center", marginBottom: 8 }}
+            onClick={onDownloadDocx}
+          >
+            Unduh sebagai Word (.docx)
+          </Button>
+        )}
         {onDownloadPdf && (
           <Button
             variant="ghost"
