@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="PLN Indonesia Power">
+  <!-- Kotak kuning identitas PLN -->
+  <rect width="100" height="100" rx="6" fill="#FFC72C"/>
+
+  <!-- Tiga garis gelombang biru muda -->
+  <g fill="none" stroke="#4FB6E6" stroke-width="6" stroke-linecap="round">
+    <path d="M15 55 Q30 45 45 55 T75 55 T105 55" />
+    <path d="M15 70 Q30 60 45 70 T75 70 T105 70" />
+    <path d="M15 85 Q30 75 45 85 T75 85 T105 85" />
+  </g>
+
+  <!-- Petir merah di tengah -->
+  <path d="M56 15 L34 55 L48 55 L42 88 L68 46 L54 46 L60 15 Z"
+        fill="#E4322C" stroke="#B0281F" stroke-width="1.4" stroke-linejoin="round"/>
+</svg>

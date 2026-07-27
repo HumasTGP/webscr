@@ -1,0 +1,272 @@
+import {
+  LayoutDashboard,
+  FileSpreadsheet,
+  FileText,
+  ShieldCheck,
+  ClipboardList,
+  Building2,
+  HelpCircle,
+  Clock,
+  Handshake,
+  Megaphone,
+} from "lucide-react";
+
+export const OPT = {
+  kategori: ["NON PO", "Cash Card"],
+  bidang: ["Niaga", "Keuangan", "SDM & Umum", "Perencanaan", "K3L"],
+  jenisProgram: ["CSR", "Bina Lingkungan", "Sponsorship", "Donasi"],
+  subprogram: [
+    "Pendidikan",
+    "Kesehatan",
+    "Infrastruktur",
+    "Bencana Alam",
+    "Lingkungan Hidup",
+  ],
+  kategoriProgram: ["Rutin", "Non Rutin", "Prioritas"],
+  procost: ["PC-1001", "PC-1002", "PC-1003"],
+  task: ["Task-A", "Task-B", "Task-C"],
+  expType: ["Operasional", "Non Operasional"],
+  expOrg: ["Kantor Pusat", "Unit Induk", "Unit Pelaksana"],
+  satuan: ["Unit", "Paket", "Buah", "Set", "Lembar"],
+  ppn: ["0%", "11%"],
+  satuanPenerima: ["Orang", "KK"],
+  ringLokasi: ["Ring 1", "Ring 2", "Ring 3", "Ring 4"],
+  provinsi: ["31 - DKI Jakarta", "32 - Jawa Barat", "36 - Banten"],
+  kabkota: ["3171 - Jakarta Pusat", "3204 - Bandung", "3671 - Tangerang"],
+  realisasi: [
+    "1 - Triwulan I",
+    "2 - Triwulan II",
+    "3 - Triwulan III",
+    "4 - Triwulan IV",
+  ],
+  programInduk: ["TJSL PLN Peduli", "TJSL PLN Pintar", "TJSL PLN Bersih"],
+  tpb: [
+    "TPB 1 - Tanpa Kemiskinan",
+    "TPB 3 - Kehidupan Sehat",
+    "TPB 4 - Pendidikan Berkualitas",
+  ],
+  judulProgramRKA: [
+    "RKA Bina Lingkungan 2026",
+    "RKA CSR Pendidikan 2026",
+    "RKA Tanggap Bencana 2026",
+  ],
+  bulan: [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  ],
+  unit: ["UBP Priok"],
+
+  statusProposal: ["Baru Masuk", "Ditinjau", "Disetujui", "Ditolak"],
+  sumberPengaju: [
+    "Yayasan/LSM",
+    "Komunitas Warga",
+    "Sekolah/Pesantren",
+    "Instansi Pemerintah",
+    "Perusahaan",
+    "Perorangan",
+  ],
+
+  programHumas: [
+    "Pelayanan Masyarakat",
+    "Pemberdayaan Masyarakat",
+    "Pembinaan Hubungan Masyarakat",
+  ],
+
+  komunikasiKategori: [
+    "B1. Scoring Grand Theme",
+    "B2. Scoring Top One",
+    "B3. Scoring Media Plan",
+    "B4. Scoring Pemberitaan Lain-lain",
+  ],
+  komunikasiNarasumber: [
+    "Buyung Arianto",
+    "Guntur Syachrir",
+    "Sigid Endro Winarno",
+    "Donny Ureansyah",
+    "Astri Oktavina",
+  ],
+  
+  komunikasiMediaPemberitaan: [
+    "Social Media",
+    "Media Elektronik",
+    "Media Cetak",
+    "Media Online",
+  ],
+  komunikasiJenisAkun: [
+    "Twitter Korporat",
+    "Facebook Korporat",
+    "Instagram Korporat",
+    "TikTok Korporat",
+    "Youtube Korporat",
+  ],
+
+  komunikasiKategoriMedia: [
+    "TV - Cnbc", "TV - Global Tv", "TV - Indosiar", "TV - Inews", "TV - Kompas Tv",
+    "TV - Metro Tv", "TV - Mnc Tv", "TV - Rcti", "TV - Sctv", "TV - Sea Today",
+    "TV - Trans 7", "TV - Trans Tv", "TV - Tv One", "TV - Local & Lainnya Tv",
+    "Media Elektronik - Iklan TV Nasional", "Media Elektronik - Iklan TV Lokal",
+    "Media Elektronik - Running Text TV Nasional", "Media Elektronik - Running Text TV Lokal",
+    "Radio - Elshinta", "Radio - Gen Fm", "Radio - Iradio", "Radio - Kiss Fm",
+    "Radio - Most Fm", "Radio - Prambons Fm", "Radio - Rri Pro 1 Banten",
+    "Radio - Rri Pro 1 Jakarta", "Radio - Rri Pro 2 Jakarta", "Radio - Trijaya Fm",
+    "Radio - Local & Lainnya Radio",
+    "Media Cetak - Bisnis Indonesia", "Media Cetak - Harian Kontan", "Media Cetak - Investor Daily",
+    "Media Cetak - Jawapos", "Media Cetak - Kompas", "Media Cetak - Kontan Tabloid",
+    "Media Cetak - Koran Sindo", "Media Cetak - Koran Tempo", "Media Cetak - Majalah Tempo",
+    "Media Cetak - Media Indonesia", "Media Cetak - Rakyat Merdeka",
+    "Media Cetak - Local & Lainnya Media Cetak",
+    "Media Online - Antaranews.com", "Media Online - Bbc News", "Media Online - Berita Satu.com",
+    "Media Online - Bisnis.com", "Media Online - Cnbc Indonesia", "Media Online - Cnn Indonesia",
+    "Media Online - Detik.com", "Media Online - Idn Times", "Media Online - Idxchannel.com",
+    "Media Online - Inews.id", "Media Online - Investor.id", "Media Online - Jawapos.com",
+    "Media Online - Jpnn.com", "Media Online - Kompas.com", "Media Online - Kontan.co.id",
+    "Media Online - Kumparan.com", "Media Online - Liputan6.com", "Media Online - Medcom.id",
+    "Media Online - Merdeka.com", "Media Online - Okezone", "Media Online - Pikiran Rakyat.com",
+    "Media Online - Republika.co.id", "Media Online - Sindonews.com", "Media Online - Suara.com",
+    "Media Online - Tempo.co", "Media Online - The Jakarta Post", "Media Online - Tirto.id",
+    "Media Online - Tribunnews.com", "Media Online - Viva.co.id", "Media Online - Warta Ekonomi",
+    "Media Online - Warta Kota", "Media Online - Local & Lainnya Media Online",
+    "Media Sosial - Twitter Views < 1000", "Media Sosial - Twitter Views 1000-5000",
+    "Media Sosial - Twitter Views > 5000",
+    "Media Sosial - Facebook Views < 1000", "Media Sosial - Facebook Views 1000-5000",
+    "Media Sosial - Facebook Views > 5000",
+    "Media Sosial - Facebook Post Like < 1000", "Media Sosial - Facebook Post Like 1000-5000",
+    "Media Sosial - Facebook Post Like > 5000",
+    "Media Sosial - Instagram Views < 1000", "Media Sosial - Instagram Views 1000-5000",
+    "Media Sosial - Instagram Views > 5000",
+    "Media Sosial - Instagram Feeds (Photo) Like < 1000",
+    "Media Sosial - Instagram Feeds (Photo) Like 1000-5000",
+    "Media Sosial - Instagram Feeds (Photo) Like > 5000",
+    "Media Sosial - Tiktok Views < 1000", "Media Sosial - Tiktok Views 1000-5000",
+    "Media Sosial - Tiktok Views > 5000",
+    "Media Sosial - Youtube Views < 1000", "Media Sosial - Youtube Views 1000-5000",
+    "Media Sosial - Youtube Views > 5000",
+    "Media Sosial - Twitter Trending 1000-10000", "Media Sosial - Twitter Trending > 10000",
+  ],
+  komunikasiStatus: ["Draft", "Terbit"],
+};
+
+export const ROLES = [
+  { value: "humas", label: "Humas" },
+  { value: "asman", label: "Asman" },
+  { value: "madm", label: "MADM" },
+];
+
+// Ganti sesuai kontak Admin/IT SIKAS yang berlaku.
+export const HELP_CONTACT = {
+  phone: "+62 21 4390 8087",
+  hours: "Senin–Jumat, 08.00–16.00 WIB",
+};
+
+export const MENU = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, group: "utama" },
+
+  { key: "proposal-rekap", label: "Rekap Pengajuan Proposal", icon: Handshake, group: "humas" },
+  { key: "proposal-evaluasi", label: "Cetak Form Evaluasi", icon: FileText, group: "humas" },
+  { key: "konten", label: "Pengelolaan Komunikasi", icon: Megaphone, group: "humas" },
+
+  { key: "rab", label: "RAB", icon: FileSpreadsheet, group: "administrasi" },
+  { key: "tor", label: "TOR", icon: FileText, group: "administrasi" },
+  { key: "bast", label: "BAST", icon: ClipboardList, group: "administrasi" },
+  { key: "pakta", label: "Pakta Integritas", icon: ShieldCheck, group: "administrasi" },
+  { key: "laporan", label: "Laporan", icon: FileText, group: "administrasi" },
+  { key: "vendor", label: "Vendor", icon: Building2, group: "administrasi" },
+
+  { key: "history", label: "History", icon: Clock, group: "master" },
+  { key: "panduan", label: "Panduan", icon: HelpCircle, group: "master" },
+];
+
+export const MENU_GROUPS = [
+  { key: "utama", label: "Ringkasan" },
+  { key: "humas", label: "Humas & Publikasi" },
+  { key: "administrasi", label: "Administrasi Kas" },
+  { key: "master", label: "Master & Bantuan" },
+];
+
+export const VENDOR_SEED = [
+  { nama: "CV Cahaya Abadi", alamat: "Jl. Yos Sudarso No.12, Jakarta Utara" },
+  { nama: "PT Sumber Makmur", alamat: "Jl. Gatot Subroto No.5, Jakarta Selatan" },
+];
+
+export const PROPOSAL_SEED = [
+  {
+    tanggalMasuk: "2026-06-14",
+    namaLembaga: "Yayasan Bina Pesisir Priok",
+    sumberPengaju: "Yayasan/LSM",
+    kontakPIC: "Ibu Siti Rahmawati",
+    kontakTelp: "0812-3345-8890",
+    kontakEmail: "siti@binapesisir.or.id",
+    jenisProgram: "Bina Lingkungan",
+    subprogram: "Lingkungan Hidup",
+    judulProposal: "Rehabilitasi Mangrove Muara Angke Tahap 2",
+    nilaiDiajukan: 120000000,
+    ringkasan:
+      "Penanaman 5.000 bibit mangrove & pemberdayaan 60 KK nelayan pesisir "
+      + "Muara Angke selama 6 bulan.",
+    statusProposal: "Ditinjau",
+    catatanInternal: "Menunggu klarifikasi RAB dari pengaju.",
+  },
+  {
+    tanggalMasuk: "2026-06-22",
+    namaLembaga: "SDN Rawa Badak Utara 05",
+    sumberPengaju: "Sekolah/Pesantren",
+    kontakPIC: "Bapak Ahmad Yani, S.Pd",
+    kontakTelp: "0821-1122-3344",
+    kontakEmail: "sdrawabadak05@dkijakarta.sch.id",
+    jenisProgram: "CSR",
+    subprogram: "Pendidikan",
+    judulProposal: "Beasiswa & Sarana Belajar 30 Siswa Berprestasi",
+    nilaiDiajukan: 45000000,
+    ringkasan: "Beasiswa 12 bulan + paket buku & seragam untuk 30 siswa.",
+    statusProposal: "Disetujui",
+    catatanInternal: "Lanjut ke pembuatan RAB.",
+  },
+];
+
+export const KONTEN_SEED = [
+  {
+    tanggal: "2026-07-01",
+    kategori: "B1. Scoring Grand Theme",
+    narasumber: "Buyung Arianto",
+    judul: "PLN IP UBP Priok Salurkan Bantuan Rehabilitasi Mangrove",
+    status: "Terbit",
+    publikasi: [
+      {
+        id: "PUB-001",
+        mediaPemberitaan: "Social Media",
+        jenisAkunMedsos: "Instagram Korporat",
+        namaMedia: "@plnip.ubppriok",
+        link: "https://instagram.com/p/mangrove-priok-2026",
+        kategoriMedia: "Media Sosial - Instagram Views < 1000",
+        nomorRilis: 67,
+      },
+      {
+        id: "PUB-002",
+        mediaPemberitaan: "Media Online",
+        jenisAkunMedsos: "",
+        namaMedia: "dki.rasionews.com",
+        link: "https://dki.rasionews.com/2026/07/01/mangrove-priok",
+        kategoriMedia: "Media Online - Local & Lainnya Media Online",
+        nomorRilis: 68,
+      },
+    ],
+  },
+  {
+    tanggal: "2026-07-15",
+    kategori: "B2. Scoring Top One",
+    narasumber: "Guntur Syachrir",
+    judul: "Dokumentasi Penyerahan Beasiswa SDN Rawa Badak 05",
+    status: "Draft",
+    publikasi: [
+      {
+        id: "PUB-003",
+        mediaPemberitaan: "Social Media",
+        jenisAkunMedsos: "TikTok Korporat",
+        namaMedia: "@plnip.ubppriok",
+        link: "https://www.tiktok.com/@plnip.ubppriok/video/beasiswa",
+        kategoriMedia: "Media Sosial - Tiktok Views < 1000",
+        nomorRilis: 69,
+      },
+    ],
+  },
+];
