@@ -1,0 +1,292 @@
+import { useMemo, useState } from "react";
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, Plus } from "lucide-react";
+import { T, font } from "../lib/theme";
+import { nextIdFor, uid } from "../lib/utils";
+import { generateSikasPdf, rowsFromFields } from "../lib/pdf";
+import Button from "../components/Button";
+import Card from "../components/Card";
+import Modal from "../components/Modal";
+import Badge from "../components/Badge";
+import PageHeader from "../components/PageHeader";
+import FlowSteps from "../components/FlowSteps";
+import DataTable from "../components/DataTable";
+import DetailModal from "../components/DetailModal";
+import FormGrid, { ReviewList } from "../components/FormGrid";
+import { SuccessModal } from "./Rab";
+
+export default function GenericWizard({
+  title,
+  eyebrow,
+  description,
+  opsiOptions,
+  opsiLabel,
+  confirmOpsi,
+  buildFields,
+  columns,
+  list,
+  setList,
+  idPrefix,
+  autoFrom,
+  notify,
+  pdfEnabled = false,
+}) {
+  const [mode, setMode] = useState("list");
+  const [step, setStep] = useState(opsiOptions ? 0 : 1);
+  const [opsi, setOpsi] = useState(null);
+  const [values, setValues] = useState({});
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [detailRow, setDetailRow] = useState(null);
+
+  const fields = useMemo(
+    () => buildFields(opsi, values, autoFrom),
+    [opsi, values, buildFields, autoFrom]
+  );
+
+  const start = () => {
+    setOpsi(null);
+    const isReferenceId = autoFrom?.key === "id";
+    setValues({
+      id: isReferenceId ? uid(idPrefix) : nextIdFor(idPrefix, list),
+    });
+    setStep(opsiOptions ? 0 : 1);
+    setMode("wizard");
+  };
+
+  const onChange = (key, val) => {
+    let next = { ...values, [key]: val };
+    if (autoFrom && key === autoFrom.key) {
+      const match = autoFrom.source.find((s) => s.idNumber === val || s.id === val);
+      if (match) next = { ...next, ...autoFrom.map(match) };
+    }
+    setValues(next);
+  };
+
+  const save = () => {
+    setList((prev) => [
+      ...prev,
+      { ...values, opsi, id: values.id || uid(idPrefix) },
+    ]);
+    setShowSaveModal(false);
+    setShowSuccessModal(true);
+  };
+
+  const finish = () => {
+    setShowSuccessModal(false);
+    setMode("list");
+    notify(`Data ${title} berhasil disimpan!`, "success", title);
+  };
+
+  const downloadPdf = async (record) => {
+    const recFields = buildFields(record?.opsi ?? null, record ?? {}, autoFrom);
+    const idText = record.id || record.idNumber || "";
+    await generateSikasPdf({
+      title,
+      subtitle: idText
+        ? `${idText}${record.opsi ? ` · ${record.opsi}` : ""}`
+        : record.opsi || "",
+      rows: rowsFromFields(recFields, record),
+      filename: `${title.replace(/\s+/g, "-")}-${idText || "record"}`,
+    });
+  };
+
+  if (mode === "list") {
+    const detailColumns = buildFields(
+      detailRow?.opsi ?? null,
+      detailRow ?? {},
+      autoFrom
+    ).map((f) => ({ key: f.key, label: f.label }));
+
+    return (
+      <div>
+        <PageHeader
+          eyebrow={eyebrow}
+          title={title}
+          description={`${description} Klik salah satu baris untuk melihat detail atau mengubah data.`}
+          right={
+            <Button icon={Plus} onClick={start}>
+              Tambah {title}
+            </Button>
+          }
+        />
+        <Card padded={false}>
+          <DataTable
+            rows={list}
+            columns={columns}
+            emptyLabel={`Belum ada data ${title.toLowerCase()}.`}
+            onRowClick={setDetailRow}
+          />
+        </Card>
+        <DetailModal
+          open={!!detailRow}
+          onClose={() => setDetailRow(null)}
+          data={detailRow}
+          columns={detailColumns}
+          onSave={(draft) => {
+            setList((prev) =>
+              prev.map((r) => (r === detailRow ? { ...r, ...draft } : r))
+            );
+            notify(`Data ${title} berhasil diperbarui!`);
+          }}
+          onDownloadPdf={pdfEnabled ? downloadPdf : undefined}
+        />
+      </div>
+    );
+  }
+
+  const stepsLabels = opsiOptions
+    ? ["Pilih Jenis", "Isi Formulir", "Konfirmasi", "Simpan"]
+    : ["Isi Formulir", "Konfirmasi", "Simpan"];
+  const savingNow = showSaveModal || showSuccessModal;
+  const currentIdx = opsiOptions
+    ? savingNow
+      ? 3
+      : Math.min(step, 2)
+    : savingNow
+    ? 2
+    : Math.min(step - 1, 1);
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow={`Tambah ${title}`}
+        title={title}
+        right={
+          <Button variant="ghost" icon={ArrowLeft} onClick={() => setMode("list")}>
+            Kembali ke daftar
+          </Button>
+        }
+      />
+      <FlowSteps steps={stepsLabels} current={currentIdx} />
+
+      {step === 0 && (
+        <Card>
+          <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 14 }}>
+            {opsiLabel}
+          </h3>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+              gap: 12,
+            }}
+          >
+            {opsiOptions.map((o) => (
+              <button
+                key={o}
+                onClick={() => setOpsi(o)}
+                style={{
+                  padding: "22px 16px",
+                  borderRadius: 10,
+                  cursor: "pointer",
+                  border: `2px solid ${opsi === o ? T.navy : T.border}`,
+                  background: opsi === o ? T.blueSoft : T.card,
+                  fontWeight: 700,
+                  color: opsi === o ? T.navy : T.text,
+                  fontSize: 14,
+                  transition: "border-color .15s ease, background-color .15s ease",
+                }}
+                onMouseEnter={(e) =>
+                  opsi !== o && (e.currentTarget.style.borderColor = "#AFC3E0")
+                }
+                onMouseLeave={(e) =>
+                  opsi !== o && (e.currentTarget.style.borderColor = T.border)
+                }
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
+            <Button
+              disabled={!opsi}
+              onClick={() => setStep(confirmOpsi ? 0.5 : 1)}
+            >
+              Lanjutkan <ArrowRight size={15} />
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {step === 0.5 && (
+        <Card>
+          <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 4 }}>
+            Pilihannya bener?
+          </h3>
+          <p style={{ color: T.muted, fontSize: 13, marginBottom: 16 }}>
+            Anda memilih <Badge tone="blue">{opsi}</Badge>
+          </p>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <Button variant="ghost" icon={ArrowLeft} onClick={() => setStep(0)}>
+              Tidak, ganti pilihan
+            </Button>
+            <Button onClick={() => setStep(1)}>
+              Ya, benar <ArrowRight size={15} />
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {step === 1 && (
+        <Card>
+          <FormGrid fields={fields} values={values} onChange={onChange} />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
+            <Button onClick={() => setStep(2)}>
+              Lanjutkan <ArrowRight size={15} />
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {step === 2 && (
+        <Card>
+          <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 4 }}>
+            Datanya udah bener?
+          </h3>
+          <p style={{ color: T.muted, fontSize: 13, marginBottom: 16 }}>
+            Tinjau data sebelum disimpan.
+          </p>
+          <ReviewList fields={fields} values={values} />
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
+            <Button variant="ghost" icon={ArrowLeft} onClick={() => setStep(1)}>
+              Tidak, edit lagi
+            </Button>
+            <Button onClick={() => setShowSaveModal(true)}>
+              Ya, sudah benar <ArrowRight size={15} />
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      <Modal
+        open={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        title="Save Data?"
+        icon={AlertTriangle}
+      >
+        <p style={{ color: T.muted, fontSize: 13.5, marginBottom: 20, lineHeight: 1.6 }}>
+          Data {title.toLowerCase()} akan disimpan dan tidak bisa diubah dari daftar.
+        </p>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <Button variant="ghost" onClick={() => setShowSaveModal(false)}>
+            Batal
+          </Button>
+          <Button variant="accent" icon={Check} onClick={save}>
+            Simpan Data
+          </Button>
+        </div>
+      </Modal>
+
+      <SuccessModal
+        open={showSuccessModal}
+        message={`Data ${title.toLowerCase()} sudah tercatat di daftar.`}
+        onDone={finish}
+        onDownloadPdf={
+          pdfEnabled
+            ? () => downloadPdf({ ...values, opsi, id: values.id })
+            : undefined
+        }
+      />
+    </div>
+  );
+}
