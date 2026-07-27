@@ -99,8 +99,8 @@ export default function DetailModal({
 
       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" }}>
         {onDownloadDocx && !editing && (
-          <Button variant="ghost" icon={Download} onClick={() => onDownloadDocx(data)}>
-            Unduh Word
+          <Button variant="ghost" icon={Eye} onClick={() => onDownloadDocx(data)}>
+            Preview &amp; Unduh
           </Button>
         )}
         {onDownloadPdf && !editing && (

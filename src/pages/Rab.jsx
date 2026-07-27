@@ -1044,7 +1044,7 @@ export function SuccessModal({ open, message, onDone, onDownloadPdf, onDownloadD
             style={{ width: "100%", justifyContent: "center", marginBottom: 8 }}
             onClick={onDownloadDocx}
           >
-            Unduh sebagai Word (.docx)
+            Preview &amp; Unduh Word (.docx)
           </Button>
         )}
         {onDownloadPdf && (
