@@ -2,7 +2,7 @@
 
 Sistem Informasi Administrasi Kas untuk PLN Indonesia Power UBP Priok.
 Mengelola alur RAB → TOR → BAST → Pakta Integritas → Laporan realisasi
-bantuuan, ditambah master data Vendor dan riwayat pekerjaan.
+bantuan, ditambah master data Vendor dan riwayat pekerjaan.
 
 ## Menjalankan
 
