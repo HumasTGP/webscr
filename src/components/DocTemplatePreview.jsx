@@ -40,16 +40,14 @@ const Row = ({ label, value, w = 130 }) => (
 );
 
 export function TorDocPreview({ values }) {
-  const tujuan = [
-    ...splitLines(values.tujuanUmum),
-    ...splitLines(values.tujuanKhusus),
-  ];
+  const tujuanKhusus = splitLines(values.tujuanKhusus);
   const sasaran = splitLines(values.sasaran);
   const latar = splitLines(values.latarBelakang);
 
   return (
     <div style={pageStyle}>
       <CtrBold size={13}>RINGKASAN KEGIATAN</CtrBold>
+      <CtrBold size={11}>{values.judulProgramRKA || "—"}</CtrBold>
       <CtrBold size={11}>{values.judulKegiatan || "—"}</CtrBold>
 
       <SecTitle>Latar Belakang</SecTitle>
@@ -60,25 +58,55 @@ export function TorDocPreview({ values }) {
         : <p style={{ color: "#aaa", margin: 0 }}>—</p>}
 
       <SecTitle>Tujuan</SecTitle>
-      <ol style={{ margin: "0 0 0 4px", paddingLeft: 18 }}>
-        {tujuan.length
-          ? tujuan.map((t, i) => <li key={i} style={{ marginBottom: 2 }}>{t}</li>)
-          : <li style={{ color: "#aaa" }}>—</li>}
-      </ol>
+      <div style={{ marginBottom: 4 }}>
+        <div style={{ fontWeight: 600, marginBottom: 2 }}>a. Tujuan Umum</div>
+        <p style={{ textAlign: "justify", margin: "0 0 6px", paddingLeft: 12 }}>
+          {values.tujuanUmum || "—"}
+        </p>
+        <div style={{ fontWeight: 600, marginBottom: 2 }}>b. Tujuan Khusus</div>
+        {tujuanKhusus.length ? (
+          <ul style={{ margin: "0 0 0 4px", paddingLeft: 24 }}>
+            {tujuanKhusus.map((t, i) => (
+              <li key={i} style={{ marginBottom: 2 }}>{t}</li>
+            ))}
+          </ul>
+        ) : (
+          <p style={{ color: "#aaa", margin: 0, paddingLeft: 12 }}>—</p>
+        )}
+      </div>
 
       <SecTitle>Sasaran</SecTitle>
-      <ol style={{ margin: "0 0 0 4px", paddingLeft: 18 }}>
-        {sasaran.length
-          ? sasaran.map((s, i) => <li key={i} style={{ marginBottom: 2 }}>{s}</li>)
-          : <li style={{ color: "#aaa" }}>—</li>}
-      </ol>
+      {sasaran.length ? (
+        <ul style={{ margin: "0 0 0 4px", paddingLeft: 24 }}>
+          {sasaran.map((s, i) => <li key={i} style={{ marginBottom: 2 }}>{s}</li>)}
+        </ul>
+      ) : (
+        <p style={{ color: "#aaa", margin: 0 }}>—</p>
+      )}
 
       <SecTitle>Rencana Kegiatan</SecTitle>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <tbody>
-          <Row label="Hari/Tanggal" value={values.hariTanggal} />
-          <Row label="Tempat" value={values.tempat} />
-          <Row label="Narasumber" value={values.narasumber} />
+          <Row label="a. Hari/Tanggal" value={values.hariTanggal} />
+          <Row label="b. Tempat" value={values.tempat} />
+          <Row label="c. Narasumber" value={values.narasumber} />
+        </tbody>
+      </table>
+
+      <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 26 }}>
+        <tbody>
+          <tr>
+            <td style={{ width: "50%", textAlign: "center", fontSize: 10.5, paddingBottom: 2 }}>Pembuat</td>
+            <td style={{ width: "50%", textAlign: "center", fontSize: 10.5, paddingBottom: 2 }}>Menyetujui</td>
+          </tr>
+          <tr>
+            <td style={{ textAlign: "center", fontSize: 10.5, paddingBottom: 46 }}>Officer Community Development</td>
+            <td style={{ textAlign: "center", fontSize: 10.5, paddingBottom: 46 }}>Assistant Manager KAS</td>
+          </tr>
+          <tr>
+            <td style={{ textAlign: "center", fontSize: 10.5 }}>Wahyu Andrias</td>
+            <td style={{ textAlign: "center", fontSize: 10.5 }}>Astri Oktavina</td>
+          </tr>
         </tbody>
       </table>
     </div>
