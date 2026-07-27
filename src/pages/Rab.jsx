@@ -16,6 +16,8 @@ import { T, font } from "../lib/theme";
 import { OPT } from "../lib/data";
 import { nextIdFor, rupiah, uid } from "../lib/utils";
 import { generateSikasPdf, rowsFromFields } from "../lib/pdf";
+import { generateDocxFromTemplate } from "../lib/docxGenerate";
+import { RabDocPreview } from "../components/DocTemplatePreview";
 import Button from "../components/Button";
 import Card from "../components/Card";
 import Modal from "../components/Modal";
@@ -209,6 +211,44 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
     });
   };
 
+  const doDownloadRabDocx = async (record) => {
+    const idText = record.idNumber || "record";
+    const itemsText = (record.items || [])
+      .map((item, i) =>
+        `${i + 1}. ${item.uraian || ""} — Qty: ${item.qtyEvaluasi || item.qty || ""} ${item.satuan || ""} × Rp ${(item.hargaEvaluasi || item.harga || 0).toLocaleString("id-ID")} = Rp ${(item.totalEvaluasi || 0).toLocaleString("id-ID")}`
+      )
+      .join("\n");
+    try {
+      await generateDocxFromTemplate(
+        "/templates/Template_RAB.docx",
+        {
+          idNumber: record.idNumber || "",
+          judulKegiatan: record.judulKegiatan || "",
+          kategori: record.kategori || "",
+          bidang: record.bidang || "",
+          tanggalRab: record.tanggalRab || "",
+          vendor: record.vendor || "",
+          procost: record.procost || "",
+          expType: record.expType || "",
+          totalEvaluasi: rupiah(record.totalEvaluasi || 0),
+          itemsText,
+          items: (record.items || []).map((item, i) => ({
+            no: String(i + 1),
+            uraian: item.uraian || "",
+            qty: String(item.qtyEvaluasi || item.qty || ""),
+            satuan: item.satuan || "",
+            harga: rupiah(item.hargaEvaluasi || item.harga || 0),
+            total: rupiah(item.totalEvaluasi || 0),
+          })),
+        },
+        `RAB-${idText}.docx`
+      );
+      notify("RAB (.docx) berhasil diunduh.", "success");
+    } catch (e) {
+      notify(`Gagal membuat RAB: ${e.message}`, "error");
+    }
+  };
+
   const openRabPreview = (record) => {
     setDetailRow(null);
     setRabPreview(record);
@@ -227,47 +267,16 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
         onClose={closeRabPreview}
         title={idText ? "Preview RAB — " + idText : "Preview RAB"}
         icon={Eye}
-        width={640}
+        width={660}
       >
         <p style={{ color: T.muted, fontSize: 13, marginBottom: 16, lineHeight: 1.6 }}>
-          Periksa data di bawah sebelum mengunduh PDF.
+          Periksa data di bawah. File akan dibuat sesuai template dan diunduh setelah kamu klik tombol download.
         </p>
-        <ReviewList fields={headerFields} values={rabPreview} />
-        {(rabPreview.items || []).length > 0 && (
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontFamily: font.display, fontSize: 13, marginBottom: 8 }}>
-              Uraian RAB ({rabPreview.items.length} item)
-            </div>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
-                <thead>
-                  <tr style={{ background: T.tableHead }}>
-                    {["Uraian", "Qty", "Satuan", "Harga", "Total Evaluasi"].map((h) => (
-                      <th key={h} style={{ padding: "6px 10px", textAlign: "left", borderBottom: `1px solid ${T.border}`, color: T.muted, fontWeight: 600 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rabPreview.items.map((item, i) => (
-                    <tr key={item.id || i} style={{ borderBottom: `1px solid ${T.border}` }}>
-                      <td style={{ padding: "6px 10px" }}>{item.uraian || "—"}</td>
-                      <td style={{ padding: "6px 10px" }}>{item.qtyEvaluasi || item.qty || "—"}</td>
-                      <td style={{ padding: "6px 10px" }}>{item.satuan || "—"}</td>
-                      <td style={{ padding: "6px 10px" }}>{rupiah(item.hargaEvaluasi || item.harga || 0)}</td>
-                      <td style={{ padding: "6px 10px" }}>{rupiah(item.totalEvaluasi || 0)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div style={{ textAlign: "right", marginTop: 8, fontWeight: 700, fontSize: 13 }}>
-              Total: {rupiah(rabPreview.totalEvaluasi || 0)}
-            </div>
-          </div>
-        )}
+        <RabDocPreview values={rabPreview} />
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20, flexWrap: "wrap" }}>
           <Button variant="ghost" onClick={closeRabPreview}>Batal</Button>
           <Button
+            variant="ghost"
             icon={Download}
             onClick={async () => {
               await doDownloadRabPdf(rabPreview);
@@ -275,6 +284,15 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
             }}
           >
             Download PDF
+          </Button>
+          <Button
+            icon={Download}
+            onClick={async () => {
+              await doDownloadRabDocx(rabPreview);
+              closeRabPreview();
+            }}
+          >
+            Download Word (.docx)
           </Button>
         </div>
       </Modal>
@@ -470,6 +488,7 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
         message={`RAB ${header.idNumber} sudah tercatat di daftar RAB.`}
         onDone={finish}
         onDownloadPdf={() => openRabPreview({ ...header, items, totalEvaluasi })}
+        onDownloadDocx={() => openRabPreview({ ...header, items, totalEvaluasi })}
       />
       {renderRabPreview()}
     </div>

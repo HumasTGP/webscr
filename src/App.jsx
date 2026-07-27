@@ -29,6 +29,7 @@ import VendorPage from "./pages/Vendor";
 import HistoryPage from "./pages/History";
 import Panduan from "./pages/Panduan";
 import GenericWizard from "./pages/GenericWizard";
+import { TorDocPreview, BastDocPreview, PaktaDocPreview } from "./components/DocTemplatePreview";
 import ProposalRekapPage from "./pages/ProposalRekap";
 import ProposalEvaluasiPage from "./pages/ProposalEvaluasi";
 import PengelolaanKomunikasi from "./pages/PengelolaanKomunikasi";
@@ -196,6 +197,7 @@ export default function App() {
           notify={notify}
           pdfEnabled
           docxTemplate={DOCX_TEMPLATES.tor}
+          buildDocPreview={(v) => <TorDocPreview values={v} />}
           columns={[
             { key: "id", label: "ID TOR" },
             { key: "kategori", label: "Kategori" },
@@ -218,6 +220,7 @@ export default function App() {
           notify={notify}
           pdfEnabled
           docxTemplate={DOCX_TEMPLATES.bast}
+          buildDocPreview={(v) => <BastDocPreview values={v} />}
           columns={[
             { key: "id", label: "ID" },
             { key: "kategori", label: "Kategori" },
@@ -239,6 +242,7 @@ export default function App() {
           notify={notify}
           pdfEnabled
           docxTemplate={DOCX_TEMPLATES.pakta}
+          buildDocPreview={(v) => <PaktaDocPreview values={v} />}
           columns={[
             { key: "id", label: "ID" },
             { key: "kategori", label: "Kategori" },

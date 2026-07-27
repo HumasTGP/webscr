@@ -40,6 +40,7 @@ export default function GenericWizard({
   notify,
   pdfEnabled = false,
   docxTemplate,
+  buildDocPreview,
 }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(opsiOptions ? 0 : 1);
@@ -148,7 +149,9 @@ export default function GenericWizard({
           Periksa data di bawah. File akan dibuat sesuai template dan diunduh
           setelah kamu klik tombol download.
         </p>
-        <ReviewList fields={previewFields} values={docxPreview} />
+        {buildDocPreview
+          ? buildDocPreview(docxPreview)
+          : <ReviewList fields={previewFields} values={docxPreview} />}
         <div
           style={{
             display: "flex",
