@@ -1,8 +1,18 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, ArrowLeft, ArrowRight, Check, Plus } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Download,
+  Eye,
+  FileText,
+  Plus,
+} from "lucide-react";
 import { T, font } from "../lib/theme";
 import { nextIdFor, uid } from "../lib/utils";
 import { generateSikasPdf, rowsFromFields } from "../lib/pdf";
+import { generateDocxFromTemplate } from "../lib/docxGenerate";
 import Button from "../components/Button";
 import Card from "../components/Card";
 import Modal from "../components/Modal";
@@ -29,6 +39,8 @@ export default function GenericWizard({
   autoFrom,
   notify,
   pdfEnabled = false,
+  docxTemplate,
+  buildDocPreview,
 }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(opsiOptions ? 0 : 1);
@@ -37,6 +49,8 @@ export default function GenericWizard({
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [detailRow, setDetailRow] = useState(null);
+  const [docxPreview, setDocxPreview] = useState(null);
+  const [selectedId, setSelectedId] = useState("");
 
   const fields = useMemo(
     () => buildFields(opsi, values, autoFrom),
@@ -90,6 +104,94 @@ export default function GenericWizard({
     });
   };
 
+  const downloadDocx = async (record) => {
+    if (!docxTemplate) return;
+    const idText = record.id || record.idNumber || "record";
+    try {
+      await generateDocxFromTemplate(
+        docxTemplate.url,
+        docxTemplate.buildData(record),
+        `${title.replace(/\s+/g, "-")}-${idText}.docx`
+      );
+      notify(`${title} (.docx) berhasil diunduh.`, "success");
+    } catch (e) {
+      notify(`Gagal membuat ${title}: ${e.message}`, "error");
+    }
+  };
+
+  // Buka preview dulu; file baru dibuat & diunduh setelah user konfirmasi.
+  const openPreview = (record) => {
+    setDetailRow(null);
+    setDocxPreview(record);
+  };
+  const closePreview = () => {
+    setDocxPreview(null);
+    setSelectedId("");
+  };
+
+  const renderDocxPreview = () => {
+    if (!docxPreview) return null;
+    const previewFields = buildFields(
+      docxPreview.opsi ?? null,
+      docxPreview,
+      autoFrom
+    );
+    const idText = docxPreview.id || docxPreview.idNumber || "";
+    return (
+      <Modal
+        open={!!docxPreview}
+        onClose={closePreview}
+        title={`Preview ${title}${idText ? ` — ${idText}` : ""}`}
+        icon={Eye}
+        width={600}
+      >
+        <p style={{ color: T.muted, fontSize: 13, marginBottom: 16, lineHeight: 1.6 }}>
+          Periksa data di bawah. File akan dibuat sesuai template dan diunduh
+          setelah kamu klik tombol download.
+        </p>
+        {buildDocPreview
+          ? buildDocPreview(docxPreview)
+          : <ReviewList fields={previewFields} values={docxPreview} />}
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            justifyContent: "flex-end",
+            marginTop: 20,
+            flexWrap: "wrap",
+          }}
+        >
+          <Button variant="ghost" onClick={closePreview}>
+            Batal
+          </Button>
+          {pdfEnabled && (
+            <Button
+              variant="ghost"
+              icon={Download}
+              onClick={async () => {
+                await downloadPdf(docxPreview);
+                closePreview();
+              }}
+            >
+              Download PDF
+            </Button>
+          )}
+          {docxTemplate && (
+            <Button
+              icon={FileText}
+              onClick={async () => {
+                await downloadDocx(docxPreview);
+                closePreview();
+              }}
+            >
+              Download Word (.docx)
+            </Button>
+          )}
+        </div>
+      </Modal>
+    );
+  };
+
   if (mode === "list") {
     const detailColumns = buildFields(
       detailRow?.opsi ?? null,
@@ -109,6 +211,62 @@ export default function GenericWizard({
             </Button>
           }
         />
+        {docxTemplate && list.length > 0 && (
+          <Card style={{ marginBottom: 14 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ flex: "1 1 260px", minWidth: 0 }}>
+                <div
+                  style={{
+                    fontFamily: font.display,
+                    fontSize: 14,
+                    marginBottom: 4,
+                  }}
+                >
+                  Preview &amp; Download berdasarkan ID
+                </div>
+                <div style={{ color: T.muted, fontSize: 12.5, lineHeight: 1.5 }}>
+                  Pilih ID untuk melihat preview data, lalu unduh dokumennya.
+                </div>
+              </div>
+              <select
+                value={selectedId}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedId(val);
+                  const rec = list.find((r) => r.id === val);
+                  if (rec) setDocxPreview(rec);
+                }}
+                style={{
+                  flex: "1 1 260px",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: `1px solid ${T.border}`,
+                  background: T.inputBg,
+                  color: T.text,
+                  fontSize: 13.5,
+                }}
+              >
+                <option value="">— Pilih ID —</option>
+                {list.map((r) => {
+                  const judul = r.judulBantuan || r.judulKegiatan || "";
+                  return (
+                    <option key={r.id} value={r.id}>
+                      {r.id}
+                      {judul ? ` — ${judul}` : ""}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </Card>
+        )}
         <Card padded={false}>
           <DataTable
             rows={list}
@@ -128,8 +286,10 @@ export default function GenericWizard({
             );
             notify(`Data ${title} berhasil diperbarui!`);
           }}
-          onDownloadPdf={pdfEnabled ? downloadPdf : undefined}
+          onDownloadPdf={pdfEnabled && !docxTemplate ? downloadPdf : undefined}
+          onDownloadDocx={docxTemplate ? openPreview : undefined}
         />
+        {renderDocxPreview()}
       </div>
     );
   }
@@ -282,11 +442,17 @@ export default function GenericWizard({
         message={`Data ${title.toLowerCase()} sudah tercatat di daftar.`}
         onDone={finish}
         onDownloadPdf={
-          pdfEnabled
+          pdfEnabled && !docxTemplate
             ? () => downloadPdf({ ...values, opsi, id: values.id })
             : undefined
         }
+        onDownloadDocx={
+          docxTemplate
+            ? () => openPreview({ ...values, opsi, id: values.id })
+            : undefined
+        }
       />
+      {renderDocxPreview()}
     </div>
   );
 }
