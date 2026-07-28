@@ -1,0 +1,202 @@
+import { useState, useRef } from "react";
+import { ArrowLeft, Upload, X } from "lucide-react";
+import { T } from "../../lib/theme";
+import { bulanIni } from "../../lib/silapakData";
+
+const MAX_SIZE = 5 * 1024 * 1024;
+
+const inputStyle = {
+  width: "100%",
+  boxSizing: "border-box",
+  border: `1px solid ${T.border}`,
+  borderRadius: 8,
+  padding: "10px 12px",
+  fontSize: 12.5,
+  color: T.text,
+  background: T.card,
+  outline: "none",
+};
+
+const fieldLabel = { display: "block", fontSize: 11.5, fontWeight: 600, color: T.text, marginBottom: 6 };
+
+export default function AmbilPaket({ paket, prefillId, duty, onBack, onSaved }) {
+  const belumDiambil = paket.filter((p) => p.status === "Belum Diambil");
+  const [selectedId, setSelectedId] = useState(prefillId || belumDiambil[0]?.id || "");
+  const [pengambil, setPengambil] = useState("");
+  const [satpamTugas, setSatpamTugas] = useState(duty?.names?.[0] || "");
+  const [foto, setFoto] = useState(null);
+  const [fotoError, setFotoError] = useState("");
+  const fileRef = useRef(null);
+
+  const handleFile = (file) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setFotoError("File harus berupa gambar.");
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      setFotoError("Ukuran file maksimal 5 MB.");
+      return;
+    }
+    setFotoError("");
+    const reader = new FileReader();
+    reader.onload = () => setFoto({ name: file.name, dataUrl: reader.result });
+    reader.readAsDataURL(file);
+  };
+
+  const submit = () => {
+    if (!selectedId || !pengambil.trim() || !foto) return;
+    onSaved({
+      id: selectedId,
+      pengambil: pengambil.trim(),
+      satpamTugas: satpamTugas || "-",
+      bulanKeluar: bulanIni(),
+      fotoBukti: foto,
+    });
+  };
+
+  return (
+    <div style={{ maxWidth: 460 }}>
+      <button
+        type="button"
+        onClick={onBack}
+        style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", color: T.muted, fontSize: 12, cursor: "pointer", marginBottom: 16, padding: 0 }}
+      >
+        <ArrowLeft size={14} /> Kembali
+      </button>
+      <h2 style={{ fontSize: 16, fontWeight: 700, color: T.heading, margin: "0 0 20px" }}>
+        Ambil paket
+      </h2>
+
+      {belumDiambil.length === 0 ? (
+        <div style={{ fontSize: 12.5, color: T.muted }}>Tidak ada paket yang menunggu diambil.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div>
+            <label style={fieldLabel}>Nomor resi <span style={{ color: "#D14343" }}>*</span></label>
+            <select style={inputStyle} value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
+              {belumDiambil.map((p) => (
+                <option key={p.id} value={p.id}>{p.noResi} · {p.namaPenerima}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={fieldLabel}>Pengambil paket <span style={{ color: "#D14343" }}>*</span></label>
+            <input style={inputStyle} value={pengambil} onChange={(e) => setPengambil(e.target.value)} placeholder="Nama orang yang mengambil" />
+          </div>
+
+          <div>
+            <label style={fieldLabel}>Satpam yang bertugas</label>
+            <select style={inputStyle} value={satpamTugas} onChange={(e) => setSatpamTugas(e.target.value)}>
+              <option value="">Pilih satpam</option>
+              {(duty?.names || []).map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={fieldLabel}>Foto bukti serah terima <span style={{ color: "#D14343" }}>*</span></label>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(e) => handleFile(e.target.files?.[0])}
+            />
+            {!foto ? (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                style={{
+                  width: "100%",
+                  border: `1px dashed ${T.border}`,
+                  borderRadius: 8,
+                  padding: "22px 12px",
+                  background: T.bg,
+                  color: T.muted,
+                  fontSize: 12,
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <Upload size={18} />
+                Ketuk untuk unggah foto (maks. 5 MB)
+              </button>
+            ) : (
+              <div style={{ position: "relative", display: "inline-block" }}>
+                <img
+                  src={foto.dataUrl}
+                  alt="Bukti serah terima"
+                  style={{ maxWidth: "100%", maxHeight: 200, borderRadius: 8, border: `1px solid ${T.border}`, display: "block" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setFoto(null)}
+                  aria-label="Hapus foto"
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    border: "none",
+                    background: "rgba(0,0,0,0.55)",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            )}
+            {fotoError && <div style={{ fontSize: 10.5, color: "#D14343", marginTop: 5 }}>{fotoError}</div>}
+            <div style={{ fontSize: 10.5, color: T.muted, marginTop: 5 }}>
+              Format gambar (JPG/PNG), ukuran maksimal 5 MB.
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#FDF3DD",
+              border: "1px solid #F0DBA6",
+              borderRadius: 8,
+              padding: "10px 12px",
+              fontSize: 11,
+              color: "#B7791F",
+            }}
+          >
+            Nomor pengambilan dan bulan keluar tercatat otomatis, sama seperti sistem sebelumnya.
+          </div>
+
+          <button
+            type="button"
+            onClick={submit}
+            disabled={!selectedId || !pengambil.trim() || !foto}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: 8,
+              border: "none",
+              background: (!selectedId || !pengambil.trim() || !foto) ? T.border : T.navy,
+              color: "#fff",
+              fontWeight: 700,
+              fontSize: 13.5,
+              cursor: (!selectedId || !pengambil.trim() || !foto) ? "not-allowed" : "pointer",
+            }}
+          >
+            Konfirmasi serah terima
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

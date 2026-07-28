@@ -22,6 +22,9 @@ import Topbar from "./components/Topbar";
 import HelpModal from "./components/HelpModal";
 import Toast from "./components/Toast";
 
+import LandingGateway from "./pages/LandingGateway";
+import SilapakLogin from "./pages/SilapakLogin";
+import SilapakApp from "./pages/SilapakApp";
 import LoginScreen from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import RabPage from "./pages/Rab";
@@ -98,6 +101,12 @@ const DOCX_TEMPLATES = {
 };
 
 export default function App() {
+  // Lapisan gateway paling luar: null = belum memilih layanan,
+  // "sikas" = alur SIKAS existing di bawah ini (tidak diubah),
+  // "silapak" = modul Si Lapak Priok yang baru, sepenuhnya terpisah.
+  const [portal, setPortal] = useState(null);
+  const [silapakLoggedIn, setSilapakLoggedIn] = useState(false);
+
   const [user, setUser] = useState(null);
   const [active, setActive] = useState("dashboard");
   const [collapsed, setCollapsed] = useState(false);
@@ -290,6 +299,32 @@ export default function App() {
     ]
   );
 
+  // Gate 1: pilih layanan (tidak menyentuh apa pun di bawahnya).
+  if (!portal) {
+    return <LandingGateway onSelect={setPortal} />;
+  }
+
+  // Gate 2a: modul Si Lapak Priok, sepenuhnya terpisah dari SIKAS.
+  if (portal === "silapak") {
+    if (!silapakLoggedIn) {
+      return (
+        <SilapakLogin
+          onLogin={() => setSilapakLoggedIn(true)}
+          onBack={() => setPortal(null)}
+        />
+      );
+    }
+    return (
+      <SilapakApp
+        onLogout={() => {
+          setSilapakLoggedIn(false);
+          setPortal(null);
+        }}
+      />
+    );
+  }
+
+  // Gate 2b: SIKAS existing, tidak diubah sama sekali.
   if (!user) return <LoginScreen onLogin={setUser} />;
 
   const activeLabel = MENU.find((m) => m.key === active)?.label || "";
