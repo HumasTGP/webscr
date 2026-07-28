@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Eye } from "lucide-react";
+import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { font } from "../lib/theme";
 import { ROLES } from "../lib/data";
 import AutoLogo from "../components/AutoLogo";
@@ -264,7 +264,7 @@ export default function LoginScreen({ onLogin }) {
                   transition: "color .15s ease",
                 }}
               >
-                <Eye size={17} />
+                {showPassword ? <Eye size={17} /> : <EyeOff size={17} />}
               </button>
             }
           />

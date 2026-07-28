@@ -154,7 +154,9 @@ export const ROLES = [
 
 // Ganti sesuai kontak Admin/IT SIKAS yang berlaku.
 export const HELP_CONTACT = {
-  phone: "+62 21 4390 8087",
+  phone: "+62 831-9904-4249",
+  waNumber: "6283199044249",
+  waMessage: "Halo! Saya mengalami problem",
   hours: "Senin–Jumat, 08.00–16.00 WIB",
 };
 

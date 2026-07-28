@@ -9,12 +9,13 @@ import {
   Eye,
   Pencil,
   Plus,
+  Printer,
   Trash2,
   X,
 } from "lucide-react";
 import { T, font } from "../lib/theme";
 import { OPT } from "../lib/data";
-import { nextIdFor, rupiah, uid } from "../lib/utils";
+import { nextIdFor, printChecklist, rupiah, uid } from "../lib/utils";
 import { generateSikasPdf, rowsFromFields } from "../lib/pdf";
 import { generateDocxFromTemplate } from "../lib/docxGenerate";
 import { RabDocPreview } from "../components/DocTemplatePreview";
@@ -654,7 +655,23 @@ function StepChecklist({ checklist, setChecklist, onNext }) {
         {lainnyaFilled.length} dokumen lainnya dicatat.
       </p>
 
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 10, flexWrap: "wrap" }}>
+        <Button
+          variant="ghost"
+          icon={Printer}
+          onClick={() =>
+            printChecklist({
+              title: "Checklist Kelengkapan Dokumen",
+              subtitle: "SIKAS — PT PLN Indonesia Power UBP Priok",
+              items: [
+                ...standarItems,
+                ...lainnyaItems.filter((c) => c.nama.trim()),
+              ],
+            })
+          }
+        >
+          Print Checklist
+        </Button>
         <Button onClick={onNext}>
           Lanjutkan <ArrowRight size={15} />
         </Button>

@@ -159,7 +159,7 @@ export default function App() {
       dashboard: (
         <Dashboard
           user={user}
-          data={{ rab, tor, bast, laporan, proposals, konten }}
+          data={{ rab, tor, bast, pakta, laporan, proposals, konten }}
           goto={setActive}
         />
       ),
