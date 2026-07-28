@@ -15,10 +15,11 @@ const fade = (collapsed, extra = {}) => ({
   ...extra,
 });
 
-function groupMenu() {
+function groupMenu(userRole) {
+  const visible = MENU.filter((m) => !m.roles || m.roles.includes(userRole));
   return MENU_GROUPS.map((g) => ({
     ...g,
-    items: MENU.filter((m) => m.group === g.key),
+    items: visible.filter((m) => m.group === g.key),
   })).filter((g) => g.items.length > 0);
 }
 
@@ -42,11 +43,11 @@ export default function Sidebar({
   collapsed,
   setCollapsed,
 }) {
-  const groups = groupMenu();
+  const groups = groupMenu(user.role);
 
   const [openGroups, setOpenGroups] = useState(() => {
     const initial = {};
-    groupMenu().forEach((g) => {
+    groupMenu(user.role).forEach((g) => {
       initial[g.key] = g.items.some((m) => m.key === active);
     });
     return initial;

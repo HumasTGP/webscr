@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Eye } from "lucide-react";
+import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { font } from "../lib/theme";
-import { ROLES } from "../lib/data";
+import { CREDENTIALS, ROLES } from "../lib/data";
 import AutoLogo from "../components/AutoLogo";
 import PartnerLogos from "../components/PartnerLogos";
 
@@ -84,9 +84,14 @@ export default function LoginScreen({ onLogin }) {
       setError("Username dan password wajib diisi.");
       return;
     }
+    const cred = CREDENTIALS[role];
+    if (!cred || username.trim() !== cred.username || password !== cred.password) {
+      setError("Username atau password salah untuk role yang dipilih.");
+      return;
+    }
     setError("");
     setLoading(true);
-    setTimeout(() => onLogin({ role, username }), 350);
+    setTimeout(() => onLogin({ role, username: username.trim() }), 350);
   };
 
   const bg = bgUrl
@@ -264,7 +269,7 @@ export default function LoginScreen({ onLogin }) {
                   transition: "color .15s ease",
                 }}
               >
-                <Eye size={17} />
+                {showPassword ? <Eye size={17} /> : <EyeOff size={17} />}
               </button>
             }
           />

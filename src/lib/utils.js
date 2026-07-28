@@ -1,7 +1,11 @@
 import { ROLES } from "./data";
 
-export const uid = (prefix) =>
-  `${prefix}-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`;
+let __uidCounter = 0;
+export const uid = (prefix) => {
+  __uidCounter += 1;
+  const rand = Math.random().toString(36).slice(2, 8);
+  return `${prefix}-${Date.now().toString(36)}-${__uidCounter}-${rand}`;
+};
 
 export const rupiah = (n) => "Rp " + (Number(n) || 0).toLocaleString("id-ID");
 
@@ -59,6 +63,46 @@ export function printDocument(title, groups) {
         <script>window.onload = function () { window.print(); };</script>
       </body>
     </html>`);
+  win.document.close();
+}
+
+export function printChecklist({ title = "Checklist Kelengkapan Dokumen", subtitle = "", items = [] }) {
+  const win = window.open("", "_blank", "width=850,height=960");
+  if (!win) return;
+  const row = (no, nama, ada) => `
+    <tr>
+      <td style="border:1px solid #333;padding:6px 8px;text-align:center;width:36px;">${no}</td>
+      <td style="border:1px solid #333;padding:6px 10px;">${nama || "&nbsp;"}</td>
+      <td style="border:1px solid #333;padding:6px 8px;text-align:center;width:60px;font-family:'Segoe UI Symbol','Arial';font-size:16px;">${ada ? "☑" : "☐"}</td>
+    </tr>`;
+  const rows = items.map((it, i) => row(i + 1, it.nama, !!it.ada)).join("");
+  win.document.write(`<!doctype html>
+    <html><head><meta charset="utf-8" /><title>${title}</title>
+      <style>
+        body { font-family: Arial, Helvetica, sans-serif; padding: 32px; color: #111; }
+        h1 { font-size: 16px; margin: 0 0 4px; text-align:center; text-transform:uppercase; letter-spacing:.5px; }
+        .sub { text-align:center; color:#555; font-size:12px; margin-bottom:22px; }
+        table { width:100%; border-collapse:collapse; font-size:12.5px; }
+        th { border:1px solid #333; padding:6px 8px; background:#EFEFEF; text-align:center; }
+        .foot { display:flex; justify-content:space-between; margin-top:60px; font-size:12px; }
+        .sig { text-align:center; }
+        .sig .line { border-top:1px solid #333; margin-top:60px; padding-top:4px; width:180px; margin-left:auto; margin-right:auto; }
+      </style>
+    </head><body>
+      <h1>${title}</h1>
+      <div class="sub">${subtitle || `Dicetak ${new Date().toLocaleString("id-ID")}`}</div>
+      <table>
+        <thead>
+          <tr><th>No</th><th style="text-align:left;">Nama Dokumen</th><th>Ada</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="foot">
+        <div class="sig"><div>Pembuat</div><div class="line">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div></div>
+        <div class="sig"><div>Menyetujui</div><div class="line">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div></div>
+      </div>
+      <script>window.onload = function () { window.print(); };</script>
+    </body></html>`);
   win.document.close();
 }
 

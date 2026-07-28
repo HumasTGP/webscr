@@ -94,7 +94,7 @@ function Pipeline({ counts, goto }) {
   const nodes = [
     { key: "proposal-rekap", label: "Proposal", value: counts.proposal, icon: Handshake },
     { key: "rab", label: "RAB", value: counts.rab, icon: FileSpreadsheet },
-    { key: "bast", label: "BAST", value: counts.bast, icon: ClipboardList },
+    { key: "bast", label: "BAST, PI, TOR", value: counts.bastPiTor, icon: ClipboardList },
     { key: "laporan", label: "Laporan", value: counts.laporan, icon: FileText },
   ];
   return (
@@ -518,7 +518,10 @@ export default function Dashboard({ data, goto, user }) {
           counts={{
             proposal: data.proposals.length,
             rab: data.rab.length,
-            bast: data.bast.length,
+            bastPiTor:
+              (data.bast?.length || 0) +
+              (data.pakta?.length || 0) +
+              (data.tor?.length || 0),
             laporan: data.laporan.length,
           }}
           goto={goto}
