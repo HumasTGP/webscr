@@ -36,6 +36,10 @@ import { TorDocPreview, BastDocPreview, PaktaDocPreview } from "./components/Doc
 import ProposalRekapPage from "./pages/ProposalRekap";
 import ProposalEvaluasiPage from "./pages/ProposalEvaluasi";
 import PengelolaanKomunikasi from "./pages/PengelolaanKomunikasi";
+import InboxPage from "./pages/Inbox";
+import AsmanDashboard from "./pages/AsmanDashboard";
+import KasPackagesPage from "./pages/KasPackages";
+import { DOC_STATUS } from "./lib/data";
 
 const seed = (prefix, rows) =>
   rows.map((v, i) => ({
@@ -123,11 +127,40 @@ export default function App() {
     return () => window.removeEventListener("resize", applyResponsive);
   }, []);
 
-  const [rab, setRab] = useState([]);
-  const [tor, setTor] = useState([]);
-  const [bast, setBast] = useState([]);
-  const [pakta, setPakta] = useState([]);
+  // 3 paket demo — semua sub-dokumen dalam satu paket memakai ID RAB yang sama
+  // sehingga bisa dikelompokkan di Inbox Asman/MADM.
+  const PACKAGE_SEED = [
+    { idRab: "RAB-2026-001", judul: "Bantuan Perbaikan Jalan Metro Marina Ancol", kategori: "NON PO",    status: DOC_STATUS.SUBMITTED },
+    { idRab: "RAB-2026-002", judul: "Fasilitasi Kegiatan Sinergi Kota Hijau",     kategori: "Cash Card", status: DOC_STATUS.APPROVED,  submittedAt: "2026-04-20T09:00:00Z", reviewedAt: "2026-04-21T10:00:00Z", reviewedBy: "asman" },
+    { idRab: "RAB-2026-003", judul: "Bantuan Rehabilitasi Mangrove Cilincing",    kategori: "NON PO",    status: DOC_STATUS.PROCESSED, submittedAt: "2026-03-15T09:00:00Z", reviewedAt: "2026-03-16T09:00:00Z", reviewedBy: "asman", processedAt: "2026-03-17T14:00:00Z", processedBy: "madm" },
+  ];
+  const seedSubDoc = (idField, judulField) =>
+    PACKAGE_SEED.map((p) => ({
+      [idField]: p.idRab,
+      [judulField]: p.judul,
+      kategori: p.kategori,
+    }));
+  const [rab, setRab] = useState(() =>
+    PACKAGE_SEED.map((p) => ({
+      idNumber: p.idRab, judulKegiatan: p.judul, kategori: p.kategori,
+      tanggalRab: "2026-04-20", totalEvaluasi: 15000000,
+    }))
+  );
+  const [tor, setTor] = useState(() => seedSubDoc("id", "judulKegiatan"));
+  const [bast, setBast] = useState(() => seedSubDoc("id", "judulBantuan"));
+  const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [laporan, setLaporan] = useState([]);
+  const [packages, setPackages] = useState(() =>
+    PACKAGE_SEED.map((p) => ({
+      idRab: p.idRab, judul: p.judul, kategori: p.kategori,
+      formEvaluasi: true,
+      status: p.status,
+      submittedAt: p.submittedAt || new Date().toISOString(),
+      reviewedAt: p.reviewedAt || "", reviewedBy: p.reviewedBy || "",
+      reviewNote: "",
+      processedAt: p.processedAt || "", processedBy: p.processedBy || "",
+    }))
+  );
   const [vendors, setVendors] = useState(() => seed("VND", VENDOR_SEED));
   const [proposals, setProposals] = useState(() => seed("PRP", PROPOSAL_SEED));
   const [konten, setKonten] = useState(() => seed("KTN", KONTEN_SEED));
@@ -161,6 +194,17 @@ export default function App() {
     if (type === "success" && jenis) addHistory(jenis);
   };
 
+  const updatePackage = (idRab, patch) => {
+    setPackages((prev) => prev.map((p) => (p.idRab === idRab ? { ...p, ...patch } : p)));
+  };
+  const upsertPackage = (idRab, patch) => {
+    setPackages((prev) => {
+      const found = prev.some((p) => p.idRab === idRab);
+      if (found) return prev.map((p) => (p.idRab === idRab ? { ...p, ...patch } : p));
+      return [...prev, { idRab, ...patch }];
+    });
+  };
+
   const rabIdOptions = useMemo(() => rab.map((r) => r.idNumber), [rab]);
 
   const modules = useMemo(
@@ -168,7 +212,7 @@ export default function App() {
       dashboard: (
         <Dashboard
           user={user}
-          data={{ rab, tor, bast, laporan, proposals, konten }}
+          data={{ rab, tor, bast, pakta, laporan, proposals, konten }}
           goto={setActive}
         />
       ),
@@ -288,6 +332,27 @@ export default function App() {
       vendor: (
         <VendorPage vendors={vendors} setVendors={setVendors} notify={notify} />
       ),
+      inbox: (
+        <InboxPage
+          user={user}
+          packages={packages}
+          rab={rab} tor={tor} bast={bast} pakta={pakta}
+          onUpdatePackage={updatePackage}
+          notify={notify}
+        />
+      ),
+      "asman-dashboard": (
+        <AsmanDashboard user={user} packages={packages} goto={setActive} />
+      ),
+      "paket-kas": (
+        <KasPackagesPage
+          rab={rab} tor={tor} bast={bast} pakta={pakta}
+          packages={packages}
+          onUpsertPackage={upsertPackage}
+          notify={notify}
+          goto={setActive}
+        />
+      ),
       history: <HistoryPage history={history} />,
       panduan: <Panduan />,
     }),
@@ -295,7 +360,7 @@ export default function App() {
     [
       user,
       rab, tor, bast, pakta, laporan, vendors, history,
-      proposals, konten, evaluasi, rabIdOptions,
+      proposals, konten, evaluasi, rabIdOptions, packages,
     ]
   );
 
@@ -324,8 +389,16 @@ export default function App() {
     );
   }
 
-  // Gate 2b: SIKAS existing, tidak diubah sama sekali.
-  if (!user) return <LoginScreen onLogin={setUser} />;
+  // Gate 2b: SIKAS — login + role routing.
+  if (!user)
+    return (
+      <LoginScreen
+        onLogin={(u) => {
+          setUser(u);
+          setActive(u.role === "humas" ? "dashboard" : "asman-dashboard");
+        }}
+      />
+    );
 
   const activeLabel = MENU.find((m) => m.key === active)?.label || "";
 

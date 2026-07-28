@@ -9,6 +9,8 @@ import {
   Clock,
   Handshake,
   Megaphone,
+  Inbox,
+  FolderCheck,
 } from "lucide-react";
 
 export const OPT = {
@@ -152,28 +154,64 @@ export const ROLES = [
   { value: "madm", label: "MADM" },
 ];
 
+// Kredensial demo — humas 1/1, asman 2/2, madm 3/3.
+export const CREDENTIALS = {
+  humas: { username: "1", password: "1" },
+  asman: { username: "2", password: "2" },
+  madm:  { username: "3", password: "3" },
+};
+
+// Status lifecycle sebuah paket kas.
+export const DOC_STATUS = {
+  DRAFT: "draft", SUBMITTED: "submitted", IN_REVIEW: "in_review",
+  APPROVED: "approved", REJECTED: "rejected", PROCESSED: "processed",
+};
+
+export const STATUS_META = {
+  draft:      { label: "Draft",              color: "#94A3B8", bg: "#F1F5F9" },
+  submitted:  { label: "Dokumen Baru Masuk", color: "#0E4C92", bg: "#DEEBFA" },
+  in_review:  { label: "Belum Dicek",        color: "#8A6D00", bg: "#FFF4D0" },
+  approved:   { label: "Disetujui",          color: "#1E7F3E", bg: "#DEF6E5" },
+  rejected:   { label: "Ditolak",            color: "#B01818", bg: "#FCE1E1" },
+  processed:  { label: "Telah Diproses",     color: "#3F1D9B", bg: "#EBE2FF" },
+};
+
+// Sub-dokumen wajib di setiap paket kas (dikelompokkan per ID RAB).
+export const SUB_DOCS = [
+  { key: "rab",   label: "RAB",              matchKey: "idNumber", required: true },
+  { key: "tor",   label: "TOR",              matchKey: "id",       required: true },
+  { key: "bast",  label: "BAST",             matchKey: "id",       required: true },
+  { key: "pakta", label: "Pakta Integritas", matchKey: "id",       required: true },
+];
+
 // Ganti sesuai kontak Admin/IT SIKAS yang berlaku.
 export const HELP_CONTACT = {
-  phone: "+62 21 4390 8087",
+  phone: "+62 831-9904-4249",
+  waNumber: "6283199044249",
+  waMessage: "Halo! Saya mengalami problem",
   hours: "Senin–Jumat, 08.00–16.00 WIB",
 };
 
+// Menu SIKAS. `roles`: item cuma tampil ke role tsb. Tanpa `roles` = semua role.
 export const MENU = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, group: "utama" },
+  { key: "dashboard",       label: "Dashboard",              icon: LayoutDashboard, group: "utama", roles: ["humas"] },
+  { key: "asman-dashboard", label: "Dashboard",              icon: LayoutDashboard, group: "utama", roles: ["asman", "madm"] },
+  { key: "inbox",           label: "Inbox Paket Kas",        icon: Inbox,           group: "utama", roles: ["asman", "madm"] },
 
-  { key: "proposal-rekap", label: "Rekap Pengajuan Proposal", icon: Handshake, group: "humas" },
-  { key: "proposal-evaluasi", label: "Cetak Form Evaluasi", icon: FileText, group: "humas" },
-  { key: "konten", label: "Pengelolaan Komunikasi", icon: Megaphone, group: "humas" },
+  { key: "proposal-rekap",    label: "Rekap Pengajuan Proposal", icon: Handshake, group: "humas", roles: ["humas"] },
+  { key: "proposal-evaluasi", label: "Cetak Form Evaluasi",      icon: FileText,  group: "humas", roles: ["humas"] },
+  { key: "konten",            label: "Pengelolaan Komunikasi",   icon: Megaphone, group: "humas", roles: ["humas"] },
 
-  { key: "rab", label: "RAB", icon: FileSpreadsheet, group: "administrasi" },
-  { key: "tor", label: "TOR", icon: FileText, group: "administrasi" },
-  { key: "bast", label: "BAST", icon: ClipboardList, group: "administrasi" },
-  { key: "pakta", label: "Pakta Integritas", icon: ShieldCheck, group: "administrasi" },
-  { key: "laporan", label: "Laporan", icon: FileText, group: "administrasi" },
-  { key: "vendor", label: "Vendor", icon: Building2, group: "administrasi" },
+  { key: "paket-kas", label: "Paket Kas (Kirim ke Asman)", icon: FolderCheck,     group: "administrasi", roles: ["humas"] },
+  { key: "rab",       label: "RAB",                        icon: FileSpreadsheet, group: "administrasi", roles: ["humas"] },
+  { key: "tor",       label: "TOR",                        icon: FileText,        group: "administrasi", roles: ["humas"] },
+  { key: "bast",      label: "BAST",                       icon: ClipboardList,   group: "administrasi", roles: ["humas"] },
+  { key: "pakta",     label: "Pakta Integritas",           icon: ShieldCheck,     group: "administrasi", roles: ["humas"] },
+  { key: "laporan",   label: "Laporan",                    icon: FileText,        group: "administrasi", roles: ["humas"] },
+  { key: "vendor",    label: "Vendor",                     icon: Building2,       group: "administrasi", roles: ["humas"] },
 
-  { key: "history", label: "History", icon: Clock, group: "master" },
-  { key: "panduan", label: "Panduan", icon: HelpCircle, group: "master" },
+  { key: "history", label: "History", icon: Clock,       group: "master" },
+  { key: "panduan", label: "Panduan", icon: HelpCircle,  group: "master" },
 ];
 
 export const MENU_GROUPS = [
