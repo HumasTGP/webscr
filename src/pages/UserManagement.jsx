@@ -4,7 +4,7 @@ import {
   ShieldAlert, Trash2, UserCog, UserPlus,
 } from "lucide-react";
 import { T, font } from "../lib/theme";
-import { ROLES, isUserActive } from "../lib/data";
+import { ROLES, isUserActive, localDateStr } from "../lib/data";
 import { uid } from "../lib/utils";
 import Card from "../components/Card";
 import Button from "../components/Button";
@@ -31,8 +31,7 @@ function RolePill({ role }) {
 }
 
 function StatusPill({ user }) {
-  const today = new Date();
-  const t = today.toISOString().slice(0, 10);
+  const t = localDateStr();
   let label, color, bg;
   if (user.activeFrom && t < user.activeFrom) {
     label = "Belum Aktif"; color = "#8A6D00"; bg = "#FFF4D0";
@@ -66,10 +65,10 @@ const labelStyle = {
   textTransform: "uppercase", fontFamily: font.mono,
 };
 
-function todayStr() { return new Date().toISOString().slice(0, 10); }
+function todayStr() { return localDateStr(new Date()); }
 function plusYearStr() {
   const d = new Date(); d.setFullYear(d.getFullYear() + 1);
-  return d.toISOString().slice(0, 10);
+  return localDateStr(d);
 }
 
 function UserForm({ initial, onCancel, onSave, existingUsernames }) {

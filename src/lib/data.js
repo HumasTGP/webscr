@@ -169,10 +169,19 @@ export const DEFAULT_USERS = [
   { id: "u-madm-1",  role: "madm",  username: "3", password: "3", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
 ];
 
+// Format Date → "YYYY-MM-DD" pakai timezone lokal (bukan UTC).
+// Penting: toISOString() berbasis UTC bisa geser 1 hari di WIB (UTC+7).
+export function localDateStr(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 // Cek apakah user masih dalam rentang tanggal aktif (inclusive).
 export function isUserActive(user, today = new Date()) {
   if (!user) return false;
-  const t = today.toISOString().slice(0, 10);
+  const t = localDateStr(today);
   if (user.activeFrom && t < user.activeFrom) return false;
   if (user.activeTo && t > user.activeTo) return false;
   return true;

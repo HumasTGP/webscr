@@ -152,7 +152,26 @@ export default function App() {
   const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [laporan, setLaporan] = useState([]);
   // Daftar user aktif — dikelola via halaman "Manajemen Akses" (khusus admin).
-  const [users, setUsers] = useState(() => DEFAULT_USERS);
+  // Disimpan di localStorage supaya tidak hilang saat refresh. Kalau localStorage
+  // rusak/kosong, fallback ke DEFAULT_USERS.
+  const USERS_LS_KEY = "sikas.users.v1";
+  const [users, setUsers] = useState(() => {
+    try {
+      const raw = typeof window !== "undefined" && window.localStorage.getItem(USERS_LS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+    return DEFAULT_USERS;
+  });
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(USERS_LS_KEY, JSON.stringify(users));
+      }
+    } catch (_) {}
+  }, [users]);
   const authenticate = (role, uname, pw) => authenticateUser(users, role, uname, pw);
 
   const [packages, setPackages] = useState(() =>

@@ -24,8 +24,12 @@ function packageContents(idRab, { rab, tor, bast, pakta }) {
   };
 }
 
-function StatusPill({ statusKey }) {
+function StatusPill({ statusKey, rejectedBy }) {
   const meta = STATUS_META[statusKey] || STATUS_META.draft;
+  let label = meta.label;
+  if (statusKey === DOC_STATUS.REJECTED && rejectedBy) {
+    label = rejectedBy === "asman" ? "Ditolak Asman" : "Ditolak MADM";
+  }
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 6,
@@ -34,7 +38,7 @@ function StatusPill({ statusKey }) {
       fontSize: 11.5, fontWeight: 700, letterSpacing: 0.3,
     }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: meta.color }} />
-      {meta.label}
+      {label}
     </span>
   );
 }
@@ -84,8 +88,10 @@ export default function KasPackagesPage({
       formEvaluasi: row.pkg?.formEvaluasi ?? true,
       status: DOC_STATUS.SUBMITTED,
       submittedAt: new Date().toISOString(),
+      // Bersihkan semua trace review lama supaya paket resubmit tampil bersih.
       reviewedAt: "", reviewedBy: "", reviewNote: "",
-      processedAt: "", processedBy: "",
+      processedAt: "", processedBy: "", processNote: "",
+      rejectedBy: "",
     });
     notify(`Paket ${row.idRab} dikirim ke Asman.`, "success", "Paket Kas");
     setDetail(null);
@@ -130,7 +136,7 @@ export default function KasPackagesPage({
         }}>Eval</span>
       </div>
     )},
-    { key: "status", label: "Status", render: (r) => <StatusPill statusKey={r.status} /> },
+    { key: "status", label: "Status", render: (r) => <StatusPill statusKey={r.status} rejectedBy={r.pkg?.rejectedBy} /> },
   ];
 
   return (
@@ -160,7 +166,7 @@ export default function KasPackagesPage({
         {detail && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              <StatusPill statusKey={detail.status} />
+              <StatusPill statusKey={detail.status} rejectedBy={detail.pkg?.rejectedBy} />
               <span style={{ fontSize: 12, color: T.muted }}>
                 {detail.completed}/{detail.totalRequired} dokumen wajib terisi
               </span>
@@ -256,7 +262,7 @@ export default function KasPackagesPage({
                 {detail.pkg.processNote}
               </div>
             )}
-            {detail.status === "processed" && !detail.pkg?.processNote && (
+            {detail.status === DOC_STATUS.PROCESSED && !detail.pkg?.processNote && (
               <div style={{
                 padding: "10px 12px", borderRadius: 8, marginBottom: 12,
                 background: STATUS_META.processed.bg,
