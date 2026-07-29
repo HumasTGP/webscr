@@ -80,11 +80,13 @@ const DOCX_TEMPLATES = {
   tor: {
     url: "/templates/Template_TOR.docx",
     buildData: (r) => ({
-      judulProgramRKA: r.judulProgramRKA || "",
       judulKegiatan: r.judulKegiatan || "",
       latarBelakang: r.latarBelakang || "",
-      tujuanUmum: r.tujuanUmum || "",
-      tujuanKhususList: splitLines(r.tujuanKhusus),
+      // Template TOR yang baru cuma punya SATU daftar "TUJUAN" (gak ada
+      // pemisahan Tujuan Umum / Tujuan Khusus lagi) — jadi digabung jadi
+      // satu list: Tujuan Umum sebagai butir pertama, disusul tiap baris
+      // Tujuan Khusus.
+      tujuanList: [r.tujuanUmum, ...splitLines(r.tujuanKhusus)].filter(Boolean),
       sasaranList: splitLines(r.sasaran),
       hariTanggal: tanggalDenganHari(r.hariTanggal) || r.hariTanggal || "",
       tempat: r.tempat || "",
