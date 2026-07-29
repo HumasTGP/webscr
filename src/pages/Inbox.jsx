@@ -28,8 +28,13 @@ const TABS = [
   { key: "diproses",  label: "Telah Diproses",     statusKey: DOC_STATUS.PROCESSED },
 ];
 
-function StatusPill({ statusKey }) {
+function StatusPill({ statusKey, rejectedBy }) {
   const meta = STATUS_META[statusKey] || STATUS_META.draft;
+  // Label lebih spesifik untuk rejected: tunjukkan siapa yang menolak.
+  let label = meta.label;
+  if (statusKey === DOC_STATUS.REJECTED && rejectedBy) {
+    label = rejectedBy === "asman" ? "Ditolak Asman" : "Ditolak MADM";
+  }
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 6,
@@ -38,7 +43,7 @@ function StatusPill({ statusKey }) {
       fontSize: 11.5, fontWeight: 700, letterSpacing: 0.3,
     }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: meta.color }} />
-      {meta.label}
+      {label}
     </span>
   );
 }
@@ -129,7 +134,10 @@ export default function InboxPage({
     setDetail(null);
   };
 
-  const contents = detail ? subDocsFor(detail.idRab, { rab, tor, bast, pakta }) : {};
+  // Ambil versi TERBARU dari state supaya modal ikut nge-update setelah
+  // auto-transisi ke IN_REVIEW / setelah aksi tolak/setuju.
+  const liveDetail = detail ? (packages.find((p) => p.idRab === detail.idRab) || detail) : null;
+  const contents = liveDetail ? subDocsFor(liveDetail.idRab, { rab, tor, bast, pakta }) : {};
 
   return (
     <div>
@@ -194,7 +202,7 @@ export default function InboxPage({
             { key: "kategori", label: "Kategori" },
             { key: "submittedAt", label: "Dikirim", render: (r) =>
               r.submittedAt ? new Date(r.submittedAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "—" },
-            { key: "status", label: "Status", render: (r) => <StatusPill statusKey={r.status} /> },
+            { key: "status", label: "Status", render: (r) => <StatusPill statusKey={r.status} rejectedBy={r.rejectedBy} /> },
           ]}
           onRowClick={openPackage}
           emptyLabel={
@@ -213,20 +221,20 @@ export default function InboxPage({
         icon={FolderOpen}
         width={640}
       >
-        {detail && (
+        {detail && liveDetail && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
-              <StatusPill statusKey={detail.status} />
-              {detail.reviewedBy && (
+              <StatusPill statusKey={liveDetail.status} rejectedBy={liveDetail.rejectedBy} />
+              {liveDetail.reviewedBy && (
                 <span style={{ fontSize: 11.5, color: T.muted }}>
-                  di-review oleh <b>{detail.reviewedBy}</b>
-                  {detail.reviewedAt && ` · ${new Date(detail.reviewedAt).toLocaleString("id-ID")}`}
+                  di-review oleh <b>{liveDetail.reviewedBy}</b>
+                  {liveDetail.reviewedAt && ` · ${new Date(liveDetail.reviewedAt).toLocaleString("id-ID")}`}
                 </span>
               )}
-              {detail.processedAt && (
+              {liveDetail.processedAt && (
                 <span style={{ fontSize: 11.5, color: T.muted }}>
-                  diproses oleh <b>{detail.processedBy || "madm"}</b>
-                  {` · ${new Date(detail.processedAt).toLocaleString("id-ID")}`}
+                  diproses oleh <b>{liveDetail.processedBy || "madm"}</b>
+                  {` · ${new Date(liveDetail.processedAt).toLocaleString("id-ID")}`}
                 </span>
               )}
             </div>
@@ -238,9 +246,9 @@ export default function InboxPage({
               fontSize: 13, marginBottom: 14,
             }}>
               <div style={{ color: T.muted }}>Judul</div>
-              <div style={{ fontWeight: 600 }}>{detail.judul}</div>
+              <div style={{ fontWeight: 600 }}>{liveDetail.judul}</div>
               <div style={{ color: T.muted }}>Kategori</div>
-              <div>{detail.kategori}</div>
+              <div>{liveDetail.kategori}</div>
               <div style={{ color: T.muted }}>Total Evaluasi</div>
               <div style={{ fontWeight: 700 }}>
                 Rp {Number(contents.rab?.totalEvaluasi || 0).toLocaleString("id-ID")}
@@ -289,24 +297,24 @@ export default function InboxPage({
               })}
               <div style={{
                 display: "flex", alignItems: "center", gap: 10, padding: "9px 12px",
-                border: `1px solid ${detail.formEvaluasi ? "#87D3A2" : T.border}`,
-                background: detail.formEvaluasi ? "#F0FBF4" : T.bg,
+                border: `1px solid ${liveDetail.formEvaluasi ? "#87D3A2" : T.border}`,
+                background: liveDetail.formEvaluasi ? "#F0FBF4" : T.bg,
                 borderRadius: 8,
               }}>
-                <Check size={16} color={detail.formEvaluasi ? "#1E7F3E" : T.muted} />
+                <Check size={16} color={liveDetail.formEvaluasi ? "#1E7F3E" : T.muted} />
                 <div style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>Form Evaluasi</div>
                 <span style={{
                   padding: "2px 8px", borderRadius: 999,
                   fontSize: 10.5, fontWeight: 700,
-                  background: detail.formEvaluasi ? "#DEF6E5" : "#F1F5F9",
-                  color: detail.formEvaluasi ? "#1E7F3E" : "#94A3B8",
+                  background: liveDetail.formEvaluasi ? "#DEF6E5" : "#F1F5F9",
+                  color: liveDetail.formEvaluasi ? "#1E7F3E" : "#94A3B8",
                 }}>
-                  {detail.formEvaluasi ? "Dilampirkan" : "Belum"}
+                  {liveDetail.formEvaluasi ? "Dilampirkan" : "Belum"}
                 </span>
               </div>
             </div>
 
-            {detail.reviewNote && (
+            {liveDetail.reviewNote && (
               <div style={{
                 padding: "10px 12px", borderRadius: 8, marginBottom: 8,
                 background: STATUS_META.rejected.bg,
@@ -314,12 +322,12 @@ export default function InboxPage({
                 color: STATUS_META.rejected.color, fontSize: 12.5,
               }}>
                 <div style={{ fontWeight: 700, marginBottom: 2 }}>
-                  Catatan Asman ({detail.reviewedBy || "asman"}):
+                  Catatan Asman ({liveDetail.reviewedBy || "asman"}):
                 </div>
-                {detail.reviewNote}
+                {liveDetail.reviewNote}
               </div>
             )}
-            {detail.processNote && (
+            {liveDetail.processNote && (
               <div style={{
                 padding: "10px 12px", borderRadius: 8, marginBottom: 12,
                 background: STATUS_META.processed.bg,
@@ -327,9 +335,9 @@ export default function InboxPage({
                 color: STATUS_META.processed.color, fontSize: 12.5,
               }}>
                 <div style={{ fontWeight: 700, marginBottom: 2 }}>
-                  Catatan MADM ({detail.processedBy || "madm"}):
+                  Catatan MADM ({liveDetail.processedBy || "madm"}):
                 </div>
-                {detail.processNote}
+                {liveDetail.processNote}
               </div>
             )}
 
@@ -339,14 +347,14 @@ export default function InboxPage({
             }}>
               <Button variant="ghost" onClick={() => setDetail(null)}>Tutup</Button>
               {user.role === "asman" &&
-                (detail.status === DOC_STATUS.SUBMITTED ||
-                 detail.status === DOC_STATUS.IN_REVIEW) && (
+                (liveDetail.status === DOC_STATUS.SUBMITTED ||
+                 liveDetail.status === DOC_STATUS.IN_REVIEW) && (
                 <>
                   <Button variant="ghost" icon={X} onClick={() => setRejectOpen(true)}>Tolak</Button>
                   <Button variant="accent" icon={Check} onClick={doApprove}>Setujui</Button>
                 </>
               )}
-              {user.role === "madm" && detail.status === DOC_STATUS.APPROVED && (
+              {user.role === "madm" && liveDetail.status === DOC_STATUS.APPROVED && (
                 <>
                   <Button variant="ghost" icon={X} onClick={() => setRejectOpen(true)}>Tolak</Button>
                   <Button variant="accent" icon={ArrowRight} onClick={doProcess}>Tandai Telah Diproses</Button>
