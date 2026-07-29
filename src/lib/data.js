@@ -11,6 +11,7 @@ import {
   Megaphone,
   Inbox,
   FolderCheck,
+  UserCog,
 } from "lucide-react";
 
 export const OPT = {
@@ -154,12 +155,44 @@ export const ROLES = [
   { value: "madm", label: "MADM" },
 ];
 
-// Kredensial demo — humas 1/1, asman 2/2, madm 3/3.
-export const CREDENTIALS = {
-  humas: { username: "1", password: "1" },
-  asman: { username: "2", password: "2" },
-  madm:  { username: "3", password: "3" },
+// Akun admin khusus untuk membuka menu "Manajemen Akses" di role Humas.
+// TIDAK muncul di daftar user biasa dan tidak bisa diubah lewat halaman admin.
+export const ADMIN_CREDENTIALS = {
+  role: "humas", username: "admin", password: "admin",
 };
+
+// Seed 3 user default sesuai kebutuhan demo. Nanti disimpan di state supaya
+// bisa ditambah/edit/dihapus via halaman "Manajemen Akses".
+export const DEFAULT_USERS = [
+  { id: "u-humas-1", role: "humas", username: "1", password: "1", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  { id: "u-asman-1", role: "asman", username: "2", password: "2", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  { id: "u-madm-1",  role: "madm",  username: "3", password: "3", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+];
+
+// Cek apakah user masih dalam rentang tanggal aktif (inclusive).
+export function isUserActive(user, today = new Date()) {
+  if (!user) return false;
+  const t = today.toISOString().slice(0, 10);
+  if (user.activeFrom && t < user.activeFrom) return false;
+  if (user.activeTo && t > user.activeTo) return false;
+  return true;
+}
+
+// Coba autentikasi (username + password + role) terhadap daftar users.
+// Return: { ok, user? , reason? } — reason: "wrong" | "inactive".
+export function authenticateUser(users, role, username, password) {
+  const match = users.find(
+    (u) => u.role === role && u.username === username && u.password === password
+  );
+  if (!match) return { ok: false, reason: "wrong" };
+  if (!isUserActive(match)) return { ok: false, reason: "inactive" };
+  return { ok: true, user: match };
+}
+
+// Backward compat: beberapa file lama mungkin masih import CREDENTIALS.
+export const CREDENTIALS = Object.fromEntries(
+  DEFAULT_USERS.map((u) => [u.role, { username: u.username, password: u.password }])
+);
 
 // Status lifecycle sebuah paket kas.
 export const DOC_STATUS = {
@@ -212,9 +245,14 @@ export const MENU = [
 
   { key: "history", label: "History", icon: Clock,       group: "master" },
   { key: "panduan", label: "Panduan", icon: HelpCircle,  group: "master" },
+
+  // Menu admin — hanya muncul kalau user login sebagai humas + admin flag.
+  // Sidebar filter mengecek `adminOnly` terhadap user.isAdmin.
+  { key: "user-mgmt", label: "Manajemen Akses", icon: UserCog, group: "admin", roles: ["humas"], adminOnly: true },
 ];
 
 export const MENU_GROUPS = [
+  { key: "admin", label: "Admin" },
   { key: "utama", label: "Ringkasan" },
   { key: "humas", label: "Humas & Publikasi" },
   { key: "administrasi", label: "Administrasi Kas" },

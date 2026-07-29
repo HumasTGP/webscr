@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { font } from "../lib/theme";
-import { CREDENTIALS, ROLES } from "../lib/data";
+import { ADMIN_CREDENTIALS, ROLES } from "../lib/data";
 import AutoLogo from "../components/AutoLogo";
 import PartnerLogos from "../components/PartnerLogos";
 
@@ -44,7 +44,7 @@ function GlassInput({ endAdornment, style, ...props }) {
   );
 }
 
-export default function LoginScreen({ onLogin }) {
+export default function LoginScreen({ onLogin, authenticate }) {
   const [role, setRole] = useState("humas");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -80,18 +80,37 @@ export default function LoginScreen({ onLogin }) {
 
   const submit = (e) => {
     e.preventDefault();
-    if (!username.trim() || !password.trim()) {
+    const u = username.trim();
+    if (!u || !password.trim()) {
       setError("Username dan password wajib diisi.");
       return;
     }
-    const cred = CREDENTIALS[role];
-    if (!cred || username.trim() !== cred.username || password !== cred.password) {
-      setError("Username atau password salah untuk role yang dipilih.");
+    // Cek dulu akun admin khusus (untuk buka menu Manajemen Akses di Humas).
+    if (
+      role === ADMIN_CREDENTIALS.role &&
+      u === ADMIN_CREDENTIALS.username &&
+      password === ADMIN_CREDENTIALS.password
+    ) {
+      setError("");
+      setLoading(true);
+      setTimeout(() => onLogin({ role, username: u, isAdmin: true }), 350);
+      return;
+    }
+    // Autentikasi user biasa via callback (mengecek daftar user + tanggal aktif).
+    const res = authenticate
+      ? authenticate(role, u, password)
+      : { ok: false, reason: "wrong" };
+    if (!res.ok) {
+      setError(
+        res.reason === "inactive"
+          ? "Akun sedang tidak aktif — di luar rentang tanggal berlaku."
+          : "Username atau password salah untuk role yang dipilih."
+      );
       return;
     }
     setError("");
     setLoading(true);
-    setTimeout(() => onLogin({ role, username: username.trim() }), 350);
+    setTimeout(() => onLogin({ role, username: u }), 350);
   };
 
   const bg = bgUrl

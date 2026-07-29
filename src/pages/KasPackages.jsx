@@ -232,13 +232,41 @@ export default function KasPackagesPage({
 
             {detail.pkg?.reviewNote && (
               <div style={{
-                padding: "10px 12px", borderRadius: 8, marginBottom: 12,
+                padding: "10px 12px", borderRadius: 8, marginBottom: 8,
                 background: STATUS_META.rejected.bg,
                 border: `1px solid ${STATUS_META.rejected.color}30`,
                 color: STATUS_META.rejected.color, fontSize: 12.5,
               }}>
-                <div style={{ fontWeight: 700, marginBottom: 2 }}>Catatan Asman:</div>
+                <div style={{ fontWeight: 700, marginBottom: 2 }}>
+                  Catatan Asman ({detail.pkg.reviewedBy || "asman"}):
+                </div>
                 {detail.pkg.reviewNote}
+              </div>
+            )}
+            {detail.pkg?.processNote && (
+              <div style={{
+                padding: "10px 12px", borderRadius: 8, marginBottom: 12,
+                background: STATUS_META.processed.bg,
+                border: `1px solid ${STATUS_META.processed.color}30`,
+                color: STATUS_META.processed.color, fontSize: 12.5,
+              }}>
+                <div style={{ fontWeight: 700, marginBottom: 2 }}>
+                  Catatan MADM ({detail.pkg.processedBy || "madm"}):
+                </div>
+                {detail.pkg.processNote}
+              </div>
+            )}
+            {detail.status === "processed" && !detail.pkg?.processNote && (
+              <div style={{
+                padding: "10px 12px", borderRadius: 8, marginBottom: 12,
+                background: STATUS_META.processed.bg,
+                border: `1px solid ${STATUS_META.processed.color}30`,
+                color: STATUS_META.processed.color, fontSize: 12.5,
+              }}>
+                <div style={{ fontWeight: 700, marginBottom: 2 }}>
+                  Paket selesai diproses oleh MADM ({detail.pkg?.processedBy || "madm"}).
+                </div>
+                Tidak ada catatan tambahan.
               </div>
             )}
 
