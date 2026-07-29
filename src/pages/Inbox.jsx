@@ -81,6 +81,7 @@ export default function InboxPage({
     }
   };
 
+  // Asman: setujui paket SUBMITTED/IN_REVIEW → dikirim ke MADM
   const doApprove = () => {
     if (!detail) return;
     onUpdatePackage(detail.idRab, {
@@ -93,26 +94,38 @@ export default function InboxPage({
     setDetail(null);
   };
 
+  // Tolak — dipakai baik Asman maupun MADM. Simpan alasan di note yang berbeda
+  // supaya Humas bisa lihat siapa yang menolak dan kapan.
   const doReject = () => {
     if (!detail || !rejectNote.trim()) return;
-    onUpdatePackage(detail.idRab, {
-      status: DOC_STATUS.REJECTED,
-      reviewedBy: user.username,
-      reviewedAt: new Date().toISOString(),
-      reviewNote: rejectNote.trim(),
-    });
-    notify(`Paket ${detail.idRab} ditolak.`, "error");
+    const now = new Date().toISOString();
+    const patch = { status: DOC_STATUS.REJECTED };
+    if (user.role === "asman") {
+      patch.reviewedBy = user.username;
+      patch.reviewedAt = now;
+      patch.reviewNote = rejectNote.trim();
+      patch.rejectedBy = "asman";
+    } else if (user.role === "madm") {
+      patch.processedBy = user.username;
+      patch.processedAt = now;
+      patch.processNote = rejectNote.trim();
+      patch.rejectedBy = "madm";
+    }
+    onUpdatePackage(detail.idRab, patch);
+    notify(`Paket ${detail.idRab} ditolak — catatan dikirim ke Humas.`, "error");
     setRejectNote(""); setRejectOpen(false); setDetail(null);
   };
 
+  // MADM: setujui/proses paket APPROVED → selesai, notif ke Humas
   const doProcess = () => {
     if (!detail) return;
     onUpdatePackage(detail.idRab, {
       status: DOC_STATUS.PROCESSED,
       processedAt: new Date().toISOString(),
       processedBy: user.username,
+      processNote: "",
     });
-    notify(`Paket ${detail.idRab} ditandai selesai diproses.`, "success");
+    notify(`Paket ${detail.idRab} selesai diproses — notifikasi dikirim ke Humas.`, "success");
     setDetail(null);
   };
 
@@ -295,13 +308,28 @@ export default function InboxPage({
 
             {detail.reviewNote && (
               <div style={{
-                padding: "10px 12px", borderRadius: 8, marginBottom: 12,
+                padding: "10px 12px", borderRadius: 8, marginBottom: 8,
                 background: STATUS_META.rejected.bg,
                 border: `1px solid ${STATUS_META.rejected.color}30`,
                 color: STATUS_META.rejected.color, fontSize: 12.5,
               }}>
-                <div style={{ fontWeight: 700, marginBottom: 2 }}>Catatan Review:</div>
+                <div style={{ fontWeight: 700, marginBottom: 2 }}>
+                  Catatan Asman ({detail.reviewedBy || "asman"}):
+                </div>
                 {detail.reviewNote}
+              </div>
+            )}
+            {detail.processNote && (
+              <div style={{
+                padding: "10px 12px", borderRadius: 8, marginBottom: 12,
+                background: STATUS_META.processed.bg,
+                border: `1px solid ${STATUS_META.processed.color}30`,
+                color: STATUS_META.processed.color, fontSize: 12.5,
+              }}>
+                <div style={{ fontWeight: 700, marginBottom: 2 }}>
+                  Catatan MADM ({detail.processedBy || "madm"}):
+                </div>
+                {detail.processNote}
               </div>
             )}
 
@@ -319,7 +347,10 @@ export default function InboxPage({
                 </>
               )}
               {user.role === "madm" && detail.status === DOC_STATUS.APPROVED && (
-                <Button icon={ArrowRight} onClick={doProcess}>Tandai Telah Diproses</Button>
+                <>
+                  <Button variant="ghost" icon={X} onClick={() => setRejectOpen(true)}>Tolak</Button>
+                  <Button variant="accent" icon={ArrowRight} onClick={doProcess}>Tandai Telah Diproses</Button>
+                </>
               )}
             </div>
           </>

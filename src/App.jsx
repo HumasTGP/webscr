@@ -39,7 +39,8 @@ import PengelolaanKomunikasi from "./pages/PengelolaanKomunikasi";
 import InboxPage from "./pages/Inbox";
 import AsmanDashboard from "./pages/AsmanDashboard";
 import KasPackagesPage from "./pages/KasPackages";
-import { DOC_STATUS } from "./lib/data";
+import UserManagementPage from "./pages/UserManagement";
+import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
 
 const seed = (prefix, rows) =>
   rows.map((v, i) => ({
@@ -150,6 +151,10 @@ export default function App() {
   const [bast, setBast] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [laporan, setLaporan] = useState([]);
+  // Daftar user aktif — dikelola via halaman "Manajemen Akses" (khusus admin).
+  const [users, setUsers] = useState(() => DEFAULT_USERS);
+  const authenticate = (role, uname, pw) => authenticateUser(users, role, uname, pw);
+
   const [packages, setPackages] = useState(() =>
     PACKAGE_SEED.map((p) => ({
       idRab: p.idRab, judul: p.judul, kategori: p.kategori,
@@ -353,6 +358,13 @@ export default function App() {
           goto={setActive}
         />
       ),
+      "user-mgmt": (
+        <UserManagementPage
+          users={users}
+          setUsers={setUsers}
+          notify={notify}
+        />
+      ),
       history: <HistoryPage history={history} />,
       panduan: <Panduan />,
     }),
@@ -360,7 +372,7 @@ export default function App() {
     [
       user,
       rab, tor, bast, pakta, laporan, vendors, history,
-      proposals, konten, evaluasi, rabIdOptions, packages,
+      proposals, konten, evaluasi, rabIdOptions, packages, users,
     ]
   );
 
@@ -393,6 +405,7 @@ export default function App() {
   if (!user)
     return (
       <LoginScreen
+        authenticate={authenticate}
         onLogin={(u) => {
           setUser(u);
           setActive(u.role === "humas" ? "dashboard" : "asman-dashboard");

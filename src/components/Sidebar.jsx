@@ -15,8 +15,12 @@ const fade = (collapsed, extra = {}) => ({
   ...extra,
 });
 
-function groupMenu(userRole) {
-  const visible = MENU.filter((m) => !m.roles || m.roles.includes(userRole));
+function groupMenu(userRole, isAdmin) {
+  const visible = MENU.filter((m) => {
+    if (m.roles && !m.roles.includes(userRole)) return false;
+    if (m.adminOnly && !isAdmin) return false;
+    return true;
+  });
   return MENU_GROUPS.map((g) => ({
     ...g,
     items: visible.filter((m) => m.group === g.key),
@@ -43,12 +47,17 @@ export default function Sidebar({
   collapsed,
   setCollapsed,
 }) {
-  const groups = groupMenu(user.role);
+  const groups = groupMenu(user.role, user.isAdmin);
 
   const [openGroups, setOpenGroups] = useState(() => {
     const initial = {};
-    groupMenu(user.role).forEach((g) => {
-      initial[g.key] = g.items.some((m) => m.key === active);
+    groupMenu(user.role, user.isAdmin).forEach((g) => {
+      // Group terbuka default kalau salah satu item-nya aktif ATAU
+      // group ini punya item admin-only (khusus supaya menu admin baru
+      // langsung kelihatan sebagai badge highlight).
+      initial[g.key] =
+        g.items.some((m) => m.key === active) ||
+        g.items.some((m) => m.adminOnly);
     });
     return initial;
   });
