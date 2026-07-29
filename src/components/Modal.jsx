@@ -18,8 +18,7 @@ export default function Modal({
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(7,27,54,0.45)",
-        backdropFilter: "blur(2px)",
+        background: "rgba(7,27,54,0.55)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

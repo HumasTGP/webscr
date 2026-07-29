@@ -92,21 +92,28 @@ const DOCX_TEMPLATES = {
     }),
   },
   bast: {
-    url: "/templates/Template_BAST.docx",
+    // Sama seperti template yang dipakai di Proposal Stakeholder — supaya
+    // BAST dari Administrasi Kas identik strukturnya (Pihak Pertama selalu
+    // fixed "Astri Oktavina, Assistant Manager KAS" di dalam template itu
+    // sendiri, tidak pernah jadi data yang bisa diubah dari sini).
+    url: "/templates/Template_BA.docx",
     buildData: (r) => ({
-      nomor: r.nomor || "",
-      judulBantuan: r.judulBantuan || "",
-      tanggal: formatTanggalPanjang(r.tanggal) || r.tanggal || "",
+      id: r.id || "",
+      judulProposal: r.judulBantuan || "",
+      tanggalBast: formatTanggalPanjang(r.tanggal) || r.tanggal || "",
       namaPihakKedua: r.namaPihakKedua || "",
       jabatanPihakKedua: r.jabatanPihakKedua || "",
-      instansiPihakKedua: r.instansiPihakKedua || "",
+      uraianBantuan: r.judulBantuan || "",
+      namaLembaga: r.instansiPihakKedua || "",
     }),
   },
   pakta: {
-    url: "/templates/Template_Pakta_Integritas.docx",
+    // Sama seperti template Pakta Integritas di Proposal Stakeholder.
+    url: "/templates/Template_PI.docx",
     buildData: (r) => ({
-      judulKegiatan: r.judulBantuan || "",
+      judulProposal: r.judulBantuan || "",
       tanggalPi: formatTanggalPanjang(r.tanggalPi) || r.tanggalPi || "",
+      namaLembaga: r.lembagaPenerima || "",
       namaPenerima: r.namaPenerima || "",
     }),
   },

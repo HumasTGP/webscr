@@ -123,7 +123,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
 
   const start = () => {
     setValues({ id: nextIdFor("PRP", proposals) });
-    setBastDraft({ namaPihakPertama: "", jabatanPihakPertama: "" });
+    setBastDraft({});
     setPaktaDraft({});
     setStep(0);
     setMode("wizard");
@@ -134,8 +134,6 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
   const goToBastStep = () => {
     setBastDraft((prev) => ({
       tanggalBast: prev.tanggalBast || values.tanggalKegiatan || "",
-      namaPihakPertama: prev.namaPihakPertama || "",
-      jabatanPihakPertama: prev.jabatanPihakPertama || "",
       namaPihakKedua: prev.namaPihakKedua || values.kontakPIC || "",
       jabatanPihakKedua: prev.jabatanPihakKedua || "Penerima Fasilitasi",
       uraianBantuan: prev.uraianBantuan || values.judulProposal || "",
@@ -260,7 +258,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
         heading: "BAST",
         rows: [
           { label: "Tanggal BAST", value: row.bast?.tanggalBast },
-          { label: "Pihak Pertama", value: `${row.bast?.namaPihakPertama || ""} (${row.bast?.jabatanPihakPertama || ""})` },
+          { label: "Pihak Pertama", value: "Astri Oktavina (Assistant Manager KAS PT PLN Indonesia Power UBP Priok) — tetap" },
           { label: "Pihak Kedua", value: `${row.bast?.namaPihakKedua || ""} (${row.bast?.jabatanPihakKedua || ""})` },
           { label: "Uraian Bantuan", value: row.bast?.uraianBantuan },
         ],
@@ -283,8 +281,6 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
           id: row.id,
           judulProposal: row.judulProposal,
           tanggalBast: formatTanggalPanjang(row.bast?.tanggalBast) || row.bast?.tanggalBast,
-          namaPihakPertama: row.bast?.namaPihakPertama,
-          jabatanPihakPertama: row.bast?.jabatanPihakPertama,
           namaPihakKedua: row.bast?.namaPihakKedua,
           jabatanPihakKedua: row.bast?.jabatanPihakKedua,
           uraianBantuan: row.bast?.uraianBantuan,

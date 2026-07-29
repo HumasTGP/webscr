@@ -185,7 +185,6 @@ export default function FieldInput({ field, value, onChange }) {
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
           onClick={openPicker}
-          onFocus={openPicker}
           style={{
             ...commonStyle,
             paddingRight: 36,

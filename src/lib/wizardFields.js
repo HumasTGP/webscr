@@ -72,8 +72,6 @@ export const proposalAdminFields = () => [
 
 export const bastStepFields = () => [
   { key: "tanggalBast", label: "Tanggal BAST", type: "date", section: "Berita Acara Serah Terima (BAST)" },
-  { key: "namaPihakPertama", label: "Nama Pihak Pertama (PLN)" },
-  { key: "jabatanPihakPertama", label: "Jabatan Pihak Pertama (PLN)" },
   { key: "namaPihakKedua", label: "Nama Pihak Kedua (Penerima)" },
   { key: "jabatanPihakKedua", label: "Jabatan Pihak Kedua (Penerima)" },
   {
@@ -157,7 +155,7 @@ export const bastFields = (rabIdOptions) => () => [
     disabled: true,
     hint: "otomatis dari ID RAB - NON PO / Cash Card",
   },
-  { key: "nomor", label: "Nomor" },
+  { key: "nomor", label: "Nomor", hint: "opsional, tidak lagi dipakai di dokumen — nomor otomatis dari ID" },
   { key: "judulBantuan", label: "Judul Bantuan", disabled: true, hint: "otomatis dari ID RAB" },
   { key: "tanggal", label: "Tanggal", type: "date" },
   { key: "namaPihakKedua", label: "Nama Pihak Kedua", section: "Pihak Kedua" },
