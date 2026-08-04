@@ -56,7 +56,7 @@ export default function LoginScreen({ onLogin, authenticate }) {
 
   const [bgUrl, setBgUrl] = useState(null);
   useEffect(() => {
-    const candidates = ["/login-bg.jpg", "/login-bg.jpeg", "/login-bg.png"];
+    const candidates = ["/portal-bg.jpg", "/portal-bg.jpeg", "/portal-bg.png", "/login-bg.jpg", "/login-bg.jpeg", "/login-bg.png"];
     let cancelled = false;
     (async () => {
       for (const src of candidates) {
@@ -103,7 +103,7 @@ export default function LoginScreen({ onLogin, authenticate }) {
     if (!res.ok) {
       setError(
         res.reason === "inactive"
-          ? "Akun sedang tidak aktif — di luar rentang tanggal berlaku."
+          ? "Akun sedang tidak aktif (di luar rentang tanggal berlaku)."
           : "Username atau password salah untuk role yang dipilih."
       );
       return;
@@ -208,7 +208,7 @@ export default function LoginScreen({ onLogin, authenticate }) {
             letterSpacing: 0.1,
           }}
         >
-          SIKAS — Sistem Administrasi Kas
+          SIREMON - Sistem Realisasi dan Monitoring
         </p>
 
         <form onSubmit={submit}>
@@ -342,15 +342,15 @@ export default function LoginScreen({ onLogin, authenticate }) {
         </form>
       </div>
 
-      {/* ===== STRIP "POWERED BY" — fixed bar di bawah, terpusat, responsive ===== */}
+      {/* ===== STRIP "POWERED BY" - fixed bar di bawah, terpusat, responsive ===== */}
       <div className="powered-by-strip" style={{ fontFamily: font.body }}>
         <span className="powered-by-label">Powered by</span>
         <div className="powered-by-logos">
-          {/* Logo PLN utama — dibungkus box seragam */}
+          {/* Logo PLN utama - dibungkus box seragam */}
           <div className="powered-by-logo-box">
             <AutoLogo alt="PLN" />
           </div>
-          {/* Logo Partner 1-6 — masing-masing sudah dibungkus box seragam di PartnerLogos */}
+          {/* Logo Partner 1-6 - masing-masing sudah dibungkus box seragam di PartnerLogos */}
           <PartnerLogos />
         </div>
       </div>

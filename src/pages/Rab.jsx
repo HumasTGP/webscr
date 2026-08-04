@@ -82,7 +82,7 @@ const buildHeaderFields = (vendors) => [
   {
     key: "idNumber",
     label: "ID Number",
-    hint: "otomatis (lanjut dari ID terakhir) — bisa diubah manual",
+    hint: "otomatis (lanjut dari ID terakhir) - bisa diubah manual",
     placeholder: "cth. RAB-2026-001",
   },
   { key: "kategori", label: "Kategori", type: "select", options: OPT.kategori },
@@ -205,7 +205,7 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
     const recFields = buildHeaderFields(vendors);
     await generateSikasPdf({
       title: "Rencana Anggaran Biaya (RAB)",
-      subtitle: `${record.idNumber || "—"} · Total Evaluasi ${rupiah(record.totalEvaluasi || 0)}`,
+      subtitle: `${record.idNumber || "-"} · Total Evaluasi ${rupiah(record.totalEvaluasi || 0)}`,
       rows: rowsFromFields(recFields, record),
       table: record.items || [],
       filename: `RAB-${record.idNumber || "record"}`,
@@ -216,7 +216,7 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
     const idText = record.idNumber || "record";
     const itemsText = (record.items || [])
       .map((item, i) =>
-        `${i + 1}. ${item.uraian || ""} — Qty: ${item.qtyEvaluasi || item.qty || ""} ${item.satuan || ""} × Rp ${(item.hargaEvaluasi || item.harga || 0).toLocaleString("id-ID")} = Rp ${(item.totalEvaluasi || 0).toLocaleString("id-ID")}`
+        `${i + 1}. ${item.uraian || ""} - Qty: ${item.qtyEvaluasi || item.qty || ""} ${item.satuan || ""} × Rp ${(item.hargaEvaluasi || item.harga || 0).toLocaleString("id-ID")} = Rp ${(item.totalEvaluasi || 0).toLocaleString("id-ID")}`
       )
       .join("\n");
     try {
@@ -266,7 +266,7 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
       <Modal
         open={!!rabPreview}
         onClose={closeRabPreview}
-        title={idText ? "Preview RAB — " + idText : "Preview RAB"}
+        title={idText ? "Preview RAB - " + idText : "Preview RAB"}
         icon={Eye}
         width={660}
       >
@@ -343,10 +343,10 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
                   fontSize: 13.5,
                 }}
               >
-                <option value="">— Pilih ID RAB —</option>
+                <option value="">- Pilih ID RAB -</option>
                 {rab.map((r) => (
                   <option key={r.idNumber} value={r.idNumber}>
-                    {r.idNumber}{r.judulKegiatan ? ` — ${r.judulKegiatan}` : ""}
+                    {r.idNumber}{r.judulKegiatan ? ` - ${r.judulKegiatan}` : ""}
                   </option>
                 ))}
               </select>
@@ -662,7 +662,7 @@ function StepChecklist({ checklist, setChecklist, onNext }) {
           onClick={() =>
             printChecklist({
               title: "Checklist Kelengkapan Dokumen",
-              subtitle: "SIKAS — PT PLN Indonesia Power UBP Priok",
+              subtitle: "SIREMON - PT PLN Indonesia Power UBP Priok",
               items: [
                 ...standarItems,
                 ...lainnyaItems.filter((c) => c.nama.trim()),
@@ -854,7 +854,7 @@ function StepUraian({
         Catatan: evaluasi = harga/jumlah pembanding fiks yang benar-benar digunakan.
         {editingId && (
           <b style={{ color: T.blue, marginLeft: 6 }}>
-            · Sedang mengedit baris — perubahan akan tersimpan setelah tekan "Update baris".
+            · Sedang mengedit baris - perubahan akan tersimpan setelah tekan "Update baris".
           </b>
         )}
       </p>
@@ -1035,20 +1035,20 @@ function BreakdownTable({ items, onEdit, onDelete, editingId }) {
                 <td style={{ ...td, fontWeight: 600, color: T.heading, whiteSpace: "normal", minWidth: 160 }}>
                   {r.uraian}
                 </td>
-                <td style={td}>{r.satuan || "—"}</td>
+                <td style={td}>{r.satuan || "-"}</td>
                 <td style={{ ...td, ...numeric }}>{r.qty || 0}</td>
                 <td style={{ ...td, ...numeric }}>{rupiah(r.harga)}</td>
-                <td style={{ ...td, ...numeric, color: T.muted }}>{r.ppn || "—"}</td>
+                <td style={{ ...td, ...numeric, color: T.muted }}>{r.ppn || "-"}</td>
                 <td style={{ ...td, ...numeric, fontWeight: 700, color: T.heading }}>{rupiah(r.total)}</td>
                 <td style={{ ...td, ...numeric, ...divider }}>{r.qtyEvaluasi || 0}</td>
                 <td style={{ ...td, ...numeric }}>{rupiah(r.hargaEvaluasi)}</td>
-                <td style={{ ...td, ...numeric, color: T.muted }}>{r.ppnEvaluasi || "—"}</td>
+                <td style={{ ...td, ...numeric, color: T.muted }}>{r.ppnEvaluasi || "-"}</td>
                 <td style={{ ...td, ...numeric, fontWeight: 700, color: T.navy }}>{rupiah(r.totalEvaluasi)}</td>
                 <td style={{ ...td, ...divider, color: r.keterangan ? T.text : T.muted, maxWidth: 180, whiteSpace: "normal" }}>
-                  {r.keterangan || "—"}
+                  {r.keterangan || "-"}
                 </td>
                 <td style={{ ...td, color: r.ketPemakaian ? T.text : T.muted, maxWidth: 180, whiteSpace: "normal" }}>
-                  {r.ketPemakaian || "—"}
+                  {r.ketPemakaian || "-"}
                 </td>
                 {showActions && (
                   <td style={{ ...td, ...divider, textAlign: "center" }}>

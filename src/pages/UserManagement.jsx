@@ -239,11 +239,11 @@ export default function UserManagementPage({ users, setUsers, notify }) {
     { key: "activeFrom", label: "Aktif Dari",
       render: (r) => r.activeFrom
         ? new Date(r.activeFrom).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
-        : "—" },
+        : "-" },
     { key: "activeTo", label: "Sampai",
       render: (r) => r.activeTo
         ? new Date(r.activeTo).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
-        : "—" },
+        : "-" },
     { key: "status", label: "Status", render: (r) => <StatusPill user={r} /> },
     { key: "aksi", label: "Aksi", render: (r) => (
       <div style={{ display: "flex", gap: 6 }}>
@@ -342,7 +342,7 @@ export default function UserManagementPage({ users, setUsers, notify }) {
       <Modal
         open={formOpen}
         onClose={() => setFormOpen(false)}
-        title={editTarget ? `Edit Akun — ${editTarget.username}` : "Tambah User Baru"}
+        title={editTarget ? `Edit Akun - ${editTarget.username}` : "Tambah User Baru"}
         icon={editTarget ? KeyRound : UserPlus}
         width={520}
       >

@@ -160,7 +160,7 @@ export default function ProposalEvaluasiPage({ proposals, evaluasiList, setEvalu
       <PageHeader
         eyebrow="Humas & Publikasi"
         title="Cetak Form Evaluasi"
-        description="Pilih Proposal ID — ID/Pemohon/Perihal otomatis terisi. Isi Nilai tiap kategori seperti mengisi Excel, lalu simpan sebagai .xlsx sesuai template resmi. Hasilnya juga tersimpan di aplikasi supaya bisa dilihat lagi kapan saja."
+        description="Pilih Proposal ID - ID/Pemohon/Perihal otomatis terisi. Isi Nilai tiap kategori seperti mengisi Excel, lalu simpan sebagai .xlsx sesuai template resmi. Hasilnya juga tersimpan di aplikasi supaya bisa dilihat lagi kapan saja."
       />
 
       <Card padded={false} style={{ marginBottom: 20 }}>
@@ -270,7 +270,7 @@ export default function ProposalEvaluasiPage({ proposals, evaluasiList, setEvalu
                   </td>
                   <td style={{ ...bodyCell, textAlign: "center" }}>{k.bobot}</td>
                   <td style={{ ...bodyCell, textAlign: "center", fontWeight: 600 }}>
-                    {k.nilai ? k.totalSkor.toFixed(2) : "—"}
+                    {k.nilai ? k.totalSkor.toFixed(2) : "-"}
                   </td>
                 </tr>
               ))}
@@ -332,7 +332,7 @@ export default function ProposalEvaluasiPage({ proposals, evaluasiList, setEvalu
 
           <p style={{ color: T.muted, fontSize: 11.5, marginTop: 12, lineHeight: 1.5 }}>
             Kolom tanda tangan (Officer Community Development / Assistant Manager KAS /
-            Administration Manager) tidak diubah — tetap sesuai template asli.
+            Administration Manager) tidak diubah - tetap sesuai template asli.
           </p>
         </Card>
       )}
@@ -345,7 +345,7 @@ export default function ProposalEvaluasiPage({ proposals, evaluasiList, setEvalu
           </h3>
           <p style={{ fontSize: 12.5, color: T.muted, margin: "0 0 4px" }}>
             Klik salah satu baris atau tombol mata untuk melihat isi Form Evaluasi yang sudah pernah
-            disimpan — tanpa perlu isi ulang atau download ulang.
+            disimpan - tanpa perlu isi ulang atau download ulang.
           </p>
         </div>
         <DataTable
@@ -424,10 +424,10 @@ function EvaluasiReadOnly({ record }) {
               <tr key={k.key}>
                 <td style={{ ...bodyCell, textAlign: "center", color: T.muted }}>{i + 1}</td>
                 <td style={{ ...bodyCell, fontWeight: 600 }}>{k.label}</td>
-                <td style={{ ...bodyCell, textAlign: "center" }}>{k.nilai ?? "—"}</td>
+                <td style={{ ...bodyCell, textAlign: "center" }}>{k.nilai ?? "-"}</td>
                 <td style={{ ...bodyCell, textAlign: "center" }}>{k.bobot}</td>
                 <td style={{ ...bodyCell, textAlign: "center", fontWeight: 600 }}>
-                  {k.nilai ? k.totalSkor.toFixed(2) : "—"}
+                  {k.nilai ? k.totalSkor.toFixed(2) : "-"}
                 </td>
               </tr>
             ))}

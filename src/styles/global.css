@@ -7,7 +7,7 @@
   --font-body: Arial, 'Helvetica Neue', sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 
-  /* Brand — konstan di dark & light */
+  /* Brand - konstan di dark & light */
   --brand-navy-deep: #071B36;
   --brand-yellow: #FFC72C;
   --brand-yellow-deep: #E6A700;
@@ -101,7 +101,7 @@ button {
               background-color .15s ease, border-color .15s ease, color .15s ease;
 }
 
-/* Sembunyikan ikon kalender bawaan Chromium — kita render ikon Lucide
+/* Sembunyikan ikon kalender bawaan Chromium - kita render ikon Lucide
    sendiri agar konsisten lintas browser, tapi biarkan area indicator tetap
    menerima klik sehingga picker tetap terbuka bila showPicker() gagal. */
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -114,10 +114,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   padding: 0;
 }
-/* Firefox: tidak ada indicator webkit — cursor pointer di field-nya sendiri
+/* Firefox: tidak ada indicator webkit - cursor pointer di field-nya sendiri
    sudah dihandle inline. */
 
-/* Glass card di halaman login — override placeholder/focus/autofill agar
+/* Glass card di halaman login - override placeholder/focus/autofill agar
    kontras di atas background gelap dan tidak muncul kotak kuning Chrome. */
 .login-glass input::placeholder {
   color: rgba(255, 255, 255, 0.68);
@@ -171,7 +171,7 @@ input[type="password"]::-webkit-textfield-decoration-container {
   box-sizing: border-box;
 }
 
-/* Powered-by strip — di semua ukuran layar selalu di bawah, tengah */
+/* Powered-by strip - di semua ukuran layar selalu di bawah, tengah */
 .powered-by-strip {
   position: fixed;
   bottom: 0;

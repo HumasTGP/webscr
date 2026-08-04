@@ -1,8 +1,8 @@
+import { useEffect, useState } from "react";
 import { font } from "../lib/theme";
 import AutoLogo from "../components/AutoLogo";
 import PartnerLogos from "../components/PartnerLogos";
 
-// Background sama persis dengan DEFAULT_BG di Login.jsx supaya identik.
 const DEFAULT_BG =
   "radial-gradient(circle at 15% 20%, rgba(255,199,44,0.28), transparent 45%),"
   + " radial-gradient(circle at 85% 82%, rgba(14,76,146,0.55), transparent 50%),"
@@ -63,11 +63,34 @@ function ServiceCard({ icon, title, desc, onClick }) {
 }
 
 export default function LandingGateway({ onSelect }) {
+  const [bgUrl, setBgUrl] = useState(null);
+  useEffect(() => {
+    const candidates = ["/portal-bg.jpg", "/portal-bg.jpeg", "/portal-bg.png", "/login-bg.jpg", "/login-bg.jpeg", "/login-bg.png"];
+    let cancelled = false;
+    (async () => {
+      for (const src of candidates) {
+        const ok = await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = src;
+        });
+        if (cancelled) return;
+        if (ok) { setBgUrl(src); return; }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const bg = bgUrl
+    ? `linear-gradient(180deg, rgba(5,20,40,0.50), rgba(5,20,40,0.65)), url(${bgUrl})`
+    : DEFAULT_BG;
+
   return (
     <div
       className="login-page"
       style={{
-        background: DEFAULT_BG,
+        background: bg,
         backgroundSize: "cover",
         backgroundPosition: "center",
         fontFamily: font.body,
@@ -152,9 +175,15 @@ export default function LandingGateway({ onSelect }) {
         />
         <ServiceCard
           icon={<span>&#128196;</span>}
-          title="SIKAS PLN"
-          desc="Administrasi Non PO, CC, RAB, dan dokumen CSR"
+          title="SIREMON"
+          desc="Sistem Realisasi dan Monitoring CSR"
           onClick={() => onSelect("sikas")}
+        />
+        <ServiceCard
+          icon={<span>&#129309;</span>}
+          title="Pengajuan Mitra"
+          desc="Pengajuan proposal kerjasama mitra"
+          onClick={() => onSelect("mitra")}
         />
       </div>
 

@@ -1,10 +1,36 @@
-import { useMemo } from "react";
-import { CheckCircle2, Inbox as InboxIcon, ThumbsDown, ThumbsUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CheckCircle2, Inbox as InboxIcon, ThumbsDown, ThumbsUp, Clock } from "lucide-react";
 import { T, font } from "../lib/theme";
 import { DOC_STATUS, STATUS_META } from "../lib/data";
 import PageHeader from "../components/PageHeader";
 import Card from "../components/Card";
 import DataTable from "../components/DataTable";
+
+function LiveClock() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const dateStr = now.toLocaleDateString("id-ID", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
+  const timeStr = now.toLocaleTimeString("id-ID", {
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  });
+  return (
+    <div style={{
+      display: "inline-flex", alignItems: "center", gap: 6,
+      padding: "4px 12px", borderRadius: 8,
+      background: T.blueSoft, border: `1px solid ${T.border}`,
+      fontSize: 12.5, color: T.blue, fontWeight: 600,
+      fontFamily: font.mono,
+    }}>
+      <Clock size={13} />
+      {dateStr} - {timeStr} WIB
+    </div>
+  );
+}
 
 function CounterTile({ icon: Icon, label, value, meta, onClick }) {
   return (
@@ -90,6 +116,10 @@ export default function AsmanDashboard({ user, packages, goto }) {
         description={desc}
       />
 
+      <div style={{ marginBottom: 14 }}>
+        <LiveClock />
+      </div>
+
       <div style={{
         display: "grid",
         gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -138,7 +168,7 @@ export default function AsmanDashboard({ user, packages, goto }) {
                 return t ? new Date(t).toLocaleString("id-ID", {
                   day: "2-digit", month: "short", year: "numeric",
                   hour: "2-digit", minute: "2-digit",
-                }) : "—";
+                }) : "-";
               },
             },
           ]}

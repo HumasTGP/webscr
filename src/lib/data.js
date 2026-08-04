@@ -12,6 +12,13 @@ import {
   Inbox,
   FolderCheck,
   UserCog,
+  Camera,
+  Users,
+  FileCheck,
+  CheckSquare,
+  FilePlus,
+  FileSearch,
+  Paperclip,
 } from "lucide-react";
 
 export const OPT = {
@@ -188,7 +195,7 @@ export function isUserActive(user, today = new Date()) {
 }
 
 // Coba autentikasi (username + password + role) terhadap daftar users.
-// Return: { ok, user? , reason? } — reason: "wrong" | "inactive".
+// Return: { ok, user? , reason? } - reason: "wrong" | "inactive".
 export function authenticateUser(users, role, username, password) {
   const match = users.find(
     (u) => u.role === role && u.username === username && u.password === password
@@ -226,15 +233,13 @@ export const SUB_DOCS = [
   { key: "pakta", label: "Pakta Integritas", matchKey: "id",       required: true },
 ];
 
-// Ganti sesuai kontak Admin/IT SIKAS yang berlaku.
 export const HELP_CONTACT = {
   phone: "+62 831-9904-4249",
   waNumber: "6283199044249",
   waMessage: "Halo! Saya mengalami problem",
-  hours: "Senin–Jumat, 08.00–16.00 WIB",
+  hours: "Senin-Jumat, 08.00-16.00 WIB",
 };
 
-// Menu SIKAS. `roles`: item cuma tampil ke role tsb. Tanpa `roles` = semua role.
 export const MENU = [
   { key: "dashboard",       label: "Dashboard",              icon: LayoutDashboard, group: "utama", roles: ["humas"] },
   { key: "asman-dashboard", label: "Dashboard",              icon: LayoutDashboard, group: "utama", roles: ["asman", "madm"] },
@@ -244,19 +249,29 @@ export const MENU = [
   { key: "proposal-evaluasi", label: "Cetak Form Evaluasi",      icon: FileText,  group: "humas", roles: ["humas"] },
   { key: "konten",            label: "Pengelolaan Komunikasi",   icon: Megaphone, group: "humas", roles: ["humas"] },
 
+  { key: "rab",  label: "RAB", icon: FileSpreadsheet, group: "perencanaan", roles: ["humas"] },
+  { key: "tor",  label: "TOR", icon: FileText,        group: "perencanaan", roles: ["humas"] },
+
+  { key: "dokumentasi",   label: "Dokumentasi",    icon: Camera,     group: "pelaksanaan", roles: ["humas"] },
+  { key: "daftar-hadir",  label: "Daftar Hadir",   icon: Users,      group: "pelaksanaan", roles: ["humas"] },
+  { key: "eviden",        label: "Eviden Lainnya",  icon: Paperclip,  group: "pelaksanaan", roles: ["humas"] },
+
+  { key: "bast",              label: "BAST",                icon: ClipboardList,   group: "pembayaran", roles: ["humas"] },
+  { key: "bapp",              label: "BAPP",                icon: FileCheck,       group: "pembayaran", roles: ["humas"] },
+  { key: "pakta",             label: "PI",                  icon: ShieldCheck,     group: "pembayaran", roles: ["humas"] },
+  { key: "checklist-dokumen", label: "Checklist Dokumen",   icon: CheckSquare,     group: "pembayaran", roles: ["humas"] },
+  { key: "proposal-evaluasi-pembayaran", label: "Form Evaluasi", icon: FileSearch, group: "pembayaran", roles: ["humas"] },
+  { key: "form-verifikasi",  label: "Form Verifikasi",      icon: FilePlus,        group: "pembayaran", roles: ["humas"] },
+  { key: "lampiran-1",       label: "Lampiran 1 - Rincian Pekerjaan", icon: FileText, group: "pembayaran", roles: ["humas"] },
+  { key: "lampiran-2",       label: "Lampiran 2 - Checklist",         icon: CheckSquare, group: "pembayaran", roles: ["humas"] },
+
   { key: "paket-kas", label: "Paket Kas (Kirim ke Asman)", icon: FolderCheck,     group: "administrasi", roles: ["humas"] },
-  { key: "rab",       label: "RAB",                        icon: FileSpreadsheet, group: "administrasi", roles: ["humas"] },
-  { key: "tor",       label: "TOR",                        icon: FileText,        group: "administrasi", roles: ["humas"] },
-  { key: "bast",      label: "BAST",                       icon: ClipboardList,   group: "administrasi", roles: ["humas"] },
-  { key: "pakta",     label: "Pakta Integritas",           icon: ShieldCheck,     group: "administrasi", roles: ["humas"] },
   { key: "laporan",   label: "Laporan",                    icon: FileText,        group: "administrasi", roles: ["humas"] },
   { key: "vendor",    label: "Vendor",                     icon: Building2,       group: "administrasi", roles: ["humas"] },
 
   { key: "history", label: "History", icon: Clock,       group: "master" },
   { key: "panduan", label: "Panduan", icon: HelpCircle,  group: "master" },
 
-  // Menu admin — hanya muncul kalau user login sebagai humas + admin flag.
-  // Sidebar filter mengecek `adminOnly` terhadap user.isAdmin.
   { key: "user-mgmt", label: "Manajemen Akses", icon: UserCog, group: "admin", roles: ["humas"], adminOnly: true },
 ];
 
@@ -264,7 +279,10 @@ export const MENU_GROUPS = [
   { key: "admin", label: "Admin" },
   { key: "utama", label: "Ringkasan" },
   { key: "humas", label: "Humas & Publikasi" },
-  { key: "administrasi", label: "Administrasi Kas" },
+  { key: "perencanaan", label: "Perencanaan" },
+  { key: "pelaksanaan", label: "Pelaksanaan" },
+  { key: "pembayaran", label: "Pembayaran" },
+  { key: "administrasi", label: "Administrasi" },
   { key: "master", label: "Master & Bantuan" },
 ];
 
@@ -305,6 +323,66 @@ export const PROPOSAL_SEED = [
     ringkasan: "Beasiswa 12 bulan + paket buku & seragam untuk 30 siswa.",
     statusProposal: "Disetujui",
     catatanInternal: "Lanjut ke pembuatan RAB.",
+  },
+];
+
+export const MITRA_STATUS = {
+  MENUNGGU_HUMAS: "menunggu_humas",
+  DIPROSES_HUMAS: "diproses_humas",
+  DITOLAK_HUMAS: "ditolak_humas",
+  MENUNGGU_ASMAN: "menunggu_asman",
+  DIPROSES_ASMAN: "diproses_asman",
+  DITOLAK_ASMAN: "ditolak_asman",
+  MENUNGGU_MADM: "menunggu_madm",
+  DIPROSES_MADM: "diproses_madm",
+  DITOLAK_MADM: "ditolak_madm",
+  DISETUJUI: "disetujui",
+};
+
+export const MITRA_STATUS_META = {
+  menunggu_humas: { label: "Menunggu Proses",     color: "#8A6D00", bg: "#FFF4D0", step: 1 },
+  diproses_humas: { label: "Diproses oleh Humas", color: "#0E4C92", bg: "#DEEBFA", step: 1 },
+  ditolak_humas:  { label: "Ditolak",             color: "#B01818", bg: "#FCE1E1", step: 1 },
+  menunggu_asman: { label: "Menunggu Proses",     color: "#8A6D00", bg: "#FFF4D0", step: 2 },
+  diproses_asman: { label: "Diproses oleh Asman", color: "#0E4C92", bg: "#DEEBFA", step: 2 },
+  ditolak_asman:  { label: "Ditolak",             color: "#B01818", bg: "#FCE1E1", step: 2 },
+  menunggu_madm:  { label: "Menunggu Proses",     color: "#8A6D00", bg: "#FFF4D0", step: 3 },
+  diproses_madm:  { label: "Diproses oleh MADM",  color: "#0E4C92", bg: "#DEEBFA", step: 3 },
+  ditolak_madm:   { label: "Ditolak",             color: "#B01818", bg: "#FCE1E1", step: 3 },
+  disetujui:      { label: "Disetujui",           color: "#1E7F3E", bg: "#DEF6E5", step: 4 },
+};
+
+export const MITRA_SEED = [
+  {
+    namaLembaga: "Yayasan Bina Pesisir Priok",
+    kontakPIC: "Ibu Siti Rahmawati",
+    kontakTelp: "0812-3345-8890",
+    judulPengajuan: "Rehabilitasi Mangrove Muara Angke Tahap 2",
+    nilaiDiajukan: 120000000,
+    deskripsi: "Penanaman 5.000 bibit mangrove dan pemberdayaan 60 KK nelayan pesisir Muara Angke selama 6 bulan.",
+    status: "diproses_humas",
+    timeline: [
+      { status: "menunggu_humas", tanggal: "2026-07-01T08:00:00Z", oleh: "Mitra", catatan: "Pengajuan diterima" },
+      { status: "diproses_humas", tanggal: "2026-07-02T10:30:00Z", oleh: "Humas", catatan: "Sedang ditinjau oleh tim Humas" },
+    ],
+  },
+  {
+    namaLembaga: "SDN Rawa Badak Utara 05",
+    kontakPIC: "Bapak Ahmad Yani, S.Pd",
+    kontakTelp: "0821-1122-3344",
+    judulPengajuan: "Beasiswa dan Sarana Belajar 30 Siswa Berprestasi",
+    nilaiDiajukan: 45000000,
+    deskripsi: "Beasiswa 12 bulan beserta paket buku dan seragam untuk 30 siswa.",
+    status: "disetujui",
+    timeline: [
+      { status: "menunggu_humas", tanggal: "2026-06-15T08:00:00Z", oleh: "Mitra", catatan: "Pengajuan diterima" },
+      { status: "diproses_humas", tanggal: "2026-06-16T09:00:00Z", oleh: "Humas", catatan: "Sedang ditinjau" },
+      { status: "menunggu_asman", tanggal: "2026-06-17T14:00:00Z", oleh: "Humas", catatan: "Disetujui Humas, diteruskan ke Asman" },
+      { status: "diproses_asman", tanggal: "2026-06-18T10:00:00Z", oleh: "Asman", catatan: "Sedang direview" },
+      { status: "menunggu_madm", tanggal: "2026-06-19T11:00:00Z", oleh: "Asman", catatan: "Disetujui Asman, diteruskan ke MADM" },
+      { status: "diproses_madm", tanggal: "2026-06-20T09:00:00Z", oleh: "MADM", catatan: "Sedang direview" },
+      { status: "disetujui", tanggal: "2026-06-21T15:00:00Z", oleh: "MADM", catatan: "Proposal disetujui, siap diimplementasikan" },
+    ],
   },
 ];
 

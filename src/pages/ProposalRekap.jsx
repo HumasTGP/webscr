@@ -38,8 +38,8 @@ const PAKTA_FIELDS = paktaStepFields();
 const STEPS = ["Isi Formulir", "Isi BAST", "Isi PI", "Konfirmasi", "Simpan"];
 
 function fieldValue(f, v) {
-  if (v === undefined || v === null || v === "") return "—";
-  if (f.type === "file-upload") return v?.name ? `${v.name}` : "—";
+  if (v === undefined || v === null || v === "") return "-";
+  if (f.type === "file-upload") return v?.name ? `${v.name}` : "-";
   return String(v);
 }
 
@@ -244,7 +244,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
   };
 
   const printAllPreview = (row) => {
-    printDocument(`Proposal + BAST + PI — ${row.id}`, [
+    printDocument(`Proposal + BAST + PI - ${row.id}`, [
       {
         heading: "Proposal",
         rows: [
@@ -321,8 +321,8 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
     { key: "namaLembaga", label: "Nama Instansi" },
     { key: "judulProposal", label: "Judul Proposal/Kegiatan" },
     { key: "program", label: "Program" },
-    { key: "nilaiDiajukan", label: "Diajukan", render: (r) => (r.nilaiDiajukan ? rupiah(r.nilaiDiajukan) : "—") },
-    { key: "approvedBudget", label: "Disetujui", render: (r) => (r.approvedBudget ? rupiah(r.approvedBudget) : "—") },
+    { key: "nilaiDiajukan", label: "Diajukan", render: (r) => (r.nilaiDiajukan ? rupiah(r.nilaiDiajukan) : "-") },
+    { key: "approvedBudget", label: "Disetujui", render: (r) => (r.approvedBudget ? rupiah(r.approvedBudget) : "-") },
     { key: "statusProposal", label: "Status", render: (r) => <StatusBadge value={r.statusProposal} /> },
     {
       key: "aksi",
@@ -388,7 +388,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
         <Modal
           open={!!overviewRow}
           onClose={() => setOverviewRow(null)}
-          title={`Overview Proposal — ${overviewRow?.id || ""}`}
+          title={`Overview Proposal - ${overviewRow?.id || ""}`}
           icon={Eye}
           width={640}
         >
@@ -414,7 +414,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
           tone="danger"
         >
           <p style={{ color: T.muted, fontSize: 13.5, marginBottom: 20, lineHeight: 1.6 }}>
-            Proposal <b>{deleteTarget?.id}</b> — {deleteTarget?.judulProposal || "(tanpa judul)"} akan dihapus
+            Proposal <b>{deleteTarget?.id}</b> - {deleteTarget?.judulProposal || "(tanpa judul)"} akan dihapus
             permanen dari daftar (termasuk BAST & PI-nya).
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
@@ -447,11 +447,11 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
           onClose={() => setEditTarget(null)}
           title={
             editTarget?.doc === "proposal"
-              ? `Edit Proposal — ${editTarget.row.id}`
+              ? `Edit Proposal - ${editTarget.row.id}`
               : editTarget?.doc === "bast"
-              ? `Edit BAST — ${editTarget.row.id}`
+              ? `Edit BAST - ${editTarget.row.id}`
               : editTarget
-              ? `Edit PI — ${editTarget.row.id}`
+              ? `Edit PI - ${editTarget.row.id}`
               : ""
           }
           icon={Pencil}
@@ -501,7 +501,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
           </div>
           <p style={{ color: T.muted, fontSize: 12, marginTop: 14, lineHeight: 1.5 }}>
             "Print Proposal" dan "Print Semua" membuka preview siap-cetak di tab baru. "Download BAST/PI"
-            akan menampilkan preview datanya dulu — file .docx baru dibuat & diunduh setelah kamu konfirmasi.
+            akan menampilkan preview datanya dulu - file .docx baru dibuat & diunduh setelah kamu konfirmasi.
           </p>
         </Modal>
 
@@ -511,9 +511,9 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
           onClose={() => setDocPreview(null)}
           title={
             docPreview?.doc === "bast"
-              ? `Preview BAST — ${docPreview.row.id}`
+              ? `Preview BAST - ${docPreview.row.id}`
               : docPreview
-              ? `Preview PI — ${docPreview.row.id}`
+              ? `Preview PI - ${docPreview.row.id}`
               : ""
           }
           icon={docPreview?.doc === "bast" ? FileText : ShieldCheck}
@@ -587,7 +587,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
       {step === 1 && (
         <Card>
           <p style={{ color: T.muted, fontSize: 13, marginBottom: 16 }}>
-            Isi data BAST (Berita Acara Serah Terima) — memakai Proposal ID yang sama.
+            Isi data BAST (Berita Acara Serah Terima) - memakai Proposal ID yang sama.
           </p>
           <FormGrid
             fields={BAST_FIELDS}
@@ -607,7 +607,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
       {step === 2 && (
         <Card>
           <p style={{ color: T.muted, fontSize: 13, marginBottom: 16 }}>
-            Isi data PI (Pakta Integritas) — memakai Proposal ID yang sama.
+            Isi data PI (Pakta Integritas) - memakai Proposal ID yang sama.
           </p>
           <FormGrid
             fields={PAKTA_FIELDS}

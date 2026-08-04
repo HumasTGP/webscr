@@ -6,6 +6,7 @@ import {
   OPT,
   PROPOSAL_SEED,
   VENDOR_SEED,
+  MITRA_SEED,
 } from "./lib/data";
 import { uid } from "./lib/utils";
 import { formatTanggalPanjang } from "./lib/docxGenerate";
@@ -40,6 +41,15 @@ import InboxPage from "./pages/Inbox";
 import AsmanDashboard from "./pages/AsmanDashboard";
 import KasPackagesPage from "./pages/KasPackages";
 import UserManagementPage from "./pages/UserManagement";
+import PengajuanMitraPage from "./pages/PengajuanMitra";
+import DokumentasiPage from "./pages/Dokumentasi";
+import DaftarHadirPage from "./pages/DaftarHadir";
+import EvidenPage from "./pages/Eviden";
+import BappPage from "./pages/BappPage";
+import ChecklistDokumenPage from "./pages/ChecklistDokumen";
+import FormVerifikasiPage from "./pages/FormVerifikasi";
+import Lampiran1Page from "./pages/Lampiran1";
+import Lampiran2Page from "./pages/Lampiran2";
 import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
 
 const seed = (prefix, rows) =>
@@ -48,14 +58,12 @@ const seed = (prefix, rows) =>
     id: `${prefix}-${String(i + 1).padStart(3, "0")}`,
   }));
 
-// Pisah textarea multi-baris jadi array butir (untuk list TUJUAN/SASARAN di TOR).
 const splitLines = (s) =>
   String(s || "")
     .split(/\r?\n/)
     .map((x) => x.trim())
     .filter(Boolean);
 
-// Tanggal "YYYY-MM-DD" -> "Selasa, 20 April 2026" (dengan nama hari).
 const tanggalDenganHari = (iso) => {
   if (!iso) return "";
   const d = new Date(`${iso}T00:00:00`);
@@ -68,7 +76,6 @@ const tanggalDenganHari = (iso) => {
   });
 };
 
-// Mapping data wizard -> placeholder di masing-masing template .docx.
 const DOCX_TEMPLATES = {
   tor: {
     url: "/templates/Template_TOR.docx",
@@ -106,9 +113,6 @@ const DOCX_TEMPLATES = {
 };
 
 export default function App() {
-  // Lapisan gateway paling luar: null = belum memilih layanan,
-  // "sikas" = alur SIKAS existing di bawah ini (tidak diubah),
-  // "silapak" = modul Si Lapak Priok yang baru, sepenuhnya terpisah.
   const [portal, setPortal] = useState(null);
   const [silapakLoggedIn, setSilapakLoggedIn] = useState(false);
 
@@ -128,8 +132,6 @@ export default function App() {
     return () => window.removeEventListener("resize", applyResponsive);
   }, []);
 
-  // 3 paket demo — semua sub-dokumen dalam satu paket memakai ID RAB yang sama
-  // sehingga bisa dikelompokkan di Inbox Asman/MADM.
   const PACKAGE_SEED = [
     { idRab: "RAB-2026-001", judul: "Bantuan Perbaikan Jalan Metro Marina Ancol", kategori: "NON PO",    status: DOC_STATUS.SUBMITTED },
     { idRab: "RAB-2026-002", judul: "Fasilitasi Kegiatan Sinergi Kota Hijau",     kategori: "Cash Card", status: DOC_STATUS.APPROVED,  submittedAt: "2026-04-20T09:00:00Z", reviewedAt: "2026-04-21T10:00:00Z", reviewedBy: "asman" },
@@ -150,10 +152,9 @@ export default function App() {
   const [tor, setTor] = useState(() => seedSubDoc("id", "judulKegiatan"));
   const [bast, setBast] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
+  const [bapp, setBapp] = useState([]);
   const [laporan, setLaporan] = useState([]);
-  // Daftar user aktif — dikelola via halaman "Manajemen Akses" (khusus admin).
-  // Disimpan di localStorage supaya tidak hilang saat refresh. Kalau localStorage
-  // rusak/kosong, fallback ke DEFAULT_USERS.
+
   const USERS_LS_KEY = "sikas.users.v1";
   const [users, setUsers] = useState(() => {
     try {
@@ -190,6 +191,7 @@ export default function App() {
   const [konten, setKonten] = useState(() => seed("KTN", KONTEN_SEED));
   const [evaluasi, setEvaluasi] = useState([]);
   const [history, setHistory] = useState([]);
+  const [mitraList, setMitraList] = useState(() => seed("MTR", MITRA_SEED));
 
   const addHistory = (jenis) => {
     const now = new Date();
@@ -230,6 +232,11 @@ export default function App() {
   };
 
   const rabIdOptions = useMemo(() => rab.map((r) => r.idNumber), [rab]);
+
+  const handleBackToPortal = () => {
+    setUser(null);
+    setPortal(null);
+  };
 
   const modules = useMemo(
     () => ({
@@ -330,6 +337,14 @@ export default function App() {
           ]}
         />
       ),
+      bapp: (
+        <BappPage
+          rab={rab}
+          list={bapp}
+          setList={setBapp}
+          notify={notify}
+        />
+      ),
       laporan: (
         <GenericWizard
           title="Laporan"
@@ -384,23 +399,36 @@ export default function App() {
           notify={notify}
         />
       ),
+      dokumentasi: <DokumentasiPage rab={rab} notify={notify} />,
+      "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
+      eviden: <EvidenPage rab={rab} notify={notify} />,
+      "checklist-dokumen": <ChecklistDokumenPage rab={rab} tor={tor} bast={bast} pakta={pakta} notify={notify} />,
+      "proposal-evaluasi-pembayaran": (
+        <ProposalEvaluasiPage
+          proposals={proposals}
+          evaluasiList={evaluasi}
+          setEvaluasiList={setEvaluasi}
+          notify={notify}
+        />
+      ),
+      "form-verifikasi": <FormVerifikasiPage rab={rab} notify={notify} />,
+      "lampiran-1": <Lampiran1Page rab={rab} notify={notify} />,
+      "lampiran-2": <Lampiran2Page rab={rab} notify={notify} />,
       history: <HistoryPage history={history} />,
       panduan: <Panduan />,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       user,
-      rab, tor, bast, pakta, laporan, vendors, history,
+      rab, tor, bast, pakta, bapp, laporan, vendors, history,
       proposals, konten, evaluasi, rabIdOptions, packages, users,
     ]
   );
 
-  // Gate 1: pilih layanan (tidak menyentuh apa pun di bawahnya).
   if (!portal) {
     return <LandingGateway onSelect={setPortal} />;
   }
 
-  // Gate 2a: modul Si Lapak Priok, sepenuhnya terpisah dari SIKAS.
   if (portal === "silapak") {
     if (!silapakLoggedIn) {
       return (
@@ -420,7 +448,41 @@ export default function App() {
     );
   }
 
-  // Gate 2b: SIKAS — login + role routing.
+  if (portal === "mitra") {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        background: T.bg,
+        fontFamily: font.body,
+        color: T.text,
+      }}>
+        <div style={{
+          position: "sticky", top: 0, zIndex: 50,
+          background: T.topbarBg, backdropFilter: "blur(6px)",
+          borderBottom: `1px solid ${T.border}`,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          minHeight: 58, padding: "14px 34px",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 13, color: T.muted }}>Portal</span>
+            <span style={{ fontSize: 13, color: T.muted }}>&#8250;</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: T.heading }}>Pengajuan Mitra</span>
+          </div>
+        </div>
+        <div style={{ width: "100%", maxWidth: 1240, margin: "0 auto", padding: "28px 34px" }}>
+          <PengajuanMitraPage
+            mitraList={mitraList}
+            setMitraList={setMitraList}
+            user={user}
+            notify={notify}
+            onBackToPortal={() => setPortal(null)}
+          />
+        </div>
+        <Toast toast={toast} />
+      </div>
+    );
+  }
+
   if (!user)
     return (
       <LoginScreen
@@ -450,6 +512,7 @@ export default function App() {
         onSelect={setActive}
         user={user}
         onLogout={() => setUser(null)}
+        onBackToPortal={handleBackToPortal}
         collapsed={collapsed}
         setCollapsed={setCollapsed}
       />

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   ClipboardList,
@@ -6,6 +7,7 @@ import {
   Handshake,
   Megaphone,
   Sparkles,
+  Clock,
 } from "lucide-react";
 import { T, font } from "../lib/theme";
 import { roleLabel, rupiah } from "../lib/utils";
@@ -267,7 +269,7 @@ function ProposalSpotlight({ items, goto }) {
               {p.judulProposal || "(tanpa judul)"}
             </div>
             <div style={{ fontSize: 11.5, color: T.muted, marginTop: 2 }}>
-              {p.namaLembaga} · {p.nilaiDiajukan ? rupiah(p.nilaiDiajukan) : "—"}
+              {p.namaLembaga} · {p.nilaiDiajukan ? rupiah(p.nilaiDiajukan) : "-"}
             </div>
           </div>
           <div style={{ alignSelf: "center" }}>
@@ -320,7 +322,7 @@ function KontenPipeline({ items, goto }) {
       </div>
       {!shown.length && (
         <div style={{ fontSize: 13, color: T.muted, padding: "18px 0" }}>
-          Tidak ada konten yang menunggu terbit — semua sudah published atau
+          Tidak ada konten yang menunggu terbit,semua sudah published atau
           dibatalkan.
         </div>
       )}
@@ -363,7 +365,7 @@ function KontenPipeline({ items, goto }) {
                 {k.judul || "(tanpa judul)"}
               </div>
               <div style={{ fontSize: 11.5, color: T.muted, marginTop: 2 }}>
-                {k.kategori || "—"} · {k.tanggal || "belum dijadwal"}
+                {k.kategori || "-"} · {k.tanggal || "belum dijadwal"}
                 {jmlPublikasi ? ` · ${jmlPublikasi} publikasi` : ""}
               </div>
             </div>
@@ -377,7 +379,32 @@ function KontenPipeline({ items, goto }) {
   );
 }
 
-// ---------------- main ----------------------------------------------------
+function LiveClock() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const dateStr = now.toLocaleDateString("id-ID", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
+  const timeStr = now.toLocaleTimeString("id-ID", {
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  });
+  return (
+    <div style={{
+      display: "inline-flex", alignItems: "center", gap: 6,
+      padding: "4px 12px", borderRadius: 8,
+      background: T.blueSoft, border: `1px solid ${T.border}`,
+      fontSize: 12.5, color: T.blue, fontWeight: 600,
+      fontFamily: font.mono,
+    }}>
+      <Clock size={13} />
+      {dateStr} - {timeStr} WIB
+    </div>
+  );
+}
+
 export default function Dashboard({ data, goto, user }) {
   const now = new Date();
   const greeting = greetingFor(now.getHours());
@@ -396,7 +423,7 @@ export default function Dashboard({ data, goto, user }) {
 
   return (
     <div>
-      {/* Header — greeting + tanggal panjang */}
+      {/* Header,greeting + tanggal panjang */}
       <div
         style={{
           marginBottom: 22,
@@ -421,7 +448,7 @@ export default function Dashboard({ data, goto, user }) {
             marginBottom: 6,
           }}
         >
-          <Sparkles size={11} /> UBP Priok — TJSL
+          <Sparkles size={11} /> UBP Priok - TJSL
         </div>
         <h1
           style={{
@@ -435,6 +462,9 @@ export default function Dashboard({ data, goto, user }) {
           {greeting}
           {user?.role ? `, ${roleLabel(user.role)}` : ""}.
         </h1>
+        <div style={{ marginTop: 8 }}>
+          <LiveClock />
+        </div>
         <p
           style={{
             color: T.muted,
@@ -442,13 +472,7 @@ export default function Dashboard({ data, goto, user }) {
             margin: "4px 0 0",
           }}
         >
-          {now.toLocaleDateString("id-ID", {
-            weekday: "long",
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-          })}{" "}
-          · {kontenPerluAksi} konten menunggu terbit ·{" "}
+          {kontenPerluAksi} konten menunggu terbit,{" "}
           {proposalCounts.baru} proposal baru masuk.
         </p>
       </div>
@@ -508,7 +532,7 @@ export default function Dashboard({ data, goto, user }) {
               color: T.heading,
             }}
           >
-            Alur Kerja SIKAS
+            Alur Kerja SIREMON
           </h3>
           <span style={{ fontSize: 11.5, color: T.muted }}>
             proposal → administrasi kas → realisasi
@@ -541,7 +565,7 @@ export default function Dashboard({ data, goto, user }) {
         <KontenPipeline items={data.konten} goto={goto} />
       </div>
 
-      {/* RAB terbaru — referensi cepat */}
+      {/* RAB terbaru,referensi cepat */}
       <Card>
         <div
           style={{
@@ -619,7 +643,7 @@ export default function Dashboard({ data, goto, user }) {
                     >
                       {r.idNumber}
                     </span>
-                    <Badge tone="blue">{r.kategori || "—"}</Badge>
+                    <Badge tone="blue">{r.kategori || "-"}</Badge>
                   </div>
                   <div
                     style={{
@@ -632,7 +656,7 @@ export default function Dashboard({ data, goto, user }) {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {r.judulKegiatan || "—"}
+                    {r.judulKegiatan || "-"}
                   </div>
                   <div style={{ marginTop: 4, fontSize: 12, color: T.muted }}>
                     {rupiah(r.totalEvaluasi)}
