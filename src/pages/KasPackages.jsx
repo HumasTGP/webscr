@@ -46,7 +46,7 @@ function StatusPill({ statusKey, rejectedBy }) {
 function DotStatus({ done, label }) {
   return (
     <span
-      title={label + (done ? " — sudah ada" : " — belum")}
+      title={label + (done ? " - sudah ada" : " - belum")}
       style={{
         display: "inline-flex", alignItems: "center", justifyContent: "center",
         width: 22, height: 22, borderRadius: "50%",
@@ -55,7 +55,7 @@ function DotStatus({ done, label }) {
         border: `1px solid ${done ? "#87D3A2" : "#CBD5E1"}`,
         fontSize: 11, fontWeight: 800,
       }}
-    >{done ? "✓" : "—"}</span>
+    >{done ? "✓" : "-"}</span>
   );
 }
 
@@ -75,8 +75,8 @@ export default function KasPackagesPage({
       const isComplete = completed === totalRequired && (pkg?.formEvaluasi ?? false);
       const status = pkg?.status || DOC_STATUS.DRAFT;
       return {
-        idRab, judul: rabRow.judulKegiatan || "—",
-        kategori: rabRow.kategori || "—",
+        idRab, judul: rabRow.judulKegiatan || "-",
+        kategori: rabRow.kategori || "-",
         contents, completed, totalRequired, isComplete, status, pkg,
       };
     });
@@ -143,7 +143,7 @@ export default function KasPackagesPage({
     <div>
       <PageHeader
         eyebrow="Administrasi Kas"
-        title="Paket Kas — Kirim ke Asman"
+        title="Paket Kas - Kirim ke Asman"
         description="Satu paket = satu ID RAB berisi RAB + TOR + BAST + Pakta Integritas + Form Evaluasi. Setelah semua lengkap, kirim satu paket sekaligus ke Asman untuk review."
       />
 
@@ -299,7 +299,7 @@ export default function KasPackagesPage({
               )}
               {detail.status === DOC_STATUS.SUBMITTED && (
                 <span style={{ color: T.muted, fontSize: 12.5, alignSelf: "center" }}>
-                  Sudah dikirim — menunggu review Asman.
+                  Sudah dikirim - menunggu review Asman.
                 </span>
               )}
             </div>

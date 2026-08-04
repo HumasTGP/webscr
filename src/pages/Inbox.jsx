@@ -95,11 +95,11 @@ export default function InboxPage({
       reviewedAt: new Date().toISOString(),
       reviewNote: "",
     });
-    notify(`Paket ${detail.idRab} disetujui — dikirim ke MADM.`, "success");
+    notify(`Paket ${detail.idRab} disetujui - dikirim ke MADM.`, "success");
     setDetail(null);
   };
 
-  // Tolak — dipakai baik Asman maupun MADM. Simpan alasan di note yang berbeda
+  // Tolak - dipakai baik Asman maupun MADM. Simpan alasan di note yang berbeda
   // supaya Humas bisa lihat siapa yang menolak dan kapan.
   const doReject = () => {
     if (!detail || !rejectNote.trim()) return;
@@ -117,7 +117,7 @@ export default function InboxPage({
       patch.rejectedBy = "madm";
     }
     onUpdatePackage(detail.idRab, patch);
-    notify(`Paket ${detail.idRab} ditolak — catatan dikirim ke Humas.`, "error");
+    notify(`Paket ${detail.idRab} ditolak - catatan dikirim ke Humas.`, "error");
     setRejectNote(""); setRejectOpen(false); setDetail(null);
   };
 
@@ -130,7 +130,7 @@ export default function InboxPage({
       processedBy: user.username,
       processNote: "",
     });
-    notify(`Paket ${detail.idRab} selesai diproses — notifikasi dikirim ke Humas.`, "success");
+    notify(`Paket ${detail.idRab} selesai diproses - notifikasi dikirim ke Humas.`, "success");
     setDetail(null);
   };
 
@@ -201,7 +201,7 @@ export default function InboxPage({
             { key: "judul", label: "Judul" },
             { key: "kategori", label: "Kategori" },
             { key: "submittedAt", label: "Dikirim", render: (r) =>
-              r.submittedAt ? new Date(r.submittedAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "—" },
+              r.submittedAt ? new Date(r.submittedAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-" },
             { key: "status", label: "Status", render: (r) => <StatusPill statusKey={r.status} rejectedBy={r.rejectedBy} /> },
           ]}
           onRowClick={openPackage}
@@ -281,7 +281,7 @@ export default function InboxPage({
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: 600 }}>{sd.label}</div>
                       <div style={{ fontSize: 11, color: T.muted }}>
-                        {done ? (doc.judulKegiatan || doc.judulBantuan || "—") : "Belum ada dokumen"}
+                        {done ? (doc.judulKegiatan || doc.judulBantuan || "-") : "Belum ada dokumen"}
                       </div>
                     </div>
                     <span style={{

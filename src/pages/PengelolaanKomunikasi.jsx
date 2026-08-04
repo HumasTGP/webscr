@@ -364,7 +364,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
             ].map(([label, val]) => (
               <div key={label} style={{ flex: "1 1 160px", borderBottom: `1px solid ${T.border}`, paddingBottom: 8 }}>
                 <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase" }}>{label}</div>
-                <div style={{ fontSize: 13.5, fontWeight: 500, marginTop: 2 }}>{val || "—"}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 500, marginTop: 2 }}>{val || "-"}</div>
               </div>
             ))}
           </div>
@@ -383,7 +383,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
             >
               <span>
                 {p.mediaPemberitaan === "Social Media" ? p.jenisAkunMedsos : p.mediaPemberitaan}
-                {p.namaMedia ? ` · ${p.namaMedia}` : ""} · {p.kategoriMedia || "—"} · No. rilis {p.nomorRilis ?? "—"}
+                {p.namaMedia ? ` · ${p.namaMedia}` : ""} · {p.kategoriMedia || "-"} · No. rilis {p.nomorRilis ?? "-"}
               </span>
               <b style={{ color: T.blue }}>{scoreForKategoriMedia(p.kategoriMedia)}</b>
             </div>
@@ -419,7 +419,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
 
         {step === 1 && (
           <Card>
-            <div style={SECTION_LABEL}>Section 1 — informasi konten</div>
+            <div style={SECTION_LABEL}>Section 1 - informasi konten</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "14px 16px", marginTop: 12 }}>
               <div style={{ flex: "1 1 220px", maxWidth: 320 }}>
                 <label style={FIELD_LABEL}>Tanggal</label>
@@ -481,7 +481,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
             </div>
 
             <div style={{ ...SECTION_LABEL, marginTop: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span>Section 2 — publikasi</span>
+              <span>Section 2 - publikasi</span>
               <Button variant="ghost" icon={Plus} onClick={() => setPubs([...pubs, blankPub()])}>
                 Tambah publikasi
               </Button>
@@ -524,12 +524,12 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
               ].map(([label, val]) => (
                 <div key={label} style={{ flex: "1 1 160px", borderBottom: `1px solid ${T.border}`, paddingBottom: 8 }}>
                   <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase" }}>{label}</div>
-                  <div style={{ fontSize: 13.5, fontWeight: 500, marginTop: 2 }}>{val || "—"}</div>
+                  <div style={{ fontSize: 13.5, fontWeight: 500, marginTop: 2 }}>{val || "-"}</div>
                 </div>
               ))}
               <div style={{ flex: "1 1 100%", borderBottom: `1px solid ${T.border}`, paddingBottom: 8 }}>
                 <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase" }}>Judul pemberitaan</div>
-                <div style={{ fontSize: 13.5, fontWeight: 500, marginTop: 2 }}>{values.judul || "—"}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 500, marginTop: 2 }}>{values.judul || "-"}</div>
               </div>
             </div>
 
@@ -549,7 +549,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
                   ].filter(Boolean).map(([label, val]) => (
                     <div key={label} style={{ flex: "1 1 160px" }}>
                       <div style={{ fontSize: 10.5, color: T.muted, textTransform: "uppercase" }}>{label}</div>
-                      <div style={{ fontSize: 13 }}>{val || "—"}</div>
+                      <div style={{ fontSize: 13 }}>{val || "-"}</div>
                     </div>
                   ))}
                   <div style={{ flex: "0 0 auto", alignSelf: "flex-end" }}>
@@ -614,7 +614,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
       <PageHeader
         eyebrow="Humas & Publikasi"
         title="Pengelolaan Komunikasi"
-        description="Monitoring pemberitaan media terkait PLN IP UBP Priok — satu konten bisa punya beberapa publikasi di media berbeda. Klik salah satu baris untuk melihat detail atau mengubah data."
+        description="Monitoring pemberitaan media terkait PLN IP UBP Priok. Satu konten bisa punya beberapa publikasi di media berbeda. Klik salah satu baris untuk melihat detail atau mengubah data."
         right={<Button icon={Plus} onClick={startAdd}>Tambah Data</Button>}
       />
 
@@ -645,10 +645,10 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
               <KpiCard value={monthlyStats.totalScore} sub="total score" />
             </div>
             <div style={{ fontSize: 12.5, color: T.text, marginBottom: 4 }}>
-              <b>Platform terbanyak:</b> {monthlyStats.platformTerbanyak.join(", ") || "—"}
+              <b>Platform terbanyak:</b> {monthlyStats.platformTerbanyak.join(", ") || "-"}
             </div>
             <div style={{ fontSize: 12.5, color: T.text }}>
-              <b>Kategori terbanyak:</b> {monthlyStats.kategoriTerbanyak.join(", ") || "—"}
+              <b>Kategori terbanyak:</b> {monthlyStats.kategoriTerbanyak.join(", ") || "-"}
             </div>
           </div>
         )}
@@ -692,10 +692,10 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
                     onMouseEnter={(e) => (e.currentTarget.style.background = T.blueSoft)}
                     onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 ? T.rowAlt : T.card)}
                   >
-                    <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{r.tanggal || "—"}</td>
+                    <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{r.tanggal || "-"}</td>
                     <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}>{r.judul || "(tanpa judul)"}</td>
-                    <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}>{r.kategori || "—"}</td>
-                    <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}>{r.narasumber || "—"}</td>
+                    <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}>{r.kategori || "-"}</td>
+                    <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}>{r.narasumber || "-"}</td>
                     <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}>{(r.publikasi || []).length}</td>
                     <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}>{totalScoreOf(r)}</td>
                     <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}>

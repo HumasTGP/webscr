@@ -79,7 +79,7 @@ export async function generateSikasPdf({
   doc.text("PLN INDONESIA POWER · UBP PRIOK", MARGIN, MARGIN);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("SIKAS — Sistem Administrasi Kas", MARGIN, MARGIN + 4);
+  doc.text("SIREMON - Sistem Realisasi dan Monitoring", MARGIN, MARGIN + 4);
 
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
@@ -110,7 +110,7 @@ export async function generateSikasPdf({
     doc.setFontSize(10.5);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(20);
-    const text = value == null || value === "" ? "—" : String(value);
+    const text = value == null || value === "" ? "-" : String(value);
     const wrapped = doc.splitTextToSize(text, PAGE.w - MARGIN * 2 - 60);
     doc.text(wrapped, MARGIN + 60, y);
     y += Math.max(7, wrapped.length * 5 + 2);
@@ -171,7 +171,7 @@ export async function generateSikasPdf({
         doc.addPage();
         y = MARGIN;
       }
-      const uraian = doc.splitTextToSize(String(item.uraian || "—"), 75);
+      const uraian = doc.splitTextToSize(String(item.uraian || "-"), 75);
       doc.text(uraian, xs[0], y);
       doc.text(String(item.qty || 0), xs[1], y);
       doc.text(rupiah(item.harga || 0), xs[2], y);
@@ -217,7 +217,7 @@ export async function generateSikasPdf({
   doc.setFontSize(7.5);
   doc.setTextColor(140);
   doc.text(
-    `Dicetak: ${new Date().toLocaleString("id-ID")} · SIKAS PLN`,
+    `Dicetak: ${new Date().toLocaleString("id-ID")} - SIREMON`,
     MARGIN,
     PAGE.h - 8
   );

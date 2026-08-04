@@ -141,7 +141,7 @@ export default function GenericWizard({
       <Modal
         open={!!docxPreview}
         onClose={closePreview}
-        title={`Preview ${title}${idText ? ` — ${idText}` : ""}`}
+        title={`Preview ${title}${idText ? ` - ${idText}` : ""}`}
         icon={Eye}
         width={600}
       >
@@ -253,13 +253,13 @@ export default function GenericWizard({
                   fontSize: 13.5,
                 }}
               >
-                <option value="">— Pilih ID —</option>
+                <option value="">- Pilih ID -</option>
                 {list.map((r) => {
                   const judul = r.judulBantuan || r.judulKegiatan || "";
                   return (
                     <option key={r.id} value={r.id}>
                       {r.id}
-                      {judul ? ` — ${judul}` : ""}
+                      {judul ? ` - ${judul}` : ""}
                     </option>
                   );
                 })}

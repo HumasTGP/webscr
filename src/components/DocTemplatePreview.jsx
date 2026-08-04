@@ -35,7 +35,7 @@ const SecTitle = ({ children }) => (
 const Row = ({ label, value, w = 130 }) => (
   <tr>
     <td style={{ width: w, paddingBottom: 2, color: "#444", fontSize: 10, verticalAlign: "top" }}>{label}</td>
-    <td style={{ paddingBottom: 2, fontSize: 10, verticalAlign: "top" }}>: {value || "—"}</td>
+    <td style={{ paddingBottom: 2, fontSize: 10, verticalAlign: "top" }}>: {value || "-"}</td>
   </tr>
 );
 
@@ -47,21 +47,21 @@ export function TorDocPreview({ values }) {
   return (
     <div style={pageStyle}>
       <CtrBold size={13}>RINGKASAN KEGIATAN</CtrBold>
-      <CtrBold size={11}>{values.judulProgramRKA || "—"}</CtrBold>
-      <CtrBold size={11}>{values.judulKegiatan || "—"}</CtrBold>
+      <CtrBold size={11}>{values.judulProgramRKA || "-"}</CtrBold>
+      <CtrBold size={11}>{values.judulKegiatan || "-"}</CtrBold>
 
       <SecTitle>Latar Belakang</SecTitle>
       {latar.length
         ? latar.map((l, i) => (
             <p key={i} style={{ textAlign: "justify", margin: "0 0 4px" }}>{l}</p>
           ))
-        : <p style={{ color: "#aaa", margin: 0 }}>—</p>}
+        : <p style={{ color: "#aaa", margin: 0 }}>-</p>}
 
       <SecTitle>Tujuan</SecTitle>
       <div style={{ marginBottom: 4 }}>
         <div style={{ fontWeight: 600, marginBottom: 2 }}>a. Tujuan Umum</div>
         <p style={{ textAlign: "justify", margin: "0 0 6px", paddingLeft: 12 }}>
-          {values.tujuanUmum || "—"}
+          {values.tujuanUmum || "-"}
         </p>
         <div style={{ fontWeight: 600, marginBottom: 2 }}>b. Tujuan Khusus</div>
         {tujuanKhusus.length ? (
@@ -71,7 +71,7 @@ export function TorDocPreview({ values }) {
             ))}
           </ul>
         ) : (
-          <p style={{ color: "#aaa", margin: 0, paddingLeft: 12 }}>—</p>
+          <p style={{ color: "#aaa", margin: 0, paddingLeft: 12 }}>-</p>
         )}
       </div>
 
@@ -81,7 +81,7 @@ export function TorDocPreview({ values }) {
           {sasaran.map((s, i) => <li key={i} style={{ marginBottom: 2 }}>{s}</li>)}
         </ul>
       ) : (
-        <p style={{ color: "#aaa", margin: 0 }}>—</p>
+        <p style={{ color: "#aaa", margin: 0 }}>-</p>
       )}
 
       <SecTitle>Rencana Kegiatan</SecTitle>
@@ -118,14 +118,14 @@ export function BastDocPreview({ values }) {
     <div style={pageStyle}>
       <CtrBold size={13}>BERITA ACARA SERAH TERIMA</CtrBold>
       <div style={{ textAlign: "center", fontSize: 10, marginBottom: 10 }}>
-        Nomor: {values.nomor || "—"}/BAST/KAS/PRIOK/2026
+        Nomor: {values.nomor || "-"}/BAST/KAS/PRIOK/2026
       </div>
 
       <CtrBold size={11}>Tentang</CtrBold>
-      <CtrBold size={11}>{values.judulBantuan || "—"}</CtrBold>
+      <CtrBold size={11}>{values.judulBantuan || "-"}</CtrBold>
 
       <p style={{ margin: "10px 0 4px" }}>
-        Pada hari ini : Jakarta, <b>{values.tanggal || "—"}</b>
+        Pada hari ini : Jakarta, <b>{values.tanggal || "-"}</b>
       </p>
       <p style={{ margin: "4px 0" }}>Dengan ini kami,</p>
       <p style={{ margin: "4px 0 4px 16px" }}>
@@ -133,11 +133,11 @@ export function BastDocPreview({ values }) {
         Selanjutnya disebut: Pihak Pertama.
       </p>
       <p style={{ margin: "4px 0 4px 16px" }}>
-        <b>{values.namaPihakKedua || "—"}</b> : Selaku {values.jabatanPihakKedua || "—"} yang
-        berkedudukan di {values.instansiPihakKedua || "—"}. Selanjutnya disebut: Pihak Kedua.
+        <b>{values.namaPihakKedua || "-"}</b> : Selaku {values.jabatanPihakKedua || "-"} yang
+        berkedudukan di {values.instansiPihakKedua || "-"}. Selanjutnya disebut: Pihak Kedua.
       </p>
       <p style={{ margin: "8px 0 4px", textAlign: "justify" }}>
-        Pihak Pertama memberikan bantuan <b>{values.judulBantuan || "—"}</b> berupa fasilitasi
+        Pihak Pertama memberikan bantuan <b>{values.judulBantuan || "-"}</b> berupa fasilitasi
         kegiatan sebagai bentuk dukungan program sosial perusahaan.
       </p>
       <p style={{ margin: "4px 0 12px", textAlign: "justify" }}>
@@ -152,10 +152,10 @@ export function BastDocPreview({ values }) {
           <div><b>Astri Oktavina</b></div>
         </div>
         <div style={{ textAlign: "center" }}>
-          <div>MITRA BINAAN {values.instansiPihakKedua || "—"}</div>
-          <div>{values.jabatanPihakKedua || "—"}</div>
+          <div>MITRA BINAAN {values.instansiPihakKedua || "-"}</div>
+          <div>{values.jabatanPihakKedua || "-"}</div>
           <div style={{ height: 30 }} />
-          <div><b>{values.namaPihakKedua || "—"}</b></div>
+          <div><b>{values.namaPihakKedua || "-"}</b></div>
         </div>
       </div>
     </div>
@@ -173,7 +173,7 @@ export function PaktaDocPreview({ values }) {
       </p>
       <p style={{ margin: "4px 0 6px", textAlign: "justify" }}>
         Kami yang bertandatangan dibawah ini menyatakan bahwa kami sebagai Mitra PT PLN Indonesia
-        Power UBP Priok pada kegiatan <b>{values.judulKegiatan || "—"}</b>, akan:
+        Power UBP Priok pada kegiatan <b>{values.judulKegiatan || "-"}</b>, akan:
       </p>
       <ol style={{ margin: "0 0 8px", paddingLeft: 20, fontSize: 10 }}>
         <li style={{ marginBottom: 2 }}>
@@ -199,9 +199,9 @@ export function PaktaDocPreview({ values }) {
         Power UBP PRIOK.
       </p>
       <div style={{ textAlign: "center" }}>
-        <div>Jakarta, {values.tanggalPi || "—"}</div>
+        <div>Jakarta, {values.tanggalPi || "-"}</div>
         <div style={{ marginTop: 4, marginBottom: 30 }}>PENERIMA DANA FASILITAS</div>
-        <div style={{ fontWeight: 700 }}>{values.namaPenerima || "—"}</div>
+        <div style={{ fontWeight: 700 }}>{values.namaPenerima || "-"}</div>
       </div>
     </div>
   );
@@ -244,9 +244,9 @@ export function RabDocPreview({ values }) {
               {items.map((item, i) => (
                 <tr key={item.id || i}>
                   <td style={{ padding: "2px 5px", border: "1px solid #ccc" }}>{i + 1}</td>
-                  <td style={{ padding: "2px 5px", border: "1px solid #ccc" }}>{item.uraian || "—"}</td>
-                  <td style={{ padding: "2px 5px", border: "1px solid #ccc" }}>{item.qtyEvaluasi || item.qty || "—"}</td>
-                  <td style={{ padding: "2px 5px", border: "1px solid #ccc" }}>{item.satuan || "—"}</td>
+                  <td style={{ padding: "2px 5px", border: "1px solid #ccc" }}>{item.uraian || "-"}</td>
+                  <td style={{ padding: "2px 5px", border: "1px solid #ccc" }}>{item.qtyEvaluasi || item.qty || "-"}</td>
+                  <td style={{ padding: "2px 5px", border: "1px solid #ccc" }}>{item.satuan || "-"}</td>
                   <td style={{ padding: "2px 5px", border: "1px solid #ccc", textAlign: "right" }}>
                     {rupiah(item.hargaEvaluasi || item.harga || 0)}
                   </td>

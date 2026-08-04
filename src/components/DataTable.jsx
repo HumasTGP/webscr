@@ -121,7 +121,7 @@ export default function DataTable({
                       }}
                     >
                       {c.render ? c.render(r) : (r[c.key] ?? (
-                        <span style={{ color: T.muted }}>—</span>
+                        <span style={{ color: T.muted }}>-</span>
                       ))}
                     </td>
                   ))}
