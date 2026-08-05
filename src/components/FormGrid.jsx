@@ -4,7 +4,7 @@ import FieldInput from "./FieldInput";
 
 // Kenapa flexbox, bukan grid?
 // Kalau grid pakai auto-fit + 1fr, baris terakhir yang jumlah field-nya
-// kurang dari kolom penuh akan STRETCH memenuhi lebar container — kolomnya
+// kurang dari kolom penuh akan STRETCH memenuhi lebar container - kolomnya
 // jadi lebih besar dari kolom baris di atasnya, dan tidak sejajar.
 // Pakai flex + justifyContent center + max-width pada tiap field: baris
 // yang kurang otomatis TER-CENTER, ukuran field tetap sama dengan baris

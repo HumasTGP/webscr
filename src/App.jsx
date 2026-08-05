@@ -6,6 +6,7 @@ import {
   OPT,
   PROPOSAL_SEED,
   VENDOR_SEED,
+  MITRA_SEED,
 } from "./lib/data";
 import { uid } from "./lib/utils";
 import { formatTanggalPanjang } from "./lib/docxGenerate";
@@ -17,29 +18,42 @@ import {
   torFields,
 } from "./lib/wizardFields";
 
-import Sidebar from "./components/Sidebar";
-import Topbar from "./components/Topbar";
+import Sidebar from "./sikas/components/Sidebar";
+import Topbar from "./sikas/components/Topbar";
 import HelpModal from "./components/HelpModal";
 import Toast from "./components/Toast";
 
-import LandingGateway from "./pages/LandingGateway";
-import SilapakLogin from "./pages/SilapakLogin";
-import SilapakApp from "./pages/SilapakApp";
-import LoginScreen from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import RabPage from "./pages/Rab";
-import VendorPage from "./pages/Vendor";
-import HistoryPage from "./pages/History";
-import Panduan from "./pages/Panduan";
-import GenericWizard from "./pages/GenericWizard";
+import LandingGateway from "./portal/pages/LandingGateway";
+import SilapakLogin from "./silapak-priok/pages/SilapakLogin";
+import SilapakApp from "./silapak-priok/pages/SilapakApp";
+import LoginScreen from "./sikas/pages/Login";
+import Dashboard from "./sikas/pages/Dashboard";
+import RabPage from "./sikas/pages/Rab";
+import VendorPage from "./sikas/pages/Vendor";
+import HistoryPage from "./sikas/pages/History";
+import Panduan from "./sikas/pages/Panduan";
+import GenericWizard from "./sikas/pages/GenericWizard";
 import { TorDocPreview, BastDocPreview, PaktaDocPreview } from "./components/DocTemplatePreview";
-import ProposalRekapPage from "./pages/ProposalRekap";
-import ProposalEvaluasiPage from "./pages/ProposalEvaluasi";
-import PengelolaanKomunikasi from "./pages/PengelolaanKomunikasi";
-import InboxPage from "./pages/Inbox";
-import AsmanDashboard from "./pages/AsmanDashboard";
-import KasPackagesPage from "./pages/KasPackages";
-import UserManagementPage from "./pages/UserManagement";
+import ProposalRekapPage from "./sikas/pages/ProposalRekap";
+import ProposalEvaluasiPage from "./sikas/pages/ProposalEvaluasi";
+import PengelolaanKomunikasi from "./sikas/pages/PengelolaanKomunikasi";
+import InboxPage from "./sikas/pages/Inbox";
+import AsmanDashboard from "./sikas/asman/pages/AsmanDashboard";
+import MadmDashboard from "./sikas/madm/pages/MadmDashboard";
+import KasPackagesPage from "./sikas/pages/KasPackages";
+import UserManagementPage from "./sikas/pages/UserManagement";
+import PengajuanMitraPage from "./pengajuan-mitra/pages/PengajuanMitra";
+import MitraLogin from "./pengajuan-mitra/pages/MitraLogin";
+import MitraApp from "./pengajuan-mitra/pages/MitraApp";
+import DokumentasiPage from "./sikas/pages/Dokumentasi";
+import DaftarHadirPage from "./sikas/pages/DaftarHadir";
+import EvidenPage from "./sikas/pages/Eviden";
+import BappPage from "./sikas/pages/BappPage";
+import ChecklistDokumenPage from "./sikas/pages/ChecklistDokumen";
+import FormVerifikasiPage from "./sikas/pages/FormVerifikasi";
+import Lampiran1Page from "./sikas/pages/Lampiran1";
+import Lampiran2Page from "./sikas/pages/Lampiran2";
+import KategoriPage from "./sikas/pages/KategoriPage";
 import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
 
 const seed = (prefix, rows) =>
@@ -48,14 +62,12 @@ const seed = (prefix, rows) =>
     id: `${prefix}-${String(i + 1).padStart(3, "0")}`,
   }));
 
-// Pisah textarea multi-baris jadi array butir (untuk list TUJUAN/SASARAN di TOR).
 const splitLines = (s) =>
   String(s || "")
     .split(/\r?\n/)
     .map((x) => x.trim())
     .filter(Boolean);
 
-// Tanggal "YYYY-MM-DD" -> "Selasa, 20 April 2026" (dengan nama hari).
 const tanggalDenganHari = (iso) => {
   if (!iso) return "";
   const d = new Date(`${iso}T00:00:00`);
@@ -68,7 +80,6 @@ const tanggalDenganHari = (iso) => {
   });
 };
 
-// Mapping data wizard -> placeholder di masing-masing template .docx.
 const DOCX_TEMPLATES = {
   tor: {
     url: "/templates/Template_TOR.docx",
@@ -106,11 +117,10 @@ const DOCX_TEMPLATES = {
 };
 
 export default function App() {
-  // Lapisan gateway paling luar: null = belum memilih layanan,
-  // "sikas" = alur SIKAS existing di bawah ini (tidak diubah),
-  // "silapak" = modul Si Lapak Priok yang baru, sepenuhnya terpisah.
   const [portal, setPortal] = useState(null);
   const [silapakLoggedIn, setSilapakLoggedIn] = useState(false);
+  const [mitraLoggedIn, setMitraLoggedIn] = useState(false);
+  const [mitraUser, setMitraUser] = useState(null);
 
   const [user, setUser] = useState(null);
   const [active, setActive] = useState("dashboard");
@@ -128,8 +138,6 @@ export default function App() {
     return () => window.removeEventListener("resize", applyResponsive);
   }, []);
 
-  // 3 paket demo — semua sub-dokumen dalam satu paket memakai ID RAB yang sama
-  // sehingga bisa dikelompokkan di Inbox Asman/MADM.
   const PACKAGE_SEED = [
     { idRab: "RAB-2026-001", judul: "Bantuan Perbaikan Jalan Metro Marina Ancol", kategori: "NON PO",    status: DOC_STATUS.SUBMITTED },
     { idRab: "RAB-2026-002", judul: "Fasilitasi Kegiatan Sinergi Kota Hijau",     kategori: "Cash Card", status: DOC_STATUS.APPROVED,  submittedAt: "2026-04-20T09:00:00Z", reviewedAt: "2026-04-21T10:00:00Z", reviewedBy: "asman" },
@@ -150,10 +158,9 @@ export default function App() {
   const [tor, setTor] = useState(() => seedSubDoc("id", "judulKegiatan"));
   const [bast, setBast] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
+  const [bapp, setBapp] = useState([]);
   const [laporan, setLaporan] = useState([]);
-  // Daftar user aktif — dikelola via halaman "Manajemen Akses" (khusus admin).
-  // Disimpan di localStorage supaya tidak hilang saat refresh. Kalau localStorage
-  // rusak/kosong, fallback ke DEFAULT_USERS.
+
   const USERS_LS_KEY = "sikas.users.v1";
   const [users, setUsers] = useState(() => {
     try {
@@ -190,6 +197,7 @@ export default function App() {
   const [konten, setKonten] = useState(() => seed("KTN", KONTEN_SEED));
   const [evaluasi, setEvaluasi] = useState([]);
   const [history, setHistory] = useState([]);
+  const [mitraList, setMitraList] = useState(() => seed("MTR", MITRA_SEED));
 
   const addHistory = (jenis) => {
     const now = new Date();
@@ -231,6 +239,11 @@ export default function App() {
 
   const rabIdOptions = useMemo(() => rab.map((r) => r.idNumber), [rab]);
 
+  const handleBackToPortal = () => {
+    setUser(null);
+    setPortal(null);
+  };
+
   const modules = useMemo(
     () => ({
       dashboard: (
@@ -263,6 +276,7 @@ export default function App() {
         />
       ),
       rab: <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} />,
+      kategori: <KategoriPage rab={rab} setRab={setRab} notify={notify} />,
       tor: (
         <GenericWizard
           title="TOR"
@@ -330,6 +344,14 @@ export default function App() {
           ]}
         />
       ),
+      bapp: (
+        <BappPage
+          rab={rab}
+          list={bapp}
+          setList={setBapp}
+          notify={notify}
+        />
+      ),
       laporan: (
         <GenericWizard
           title="Laporan"
@@ -368,6 +390,9 @@ export default function App() {
       "asman-dashboard": (
         <AsmanDashboard user={user} packages={packages} goto={setActive} />
       ),
+      "madm-dashboard": (
+        <MadmDashboard user={user} packages={packages} goto={setActive} />
+      ),
       "paket-kas": (
         <KasPackagesPage
           rab={rab} tor={tor} bast={bast} pakta={pakta}
@@ -384,27 +409,41 @@ export default function App() {
           notify={notify}
         />
       ),
+      dokumentasi: <DokumentasiPage rab={rab} notify={notify} />,
+      "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
+      eviden: <EvidenPage rab={rab} notify={notify} />,
+      "checklist-dokumen": <ChecklistDokumenPage rab={rab} tor={tor} bast={bast} pakta={pakta} notify={notify} />,
+      "proposal-evaluasi-pembayaran": (
+        <ProposalEvaluasiPage
+          proposals={proposals}
+          evaluasiList={evaluasi}
+          setEvaluasiList={setEvaluasi}
+          notify={notify}
+        />
+      ),
+      "form-verifikasi": <FormVerifikasiPage rab={rab} notify={notify} />,
+      "lampiran-1": <Lampiran1Page rab={rab} notify={notify} />,
+      "lampiran-2": <Lampiran2Page rab={rab} notify={notify} />,
       history: <HistoryPage history={history} />,
       panduan: <Panduan />,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       user,
-      rab, tor, bast, pakta, laporan, vendors, history,
+      rab, tor, bast, pakta, bapp, laporan, vendors, history,
       proposals, konten, evaluasi, rabIdOptions, packages, users,
     ]
   );
 
-  // Gate 1: pilih layanan (tidak menyentuh apa pun di bawahnya).
   if (!portal) {
     return <LandingGateway onSelect={setPortal} />;
   }
 
-  // Gate 2a: modul Si Lapak Priok, sepenuhnya terpisah dari SIKAS.
   if (portal === "silapak") {
     if (!silapakLoggedIn) {
       return (
         <SilapakLogin
+          authenticate={authenticate}
           onLogin={() => setSilapakLoggedIn(true)}
           onBack={() => setPortal(null)}
         />
@@ -420,14 +459,49 @@ export default function App() {
     );
   }
 
-  // Gate 2b: SIKAS — login + role routing.
+  if (portal === "mitra") {
+    if (!mitraLoggedIn) {
+      return (
+        <MitraLogin
+          authenticate={authenticate}
+          onLogin={(u) => {
+            setMitraUser(u);
+            setMitraLoggedIn(true);
+          }}
+          onBack={() => setPortal(null)}
+        />
+      );
+    }
+    return (
+      <>
+        <MitraApp
+          mitraList={mitraList}
+          setMitraList={setMitraList}
+          notify={notify}
+          onBackToPortal={() => {
+            setMitraLoggedIn(false);
+            setMitraUser(null);
+            setPortal(null);
+          }}
+          user={mitraUser}
+          onLogout={() => {
+            setMitraLoggedIn(false);
+            setMitraUser(null);
+          }}
+        />
+        <Toast toast={toast} />
+      </>
+    );
+  }
+
   if (!user)
     return (
       <LoginScreen
         authenticate={authenticate}
+        onBack={() => setPortal(null)}
         onLogin={(u) => {
           setUser(u);
-          setActive(u.role === "humas" ? "dashboard" : "asman-dashboard");
+          setActive(u.role === "humas" ? "dashboard" : u.role === "madm" ? "madm-dashboard" : "asman-dashboard");
         }}
       />
     );
@@ -450,6 +524,7 @@ export default function App() {
         onSelect={setActive}
         user={user}
         onLogout={() => setUser(null)}
+        onBackToPortal={handleBackToPortal}
         collapsed={collapsed}
         setCollapsed={setCollapsed}
       />

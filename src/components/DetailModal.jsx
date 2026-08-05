@@ -90,7 +90,7 @@ export default function DetailModal({
                     overflowWrap: "break-word",
                   }}
                 >
-                  {c.render ? c.render(data) : (data[c.key] ?? "—")}
+                  {c.render ? c.render(data) : (data[c.key] ?? "-")}
                 </div>
               )}
             </div>

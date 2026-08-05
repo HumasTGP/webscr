@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Home } from "lucide-react";
 import { T, font } from "../lib/theme";
 import { MENU, MENU_GROUPS, ROLES } from "../lib/data";
 import { roleInitials } from "../lib/utils";
@@ -44,6 +44,7 @@ export default function Sidebar({
   onSelect,
   user,
   onLogout,
+  onBackToPortal,
   collapsed,
   setCollapsed,
 }) {
@@ -111,7 +112,7 @@ export default function Sidebar({
               lineHeight: 1.3,
             }}
           >
-            SIKAS PLN
+            SIKAS
           </div>
           <div
             style={{
@@ -120,7 +121,7 @@ export default function Sidebar({
               fontFamily: font.mono,
             }}
           >
-            Administrasi Kas
+            Sistem Informasi Kas
           </div>
         </div>
         <button
@@ -284,6 +285,44 @@ export default function Sidebar({
           );
         })}
       </nav>
+
+      {onBackToPortal && (
+        <div style={{ padding: collapsed ? "4px 10px" : "4px 14px" }}>
+          <button
+            onClick={onBackToPortal}
+            title="Kembali ke Portal"
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "10px 12px",
+              borderRadius: 8,
+              border: "1px solid #1C4A7C",
+              background: "rgba(255,199,44,0.08)",
+              color: T.yellow,
+              cursor: "pointer",
+              fontSize: 12.5,
+              fontWeight: 600,
+              fontFamily: font.body,
+              justifyContent: collapsed ? "center" : "flex-start",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,199,44,0.18)";
+              e.currentTarget.style.borderColor = T.yellow;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255,199,44,0.08)";
+              e.currentTarget.style.borderColor = "#1C4A7C";
+            }}
+          >
+            <Home size={15} style={{ flexShrink: 0 }} />
+            <span style={fade(collapsed, { maxWidth: collapsed ? 0 : 180 })}>
+              Kembali ke Portal
+            </span>
+          </button>
+        </div>
+      )}
 
       <div
         style={{

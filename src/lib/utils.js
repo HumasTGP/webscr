@@ -36,7 +36,7 @@ export function printDocument(title, groups) {
             <td style="padding:4px 8px;color:#555;width:38%;vertical-align:top;">${r.label}</td>
             <td style="padding:4px 8px;color:#111;font-weight:600;vertical-align:top;">${
               r.value === undefined || r.value === null || r.value === ""
-                ? "—"
+                ? "-"
                 : String(r.value)
             }</td>
           </tr>`
