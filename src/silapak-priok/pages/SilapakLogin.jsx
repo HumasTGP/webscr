@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowLeft, Eye } from "lucide-react";
 import { font } from "../../lib/theme";
 import AutoLogo from "../../components/AutoLogo";
@@ -42,6 +42,26 @@ export default function SilapakLogin({ onLogin, onBack, authenticate }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [bgUrl, setBgUrl] = useState(null);
+  useEffect(() => {
+    const candidates = [
+      "/silapak-bg.jpg", "/silapak-bg.jpeg", "/silapak-bg.png",
+    ];
+    let cancelled = false;
+    (async () => {
+      for (const src of candidates) {
+        const ok = await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = src;
+        });
+        if (cancelled) return;
+        if (ok) { setBgUrl(src); return; }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const submit = (e) => {
     e.preventDefault();
@@ -65,11 +85,15 @@ export default function SilapakLogin({ onLogin, onBack, authenticate }) {
     setTimeout(() => onLogin(), 300);
   };
 
+  const bg = bgUrl
+    ? `linear-gradient(180deg, rgba(1,20,20,0.45), rgba(1,20,20,0.60)), url(${bgUrl})`
+    : DEFAULT_BG;
+
   return (
     <div
       className="login-page"
       style={{
-        background: DEFAULT_BG,
+        background: bg,
         position: "relative",
         backgroundSize: "cover",
         backgroundPosition: "center",

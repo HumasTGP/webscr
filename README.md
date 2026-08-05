@@ -231,11 +231,24 @@ webscr/
 
 ## Mengganti Aset
 
+### Background Halaman Login
+
+Setiap halaman login membaca background dari file di folder `public/`. Cukup letakkan file gambar dengan nama yang sesuai, background akan otomatis terpasang. Jika file tidak ada, halaman menggunakan gradient default.
+
+| File di `public/` | Digunakan oleh |
+|---|---|
+| `portal-bg.jpg` / `portal-bg.png` | Portal Utama (halaman selamat datang) |
+| `sikas-bg.jpg` / `sikas-bg.png` | Login SIKAS |
+| `silapak-bg.jpg` / `silapak-bg.png` | Login Si Lapak Priok |
+| `mitra-bg.jpg` / `mitra-bg.png` | Login Pengajuan Mitra |
+
+Tips: gunakan foto beresolusi minimal 1920x1080px, format JPG dengan kualitas 80% agar file tidak terlalu besar.
+
+### Aset Lainnya
+
 | File | Keterangan |
 |---|---|
 | `public/logo.png` | Logo PLN di sidebar. Format PNG/JPG. Fallback ke SVG jika tidak ada. |
-| `public/portal-bg.jpg` | Foto background halaman portal. |
-| `public/login-bg.jpg` | Foto background halaman login SIKAS. |
 | `src/assets/sikas-logo.svg` | Logo SIKAS di landing page. |
 | `src/assets/silapak-logo.svg` | Logo Si Lapak Priok di landing page. |
 | `src/assets/mitra-logo.svg` | Logo Pengajuan Mitra di landing page. |

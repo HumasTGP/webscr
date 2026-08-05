@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LogIn, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { font } from "../../lib/theme";
 
-const BG =
+const DEFAULT_BG =
   "radial-gradient(ellipse at 30% 15%, rgba(99,102,241,0.22) 0%, transparent 55%),"
   + " radial-gradient(ellipse at 75% 85%, rgba(139,92,246,0.18) 0%, transparent 55%),"
   + " linear-gradient(140deg, #05060F 0%, #0C0D24 40%, #141640 75%, #1A1C54 100%)";
@@ -39,6 +39,26 @@ export default function MitraLogin({ onLogin, onBack, authenticate }) {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [bgUrl, setBgUrl] = useState(null);
+  useEffect(() => {
+    const candidates = [
+      "/mitra-bg.jpg", "/mitra-bg.jpeg", "/mitra-bg.png",
+    ];
+    let cancelled = false;
+    (async () => {
+      for (const src of candidates) {
+        const ok = await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = src;
+        });
+        if (cancelled) return;
+        if (ok) { setBgUrl(src); return; }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -61,11 +81,17 @@ export default function MitraLogin({ onLogin, onBack, authenticate }) {
     }, 500);
   };
 
+  const bg = bgUrl
+    ? `linear-gradient(180deg, rgba(5,6,15,0.50), rgba(5,6,15,0.65)), url(${bgUrl})`
+    : DEFAULT_BG;
+
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: BG,
+        background: bg,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

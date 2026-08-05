@@ -57,7 +57,10 @@ export default function LoginScreen({ onLogin, onBack, authenticate }) {
 
   const [bgUrl, setBgUrl] = useState(null);
   useEffect(() => {
-    const candidates = ["/portal-bg.jpg", "/portal-bg.jpeg", "/portal-bg.png", "/login-bg.jpg", "/login-bg.jpeg", "/login-bg.png"];
+    const candidates = [
+      "/sikas-bg.jpg", "/sikas-bg.jpeg", "/sikas-bg.png",
+      "/login-bg.jpg", "/login-bg.jpeg", "/login-bg.png",
+    ];
     let cancelled = false;
     (async () => {
       for (const src of candidates) {
@@ -68,15 +71,10 @@ export default function LoginScreen({ onLogin, onBack, authenticate }) {
           img.src = src;
         });
         if (cancelled) return;
-        if (ok) {
-          setBgUrl(src);
-          return;
-        }
+        if (ok) { setBgUrl(src); return; }
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const submit = (e) => {
