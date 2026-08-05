@@ -53,17 +53,26 @@ export default function Sidebar({
   const [openGroups, setOpenGroups] = useState(() => {
     const initial = {};
     groupMenu(user.role, user.isAdmin).forEach((g) => {
-      // Group terbuka default kalau salah satu item-nya aktif ATAU
-      // group ini punya item admin-only (khusus supaya menu admin baru
-      // langsung kelihatan sebagai badge highlight).
       initial[g.key] =
-        g.items.some((m) => m.key === active) ||
+        g.items.some((m) => m.key === active || m.children?.some((c) => c.key === active)) ||
         g.items.some((m) => m.adminOnly);
     });
     return initial;
   });
   const toggleGroup = (key) =>
     setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const [openChildren, setOpenChildren] = useState(() => {
+    const initial = {};
+    groupMenu(user.role, user.isAdmin).forEach((g) => {
+      g.items.forEach((m) => {
+        if (m.children) initial[m.key] = m.children.some((c) => c.key === active);
+      });
+    });
+    return initial;
+  });
+  const toggleChildren = (key) =>
+    setOpenChildren((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
     <aside
@@ -165,7 +174,9 @@ export default function Sidebar({
       >
         {groups.map((g, gIdx) => {
           const isOpen = collapsed ? false : !!openGroups[g.key];
-          const groupActive = g.items.some((m) => m.key === active);
+          const groupActive = g.items.some(
+            (m) => m.key === active || m.children?.some((c) => c.key === active)
+          );
 
           return (
             <div key={g.key}>
@@ -234,49 +245,109 @@ export default function Sidebar({
                 <div style={{ marginBottom: 4 }}>
                   {g.items.map((m) => {
                     const Icon = m.icon;
+                    const hasChildren = !!m.children?.length;
+                    const isParentActive = hasChildren && m.children.some((c) => c.key === active);
                     const isActive = active === m.key;
+                    const highlighted = isActive || isParentActive;
+                    const isChildOpen = !collapsed && !!openChildren[m.key];
+
                     return (
-                      <button
-                        key={m.key}
-                        onClick={() => onSelect(m.key)}
-                        title={m.label}
-                        style={{
-                          width: "100%",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 12,
-                          padding: "10px 12px",
-                          marginBottom: 2,
-                          borderRadius: 8,
-                          border: "none",
-                          cursor: "pointer",
-                          background: isActive
-                            ? "rgba(255,199,44,0.14)"
-                            : "transparent",
-                          color: isActive ? T.yellow : "#B9C9E1",
-                          fontWeight: isActive ? 700 : 500,
-                          fontSize: 13.5,
-                          fontFamily: font.body,
-                          borderLeft: isActive
-                            ? `3px solid ${T.yellow}`
-                            : "3px solid transparent",
-                          justifyContent: collapsed ? "center" : "flex-start",
-                        }}
-                        onMouseEnter={(e) =>
-                          !isActive &&
-                          (e.currentTarget.style.background = "rgba(255,255,255,0.06)")
-                        }
-                        onMouseLeave={(e) =>
-                          !isActive && (e.currentTarget.style.background = "transparent")
-                        }
-                      >
-                        <Icon size={17} style={{ flexShrink: 0 }} />
-                        <span
-                          style={fade(collapsed, { maxWidth: collapsed ? 0 : 180 })}
+                      <div key={m.key}>
+                        <button
+                          onClick={() =>
+                            hasChildren
+                              ? collapsed
+                                ? onSelect(m.children[0].key)
+                                : toggleChildren(m.key)
+                              : onSelect(m.key)
+                          }
+                          title={m.label}
+                          style={{
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 12,
+                            padding: "10px 12px",
+                            marginBottom: 2,
+                            borderRadius: 8,
+                            border: "none",
+                            cursor: "pointer",
+                            background: highlighted ? "rgba(255,199,44,0.14)" : "transparent",
+                            color: highlighted ? T.yellow : "#B9C9E1",
+                            fontWeight: highlighted ? 700 : 500,
+                            fontSize: 13.5,
+                            fontFamily: font.body,
+                            borderLeft: highlighted ? `3px solid ${T.yellow}` : "3px solid transparent",
+                            justifyContent: collapsed ? "center" : "flex-start",
+                          }}
+                          onMouseEnter={(e) =>
+                            !highlighted && (e.currentTarget.style.background = "rgba(255,255,255,0.06)")
+                          }
+                          onMouseLeave={(e) =>
+                            !highlighted && (e.currentTarget.style.background = "transparent")
+                          }
                         >
-                          {m.label}
-                        </span>
-                      </button>
+                          <Icon size={17} style={{ flexShrink: 0 }} />
+                          <span style={fade(collapsed, { maxWidth: collapsed ? 0 : 160, flex: 1, textAlign: "left" })}>
+                            {m.label}
+                          </span>
+                          {hasChildren && !collapsed && (
+                            <ChevronDown
+                              size={13}
+                              style={{
+                                flexShrink: 0,
+                                transition: "transform .15s ease",
+                                transform: isChildOpen ? "rotate(180deg)" : "rotate(0deg)",
+                              }}
+                            />
+                          )}
+                        </button>
+
+                        {hasChildren && isChildOpen && (
+                          <div style={{ paddingLeft: 14, marginBottom: 4 }}>
+                            {m.children.map((child) => {
+                              const isChildActive = active === child.key;
+                              return (
+                                <button
+                                  key={child.key}
+                                  onClick={() => onSelect(child.key)}
+                                  title={child.label}
+                                  style={{
+                                    width: "100%",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 10,
+                                    padding: "8px 12px",
+                                    marginBottom: 2,
+                                    borderRadius: 8,
+                                    border: "none",
+                                    cursor: "pointer",
+                                    background: isChildActive ? "rgba(255,199,44,0.12)" : "transparent",
+                                    color: isChildActive ? T.yellow : "#8CA8C9",
+                                    fontWeight: isChildActive ? 700 : 500,
+                                    fontSize: 13,
+                                    fontFamily: font.body,
+                                    borderLeft: isChildActive ? `3px solid ${T.yellow}` : "3px solid transparent",
+                                    justifyContent: "flex-start",
+                                  }}
+                                  onMouseEnter={(e) =>
+                                    !isChildActive && (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+                                  }
+                                  onMouseLeave={(e) =>
+                                    !isChildActive && (e.currentTarget.style.background = "transparent")
+                                  }
+                                >
+                                  <span style={{
+                                    width: 6, height: 6, borderRadius: "50%", flexShrink: 0,
+                                    background: isChildActive ? T.yellow : "#4A6080",
+                                  }} />
+                                  <span>{child.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>

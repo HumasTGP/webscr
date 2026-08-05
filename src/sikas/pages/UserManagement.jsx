@@ -122,6 +122,7 @@ function UserForm({ initial, onCancel, onSave, existingUsernames }) {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="contoh: budi.humas"
+            autoFocus
             style={inputStyle}
           />
         </div>
@@ -145,9 +146,10 @@ function UserForm({ initial, onCancel, onSave, existingUsernames }) {
             Aktif Dari
           </label>
           <input
-            type="date"
+            type="text"
             value={activeFrom}
             onChange={(e) => setActiveFrom(e.target.value)}
+            placeholder="YYYY-MM-DD"
             style={inputStyle}
           />
         </div>
@@ -157,9 +159,10 @@ function UserForm({ initial, onCancel, onSave, existingUsernames }) {
             Aktif Sampai
           </label>
           <input
-            type="date"
+            type="text"
             value={activeTo}
             onChange={(e) => setActiveTo(e.target.value)}
+            placeholder="YYYY-MM-DD"
             style={inputStyle}
           />
         </div>

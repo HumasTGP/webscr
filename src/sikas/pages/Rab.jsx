@@ -122,7 +122,7 @@ function itemTotals(row) {
   };
 }
 
-export default function RabPage({ rab, setRab, vendors, notify }) {
+export default function RabPage({ rab, setRab, vendors, notify, defaultKategori }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(0);
   const [checklist, setChecklist] = useState(() => buildInitialChecklist());
@@ -144,7 +144,10 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
     setRowDraft({});
     setEditingId(null);
     setChecklist(buildInitialChecklist());
-    setHeader({ idNumber: nextIdFor("RAB", rab, "idNumber") });
+    setHeader({
+      idNumber: nextIdFor("RAB", rab, "idNumber"),
+      ...(defaultKategori ? { kategori: defaultKategori } : {}),
+    });
     setStep(0);
     setMode("wizard");
   };
@@ -301,19 +304,25 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
 
   if (mode === "list") {
     const detailColumns = headerFields.map((f) => ({ key: f.key, label: f.label }));
+    const displayRab = defaultKategori ? rab.filter((r) => r.kategori === defaultKategori) : rab;
+    const pageTitle = defaultKategori ? `RAB - ${defaultKategori}` : "Rencana Anggaran Biaya";
+    const pageDesc = defaultKategori
+      ? `Daftar RAB dengan kategori ${defaultKategori}. Klik baris untuk melihat detail.`
+      : "Kelola seluruh data Rencana Anggaran Biaya. Klik salah satu baris untuk melihat detail atau mengubah data.";
+    const addLabel = defaultKategori ? `Buat RAB ${defaultKategori}` : "Add New RAB";
     return (
       <div>
         <PageHeader
           eyebrow="Modul RAB"
-          title="Rencana Anggaran Biaya"
-          description="Kelola seluruh data Rencana Anggaran Biaya. Klik salah satu baris untuk melihat detail atau mengubah data."
+          title={pageTitle}
+          description={pageDesc}
           right={
             <Button icon={Plus} onClick={startWizard}>
-              Add New RAB
+              {addLabel}
             </Button>
           }
         />
-        {rab.length > 0 && (
+        {displayRab.length > 0 && (
           <Card style={{ marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               <div style={{ flex: "1 1 260px", minWidth: 0 }}>
@@ -329,7 +338,7 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
                 onChange={(e) => {
                   const val = e.target.value;
                   setSelectedId(val);
-                  const rec = rab.find((r) => r.idNumber === val);
+                  const rec = displayRab.find((r) => r.idNumber === val);
                   if (rec) openRabPreview(rec);
                 }}
                 style={{
@@ -343,7 +352,7 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
                 }}
               >
                 <option value="">- Pilih ID RAB -</option>
-                {rab.map((r) => (
+                {displayRab.map((r) => (
                   <option key={r.idNumber} value={r.idNumber}>
                     {r.idNumber}{r.judulKegiatan ? ` - ${r.judulKegiatan}` : ""}
                   </option>
@@ -354,9 +363,9 @@ export default function RabPage({ rab, setRab, vendors, notify }) {
         )}
         <Card padded={false}>
           <DataTable
-            emptyLabel={'Belum ada RAB. Klik “Add New RAB” untuk membuat pengajuan pertama.'}
+            emptyLabel={`Belum ada RAB${defaultKategori ? ` kategori ${defaultKategori}` : ""}. Klik "${addLabel}" untuk membuat pengajuan pertama.`}
             columns={LIST_COLUMNS}
-            rows={rab}
+            rows={displayRab}
             onRowClick={setDetailRow}
           />
         </Card>
