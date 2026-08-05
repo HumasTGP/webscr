@@ -8,7 +8,7 @@ export default function HelpModal({ open, onClose, onGotoPanduan }) {
   return (
     <Modal open={open} onClose={onClose} title="Butuh Bantuan?" icon={MessageCircle} width={360}>
       <p style={{ color: T.muted, fontSize: 13.5, marginBottom: 18, lineHeight: 1.6 }}>
-        Hubungi tim Admin/IT SIREMON jika ada kendala saat menggunakan sistem ini.
+        Hubungi tim Admin/IT SIKAS jika ada kendala saat menggunakan sistem ini.
       </p>
 
       <a

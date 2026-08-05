@@ -18,38 +18,41 @@ import {
   torFields,
 } from "./lib/wizardFields";
 
-import Sidebar from "./components/Sidebar";
-import Topbar from "./components/Topbar";
+import Sidebar from "./sikas/components/Sidebar";
+import Topbar from "./sikas/components/Topbar";
 import HelpModal from "./components/HelpModal";
 import Toast from "./components/Toast";
 
-import LandingGateway from "./pages/LandingGateway";
-import SilapakLogin from "./pages/SilapakLogin";
-import SilapakApp from "./pages/SilapakApp";
-import LoginScreen from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import RabPage from "./pages/Rab";
-import VendorPage from "./pages/Vendor";
-import HistoryPage from "./pages/History";
-import Panduan from "./pages/Panduan";
-import GenericWizard from "./pages/GenericWizard";
+import LandingGateway from "./portal/pages/LandingGateway";
+import SilapakLogin from "./silapak-priok/pages/SilapakLogin";
+import SilapakApp from "./silapak-priok/pages/SilapakApp";
+import LoginScreen from "./sikas/pages/Login";
+import Dashboard from "./sikas/pages/Dashboard";
+import RabPage from "./sikas/pages/Rab";
+import VendorPage from "./sikas/pages/Vendor";
+import HistoryPage from "./sikas/pages/History";
+import Panduan from "./sikas/pages/Panduan";
+import GenericWizard from "./sikas/pages/GenericWizard";
 import { TorDocPreview, BastDocPreview, PaktaDocPreview } from "./components/DocTemplatePreview";
-import ProposalRekapPage from "./pages/ProposalRekap";
-import ProposalEvaluasiPage from "./pages/ProposalEvaluasi";
-import PengelolaanKomunikasi from "./pages/PengelolaanKomunikasi";
-import InboxPage from "./pages/Inbox";
-import AsmanDashboard from "./pages/AsmanDashboard";
-import KasPackagesPage from "./pages/KasPackages";
-import UserManagementPage from "./pages/UserManagement";
-import PengajuanMitraPage from "./pages/PengajuanMitra";
-import DokumentasiPage from "./pages/Dokumentasi";
-import DaftarHadirPage from "./pages/DaftarHadir";
-import EvidenPage from "./pages/Eviden";
-import BappPage from "./pages/BappPage";
-import ChecklistDokumenPage from "./pages/ChecklistDokumen";
-import FormVerifikasiPage from "./pages/FormVerifikasi";
-import Lampiran1Page from "./pages/Lampiran1";
-import Lampiran2Page from "./pages/Lampiran2";
+import ProposalRekapPage from "./sikas/pages/ProposalRekap";
+import ProposalEvaluasiPage from "./sikas/pages/ProposalEvaluasi";
+import PengelolaanKomunikasi from "./sikas/pages/PengelolaanKomunikasi";
+import InboxPage from "./sikas/pages/Inbox";
+import AsmanDashboard from "./sikas/asman/pages/AsmanDashboard";
+import MadmDashboard from "./sikas/madm/pages/MadmDashboard";
+import KasPackagesPage from "./sikas/pages/KasPackages";
+import UserManagementPage from "./sikas/pages/UserManagement";
+import PengajuanMitraPage from "./pengajuan-mitra/pages/PengajuanMitra";
+import MitraLogin from "./pengajuan-mitra/pages/MitraLogin";
+import MitraApp from "./pengajuan-mitra/pages/MitraApp";
+import DokumentasiPage from "./sikas/pages/Dokumentasi";
+import DaftarHadirPage from "./sikas/pages/DaftarHadir";
+import EvidenPage from "./sikas/pages/Eviden";
+import BappPage from "./sikas/pages/BappPage";
+import ChecklistDokumenPage from "./sikas/pages/ChecklistDokumen";
+import FormVerifikasiPage from "./sikas/pages/FormVerifikasi";
+import Lampiran1Page from "./sikas/pages/Lampiran1";
+import Lampiran2Page from "./sikas/pages/Lampiran2";
 import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
 
 const seed = (prefix, rows) =>
@@ -115,6 +118,8 @@ const DOCX_TEMPLATES = {
 export default function App() {
   const [portal, setPortal] = useState(null);
   const [silapakLoggedIn, setSilapakLoggedIn] = useState(false);
+  const [mitraLoggedIn, setMitraLoggedIn] = useState(false);
+  const [mitraUser, setMitraUser] = useState(null);
 
   const [user, setUser] = useState(null);
   const [active, setActive] = useState("dashboard");
@@ -383,6 +388,9 @@ export default function App() {
       "asman-dashboard": (
         <AsmanDashboard user={user} packages={packages} goto={setActive} />
       ),
+      "madm-dashboard": (
+        <MadmDashboard user={user} packages={packages} goto={setActive} />
+      ),
       "paket-kas": (
         <KasPackagesPage
           rab={rab} tor={tor} bast={bast} pakta={pakta}
@@ -449,37 +457,36 @@ export default function App() {
   }
 
   if (portal === "mitra") {
+    if (!mitraLoggedIn) {
+      return (
+        <MitraLogin
+          onLogin={(u) => {
+            setMitraUser(u);
+            setMitraLoggedIn(true);
+          }}
+          onBack={() => setPortal(null)}
+        />
+      );
+    }
     return (
-      <div style={{
-        minHeight: "100vh",
-        background: T.bg,
-        fontFamily: font.body,
-        color: T.text,
-      }}>
-        <div style={{
-          position: "sticky", top: 0, zIndex: 50,
-          background: T.topbarBg, backdropFilter: "blur(6px)",
-          borderBottom: `1px solid ${T.border}`,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          minHeight: 58, padding: "14px 34px",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 13, color: T.muted }}>Portal</span>
-            <span style={{ fontSize: 13, color: T.muted }}>&#8250;</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: T.heading }}>Pengajuan Mitra</span>
-          </div>
-        </div>
-        <div style={{ width: "100%", maxWidth: 1240, margin: "0 auto", padding: "28px 34px" }}>
-          <PengajuanMitraPage
-            mitraList={mitraList}
-            setMitraList={setMitraList}
-            user={user}
-            notify={notify}
-            onBackToPortal={() => setPortal(null)}
-          />
-        </div>
+      <>
+        <MitraApp
+          mitraList={mitraList}
+          setMitraList={setMitraList}
+          notify={notify}
+          onBackToPortal={() => {
+            setMitraLoggedIn(false);
+            setMitraUser(null);
+            setPortal(null);
+          }}
+          user={mitraUser}
+          onLogout={() => {
+            setMitraLoggedIn(false);
+            setMitraUser(null);
+          }}
+        />
         <Toast toast={toast} />
-      </div>
+      </>
     );
   }
 
@@ -489,7 +496,7 @@ export default function App() {
         authenticate={authenticate}
         onLogin={(u) => {
           setUser(u);
-          setActive(u.role === "humas" ? "dashboard" : "asman-dashboard");
+          setActive(u.role === "humas" ? "dashboard" : u.role === "madm" ? "madm-dashboard" : "asman-dashboard");
         }}
       />
     );

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Pengajuan Mitra">
+  <!-- Background -->
+  <rect width="120" height="120" rx="18" fill="#16103A"/>
+
+  <!-- Left hand -->
+  <path d="M20,72 C20,62 28,52 36,50 L46,48 C48,48 50,50 50,52 L50,76 C50,80 47,83 43,83 L30,83 C24,83 20,78 20,72 Z"
+        fill="#FFC72C"/>
+
+  <!-- Left thumb -->
+  <ellipse cx="27" cy="47" rx="7" ry="10" fill="#FFC72C" transform="rotate(-20, 27, 47)"/>
+
+  <!-- Right hand -->
+  <path d="M100,72 C100,62 92,52 84,50 L74,48 C72,48 70,50 70,52 L70,76 C70,80 73,83 77,83 L90,83 C96,83 100,78 100,72 Z"
+        fill="#E6A700"/>
+
+  <!-- Right thumb -->
+  <ellipse cx="93" cy="47" rx="7" ry="10" fill="#E6A700" transform="rotate(20, 93, 47)"/>
+
+  <!-- Clasped center / overlap -->
+  <rect x="46" y="50" width="28" height="30" rx="4" fill="#FFC72C"/>
+
+  <!-- Star / accent at center -->
+  <circle cx="60" cy="38" r="9" fill="none" stroke="#FFC72C" stroke-width="2.5"/>
+  <circle cx="60" cy="38" r="4" fill="#FFC72C"/>
+
+  <!-- Text: Mitra -->
+  <text x="60" y="114" text-anchor="middle"
+        font-family="Arial, sans-serif" font-weight="800"
+        font-size="10" fill="#FFC72C" letter-spacing="2">Mitra</text>
+</svg>

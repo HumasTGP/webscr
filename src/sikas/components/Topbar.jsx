@@ -1,6 +1,6 @@
 import { ChevronRight, HelpCircle, Moon, Sun } from "lucide-react";
-import { T, font } from "../lib/theme";
-import { roleInitials, roleLabel } from "../lib/utils";
+import { T, font } from "../../lib/theme";
+import { roleInitials, roleLabel } from "../../lib/utils";
 
 export default function Topbar({
   activeLabel,
