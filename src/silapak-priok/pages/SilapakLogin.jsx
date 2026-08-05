@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { AlertTriangle, Eye } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Eye } from "lucide-react";
 import { font } from "../../lib/theme";
 import AutoLogo from "../../components/AutoLogo";
 import PartnerLogos from "../../components/PartnerLogos";
 
 const DEFAULT_BG =
-  "radial-gradient(circle at 15% 20%, rgba(255,199,44,0.28), transparent 45%),"
-  + " radial-gradient(circle at 85% 82%, rgba(14,76,146,0.55), transparent 50%),"
-  + " linear-gradient(135deg, #051428 0%, #0A2A50 40%, #0E4C92 100%)";
+  "radial-gradient(ellipse at 20% 15%, rgba(20,184,166,0.22) 0%, transparent 50%),"
+  + " radial-gradient(ellipse at 80% 85%, rgba(6,182,212,0.18) 0%, transparent 50%),"
+  + " linear-gradient(140deg, #011414 0%, #022828 40%, #045050 75%, #067070 100%)";
 
 function GlassInput({ endAdornment, style, ...props }) {
   return (
@@ -67,11 +67,33 @@ export default function SilapakLogin({ onLogin, onBack }) {
       className="login-page"
       style={{
         background: DEFAULT_BG,
+        position: "relative",
         backgroundSize: "cover",
         backgroundPosition: "center",
         fontFamily: font.body,
       }}
     >
+      <button
+        type="button"
+        onClick={onBack}
+        style={{
+          position: "fixed", top: 28, left: 28, zIndex: 10,
+          display: "flex", alignItems: "center", gap: 6,
+          background: "rgba(255,255,255,0.07)",
+          border: "1px solid rgba(255,255,255,0.15)",
+          borderRadius: 8,
+          color: "rgba(255,255,255,0.75)",
+          cursor: "pointer",
+          fontSize: 13, fontWeight: 500,
+          padding: "8px 14px",
+          backdropFilter: "blur(8px)",
+          fontFamily: font.body,
+        }}
+      >
+        <ArrowLeft size={14} />
+        Kembali ke Portal
+      </button>
+
       <div
         className="login-glass"
         style={{
@@ -191,21 +213,6 @@ export default function SilapakLogin({ onLogin, onBack }) {
           </button>
         </form>
 
-        <button
-          type="button"
-          onClick={onBack}
-          style={{
-            display: "block",
-            margin: "18px auto 0",
-            background: "transparent",
-            border: "none",
-            color: "rgba(255,255,255,0.6)",
-            fontSize: 12,
-            cursor: "pointer",
-          }}
-        >
-          &#8249; Kembali ke pilihan layanan
-        </button>
       </div>
 
       <div className="powered-by-strip" style={{ fontFamily: font.body }}>

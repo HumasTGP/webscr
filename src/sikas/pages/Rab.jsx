@@ -85,7 +85,6 @@ const buildHeaderFields = (vendors) => [
     hint: "otomatis (lanjut dari ID terakhir) - bisa diubah manual",
     placeholder: "cth. RAB-2026-001",
   },
-  { key: "kategori", label: "Kategori", type: "select", options: OPT.kategori },
   { key: "bidang", label: "Bidang", type: "select", options: OPT.bidang },
   { key: "jenisProgram", label: "Jenis Program", type: "select", options: OPT.jenisProgram },
   { key: "subprogram", label: "Subprogram", type: "select", options: OPT.subprogram },

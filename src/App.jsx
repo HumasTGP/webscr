@@ -53,6 +53,7 @@ import ChecklistDokumenPage from "./sikas/pages/ChecklistDokumen";
 import FormVerifikasiPage from "./sikas/pages/FormVerifikasi";
 import Lampiran1Page from "./sikas/pages/Lampiran1";
 import Lampiran2Page from "./sikas/pages/Lampiran2";
+import KategoriPage from "./sikas/pages/KategoriPage";
 import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
 
 const seed = (prefix, rows) =>
@@ -275,6 +276,7 @@ export default function App() {
         />
       ),
       rab: <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} />,
+      kategori: <KategoriPage rab={rab} setRab={setRab} notify={notify} />,
       tor: (
         <GenericWizard
           title="TOR"
@@ -460,6 +462,7 @@ export default function App() {
     if (!mitraLoggedIn) {
       return (
         <MitraLogin
+          authenticate={authenticate}
           onLogin={(u) => {
             setMitraUser(u);
             setMitraLoggedIn(true);
@@ -494,6 +497,7 @@ export default function App() {
     return (
       <LoginScreen
         authenticate={authenticate}
+        onBack={() => setPortal(null)}
         onLogin={(u) => {
           setUser(u);
           setActive(u.role === "humas" ? "dashboard" : u.role === "madm" ? "madm-dashboard" : "asman-dashboard");

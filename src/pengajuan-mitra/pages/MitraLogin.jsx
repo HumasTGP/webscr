@@ -1,8 +1,39 @@
 import { useState } from "react";
 import { LogIn, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { T, font } from "../../lib/theme";
+import { font } from "../../lib/theme";
 
-export default function MitraLogin({ onLogin, onBack }) {
+const BG =
+  "radial-gradient(ellipse at 30% 15%, rgba(99,102,241,0.22) 0%, transparent 55%),"
+  + " radial-gradient(ellipse at 75% 85%, rgba(139,92,246,0.18) 0%, transparent 55%),"
+  + " linear-gradient(140deg, #05060F 0%, #0C0D24 40%, #141640 75%, #1A1C54 100%)";
+
+const inputStyle = (font) => ({
+  width: "100%",
+  padding: "11px 14px",
+  borderRadius: 8,
+  border: "1px solid rgba(255,255,255,0.18)",
+  background: "rgba(255,255,255,0.08)",
+  fontSize: 14,
+  color: "#fff",
+  boxSizing: "border-box",
+  outline: "none",
+  fontFamily: font.body,
+});
+
+const BACK_BTN = {
+  display: "flex", alignItems: "center", gap: 6,
+  background: "rgba(255,255,255,0.07)",
+  border: "1px solid rgba(255,255,255,0.15)",
+  borderRadius: 8,
+  color: "rgba(255,255,255,0.75)",
+  cursor: "pointer",
+  fontSize: 13, fontWeight: 500,
+  padding: "8px 14px",
+  backdropFilter: "blur(8px)",
+  transition: "background 0.15s ease",
+};
+
+export default function MitraLogin({ onLogin, onBack, authenticate }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -14,65 +45,47 @@ export default function MitraLogin({ onLogin, onBack }) {
     setError("");
     setLoading(true);
     setTimeout(() => {
-      if (username === "mitra" && password === "mitra") {
-        onLogin({ username, name: "Mitra User", role: "mitra" });
+      const res = authenticate
+        ? authenticate("mitra", username.trim(), password)
+        : { ok: false, reason: "wrong" };
+      if (!res.ok) {
+        setError(
+          res.reason === "inactive"
+            ? "Akun sedang tidak aktif (di luar rentang tanggal berlaku)."
+            : "Username atau password salah."
+        );
+        setLoading(false);
       } else {
-        setError("Username atau password salah.");
+        onLogin({ username: res.user.username, name: res.user.username, role: "mitra" });
       }
-      setLoading(false);
     }, 500);
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "11px 14px",
-    borderRadius: 8,
-    border: "1px solid rgba(255,255,255,0.18)",
-    background: "rgba(255,255,255,0.08)",
-    fontSize: 14,
-    color: "#fff",
-    boxSizing: "border-box",
-    outline: "none",
-    fontFamily: font.body,
   };
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: "#0A1628",
+        background: BG,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         fontFamily: font.body,
         padding: 24,
+        position: "relative",
       }}
     >
-      {/* Background decoration */}
-      <div style={{
-        position: "fixed",
-        inset: 0,
-        background: "radial-gradient(ellipse at 60% 20%, rgba(255,199,44,0.07) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(14,76,146,0.18) 0%, transparent 60%)",
-        pointerEvents: "none",
-      }} />
-
       {/* Back button */}
-      <div style={{ width: "100%", maxWidth: 420, marginBottom: 20, position: "relative", zIndex: 1 }}>
-        <button
-          onClick={onBack}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: "transparent", border: "none",
-            color: "rgba(255,255,255,0.6)", cursor: "pointer",
-            fontSize: 13, fontWeight: 500, padding: 0,
-            fontFamily: font.body,
-          }}
-        >
-          <ArrowLeft size={15} />
-          Kembali ke Portal
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onBack}
+        style={{ ...BACK_BTN, position: "fixed", top: 28, left: 28, zIndex: 10 }}
+        onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
+        onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.07)"}
+      >
+        <ArrowLeft size={14} />
+        Kembali ke Portal
+      </button>
 
       {/* Card */}
       <div
@@ -84,7 +97,7 @@ export default function MitraLogin({ onLogin, onBack }) {
           border: "1px solid rgba(255,255,255,0.12)",
           borderRadius: 16,
           padding: "36px 32px",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.45)",
           position: "relative",
           zIndex: 1,
         }}
@@ -114,7 +127,7 @@ export default function MitraLogin({ onLogin, onBack }) {
               Username
             </label>
             <input
-              style={inputStyle}
+              style={inputStyle(font)}
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -130,7 +143,7 @@ export default function MitraLogin({ onLogin, onBack }) {
             </label>
             <div style={{ position: "relative" }}>
               <input
-                style={{ ...inputStyle, paddingRight: 44 }}
+                style={{ ...inputStyle(font), paddingRight: 44 }}
                 type={showPw ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -179,12 +192,6 @@ export default function MitraLogin({ onLogin, onBack }) {
             {loading ? "Masuk..." : "Masuk"}
           </button>
         </form>
-
-        <div style={{ marginTop: 20, padding: "12px 14px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textAlign: "center" }}>
-            Demo: username <strong style={{ color: "rgba(255,255,255,0.5)" }}>mitra</strong> / password <strong style={{ color: "rgba(255,255,255,0.5)" }}>mitra</strong>
-          </div>
-        </div>
       </div>
     </div>
   );

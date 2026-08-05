@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { font } from "../../lib/theme";
 import { ADMIN_CREDENTIALS, ROLES } from "../../lib/data";
 import AutoLogo from "../../components/AutoLogo";
 import PartnerLogos from "../../components/PartnerLogos";
 
 const DEFAULT_BG =
-  "radial-gradient(circle at 15% 20%, rgba(255,199,44,0.28), transparent 45%),"
-  + " radial-gradient(circle at 85% 82%, rgba(14,76,146,0.55), transparent 50%),"
-  + " linear-gradient(135deg, #051428 0%, #0A2A50 40%, #0E4C92 100%)";
+  "radial-gradient(ellipse at 15% 20%, rgba(255,199,44,0.20) 0%, transparent 45%),"
+  + " radial-gradient(ellipse at 85% 80%, rgba(14,76,146,0.40) 0%, transparent 50%),"
+  + " linear-gradient(160deg, #010A18 0%, #031428 35%, #061E42 65%, #0A2E60 100%)";
 
 function GlassInput({ endAdornment, style, ...props }) {
   return (
@@ -44,7 +44,8 @@ function GlassInput({ endAdornment, style, ...props }) {
   );
 }
 
-export default function LoginScreen({ onLogin, authenticate }) {
+export default function LoginScreen({ onLogin, onBack, authenticate }) {
+  const sikasRoles = ROLES.filter((r) => r.value !== "mitra");
   const [role, setRole] = useState("humas");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -125,8 +126,32 @@ export default function LoginScreen({ onLogin, authenticate }) {
         backgroundSize: "cover",
         backgroundPosition: "center",
         fontFamily: font.body,
+        position: "relative",
       }}
     >
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          style={{
+            position: "fixed", top: 28, left: 28, zIndex: 10,
+            display: "flex", alignItems: "center", gap: 6,
+            background: "rgba(255,255,255,0.07)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            borderRadius: 8,
+            color: "rgba(255,255,255,0.75)",
+            cursor: "pointer",
+            fontSize: 13, fontWeight: 500,
+            padding: "8px 14px",
+            backdropFilter: "blur(8px)",
+            fontFamily: font.body,
+          }}
+        >
+          <ArrowLeft size={14} />
+          Kembali ke Portal
+        </button>
+      )}
+
       <div
         className="login-glass"
         style={{
@@ -215,7 +240,7 @@ export default function LoginScreen({ onLogin, authenticate }) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: `repeat(${ROLES.length}, 1fr)`,
+              gridTemplateColumns: `repeat(${sikasRoles.length}, 1fr)`,
               gap: 4,
               background: "rgba(0,0,0,0.20)",
               padding: 4,
@@ -224,7 +249,7 @@ export default function LoginScreen({ onLogin, authenticate }) {
               border: "1px solid rgba(255,255,255,0.10)",
             }}
           >
-            {ROLES.map((r) => {
+            {sikasRoles.map((r) => {
               const active = role === r.value;
               return (
                 <button

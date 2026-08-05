@@ -19,6 +19,7 @@ import {
   FilePlus,
   FileSearch,
   Paperclip,
+  Tags,
 } from "lucide-react";
 
 export const OPT = {
@@ -160,6 +161,7 @@ export const ROLES = [
   { value: "humas", label: "Humas" },
   { value: "asman", label: "Asman" },
   { value: "madm", label: "MADM" },
+  { value: "mitra", label: "Mitra" },
 ];
 
 // Akun admin khusus untuk membuka menu "Manajemen Akses" di role Humas.
@@ -171,9 +173,10 @@ export const ADMIN_CREDENTIALS = {
 // Seed 3 user default sesuai kebutuhan demo. Nanti disimpan di state supaya
 // bisa ditambah/edit/dihapus via halaman "Manajemen Akses".
 export const DEFAULT_USERS = [
-  { id: "u-humas-1", role: "humas", username: "1", password: "1", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
-  { id: "u-asman-1", role: "asman", username: "2", password: "2", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
-  { id: "u-madm-1",  role: "madm",  username: "3", password: "3", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  { id: "u-humas-1", role: "humas", username: "1",     password: "1",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  { id: "u-asman-1", role: "asman", username: "2",     password: "2",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  { id: "u-madm-1",  role: "madm",  username: "3",     password: "3",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  { id: "u-mitra-admin", role: "mitra", username: "admin", password: "admin123", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
 ];
 
 // Format Date → "YYYY-MM-DD" pakai timezone lokal (bukan UTC).
@@ -250,8 +253,9 @@ export const MENU = [
   { key: "proposal-evaluasi", label: "Cetak Form Evaluasi",      icon: FileText,  group: "humas", roles: ["humas"] },
   { key: "konten",            label: "Pengelolaan Komunikasi",   icon: Megaphone, group: "humas", roles: ["humas"] },
 
-  { key: "rab",  label: "RAB & Jenis Paket", icon: FileSpreadsheet, group: "perencanaan", roles: ["humas"] },
-  { key: "tor",  label: "TOR", icon: FileText,        group: "perencanaan", roles: ["humas"] },
+  { key: "rab",      label: "RAB & Jenis Paket", icon: FileSpreadsheet, group: "perencanaan", roles: ["humas"] },
+  { key: "tor",      label: "TOR",               icon: FileText,        group: "perencanaan", roles: ["humas"] },
+  { key: "kategori", label: "Kategori",           icon: Tags,            group: "perencanaan", roles: ["humas"] },
 
   { key: "dokumentasi",   label: "Dokumentasi",    icon: Camera,     group: "pelaksanaan", roles: ["humas"] },
   { key: "daftar-hadir",  label: "Daftar Hadir",   icon: Users,      group: "pelaksanaan", roles: ["humas"] },
