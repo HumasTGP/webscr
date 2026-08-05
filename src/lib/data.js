@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 export const OPT = {
-  kategori: ["NON PO", "Cash Card"],
+  kategori: ["NON PO", "Cash Card", "PO"],
   bidang: ["Niaga", "Keuangan", "SDM & Umum", "Perencanaan", "K3L"],
   jenisProgram: ["CSR", "Bina Lingkungan", "Sponsorship", "Donasi"],
   subprogram: [
@@ -242,14 +242,15 @@ export const HELP_CONTACT = {
 
 export const MENU = [
   { key: "dashboard",       label: "Dashboard",              icon: LayoutDashboard, group: "utama", roles: ["humas"] },
-  { key: "asman-dashboard", label: "Dashboard",              icon: LayoutDashboard, group: "utama", roles: ["asman", "madm"] },
+  { key: "asman-dashboard", label: "Dashboard Asman",        icon: LayoutDashboard, group: "utama", roles: ["asman"] },
+  { key: "madm-dashboard",  label: "Dashboard MADM",         icon: LayoutDashboard, group: "utama", roles: ["madm"] },
   { key: "inbox",           label: "Inbox Paket Kas",        icon: Inbox,           group: "utama", roles: ["asman", "madm"] },
 
   { key: "proposal-rekap",    label: "Rekap Pengajuan Proposal", icon: Handshake, group: "humas", roles: ["humas"] },
   { key: "proposal-evaluasi", label: "Cetak Form Evaluasi",      icon: FileText,  group: "humas", roles: ["humas"] },
   { key: "konten",            label: "Pengelolaan Komunikasi",   icon: Megaphone, group: "humas", roles: ["humas"] },
 
-  { key: "rab",  label: "RAB", icon: FileSpreadsheet, group: "perencanaan", roles: ["humas"] },
+  { key: "rab",  label: "RAB & Jenis Paket", icon: FileSpreadsheet, group: "perencanaan", roles: ["humas"] },
   { key: "tor",  label: "TOR", icon: FileText,        group: "perencanaan", roles: ["humas"] },
 
   { key: "dokumentasi",   label: "Dokumentasi",    icon: Camera,     group: "pelaksanaan", roles: ["humas"] },
@@ -279,7 +280,7 @@ export const MENU_GROUPS = [
   { key: "admin", label: "Admin" },
   { key: "utama", label: "Ringkasan" },
   { key: "humas", label: "Humas & Publikasi" },
-  { key: "perencanaan", label: "Perencanaan" },
+  { key: "perencanaan", label: "Perencanaan & RAB" },
   { key: "pelaksanaan", label: "Pelaksanaan" },
   { key: "pembayaran", label: "Pembayaran" },
   { key: "administrasi", label: "Administrasi" },

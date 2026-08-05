@@ -291,6 +291,7 @@ export const autoFromRab = {
     procost: r.procost,
     expType: r.expType,
     judulProgram: r.judulKegiatan,
+    kategori: r.kategori || "",
     jumlahBarang: (r.items || []).length,
     hargaTotal: rupiah(r.totalEvaluasi),
     bidang: r.bidang,

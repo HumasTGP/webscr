@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Home } from "lucide-react";
-import { T, font } from "../lib/theme";
-import { MENU, MENU_GROUPS, ROLES } from "../lib/data";
-import { roleInitials } from "../lib/utils";
-import Badge from "./Badge";
-import AutoLogo from "./AutoLogo";
+import { T, font } from "../../lib/theme";
+import { MENU, MENU_GROUPS, ROLES } from "../../lib/data";
+import { roleInitials } from "../../lib/utils";
+import Badge from "../../components/Badge";
+import AutoLogo from "../../components/AutoLogo";
 
 const fade = (collapsed, extra = {}) => ({
   opacity: collapsed ? 0 : 1,

@@ -79,7 +79,7 @@ export async function generateSikasPdf({
   doc.text("PLN INDONESIA POWER · UBP PRIOK", MARGIN, MARGIN);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("SIREMON - Sistem Realisasi dan Monitoring", MARGIN, MARGIN + 4);
+  doc.text("SIKAS - Sistem Informasi Kas", MARGIN, MARGIN + 4);
 
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
@@ -217,7 +217,7 @@ export async function generateSikasPdf({
   doc.setFontSize(7.5);
   doc.setTextColor(140);
   doc.text(
-    `Dicetak: ${new Date().toLocaleString("id-ID")} - SIREMON`,
+    `Dicetak: ${new Date().toLocaleString("id-ID")} - SIKAS`,
     MARGIN,
     PAGE.h - 8
   );
