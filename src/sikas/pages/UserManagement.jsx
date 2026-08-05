@@ -13,10 +13,11 @@ import PageHeader from "../../components/PageHeader";
 import DataTable from "../../components/DataTable";
 
 const ROLE_TONE = {
-  humas: { color: "#0E4C92", bg: "#DEEBFA" },
-  asman: { color: "#8A6D00", bg: "#FFF4D0" },
-  madm:  { color: "#3F1D9B", bg: "#EBE2FF" },
-  mitra: { color: "#065F46", bg: "#D1FAE5" },
+  humas:   { color: "#0E4C92", bg: "#DEEBFA" },
+  asman:   { color: "#8A6D00", bg: "#FFF4D0" },
+  madm:    { color: "#3F1D9B", bg: "#EBE2FF" },
+  mitra:   { color: "#065F46", bg: "#D1FAE5" },
+  silapak: { color: "#0F5457", bg: "#CCFBF1" },
 };
 
 function RolePill({ role }) {

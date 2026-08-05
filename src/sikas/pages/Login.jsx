@@ -45,7 +45,7 @@ function GlassInput({ endAdornment, style, ...props }) {
 }
 
 export default function LoginScreen({ onLogin, onBack, authenticate }) {
-  const sikasRoles = ROLES.filter((r) => r.value !== "mitra");
+  const sikasRoles = ROLES.filter((r) => r.value !== "mitra" && r.value !== "silapak");
   const [role, setRole] = useState("humas");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

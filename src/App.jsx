@@ -443,6 +443,7 @@ export default function App() {
     if (!silapakLoggedIn) {
       return (
         <SilapakLogin
+          authenticate={authenticate}
           onLogin={() => setSilapakLoggedIn(true)}
           onBack={() => setPortal(null)}
         />

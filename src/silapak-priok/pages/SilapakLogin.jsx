@@ -36,11 +36,7 @@ function GlassInput({ endAdornment, style, ...props }) {
   );
 }
 
-// Akun bersama satpam. Ganti sesuai kebutuhan tim keamanan.
-const SILAPAK_USERNAME = "satpam.priok";
-const SILAPAK_PASSWORD = "lapakpriok26";
-
-export default function SilapakLogin({ onLogin, onBack }) {
+export default function SilapakLogin({ onLogin, onBack, authenticate }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -53,8 +49,15 @@ export default function SilapakLogin({ onLogin, onBack }) {
       setError("Username dan password wajib diisi.");
       return;
     }
-    if (username.trim() !== SILAPAK_USERNAME || password !== SILAPAK_PASSWORD) {
-      setError("Username atau password salah.");
+    const res = authenticate
+      ? authenticate("silapak", username.trim(), password)
+      : { ok: false, reason: "wrong" };
+    if (!res.ok) {
+      setError(
+        res.reason === "inactive"
+          ? "Akun sedang tidak aktif (di luar rentang tanggal berlaku)."
+          : "Username atau password salah."
+      );
       return;
     }
     setError("");

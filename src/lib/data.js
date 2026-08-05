@@ -158,10 +158,11 @@ export const OPT = {
 };
 
 export const ROLES = [
-  { value: "humas", label: "Humas" },
-  { value: "asman", label: "Asman" },
-  { value: "madm", label: "MADM" },
-  { value: "mitra", label: "Mitra" },
+  { value: "humas",   label: "Humas" },
+  { value: "asman",   label: "Asman" },
+  { value: "madm",    label: "MADM" },
+  { value: "mitra",   label: "Mitra" },
+  { value: "silapak", label: "Si Lapak" },
 ];
 
 // Akun admin khusus untuk membuka menu "Manajemen Akses" di role Humas.
@@ -176,7 +177,8 @@ export const DEFAULT_USERS = [
   { id: "u-humas-1", role: "humas", username: "1",     password: "1",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
   { id: "u-asman-1", role: "asman", username: "2",     password: "2",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
   { id: "u-madm-1",  role: "madm",  username: "3",     password: "3",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
-  { id: "u-mitra-admin", role: "mitra", username: "admin", password: "admin123", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  { id: "u-mitra-admin",   role: "mitra",   username: "admin",        password: "admin123",    activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  { id: "u-silapak-1",    role: "silapak", username: "satpam.priok", password: "lapakpriok26", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
 ];
 
 // Format Date → "YYYY-MM-DD" pakai timezone lokal (bukan UTC).
