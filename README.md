@@ -8,7 +8,7 @@ Aplikasi web internal untuk mengelola seluruh alur kerja program CSR dan TJSL, m
 
 | Modul | Deskripsi | Pengguna |
 |---|---|---|
-| **SIKAS** | Pengelolaan RAB, TOR, BAST, BAPP, PI, dokumen pembayaran, laporan, dan approval | Humas / Asman / MADM |
+| **SIKAS** | Pengelolaan RAB, Kategori, TOR, BAST, BAPP, PI, dokumen pembayaran, laporan, dan approval | Humas / Asman / MADM |
 | **Si Lapak Priok** | Manajemen paket/logistik harian, shift satpam, buku tamu, riwayat aktivitas | Operator Lapak |
 | **Pengajuan Mitra** | Portal pengajuan proposal mitra eksternal dengan tracking approval multi-level | Mitra |
 
@@ -24,7 +24,7 @@ Aplikasi web internal untuk mengelola seluruh alur kerja program CSR dan TJSL, m
 ## Instalasi & Menjalankan
 
 ```bash
-# Clone repo
+# Clone repo (pertama kali)
 git clone https://github.com/HumasTGP/webscr.git
 cd webscr
 
@@ -43,6 +43,81 @@ npm run build
 
 # Preview hasil build production
 npm run preview
+```
+
+## Git - Sinkronisasi dengan GitHub
+
+### Mengambil update terbaru dari GitHub (Pull)
+
+Lakukan ini setiap kali ingin mendapatkan perubahan terbaru sebelum mulai bekerja:
+
+```bash
+# Pastikan kamu berada di branch main
+git checkout main
+
+# Ambil dan terapkan perubahan terbaru dari GitHub
+git pull origin main
+```
+
+Setelah pull, jalankan ulang:
+
+```bash
+npm install   # jika ada dependensi baru
+npm run dev   # jalankan kembali dev server
+```
+
+### Menyimpan & mengirim perubahan ke GitHub (Push)
+
+Gunakan alur berikut setiap kali selesai membuat perubahan:
+
+```bash
+# 1. Cek file mana yang berubah
+git status
+
+# 2. Tambahkan file yang ingin disimpan
+#    Untuk semua file yang berubah:
+git add .
+
+#    Atau pilih file tertentu saja:
+git add src/sikas/pages/Rab.jsx
+
+# 3. Buat commit dengan pesan yang jelas
+git commit -m "feat: deskripsi singkat perubahan yang dilakukan"
+
+# 4. Kirim ke GitHub
+git push origin main
+```
+
+### Contoh pesan commit yang baik
+
+```bash
+git commit -m "feat: tambah halaman laporan bulanan"
+git commit -m "fix: perbaiki bug kategori tidak tersimpan"
+git commit -m "update: perbarui template BAST"
+git commit -m "docs: perbarui README"
+```
+
+### Cek riwayat perubahan
+
+```bash
+# Lihat log commit terbaru
+git log --oneline -10
+
+# Lihat siapa yang mengubah file tertentu
+git log --oneline src/App.jsx
+```
+
+### Jika ada konflik saat pull
+
+```bash
+# Simpan perubahan lokal sementara
+git stash
+
+# Ambil update terbaru
+git pull origin main
+
+# Kembalikan perubahan lokal
+git stash pop
 ```
 
 ## Akun Login
