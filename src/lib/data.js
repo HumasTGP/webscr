@@ -257,7 +257,14 @@ export const MENU = [
 
   { key: "rab",      label: "RAB & Jenis Paket", icon: FileSpreadsheet, group: "perencanaan", roles: ["humas"] },
   { key: "tor",      label: "TOR",               icon: FileText,        group: "perencanaan", roles: ["humas"] },
-  { key: "kategori", label: "Kategori",           icon: Tags,            group: "perencanaan", roles: ["humas"] },
+  {
+    key: "kategori", label: "Kategori", icon: Tags, group: "perencanaan", roles: ["humas"],
+    children: [
+      { key: "kategori-npo", label: "NON PO" },
+      { key: "kategori-po",  label: "PO" },
+      { key: "kategori-cc",  label: "Cash Card" },
+    ],
+  },
 
   { key: "dokumentasi",   label: "Dokumentasi",    icon: Camera,     group: "pelaksanaan", roles: ["humas"] },
   { key: "daftar-hadir",  label: "Daftar Hadir",   icon: Users,      group: "pelaksanaan", roles: ["humas"] },

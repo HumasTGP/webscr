@@ -53,7 +53,6 @@ import ChecklistDokumenPage from "./sikas/pages/ChecklistDokumen";
 import FormVerifikasiPage from "./sikas/pages/FormVerifikasi";
 import Lampiran1Page from "./sikas/pages/Lampiran1";
 import Lampiran2Page from "./sikas/pages/Lampiran2";
-import KategoriPage from "./sikas/pages/KategoriPage";
 import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
 
 const seed = (prefix, rows) =>
@@ -276,7 +275,9 @@ export default function App() {
         />
       ),
       rab: <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} />,
-      kategori: <KategoriPage rab={rab} setRab={setRab} notify={notify} />,
+      "kategori-npo": <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="NON PO" />,
+      "kategori-po":  <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="PO" />,
+      "kategori-cc":  <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="Cash Card" />,
       tor: (
         <GenericWizard
           title="TOR"
