@@ -36,9 +36,10 @@ export default function SilapakLogin({ onLogin, onBack, authenticate }) {
       subtitle="Sistem Pengelolaan Penerimaan Tamu dan Paket"
       onBack={onBack}
       illustration={<SilapakIllustration />}
-      accent="#147A36"
-      accentSoft="#EEF8F0"
+      accent="#FFC5AA"
+      accentSoft="#FFF4EE"
       brandTitle="SI LAPAK PRIOK"
+      backgroundImage="/portal-bg.png"
     >
       <form onSubmit={submit} style={{ fontFamily: font.body }}>
         <div className="gl-field">
