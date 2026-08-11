@@ -29,7 +29,7 @@ export const PORTAL_CONFIG = {
     name:    "PT PLN Indonesia Power",
     unit:    "Unit Bisnis Pembangkitan Priok",
     phone:   "081219540978",
-    email:   "ubppriok@plnindonesiapower.co.id", // Ganti dengan email resmi
+    email:   "humastgp@gmail.com",
     address: "Jl. Yos Sudarso, Tanjung Priok, Jakarta Utara 14310",
   },
 };
