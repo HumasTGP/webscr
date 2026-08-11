@@ -61,13 +61,14 @@ export default function LoginScreen({ onLogin, onBack, authenticate, fixedRole }
   return (
     <GlassLoginShell
       title={`SAKTI - ${roleLabel}`}
-      subtitle={<>Sistem Aplikasi Keuangan Terintegrasi<br />PLN Indonesia Power</>}
+      subtitle="Sistem Aplikasi Keuangan Terintegrasi"
       onBack={onBack}
       illustration={<SikasIllustration />}
-      accent="#0B57C8"
-      accentSoft="#EAF3FF"
+      accent="#FF9D9D"
+      accentSoft="#FFF0F0"
       brandTitle="SAKTI"
       roleLabel={roleLabel}
+      backgroundImage="/login-plant.png"
     >
       <form onSubmit={submit} style={{ fontFamily: font.body }}>
         <div className="gl-field">
