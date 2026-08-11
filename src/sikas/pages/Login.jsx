@@ -7,8 +7,17 @@ import { SikasIllustration } from "../../portal/components/LoginIllustrations";
 
 const ROLE_LABEL = { humas: "HUMAS", asman: "ASMAN", madm: "MADM" };
 
-export default function LoginScreen({ onLogin, onBack, authenticate, fixedRole = "humas" }) {
-  const role = fixedRole;
+function selectedRole(fallback = "humas") {
+  try {
+    const stored = window.localStorage.getItem("portal.sakti.role");
+    return ROLE_LABEL[stored] ? stored : fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+
+export default function LoginScreen({ onLogin, onBack, authenticate, fixedRole }) {
+  const [role] = useState(() => fixedRole || selectedRole());
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
