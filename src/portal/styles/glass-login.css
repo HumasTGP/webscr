@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 120px 24px 115px;
+  padding: 112px 24px 104px;
   box-sizing: border-box;
   background: #dce9f4;
   color: #0f2b5b;
@@ -13,39 +13,49 @@
 .gl-page::before {
   content: "";
   position: absolute;
-  inset: -18px;
-  background: linear-gradient(rgba(231,241,250,.24), rgba(231,241,250,.24)), url('/portal-bg.jpg') center/cover no-repeat;
-  filter: blur(7px);
-  transform: scale(1.035);
+  inset: -26px;
+  background: var(--gl-background-image) center/cover no-repeat;
+  filter: blur(10px);
+  transform: scale(1.06);
 }
 .gl-page::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(225,237,248,.22);
+  background: rgba(224, 235, 246, .42);
   pointer-events: none;
 }
 .gl-top-brand {
   position: absolute;
-  top: 38px;
+  top: 32px;
   left: 48px;
   z-index: 3;
+  display: flex;
+  align-items: center;
 }
-.gl-top-brand img { width: 260px; max-height: 72px; object-fit: contain; object-position: left center; }
+.gl-top-brand img {
+  display: block;
+  width: 218px;
+  height: auto;
+  max-height: 64px;
+  object-fit: contain;
+  object-position: left center;
+  background: transparent;
+}
 .gl-card {
   position: relative;
   z-index: 2;
   display: grid;
   grid-template-columns: 56% 44%;
   width: min(1090px, 90vw);
-  min-height: 680px;
+  min-height: 650px;
   border-radius: 24px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 24px 54px rgba(7, 34, 76, .24);
 }
 .gl-form-panel {
-  background: rgba(255,255,255,.97);
+  background: rgba(255,255,255,.98);
   padding: 54px 58px 46px;
   display: flex;
   flex-direction: column;
@@ -53,12 +63,14 @@
 .gl-visual-panel {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--gl-soft) 0%, #fff 76%);
+  background: linear-gradient(180deg, var(--gl-soft) 0%, #ffffff 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 72px 28px 0;
+  justify-content: center;
+  padding: 58px 34px;
   box-sizing: border-box;
+  text-align: center;
 }
 .gl-back-btn {
   display: inline-flex;
@@ -162,28 +174,33 @@
 }
 .gl-forgot a { color: var(--gl-accent); font-weight: 700; text-decoration: none; }
 .gl-visual-icon {
-  width: 156px;
-  height: 156px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: rgba(255,255,255,.62);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.92), 0 0 0 14px rgba(255,255,255,.28);
-  z-index: 3;
+  background: rgba(255,255,255,.72);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.95), 0 0 0 14px rgba(255,255,255,.26);
 }
 .gl-visual-icon svg { width: 124px !important; height: 124px !important; }
+.gl-app-logo {
+  display: block;
+  width: 128px;
+  max-width: 76%;
+  max-height: 116px;
+  object-fit: contain;
+  background: transparent;
+}
 .gl-brand-title {
-  z-index: 3;
-  margin-top: 25px;
+  margin-top: 34px;
   color: var(--gl-accent);
-  font-size: 29px;
+  font-size: 30px;
   font-weight: 800;
   text-align: center;
   text-transform: uppercase;
 }
 .gl-role-pill {
-  z-index: 3;
-  margin-top: 9px;
+  margin-top: 10px;
   min-width: 120px;
   text-align: center;
   color: #fff;
@@ -193,28 +210,26 @@
   font-size: 14px;
   font-weight: 800;
 }
-.gl-yellow-line { z-index: 3; width: 37px; height: 4px; border-radius: 99px; background: #f4cf00; margin: 17px 0 19px; }
-.gl-company { z-index: 3; color: #102f60; font-size: 17px; font-weight: 600; text-align: center; }
-.gl-plant-art {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 47%;
-  background: linear-gradient(180deg, rgba(255,255,255,.1), color-mix(in srgb, var(--gl-soft) 45%, transparent)), url('/portal-bg.jpg') 68% center/cover no-repeat;
-  opacity: .72;
-  filter: saturate(.85) contrast(.95);
+.gl-yellow-line {
+  width: 37px;
+  height: 4px;
+  border-radius: 99px;
+  background: #f4cf00;
+  margin: 18px 0 20px;
 }
-.gl-wave { position: absolute; left: -8%; right: -8%; height: 120px; border-radius: 50% 50% 0 0 / 60% 60% 0 0; z-index: 2; }
-.gl-wave-one { bottom: -54px; background: color-mix(in srgb, var(--gl-accent) 24%, #fff); transform: rotate(-4deg); }
-.gl-wave-two { bottom: -76px; background: var(--gl-accent); transform: rotate(2deg); }
+.gl-company {
+  color: #102f60;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
 .gl-footer {
   position: absolute;
   z-index: 3;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 76px;
+  height: 72px;
   display: grid;
   place-items: center;
   color: #fff;
@@ -224,13 +239,13 @@
 .gl-role-tabs { display: none; }
 
 @media (max-width: 800px) {
-  .gl-page { padding: 95px 15px 92px; }
+  .gl-page { padding: 92px 15px 88px; }
   .gl-top-brand { top: 20px; left: 20px; }
-  .gl-top-brand img { width: 190px; max-height: 52px; }
+  .gl-top-brand img { width: 170px; max-height: 50px; }
   .gl-card { grid-template-columns: 1fr; min-height: auto; width: min(520px, 94vw); }
   .gl-visual-panel { display: none; }
   .gl-form-panel { padding: 38px 28px 34px; }
   .gl-title { font-size: 34px; }
   .gl-subtitle { font-size: 14px; }
-  .gl-footer { height: 62px; font-size: 12px; text-align: center; padding: 0 10px; }
+  .gl-footer { height: 60px; font-size: 12px; text-align: center; padding: 0 10px; }
 }
