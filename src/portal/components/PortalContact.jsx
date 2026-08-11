@@ -3,7 +3,6 @@ import { MapPin, Phone, Mail, Send, Facebook, Instagram, Youtube } from "lucide-
 import { PORTAL_CONFIG } from "../config/portalConfig";
 import { useReveal } from "../hooks/useReveal";
 
-// TikTok icon (tidak ada di lucide-react)
 function TikTokIcon({ size = 16 }) {
   return (
     <svg
@@ -38,7 +37,7 @@ export default function PortalContact() {
           ref={headerRef}
           className={`portal-section-header portal-reveal ${headerVisible ? "visible" : ""}`}
         >
-          <h2 className="portal-section-title">Hubungi Kami</h2>
+          <h2 className="portal-section-title">Kami Siap Membantu Anda</h2>
           <div className="portal-section-divider" />
           <p className="portal-section-subtitle">
             Ada pertanyaan atau ingin berkolaborasi? Kirim pesan dan tim kami
@@ -76,18 +75,11 @@ function ContactForm() {
       `Pesan:\n${form.message}\n\n` +
       `Terima kasih.`
     );
-    window.open(
-      `https://wa.me/${number}?text=${text}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
+    window.open(`https://wa.me/${number}?text=${text}`, "_blank", "noopener,noreferrer");
   };
 
   return (
-    <div
-      ref={ref}
-      className={`portal-contact-form-wrap portal-reveal ${visible ? "visible" : ""}`}
-    >
+    <div ref={ref} className={`portal-contact-form-wrap portal-reveal ${visible ? "visible" : ""}`}>
       <div className="portal-contact-form-title">Kirim Pesan</div>
       <p className="portal-contact-form-sub">
         <Send size={13} style={{ flexShrink: 0 }} />
@@ -204,7 +196,6 @@ function ContactMap() {
         </div>
       </div>
 
-      {/* Social media */}
       <div className="portal-contact-social">
         {CONTACT_SOCIAL.map(({ icon: Icon, href, label }) => (
           <a
@@ -215,7 +206,7 @@ function ContactMap() {
             className="portal-contact-social-btn"
             aria-label={label}
           >
-            <Icon size={16} />
+            <Icon size={20} />
           </a>
         ))}
       </div>

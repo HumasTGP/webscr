@@ -2,8 +2,7 @@ import { Facebook, Instagram, Youtube } from "lucide-react";
 import AutoLogo from "../../components/AutoLogo";
 import { PORTAL_CONFIG } from "../config/portalConfig";
 
-// TikTok icon (tidak ada di lucide-react)
-function TikTokIcon({ size = 16 }) {
+function TikTokIcon({ size = 20 }) {
   return (
     <svg
       width={size} height={size}
@@ -27,6 +26,14 @@ const SOCIAL_LINKS = [
   { icon: Youtube,    href: PORTAL_CONFIG.social.youtube,   label: "YouTube PLN Indonesia Power"   },
 ];
 
+const NAVIGASI_LINKS = [
+  { label: "Beranda",          id: "hero"     },
+  { label: "Akses Sistem Kami", id: "services" },
+  { label: "Kawasan Industri",  id: "ruko"     },
+  { label: "Tim Kami",          id: "team"     },
+  { label: "Hubungi Kami",      id: "contact"  },
+];
+
 export default function PortalFooter({ onSelect }) {
   const scrollTo = (id) =>
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -36,8 +43,8 @@ export default function PortalFooter({ onSelect }) {
       <div className="portal-footer-inner">
         <div className="portal-footer-top">
 
-          {/* Kolom brand */}
-          <div>
+          {/* Kolom 1: Brand */}
+          <div className="portal-footer-brand-col">
             <div className="portal-footer-logo-row">
               <AutoLogo
                 alt="PLN Indonesia Power"
@@ -58,51 +65,27 @@ export default function PortalFooter({ onSelect }) {
               Bisnis Pembangkitan Priok, mendukung digitalisasi operasional
               dan tata kelola perusahaan.
             </p>
-            <div className="portal-footer-social">
-              {SOCIAL_LINKS.map(({ icon: Icon, href, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="portal-footer-social-btn"
-                  aria-label={label}
-                >
-                  <Icon size={16} />
-                </a>
-              ))}
-            </div>
           </div>
 
-          {/* Kolom portal */}
+          {/* Kolom 2: Navigasi */}
           <div>
-            <div className="portal-footer-col-title">Portal</div>
+            <div className="portal-footer-col-title">Navigasi</div>
+            <ul className="portal-footer-links">
+              {NAVIGASI_LINKS.map(({ label, id }) => (
+                <li key={id}>
+                  <button onClick={() => scrollTo(id)}>{label}</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Kolom 3: Layanan */}
+          <div>
+            <div className="portal-footer-col-title">Layanan</div>
             <ul className="portal-footer-links">
               <li><button onClick={() => onSelect("sikas")}>SIKAS PLN</button></li>
               <li><button onClick={() => onSelect("silapak")}>Si Lapak Priok</button></li>
               <li><button onClick={() => onSelect("mitra")}>Pengajuan Mitra</button></li>
-            </ul>
-          </div>
-
-          {/* Kolom navigasi */}
-          <div>
-            <div className="portal-footer-col-title">Navigasi</div>
-            <ul className="portal-footer-links">
-              <li>
-                <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-                  Beranda
-                </button>
-              </li>
-              <li><button onClick={() => scrollTo("ruko")}>Kawasan</button></li>
-              <li><button onClick={() => scrollTo("team")}>Tim Kami</button></li>
-              <li><button onClick={() => scrollTo("contact")}>Kontak</button></li>
-            </ul>
-          </div>
-
-          {/* Kolom tautan */}
-          <div>
-            <div className="portal-footer-col-title">Tautan</div>
-            <ul className="portal-footer-links">
               <li>
                 <a href={PORTAL_CONFIG.rukoPriok.url} target="_blank" rel="noopener noreferrer">
                   Ruko Priok
@@ -115,6 +98,30 @@ export default function PortalFooter({ onSelect }) {
               </li>
             </ul>
           </div>
+
+          {/* Kolom 4: Ikuti Kami */}
+          <div>
+            <div className="portal-footer-col-title">Ikuti Kami</div>
+            <div className="portal-footer-social">
+              {SOCIAL_LINKS.map(({ icon: Icon, href, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="portal-footer-social-btn"
+                  aria-label={label}
+                >
+                  <Icon size={20} />
+                </a>
+              ))}
+            </div>
+            <p className="portal-footer-social-desc">
+              Ikuti kami di media sosial untuk informasi terbaru seputar
+              PLN Indonesia Power UBP Priok.
+            </p>
+          </div>
+
         </div>
 
         <div className="portal-footer-bottom">

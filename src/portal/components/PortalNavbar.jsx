@@ -1,56 +1,50 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import AutoLogo from "../../components/AutoLogo";
 
 const NAV_LINKS = [
-  { label: "Beranda",  id: "hero"     },
-  { label: "Sistem",   id: "services" },
-  { label: "Kawasan",  id: "ruko"     },
-  { label: "Tim",      id: "team"     },
-  { label: "Kontak",   id: "contact"  },
+  { label: "Beranda",          id: "hero"     },
+  { label: "Akses Sistem Kami", id: "services" },
+  { label: "Kawasan Industri",  id: "ruko"     },
+  { label: "Tim Kami",          id: "team"     },
+  { label: "Hubungi Kami",      id: "contact"  },
 ];
 
 export default function PortalNavbar({ onBackToWork }) {
-  const [scrolled,  setScrolled]  = useState(false);
-  const [menuOpen,  setMenuOpen]  = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [active, setActive]     = useState("hero");
 
+  // Track which section is in view
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 60);
-      if (menuOpen) setMenuOpen(false);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [menuOpen]);
+    const ids = NAV_LINKS.map((l) => l.id);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(e.target.id);
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const scrollTo = (id) => {
-    if (id === "hero") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     setMenuOpen(false);
   };
 
   return (
-    <nav className={`portal-navbar ${scrolled ? "scrolled" : "top"}`}>
+    <nav className="portal-navbar">
       <div className="portal-nav-inner">
-
         {/* Logo */}
-        <button
-          className="portal-nav-logo"
-          onClick={() => scrollTo("hero")}
-          aria-label="Kembali ke atas"
-        >
+        <button className="portal-nav-logo" onClick={() => scrollTo("hero")} aria-label="Beranda">
           <AutoLogo
             alt="PLN Indonesia Power"
-            style={{
-              height: 38,
-              width: "auto",
-              filter: scrolled ? "none" : "brightness(0) invert(1)",
-              flexShrink: 0,
-              transition: "filter 0.3s ease",
-            }}
+            style={{ height: 36, width: "auto", flexShrink: 0 }}
           />
           <div className="portal-nav-logo-text-wrap">
             <span className="portal-nav-logo-text">PLN Indonesia Power</span>
@@ -58,53 +52,41 @@ export default function PortalNavbar({ onBackToWork }) {
           </div>
         </button>
 
-        {/* Nav links — desktop */}
-        <ul className="portal-nav-links" role="list">
-          {NAV_LINKS.map((link) => (
-            <li key={link.id}>
+        {/* Desktop links */}
+        <ul className="portal-nav-links">
+          {NAV_LINKS.map(({ label, id }) => (
+            <li key={id}>
               <button
-                className="portal-nav-link"
-                onClick={() => scrollTo(link.id)}
+                className={`portal-nav-link${active === id ? " active" : ""}`}
+                onClick={() => scrollTo(id)}
               >
-                {link.label}
+                {label}
               </button>
             </li>
           ))}
         </ul>
 
-        {/* Right: CTA + hamburger */}
-        <div className="portal-nav-right">
-          <button className="portal-nav-cta" onClick={onBackToWork}>
-            Akses Sistem
-          </button>
-          <button
-            className="portal-nav-hamburger"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
+        {/* Hamburger */}
+        <button
+          className="portal-nav-hamburger"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
+        >
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
       </div>
 
       {/* Mobile menu */}
-      <div className={`portal-nav-mobile-menu ${menuOpen ? "open" : ""}`}>
-        {NAV_LINKS.map((link) => (
+      <div className={`portal-nav-mobile-menu${menuOpen ? " open" : ""}`}>
+        {NAV_LINKS.map(({ label, id }) => (
           <button
-            key={link.id}
-            className="portal-nav-mobile-link"
-            onClick={() => scrollTo(link.id)}
+            key={id}
+            className={`portal-nav-mobile-link${active === id ? " active" : ""}`}
+            onClick={() => scrollTo(id)}
           >
-            {link.label}
+            {label}
           </button>
         ))}
-        <button
-          className="portal-nav-mobile-cta"
-          onClick={() => { onBackToWork(); setMenuOpen(false); }}
-        >
-          Akses Sistem
-        </button>
       </div>
     </nav>
   );
