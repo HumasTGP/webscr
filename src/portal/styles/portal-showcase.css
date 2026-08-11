@@ -113,15 +113,28 @@
 .gateway-hero-photo {
   position: absolute;
   inset: 0;
-  background-image: url('/portal-bg.jpg');
+  background-image: url('/portal-bg.png');
   background-size: cover;
   background-position: center right;
   transform: scale(1.01);
 }
 
+.gateway-hero::after {
+  content: "";
+  position: absolute;
+  right: 5.5%;
+  bottom: 0;
+  width: min(49vw, 780px);
+  height: 88%;
+  background: url('/hero-worker.png') right bottom / contain no-repeat;
+  z-index: 1;
+  pointer-events: none;
+}
+
 .gateway-hero-fade {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(90deg,
     #ffffff 0%,
     rgba(255,255,255,.99) 22%,
@@ -133,7 +146,7 @@
 
 .gateway-copy {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: min(600px, 46vw);
   padding: 168px 0 120px 62px;
 }
@@ -190,6 +203,7 @@
   .gateway-copy { padding: 110px 0 80px 42px; width: 54vw; }
   .gateway-eyebrow { font-size: 19px; }
   .gateway-copy p { font-size: 16px; }
+  .gateway-hero::after { right: 2%; width: 52vw; height: 82%; }
 }
 
 @media (max-width: 760px) {
@@ -202,6 +216,7 @@
   .gateway-sakti, .gateway-sakti > .gateway-nav-link { height: 42px; }
   .gateway-dropdown { position: fixed; top: 104px; left: 20px; transform: none; }
   .gateway-hero-photo { background-position: 64% center; }
+  .gateway-hero::after { right: -12%; width: 76vw; height: 58%; opacity: .48; }
   .gateway-hero-fade { background: linear-gradient(90deg, rgba(255,255,255,.98), rgba(255,255,255,.84) 68%, rgba(255,255,255,.34)); }
   .gateway-copy { width: auto; padding: 90px 26px 70px; }
   .gateway-copy h1 { font-size: clamp(45px, 13vw, 66px); letter-spacing: -1.6px; }
