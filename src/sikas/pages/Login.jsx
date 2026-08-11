@@ -1,13 +1,23 @@
 import { useState } from "react";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { font } from "../../lib/theme";
-import { ADMIN_CREDENTIALS, ROLES } from "../../lib/data";
+import { ADMIN_CREDENTIALS, HELP_CONTACT } from "../../lib/data";
 import GlassLoginShell from "../../portal/components/GlassLoginShell";
 import { SikasIllustration } from "../../portal/components/LoginIllustrations";
 
-export default function LoginScreen({ onLogin, onBack, authenticate }) {
-  const sikasRoles = ROLES.filter((r) => r.value !== "mitra" && r.value !== "silapak");
-  const [role, setRole] = useState("humas");
+const ROLE_LABEL = { humas: "HUMAS", asman: "ASMAN", madm: "MADM" };
+
+function selectedRole(fallback = "humas") {
+  try {
+    const stored = window.localStorage.getItem("portal.sakti.role");
+    return ROLE_LABEL[stored] ? stored : fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+
+export default function LoginScreen({ onLogin, onBack, authenticate, fixedRole }) {
+  const [role] = useState(() => fixedRole || selectedRole());
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,14 +41,12 @@ export default function LoginScreen({ onLogin, onBack, authenticate }) {
       setTimeout(() => onLogin({ role, username: u, isAdmin: true }), 350);
       return;
     }
-    const res = authenticate
-      ? authenticate(role, u, password)
-      : { ok: false, reason: "wrong" };
+    const res = authenticate ? authenticate(role, u, password) : { ok: false, reason: "wrong" };
     if (!res.ok) {
       setError(
         res.reason === "inactive"
           ? "Akun sedang tidak aktif (di luar rentang tanggal berlaku)."
-          : "Username atau password salah untuk role yang dipilih."
+          : "Username atau password salah."
       );
       return;
     }
@@ -47,29 +55,21 @@ export default function LoginScreen({ onLogin, onBack, authenticate }) {
     setTimeout(() => onLogin({ role, username: u }), 350);
   };
 
+  const waUrl = `https://wa.me/${HELP_CONTACT.waNumber}?text=${encodeURIComponent(HELP_CONTACT.waMessage)}`;
+  const roleLabel = ROLE_LABEL[role] || "HUMAS";
+
   return (
     <GlassLoginShell
-      title="Sakti"
-      subtitle="Sistem Administrasi & Kelola Terintegrasi — PLN Indonesia Power UBP Priok"
+      title={`SAKTI - ${roleLabel}`}
+      subtitle={<>Sistem Aplikasi Keuangan Terintegrasi<br />PLN Indonesia Power</>}
       onBack={onBack}
       illustration={<SikasIllustration />}
+      accent="#0B57C8"
+      accentSoft="#EAF3FF"
+      brandTitle="SAKTI"
+      roleLabel={roleLabel}
     >
       <form onSubmit={submit} style={{ fontFamily: font.body }}>
-        {/* Role tabs */}
-        <div className="gl-role-tabs">
-          {sikasRoles.map((r) => (
-            <button
-              key={r.value}
-              type="button"
-              className={`gl-role-tab${role === r.value ? " active" : ""}`}
-              onClick={() => setRole(r.value)}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Username */}
         <div className="gl-field">
           <label className="gl-label">Username</label>
           <input
@@ -78,14 +78,14 @@ export default function LoginScreen({ onLogin, onBack, authenticate }) {
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Masukkan username"
             autoComplete="username"
+            autoFocus
           />
         </div>
 
-        {/* Password */}
         <div className="gl-field">
           <label className="gl-label">Password</label>
           <input
-            className={`gl-input has-eye`}
+            className="gl-input has-eye"
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -98,29 +98,16 @@ export default function LoginScreen({ onLogin, onBack, authenticate }) {
             onClick={() => setShowPassword((v) => !v)}
             aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
           >
-            {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
           </button>
         </div>
 
-        {error && (
-          <div className="gl-error" role="alert">
-            <AlertTriangle size={14} /> {error}
-          </div>
-        )}
+        {error && <div className="gl-error" role="alert"><AlertTriangle size={14} /> {error}</div>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="gl-submit"
-          style={{
-            background: "linear-gradient(90deg, #4568DC 0%, #6B77E5 100%)",
-            color: "#fff",
-            boxShadow: "0 8px 24px rgba(69,104,220,0.40)",
-            marginTop: 4,
-          }}
-        >
-          {loading ? "Memeriksa akun…" : "Login"}
+        <button type="submit" disabled={loading} className="gl-submit">
+          {loading ? "Memeriksa akun…" : "LOGIN"}
         </button>
+        <div className="gl-forgot">Lupa password? <a href={waUrl} target="_blank" rel="noopener noreferrer">Klik di sini</a></div>
       </form>
     </GlassLoginShell>
   );
