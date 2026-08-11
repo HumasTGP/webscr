@@ -1,6 +1,12 @@
 import { ArrowLeft } from "lucide-react";
 import "../styles/glass-login.css";
 
+const APP_LOGOS = {
+  SAKTI: "/logo-sakti.png",
+  "SI LAPAK PRIOK": "/logo-silapak.png",
+  GANDENG: "/logo-gandeng.png",
+};
+
 export default function GlassLoginShell({
   title,
   subtitle,
@@ -12,8 +18,18 @@ export default function GlassLoginShell({
   roleLabel = "",
   brandTitle = "",
 }) {
+  const visualTitle = brandTitle || title;
+  const appLogo = APP_LOGOS[visualTitle];
+
   return (
-    <div className="gl-page" style={{ "--gl-accent": accent, "--gl-soft": accentSoft }}>
+    <div
+      className="gl-page"
+      style={{
+        "--gl-accent": accent,
+        "--gl-soft": accentSoft,
+        "--gl-background-image": "url('/login-plant.png')",
+      }}
+    >
       <div className="gl-top-brand">
         <img src="/logo-pln.png" alt="PLN Indonesia Power" />
       </div>
@@ -29,14 +45,13 @@ export default function GlassLoginShell({
         </div>
 
         <div className="gl-visual-panel">
-          <div className="gl-visual-icon">{illustration}</div>
-          <div className="gl-brand-title">{brandTitle || title}</div>
+          <div className="gl-visual-icon">
+            {appLogo ? <img className="gl-app-logo" src={appLogo} alt={visualTitle} /> : illustration}
+          </div>
+          <div className="gl-brand-title">{visualTitle}</div>
           {roleLabel && <div className="gl-role-pill">{roleLabel}</div>}
           <div className="gl-yellow-line" />
           <div className="gl-company">PLN Indonesia Power</div>
-          <div className="gl-plant-art" aria-hidden="true" />
-          <div className="gl-wave gl-wave-one" />
-          <div className="gl-wave gl-wave-two" />
         </div>
       </div>
 
