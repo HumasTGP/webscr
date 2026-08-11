@@ -8,23 +8,26 @@ const SERVICES = [
   {
     key: "sikas",
     logo: sikasLogo,
-    name: "SIKAS PLN",
+    name: "Sakti",
+    kepanjangan: "Sistem Administrasi & Kelola Terintegrasi",
     desc:
-      "Sistem Informasi Kas PLN Indonesia Power — platform terintegrasi untuk manajemen RAB, monitoring realisasi kegiatan, dan pelaporan program CSR Unit Bisnis Pembangkitan Priok.",
+      "Platform terintegrasi untuk manajemen RAB, monitoring realisasi kegiatan, dan pelaporan program CSR Unit Bisnis Pembangkitan Priok.",
   },
   {
     key: "silapak",
     logo: silapakLogo,
     name: "Si Lapak Priok",
+    kepanjangan: "",
     desc:
-      "Sistem pengelolaan penerimaan tamu dan paket di area PLN Indonesia Power UBP Priok — digitalisasi proses registrasi dan pengambilan paket secara efisien dan terstruktur.",
+      "Sistem pengelolaan penerimaan tamu dan paket di area UBP Priok. Digitalisasi proses registrasi dan pengambilan paket secara efisien dan terstruktur.",
   },
   {
     key: "mitra",
     logo: mitraLogo,
-    name: "Pengajuan Mitra",
+    name: "Gandeng",
+    kepanjangan: "Gerbang Administrasi & Pengajuan Proposal Mitra",
     desc:
-      "Platform pengajuan dan pengelolaan proposal kerjasama mitra PLN Indonesia Power UBP Priok — mempermudah proses administrasi dan pengelolaan kemitraan bisnis.",
+      "Platform pengajuan dan pengelolaan proposal kerjasama mitra UBP Priok. Mempermudah proses administrasi dan pengelolaan kemitraan bisnis.",
   },
 ];
 
@@ -79,6 +82,9 @@ function ServiceCard({ service, delay, onSelect }) {
         <img src={service.logo} alt={service.name} />
       </div>
       <div className="portal-service-name">{service.name}</div>
+      {service.kepanjangan && (
+        <div className="portal-service-kepanjangan">{service.kepanjangan}</div>
+      )}
       <p className="portal-service-desc">{service.desc}</p>
       <button
         className="portal-service-btn"
