@@ -64,11 +64,15 @@ export default function PortalRukoPriok() {
             className={`portal-ruko-visual portal-reveal portal-reveal-d2 ${rightVisible ? "visible" : ""}`}
           >
             <div className="portal-ruko-photo-wrap">
-              <img
-                src="/portal-bg.png"
-                alt="Kawasan PLN Indonesia Power UBP Priok"
-                className="portal-ruko-photo"
-              />
+              <div className="portal-ruko-circle-ring" />
+              <div className="portal-ruko-circle-frame">
+                <img
+                  src="/portal-bg.png"
+                  alt="Kawasan PLN Indonesia Power UBP Priok"
+                  className="portal-ruko-photo"
+                />
+              </div>
+              <div className="portal-ruko-circle-accent" />
             </div>
           </div>
 

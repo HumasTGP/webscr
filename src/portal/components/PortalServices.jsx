@@ -4,7 +4,7 @@ import { useReveal } from "../hooks/useReveal";
 const SERVICES = [
   {
     key: "sikas",
-    logo: "/sakti-logo.png",
+    logo: "/sakti-logo.svg",
     name: "Sakti",
     kepanjangan: "Sistem Administrasi & Kelola Terintegrasi",
     desc:
@@ -12,7 +12,7 @@ const SERVICES = [
   },
   {
     key: "silapak",
-    logo: "/silapak-logo.png",
+    logo: "/silapak-logo.svg",
     name: "Si Lapak Priok",
     kepanjangan: "",
     desc:
@@ -20,7 +20,7 @@ const SERVICES = [
   },
   {
     key: "mitra",
-    logo: "/gandeng-logo.png",
+    logo: "/gandeng-logo.svg",
     name: "Gandeng",
     kepanjangan: "Gerbang Administrasi & Pengajuan Proposal Mitra",
     desc:
