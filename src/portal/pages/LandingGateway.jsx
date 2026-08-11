@@ -4,9 +4,9 @@ import AutoLogo from "../../components/AutoLogo";
 import "../styles/portal-showcase.css";
 
 const SAKTI_ROLES = [
-  { key: "sikas-humas", label: "Humas" },
-  { key: "sikas-asman", label: "Asman" },
-  { key: "sikas-madm", label: "MADM" },
+  { value: "humas", label: "HUMAS" },
+  { value: "asman", label: "ASMAN" },
+  { value: "madm", label: "MADM" },
 ];
 
 export default function LandingGateway({ onSelect }) {
@@ -20,6 +20,11 @@ export default function LandingGateway({ onSelect }) {
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
   }, []);
+
+  const openSakti = (role) => {
+    try { window.localStorage.setItem("portal.sakti.role", role); } catch (_) {}
+    onSelect("sikas");
+  };
 
   return (
     <div className="gateway-page">
@@ -43,12 +48,8 @@ export default function LandingGateway({ onSelect }) {
             {saktiOpen && (
               <div className="gateway-dropdown">
                 {SAKTI_ROLES.map((item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => onSelect(item.key)}
-                  >
-                    SAKTI - {item.label.toUpperCase()}
+                  <button key={item.value} type="button" onClick={() => openSakti(item.value)}>
+                    SAKTI - {item.label}
                   </button>
                 ))}
               </div>
@@ -82,9 +83,7 @@ export default function LandingGateway({ onSelect }) {
         </section>
       </main>
 
-      <footer className="gateway-footer">
-        © 2026 PLN Indonesia Power. Seluruh hak dilindungi.
-      </footer>
+      <footer className="gateway-footer">© 2026 PLN Indonesia Power. Seluruh hak dilindungi.</footer>
     </div>
   );
 }
