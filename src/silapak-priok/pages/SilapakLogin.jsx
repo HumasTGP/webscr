@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { font } from "../../lib/theme";
+import { HELP_CONTACT } from "../../lib/data";
 import GlassLoginShell from "../../portal/components/GlassLoginShell";
 import { SilapakIllustration } from "../../portal/components/LoginIllustrations";
 
@@ -17,15 +18,9 @@ export default function SilapakLogin({ onLogin, onBack, authenticate }) {
       setError("Username dan password wajib diisi.");
       return;
     }
-    const res = authenticate
-      ? authenticate("silapak", username.trim(), password)
-      : { ok: false, reason: "wrong" };
+    const res = authenticate ? authenticate("silapak", username.trim(), password) : { ok: false, reason: "wrong" };
     if (!res.ok) {
-      setError(
-        res.reason === "inactive"
-          ? "Akun sedang tidak aktif (di luar rentang tanggal berlaku)."
-          : "Username atau password salah."
-      );
+      setError(res.reason === "inactive" ? "Akun sedang tidak aktif (di luar rentang tanggal berlaku)." : "Username atau password salah.");
       return;
     }
     setError("");
@@ -33,66 +28,33 @@ export default function SilapakLogin({ onLogin, onBack, authenticate }) {
     setTimeout(() => onLogin(), 300);
   };
 
+  const waUrl = `https://wa.me/${HELP_CONTACT.waNumber}?text=${encodeURIComponent(HELP_CONTACT.waMessage)}`;
+
   return (
     <GlassLoginShell
-      title="Si Lapak Priok"
-      subtitle="Sistem Penerimaan Tamu & Paket — PLN Indonesia Power UBP Priok"
+      title="SI LAPAK PRIOK"
+      subtitle="Sistem Pengelolaan Penerimaan Tamu dan Paket"
       onBack={onBack}
       illustration={<SilapakIllustration />}
+      accent="#147A36"
+      accentSoft="#EEF8F0"
+      brandTitle="SI LAPAK PRIOK"
     >
       <form onSubmit={submit} style={{ fontFamily: font.body }}>
-        {/* Username */}
         <div className="gl-field">
           <label className="gl-label">Username</label>
-          <input
-            className="gl-input"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Masukkan username"
-            autoComplete="username"
-          />
+          <input className="gl-input" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Masukkan username" autoComplete="username" autoFocus />
         </div>
-
-        {/* Password */}
         <div className="gl-field">
           <label className="gl-label">Password</label>
-          <input
-            className="gl-input has-eye"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Masukkan password"
-            autoComplete="current-password"
-          />
-          <button
-            type="button"
-            className="gl-eye-btn"
-            onClick={() => setShowPassword((v) => !v)}
-            aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-          >
-            {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
+          <input className="gl-input has-eye" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Masukkan password" autoComplete="current-password" />
+          <button type="button" className="gl-eye-btn" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}>
+            {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
           </button>
         </div>
-
-        {error && (
-          <div className="gl-error" role="alert">
-            <AlertTriangle size={14} /> {error}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="gl-submit"
-          style={{
-            background: "linear-gradient(90deg, #0D9488 0%, #06B6D4 100%)",
-            color: "#fff",
-            boxShadow: "0 8px 24px rgba(13,148,136,0.40)",
-            marginTop: 4,
-          }}
-        >
-          {loading ? "Memeriksa akun…" : "Login"}
-        </button>
+        {error && <div className="gl-error" role="alert"><AlertTriangle size={14} /> {error}</div>}
+        <button type="submit" disabled={loading} className="gl-submit">{loading ? "Memeriksa akun…" : "LOGIN"}</button>
+        <div className="gl-forgot">Lupa password? <a href={waUrl} target="_blank" rel="noopener noreferrer">Klik di sini</a></div>
       </form>
     </GlassLoginShell>
   );
