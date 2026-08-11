@@ -39,9 +39,10 @@ export default function MitraLogin({ onLogin, onBack, authenticate }) {
       subtitle="Sistem Pengajuan dan Pengelolaan Kerja Sama"
       onBack={onBack}
       illustration={<MitraIllustration />}
-      accent="#5B27C7"
-      accentSoft="#F3EEFF"
+      accent="#EEF8CD"
+      accentSoft="#F8FCEB"
       brandTitle="GANDENG"
+      backgroundImage="/login-plant.png"
     >
       <form onSubmit={handleSubmit} style={{ fontFamily: font.body }}>
         <div className="gl-field">
