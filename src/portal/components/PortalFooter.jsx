@@ -91,11 +91,6 @@ export default function PortalFooter({ onSelect }) {
                   Ruko Priok
                 </a>
               </li>
-              <li>
-                <a href="https://www.plnindonesiapower.co.id" target="_blank" rel="noopener noreferrer">
-                  PLN Indonesia Power
-                </a>
-              </li>
             </ul>
           </div>
 

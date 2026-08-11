@@ -1,13 +1,10 @@
 import { ArrowRight } from "lucide-react";
-import sikasLogo from "../../assets/sikas-logo.svg";
-import silapakLogo from "../../assets/silapak-logo.svg";
-import mitraLogo from "../../assets/mitra-logo.svg";
 import { useReveal } from "../hooks/useReveal";
 
 const SERVICES = [
   {
     key: "sikas",
-    logo: sikasLogo,
+    logo: "/sakti-logo.png",
     name: "Sakti",
     kepanjangan: "Sistem Administrasi & Kelola Terintegrasi",
     desc:
@@ -15,7 +12,7 @@ const SERVICES = [
   },
   {
     key: "silapak",
-    logo: silapakLogo,
+    logo: "/silapak-logo.png",
     name: "Si Lapak Priok",
     kepanjangan: "",
     desc:
@@ -23,7 +20,7 @@ const SERVICES = [
   },
   {
     key: "mitra",
-    logo: mitraLogo,
+    logo: "/gandeng-logo.png",
     name: "Gandeng",
     kepanjangan: "Gerbang Administrasi & Pengajuan Proposal Mitra",
     desc:

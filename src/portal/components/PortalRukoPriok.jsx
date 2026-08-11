@@ -69,10 +69,6 @@ export default function PortalRukoPriok() {
                 alt="Kawasan PLN Indonesia Power UBP Priok"
                 className="portal-ruko-photo"
               />
-              <div className="portal-ruko-photo-badge">
-                <Zap size={14} />
-                Kawasan Industri Tanjung Priok
-              </div>
             </div>
           </div>
 

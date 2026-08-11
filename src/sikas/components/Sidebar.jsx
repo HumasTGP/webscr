@@ -121,7 +121,7 @@ export default function Sidebar({
               lineHeight: 1.3,
             }}
           >
-            SIKAS
+            Sakti
           </div>
           <div
             style={{

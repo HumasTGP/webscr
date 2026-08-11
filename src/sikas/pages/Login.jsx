@@ -49,8 +49,8 @@ export default function LoginScreen({ onLogin, onBack, authenticate }) {
 
   return (
     <GlassLoginShell
-      title="SIKAS PLN"
-      subtitle="Sistem Informasi Kas — PLN Indonesia Power UBP Priok"
+      title="Sakti"
+      subtitle="Sistem Administrasi & Kelola Terintegrasi — PLN Indonesia Power UBP Priok"
       onBack={onBack}
       illustration={<SikasIllustration />}
     >

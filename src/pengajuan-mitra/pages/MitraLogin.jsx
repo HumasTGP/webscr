@@ -38,8 +38,8 @@ export default function MitraLogin({ onLogin, onBack, authenticate }) {
 
   return (
     <GlassLoginShell
-      title="Pengajuan Mitra"
-      subtitle="Sistem Pengajuan Kerjasama Mitra — PLN Indonesia Power UBP Priok"
+      title="Gandeng"
+      subtitle="Gerbang Administrasi & Pengajuan Proposal Mitra — PLN Indonesia Power UBP Priok"
       onBack={onBack}
       illustration={<MitraIllustration />}
     >
