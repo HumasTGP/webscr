@@ -3,13 +3,14 @@ import { PORTAL_CONFIG } from "../config/portalConfig";
 import { useReveal } from "../hooks/useReveal";
 
 export default function PortalRukoPriok() {
-  const [leftRef, leftVisible] = useReveal();
+  const [leftRef,  leftVisible]  = useReveal();
   const [rightRef, rightVisible] = useReveal();
 
   return (
     <section className="portal-section portal-section-dark" id="ruko">
       <div className="portal-section-inner">
         <div className="portal-ruko-inner">
+
           {/* Teks kiri */}
           <div
             ref={leftRef}
@@ -19,35 +20,39 @@ export default function PortalRukoPriok() {
               Unit Bisnis Pembangkitan Priok
             </div>
             <h2 className="portal-ruko-title">
-              Kawasan Industri<br />
-              <span>PLN Indonesia Power</span>
-              <br />di Tanjung Priok
+              Kawasan Industri PLN Indonesia Power
+              <br />
+              <span>di Tanjung Priok</span>
             </h2>
             <p className="portal-ruko-desc">
-              PLN Indonesia Power UBP Priok adalah unit pembangkitan strategis
-              yang berlokasi di Tanjung Priok, Jakarta Utara. Kawasan ini
-              mendukung ketahanan energi nasional dengan sistem pengelolaan
-              digital yang modern dan terintegrasi — mulai dari administrasi
-              kas, pengelolaan lapak, hingga kemitraan bisnis.
+              PLN Indonesia Power UBP Priok berlokasi di kawasan industri
+              Tanjung Priok, Jakarta Utara. Kawasan ini merupakan pusat
+              kegiatan pembangkitan energi strategis yang terintegrasi dengan
+              ekosistem bisnis dan perdagangan pelabuhan Tanjung Priok.
+            </p>
+            <p className="portal-ruko-desc" style={{ marginTop: -12 }}>
+              Didukung oleh area komersial Ruko Priok, kawasan ini menyediakan
+              fasilitas usaha bagi mitra dan pelaku bisnis yang beroperasi di
+              sekitar wilayah UBP Priok.
             </p>
 
             <div className="portal-ruko-stats">
               <div className="portal-ruko-stat">
-                <div className="portal-ruko-stat-num">UBP</div>
+                <div className="portal-ruko-stat-num">Strategis</div>
                 <div className="portal-ruko-stat-label">
-                  Unit Bisnis Pembangkitan
+                  Dekat Pelabuhan Tanjung Priok
                 </div>
               </div>
               <div className="portal-ruko-stat">
-                <div className="portal-ruko-stat-num">Priok</div>
+                <div className="portal-ruko-stat-num">Industri</div>
                 <div className="portal-ruko-stat-label">
-                  Tanjung Priok, Jakarta Utara
+                  Kawasan Pembangkitan Energi
                 </div>
               </div>
               <div className="portal-ruko-stat">
-                <div className="portal-ruko-stat-num">CSR</div>
+                <div className="portal-ruko-stat-num">Bisnis</div>
                 <div className="portal-ruko-stat-label">
-                  Program Tanggung Jawab Sosial
+                  Ekosistem Mitra dan Komersial
                 </div>
               </div>
               <div className="portal-ruko-stat">
@@ -156,10 +161,7 @@ function BuildingIllustration() {
         stroke="rgba(22,110,73,0.55)"
         strokeWidth="1"
       />
-      <rect
-        x="44" y="258" width="4" height="12"
-        fill="rgba(255,255,255,0.18)"
-      />
+      <rect x="44" y="258" width="4" height="12" fill="rgba(255,255,255,0.18)" />
 
       {/* Right tree */}
       <ellipse
@@ -168,10 +170,7 @@ function BuildingIllustration() {
         stroke="rgba(22,110,73,0.55)"
         strokeWidth="1"
       />
-      <rect
-        x="312" y="256" width="4" height="14"
-        fill="rgba(255,255,255,0.18)"
-      />
+      <rect x="312" y="256" width="4" height="14" fill="rgba(255,255,255,0.18)" />
 
       {/* PLN watermark text */}
       <text
@@ -186,18 +185,8 @@ function BuildingIllustration() {
       </text>
 
       {/* Decorative circles */}
-      <circle
-        cx="60" cy="130" r="20"
-        stroke="rgba(255,199,44,0.12)"
-        strokeWidth="1"
-        fill="none"
-      />
-      <circle
-        cx="300" cy="180" r="28"
-        stroke="rgba(14,76,146,0.25)"
-        strokeWidth="1"
-        fill="none"
-      />
+      <circle cx="60"  cy="130" r="20" stroke="rgba(255,199,44,0.12)" strokeWidth="1" fill="none" />
+      <circle cx="300" cy="180" r="28" stroke="rgba(255,255,255,0.10)" strokeWidth="1" fill="none" />
     </svg>
   );
 }

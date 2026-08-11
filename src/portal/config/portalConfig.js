@@ -1,35 +1,35 @@
 // ============================================================
-// Portal Configuration — ganti nilai placeholder di bawah ini
-// dengan data resmi PLN Indonesia Power UBP Priok
+// Portal Configuration — PLN Indonesia Power UBP Priok
+// Ganti nilai placeholder di bawah ini dengan data resmi.
 // ============================================================
 
 export const PORTAL_CONFIG = {
   whatsapp: {
-    // Ganti dengan nomor WhatsApp resmi (format: 62xxx tanpa tanda +)
-    number: "6281234567890",
+    // Nomor WhatsApp (format: 62xxx tanpa tanda + atau strip)
+    number: "6282111801125",
   },
   maps: {
     // Link share Google Maps lokasi PLN Indonesia Power UBP Priok
     shareUrl: "https://maps.app.goo.gl/meEwXkfPZLXKf9TT7",
-    // Embed src untuk iframe (koordinat PLN UBP Priok, Tanjung Priok)
+    // Embed src untuk iframe
     embedSrc:
       "https://maps.google.com/maps?q=PLN+Indonesia+Power+UBP+Priok+Tanjung+Priok+Jakarta&z=16&output=embed",
   },
   social: {
-    // Ganti dengan URL resmi jika berbeda dari placeholder berikut
+    // Ganti dengan URL resmi masing-masing platform
+    facebook:  "#", // Contoh: "https://www.facebook.com/PLNIndonesiaPower"
     instagram: "https://www.instagram.com/plnindonesiapower/",
-    linkedin: "https://www.linkedin.com/company/pt-pln-indonesia-power/",
-    youtube: "https://www.youtube.com/@PLNIndonesiaPower",
-    tiktok: "https://www.tiktok.com/@plnindonesiapower",
+    youtube:   "https://www.youtube.com/@PLNIndonesiaPower",
+    tiktok:    "https://www.tiktok.com/@plnindonesiapower",
   },
   rukoPriok: {
     url: "https://rukopriok.com",
   },
   company: {
-    name: "PT PLN Indonesia Power",
-    unit: "Unit Bisnis Pembangkitan Priok",
-    phone: "+62 (021) xxx-xxxx", // Ganti dengan nomor telepon resmi
-    email: "contact@plnindonesiapower.co.id", // Ganti dengan email resmi
+    name:    "PT PLN Indonesia Power",
+    unit:    "Unit Bisnis Pembangkitan Priok",
+    phone:   "081219540978",
+    email:   "ubppriok@plnindonesiapower.co.id", // Ganti dengan email resmi
     address: "Jl. Yos Sudarso, Tanjung Priok, Jakarta Utara 14310",
   },
 };
