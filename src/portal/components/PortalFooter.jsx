@@ -1,13 +1,12 @@
-import { Instagram, Linkedin, Youtube } from "lucide-react";
+import { Facebook, Instagram, Youtube } from "lucide-react";
 import AutoLogo from "../../components/AutoLogo";
 import { PORTAL_CONFIG } from "../config/portalConfig";
 
-// Icon TikTok — lucide belum include TikTok, gunakan SVG inline
+// TikTok icon (tidak ada di lucide-react)
 function TikTokIcon({ size = 16 }) {
   return (
     <svg
-      width={size}
-      height={size}
+      width={size} height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -22,26 +21,10 @@ function TikTokIcon({ size = 16 }) {
 }
 
 const SOCIAL_LINKS = [
-  {
-    icon: Instagram,
-    href: PORTAL_CONFIG.social.instagram,
-    label: "Instagram PLN Indonesia Power",
-  },
-  {
-    icon: Linkedin,
-    href: PORTAL_CONFIG.social.linkedin,
-    label: "LinkedIn PLN Indonesia Power",
-  },
-  {
-    icon: Youtube,
-    href: PORTAL_CONFIG.social.youtube,
-    label: "YouTube PLN Indonesia Power",
-  },
-  {
-    icon: TikTokIcon,
-    href: PORTAL_CONFIG.social.tiktok,
-    label: "TikTok PLN Indonesia Power",
-  },
+  { icon: Facebook,   href: PORTAL_CONFIG.social.facebook,  label: "Facebook PLN Indonesia Power"  },
+  { icon: Instagram,  href: PORTAL_CONFIG.social.instagram, label: "Instagram PLN Indonesia Power" },
+  { icon: TikTokIcon, href: PORTAL_CONFIG.social.tiktok,   label: "TikTok PLN Indonesia Power"    },
+  { icon: Youtube,    href: PORTAL_CONFIG.social.youtube,   label: "YouTube PLN Indonesia Power"   },
 ];
 
 export default function PortalFooter({ onSelect }) {
@@ -52,6 +35,7 @@ export default function PortalFooter({ onSelect }) {
     <footer className="portal-footer">
       <div className="portal-footer-inner">
         <div className="portal-footer-top">
+
           {/* Kolom brand */}
           <div>
             <div className="portal-footer-logo-row">
@@ -65,15 +49,13 @@ export default function PortalFooter({ onSelect }) {
                 }}
               />
               <div>
-                <div className="portal-footer-brand-name">
-                  PLN Indonesia Power
-                </div>
+                <div className="portal-footer-brand-name">PLN Indonesia Power</div>
                 <span className="portal-footer-brand-sub">UBP Priok</span>
               </div>
             </div>
             <p className="portal-footer-desc">
               Portal layanan digital terintegrasi PLN Indonesia Power Unit
-              Bisnis Pembangkitan Priok — mendukung digitalisasi operasional
+              Bisnis Pembangkitan Priok, mendukung digitalisasi operasional
               dan tata kelola perusahaan.
             </p>
             <div className="portal-footer-social">
@@ -96,15 +78,9 @@ export default function PortalFooter({ onSelect }) {
           <div>
             <div className="portal-footer-col-title">Portal</div>
             <ul className="portal-footer-links">
-              <li>
-                <button onClick={() => onSelect("sikas")}>SIKAS PLN</button>
-              </li>
-              <li>
-                <button onClick={() => onSelect("silapak")}>Si Lapak Priok</button>
-              </li>
-              <li>
-                <button onClick={() => onSelect("mitra")}>Pengajuan Mitra</button>
-              </li>
+              <li><button onClick={() => onSelect("sikas")}>SIKAS PLN</button></li>
+              <li><button onClick={() => onSelect("silapak")}>Si Lapak Priok</button></li>
+              <li><button onClick={() => onSelect("mitra")}>Pengajuan Mitra</button></li>
             </ul>
           </div>
 
@@ -113,20 +89,13 @@ export default function PortalFooter({ onSelect }) {
             <div className="portal-footer-col-title">Navigasi</div>
             <ul className="portal-footer-links">
               <li>
-                <button
-                  onClick={() =>
-                    window.scrollTo({ top: 0, behavior: "smooth" })
-                  }
-                >
+                <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
                   Beranda
                 </button>
               </li>
-              <li>
-                <button onClick={() => scrollTo("team")}>Tim Kami</button>
-              </li>
-              <li>
-                <button onClick={() => scrollTo("contact")}>Kontak</button>
-              </li>
+              <li><button onClick={() => scrollTo("ruko")}>Kawasan</button></li>
+              <li><button onClick={() => scrollTo("team")}>Tim Kami</button></li>
+              <li><button onClick={() => scrollTo("contact")}>Kontak</button></li>
             </ul>
           </div>
 
@@ -135,20 +104,12 @@ export default function PortalFooter({ onSelect }) {
             <div className="portal-footer-col-title">Tautan</div>
             <ul className="portal-footer-links">
               <li>
-                <a
-                  href={PORTAL_CONFIG.rukoPriok.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={PORTAL_CONFIG.rukoPriok.url} target="_blank" rel="noopener noreferrer">
                   Ruko Priok
                 </a>
               </li>
               <li>
-                <a
-                  href="https://www.plnindonesiapower.co.id"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="https://www.plnindonesiapower.co.id" target="_blank" rel="noopener noreferrer">
                   PLN Indonesia Power
                 </a>
               </li>
@@ -157,8 +118,7 @@ export default function PortalFooter({ onSelect }) {
         </div>
 
         <div className="portal-footer-bottom">
-          © {new Date().getFullYear()} PLN Indonesia Power UBP Priok. Seluruh
-          hak dilindungi.
+          &copy; {new Date().getFullYear()} PLN Indonesia Power UBP Priok. Seluruh hak dilindungi.
         </div>
       </div>
     </footer>

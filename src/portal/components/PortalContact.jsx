@@ -1,7 +1,32 @@
 import { useState } from "react";
-import { MapPin, Phone, Mail, Send } from "lucide-react";
+import { MapPin, Phone, Mail, Send, Facebook, Instagram, Youtube } from "lucide-react";
 import { PORTAL_CONFIG } from "../config/portalConfig";
 import { useReveal } from "../hooks/useReveal";
+
+// TikTok icon (tidak ada di lucide-react)
+function TikTokIcon({ size = 16 }) {
+  return (
+    <svg
+      width={size} height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+    </svg>
+  );
+}
+
+const CONTACT_SOCIAL = [
+  { icon: Facebook,   href: PORTAL_CONFIG.social.facebook,  label: "Facebook PLN Indonesia Power" },
+  { icon: Instagram,  href: PORTAL_CONFIG.social.instagram, label: "Instagram PLN Indonesia Power" },
+  { icon: TikTokIcon, href: PORTAL_CONFIG.social.tiktok,   label: "TikTok PLN Indonesia Power" },
+  { icon: Youtube,    href: PORTAL_CONFIG.social.youtube,   label: "YouTube PLN Indonesia Power" },
+];
 
 export default function PortalContact() {
   const [headerRef, headerVisible] = useReveal();
@@ -32,12 +57,7 @@ export default function PortalContact() {
 
 function ContactForm() {
   const [ref, visible] = useReveal();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,12 +68,13 @@ function ContactForm() {
     e.preventDefault();
     const { number } = PORTAL_CONFIG.whatsapp;
     const text = encodeURIComponent(
-      `Halo PLN Indonesia Power,\n\n` +
-        `Saya *${form.name}*.\n` +
-        `Email: ${form.email}\n` +
-        `Subjek: ${form.subject}\n\n` +
-        `Pesan:\n${form.message}\n\n` +
-        `Terima kasih.`
+      `Halo PLN Indonesia Power UBP Priok,\n\n` +
+      `Saya ingin menghubungi PLN Indonesia Power UBP Priok.\n\n` +
+      `Nama:\n${form.name}\n\n` +
+      `Email:\n${form.email}\n\n` +
+      `Subjek:\n${form.subject}\n\n` +
+      `Pesan:\n${form.message}\n\n` +
+      `Terima kasih.`
     );
     window.open(
       `https://wa.me/${number}?text=${text}`,
@@ -76,9 +97,7 @@ function ContactForm() {
       <form onSubmit={handleSubmit}>
         <div className="portal-form-row">
           <div className="portal-form-group">
-            <label className="portal-form-label" htmlFor="contact-name">
-              Nama
-            </label>
+            <label className="portal-form-label" htmlFor="contact-name">Nama</label>
             <input
               id="contact-name"
               name="name"
@@ -90,9 +109,7 @@ function ContactForm() {
             />
           </div>
           <div className="portal-form-group">
-            <label className="portal-form-label" htmlFor="contact-email">
-              Email
-            </label>
+            <label className="portal-form-label" htmlFor="contact-email">Email</label>
             <input
               id="contact-email"
               name="email"
@@ -107,9 +124,7 @@ function ContactForm() {
         </div>
 
         <div className="portal-form-group">
-          <label className="portal-form-label" htmlFor="contact-subject">
-            Subjek
-          </label>
+          <label className="portal-form-label" htmlFor="contact-subject">Subjek</label>
           <input
             id="contact-subject"
             name="subject"
@@ -122,9 +137,7 @@ function ContactForm() {
         </div>
 
         <div className="portal-form-group">
-          <label className="portal-form-label" htmlFor="contact-message">
-            Pesan
-          </label>
+          <label className="portal-form-label" htmlFor="contact-message">Pesan</label>
           <textarea
             id="contact-message"
             name="message"
@@ -167,19 +180,13 @@ function ContactMap() {
 
       <div className="portal-contact-info-list">
         <div className="portal-contact-info-item">
-          <div className="portal-contact-info-icon">
-            <MapPin size={16} />
-          </div>
+          <div className="portal-contact-info-icon"><MapPin size={16} /></div>
           <div>
             <a
               href={shareUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                color: "inherit",
-                textDecoration: "underline",
-                textDecorationColor: "rgba(0,0,0,0.2)",
-              }}
+              style={{ color: "inherit", textDecoration: "underline", textDecorationColor: "rgba(0,0,0,0.2)" }}
             >
               {address}
             </a>
@@ -187,18 +194,30 @@ function ContactMap() {
         </div>
 
         <div className="portal-contact-info-item">
-          <div className="portal-contact-info-icon">
-            <Phone size={16} />
-          </div>
+          <div className="portal-contact-info-icon"><Phone size={16} /></div>
           <div>{phone}</div>
         </div>
 
         <div className="portal-contact-info-item">
-          <div className="portal-contact-info-icon">
-            <Mail size={16} />
-          </div>
+          <div className="portal-contact-info-icon"><Mail size={16} /></div>
           <div>{email}</div>
         </div>
+      </div>
+
+      {/* Social media */}
+      <div className="portal-contact-social">
+        {CONTACT_SOCIAL.map(({ icon: Icon, href, label }) => (
+          <a
+            key={label}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="portal-contact-social-btn"
+            aria-label={label}
+          >
+            <Icon size={16} />
+          </a>
+        ))}
       </div>
     </div>
   );
