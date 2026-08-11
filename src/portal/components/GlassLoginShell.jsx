@@ -17,6 +17,7 @@ export default function GlassLoginShell({
   accentSoft = "#EAF3FF",
   roleLabel = "",
   brandTitle = "",
+  backgroundImage = "/login-plant.png",
 }) {
   const visualTitle = brandTitle || title;
   const appLogo = APP_LOGOS[visualTitle];
@@ -27,7 +28,7 @@ export default function GlassLoginShell({
       style={{
         "--gl-accent": accent,
         "--gl-soft": accentSoft,
-        "--gl-background-image": "url('/login-plant.png')",
+        "--gl-background-image": `url('${backgroundImage}')`,
       }}
     >
       <div className="gl-top-brand">
@@ -51,7 +52,6 @@ export default function GlassLoginShell({
           <div className="gl-brand-title">{visualTitle}</div>
           {roleLabel && <div className="gl-role-pill">{roleLabel}</div>}
           <div className="gl-yellow-line" />
-          <div className="gl-company">PLN Indonesia Power</div>
         </div>
       </div>
 
