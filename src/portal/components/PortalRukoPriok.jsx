@@ -28,14 +28,12 @@ export default function PortalRukoPriok() {
             </h2>
             <p className="portal-ruko-desc">
               PLN Indonesia Power UBP Priok berlokasi di kawasan industri
-              Tanjung Priok, Jakarta Utara. Kawasan ini merupakan pusat
-              kegiatan pembangkitan energi strategis yang terintegrasi dengan
-              ekosistem bisnis dan perdagangan pelabuhan Tanjung Priok.
-            </p>
-            <p className="portal-ruko-desc" style={{ marginTop: -12 }}>
-              Didukung oleh area komersial Ruko Priok, kawasan ini menyediakan
-              fasilitas usaha bagi mitra dan pelaku bisnis yang beroperasi di
-              sekitar wilayah UBP Priok.
+              Tanjung Priok, Jakarta Utara. Kawasan ini merupakan pusat kegiatan
+              pembangkitan energi strategis yang terintegrasi dengan ekosistem
+              bisnis dan perdagangan pelabuhan Tanjung Priok. Didukung oleh area
+              komersial Ruko Priok, kawasan ini menyediakan fasilitas usaha bagi
+              mitra dan pelaku bisnis yang beroperasi di sekitar wilayah UBP
+              Priok.
             </p>
 
             <div className="portal-ruko-stats">

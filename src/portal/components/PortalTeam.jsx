@@ -15,8 +15,8 @@ export default function PortalTeam() {
           <h2 className="portal-section-title">Tim Kami</h2>
           <div className="portal-section-divider" />
           <p className="portal-section-subtitle">
-            Kenali tim yang bekerja di balik Portal Layanan Digital PLN
-            Indonesia Power UBP Priok.
+            Kenali tim yang bekerja di balik sistem digital PLN Indonesia Power
+            UBP Priok.
           </p>
         </div>
 
