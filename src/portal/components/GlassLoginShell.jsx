@@ -16,7 +16,10 @@ export default function GlassLoginShell({
   return (
     <div className="gl-page" style={{ "--gl-accent": accent, "--gl-soft": accentSoft }}>
       <div className="gl-top-brand">
-        <AutoLogo alt="PLN Indonesia Power" />
+        <AutoLogo
+          alt="PLN Indonesia Power"
+          style={{ mixBlendMode: "multiply", background: "transparent" }}
+        />
       </div>
 
       <div className="gl-card">
