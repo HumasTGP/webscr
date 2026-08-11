@@ -16,11 +16,10 @@ export const PORTAL_CONFIG = {
       "https://maps.google.com/maps?q=PLN+Indonesia+Power+UBP+Priok+Tanjung+Priok+Jakarta&z=16&output=embed",
   },
   social: {
-    // Ganti dengan URL resmi masing-masing platform
-    facebook:  "#", // Contoh: "https://www.facebook.com/PLNIndonesiaPower"
-    instagram: "https://www.instagram.com/plnindonesiapower/",
-    youtube:   "https://www.youtube.com/@PLNIndonesiaPower",
-    tiktok:    "https://www.tiktok.com/@plnindonesiapower",
+    facebook:  "https://www.facebook.com/profile.php?id=100095299130458",
+    instagram: "https://www.instagram.com/plnip.ubppriok/",
+    youtube:   "https://www.youtube.com/@PLNIPUBPPriok",
+    tiktok:    "https://www.tiktok.com/@plnip.ubppriok",
   },
   rukoPriok: {
     url: "https://rukopriok.com",
