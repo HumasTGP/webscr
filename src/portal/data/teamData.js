@@ -1,43 +1,33 @@
 // ============================================================
 // DATA TIM — PLN Indonesia Power UBP Priok
 //
-// Cara mengubah data tim:
-//   - name   : Ganti string nama lengkap anggota tim
-//   - role   : Ganti jabatan atau peran anggota
-//   - photo  : Letakkan foto di folder /public/team/, lalu isi
-//              path-nya. Contoh: "/team/nama-file.jpg"
-//              Biarkan null jika belum ada foto (tampil avatar)
-//   - instagram : Isi URL Instagram. Contoh:
-//              "https://www.instagram.com/username/"
-//              Isi "#" jika belum ada
-//   - linkedin  : Isi URL LinkedIn. Contoh:
-//              "https://www.linkedin.com/in/username/"
-//              Isi "#" atau hapus jika tidak digunakan
+// Untuk menambah foto: letakkan file di /public/team/
+// Contoh: "/team/william.jpg"
 // ============================================================
 
 export const TEAM = [
   {
     id: 1,
-    name:      "Nama Anggota 1",   // <-- Ganti nama di sini
-    role:      "Jabatan / Peran",  // <-- Ganti jabatan di sini
-    photo:     null,               // <-- Ganti path foto di sini
-    instagram: "#",                // <-- Isi link Instagram di sini
-    linkedin:  "#",                // <-- Isi link LinkedIn di sini
+    name:      "William Eka Chandra",
+    role:      "Front End Engineer",
+    photo:     "/team/william.jpg",
+    instagram: "https://www.instagram.com/chandrawilliameka/",
+    linkedin:  "https://www.linkedin.com/in/william-eka-chandra",
   },
   {
     id: 2,
-    name:      "Nama Anggota 2",
-    role:      "Jabatan / Peran",
-    photo:     null,
-    instagram: "#",
-    linkedin:  "#",
+    name:      "Ajeng Puspita Sari",
+    role:      "Anggota Tim",
+    photo:     "/team/ajeng.jpg",
+    instagram: "https://www.instagram.com/ajeng_ps165?igsh=MTdvN2p3c3BtbnBkNA%3D%3D",
+    linkedin:  "https://www.linkedin.com/in/ajeng-puspita-sari",
   },
   {
     id: 3,
-    name:      "Nama Anggota 3",
-    role:      "Jabatan / Peran",
-    photo:     null,
-    instagram: "#",
-    linkedin:  "#",
+    name:      "Kareen Divanya Permadhie",
+    role:      "Anggota Tim",
+    photo:     "/team/kareen.jpg",
+    instagram: "https://www.instagram.com/absalontulip?igsh=MWU3dTE3bHE2b2l2eA==",
+    linkedin:  "https://www.linkedin.com/in/kdivanya",
   },
 ];

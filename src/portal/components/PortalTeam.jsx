@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Instagram, Linkedin, User } from "lucide-react";
 import { TEAM } from "../data/teamData";
 import { useReveal } from "../hooks/useReveal";
@@ -32,6 +33,7 @@ export default function PortalTeam() {
 
 function TeamCard({ member, delay }) {
   const [ref, visible] = useReveal();
+  const [imgError, setImgError] = useState(false);
 
   return (
     <div
@@ -40,8 +42,8 @@ function TeamCard({ member, delay }) {
       style={{ transitionDelay: `${delay}s` }}
     >
       <div className="portal-team-img-wrap">
-        {member.photo ? (
-          <img src={member.photo} alt={member.name} />
+        {member.photo && !imgError ? (
+          <img src={member.photo} alt={member.name} onError={() => setImgError(true)} />
         ) : (
           <div className="portal-team-avatar">
             <User size={42} />
