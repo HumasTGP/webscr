@@ -24,14 +24,17 @@
   background: transparent;
   padding: 0;
   cursor: default;
+  display: flex;
+  align-items: center;
 }
 
 .gateway-logo {
   display: block;
   width: 285px;
-  max-height: 72px;
+  height: 86px;
   object-fit: contain;
   object-position: left center;
+  background: transparent;
 }
 
 .gateway-nav {
@@ -113,10 +116,10 @@
 .gateway-hero-photo {
   position: absolute;
   inset: 0;
-  background-image: url('/portal-bg.jpg');
+  background-image: url('/portal-utama.png');
+  background-repeat: no-repeat;
   background-size: cover;
-  background-position: center right;
-  transform: scale(1.01);
+  background-position: center center;
 }
 
 .gateway-hero-fade {
@@ -124,17 +127,17 @@
   inset: 0;
   background: linear-gradient(90deg,
     #ffffff 0%,
-    rgba(255,255,255,.99) 22%,
-    rgba(255,255,255,.92) 34%,
-    rgba(255,255,255,.58) 46%,
-    rgba(255,255,255,.12) 61%,
-    rgba(255,255,255,0) 72%);
+    rgba(255,255,255,.99) 18%,
+    rgba(255,255,255,.94) 31%,
+    rgba(255,255,255,.68) 43%,
+    rgba(255,255,255,.22) 55%,
+    rgba(255,255,255,0) 67%);
 }
 
 .gateway-copy {
   position: relative;
   z-index: 2;
-  width: min(600px, 46vw);
+  width: min(600px, 44vw);
   padding: 168px 0 120px 62px;
 }
 
@@ -183,11 +186,11 @@
 @media (max-width: 1100px) {
   .gateway-page { grid-template-rows: 110px 1fr 72px; }
   .gateway-header { padding: 0 26px; }
-  .gateway-logo { width: 220px; }
+  .gateway-logo { width: 220px; height: 66px; }
   .gateway-nav { gap: 26px; }
   .gateway-nav-link { font-size: 15px; }
   .gateway-nav-link::after { bottom: 22px; }
-  .gateway-copy { padding: 110px 0 80px 42px; width: 54vw; }
+  .gateway-copy { padding: 110px 0 80px 42px; width: 52vw; }
   .gateway-eyebrow { font-size: 19px; }
   .gateway-copy p { font-size: 16px; }
 }
@@ -195,14 +198,14 @@
 @media (max-width: 760px) {
   .gateway-page { grid-template-rows: auto 1fr 64px; }
   .gateway-header { align-items: flex-start; flex-direction: column; gap: 8px; padding: 18px 20px 12px; }
-  .gateway-logo { width: 190px; max-height: 52px; }
+  .gateway-logo { width: 190px; height: 58px; }
   .gateway-nav { width: 100%; height: auto; gap: 18px; overflow-x: auto; padding-bottom: 4px; }
   .gateway-nav-link { height: 42px; font-size: 13px; }
   .gateway-nav-link::after { bottom: 0; }
   .gateway-sakti, .gateway-sakti > .gateway-nav-link { height: 42px; }
   .gateway-dropdown { position: fixed; top: 104px; left: 20px; transform: none; }
-  .gateway-hero-photo { background-position: 64% center; }
-  .gateway-hero-fade { background: linear-gradient(90deg, rgba(255,255,255,.98), rgba(255,255,255,.84) 68%, rgba(255,255,255,.34)); }
+  .gateway-hero-photo { background-position: 70% center; }
+  .gateway-hero-fade { background: linear-gradient(90deg, rgba(255,255,255,.98), rgba(255,255,255,.85) 66%, rgba(255,255,255,.28)); }
   .gateway-copy { width: auto; padding: 90px 26px 70px; }
   .gateway-copy h1 { font-size: clamp(45px, 13vw, 66px); letter-spacing: -1.6px; }
   .gateway-eyebrow { font-size: 17px; margin-bottom: 22px; }

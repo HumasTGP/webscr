@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ExternalLink } from "lucide-react";
-import AutoLogo from "../../components/AutoLogo";
 import "../styles/portal-showcase.css";
 
 const SAKTI_ROLES = [
@@ -30,7 +29,7 @@ export default function LandingGateway({ onSelect }) {
     <div className="gateway-page">
       <header className="gateway-header">
         <button className="gateway-brand" type="button" aria-label="PLN Indonesia Power">
-          <AutoLogo alt="PLN Indonesia Power" className="gateway-logo" />
+          <img src="/logo-pln.png" alt="PLN Indonesia Power" className="gateway-logo" />
         </button>
 
         <nav className="gateway-nav" aria-label="Navigasi portal">

@@ -1,5 +1,4 @@
 import { ArrowLeft } from "lucide-react";
-import AutoLogo from "../../components/AutoLogo";
 import "../styles/glass-login.css";
 
 export default function GlassLoginShell({
@@ -16,10 +15,7 @@ export default function GlassLoginShell({
   return (
     <div className="gl-page" style={{ "--gl-accent": accent, "--gl-soft": accentSoft }}>
       <div className="gl-top-brand">
-        <AutoLogo
-          alt="PLN Indonesia Power"
-          style={{ mixBlendMode: "multiply", background: "transparent" }}
-        />
+        <img src="/logo-pln.png" alt="PLN Indonesia Power" />
       </div>
 
       <div className="gl-card">
