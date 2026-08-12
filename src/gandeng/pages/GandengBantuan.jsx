@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { BookOpen, ChevronDown, ChevronUp, HelpCircle, Phone } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { HELP_CONTACT } from "../../lib/helpContact";
 
 const PANDUAN_STEPS = [
   { step: 1, judul: "Daftar Akun GANDENG", desc: "Daftar menggunakan email perusahaan/lembaga, lalu buat username dan password sendiri." },
@@ -16,10 +15,6 @@ const FAQS = [
   { q: "Apa yang harus dilakukan jika pengajuan dikembalikan atau ditolak?", a: "Buka detail pengajuan untuk melihat status dan riwayat proses sebagai acuan tindak lanjut." },
   { q: "Bagaimana jika lupa password?", a: "Masukkan email terdaftar pada fitur Lupa Password. Sistem akan membuat tautan reset untuk membuat username dan password baru." },
 ];
-
-function WhatsAppIcon({ size=16, color="currentColor" }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true"><path fill={color} d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .2 5.3.2 11.9c0 2.1.6 4.1 1.6 5.9L.1 24l6.4-1.7a11.8 11.8 0 0 0 5.6 1.4C18.7 23.8 24 18.4 24 11.9c0-3.2-1.2-6.2-3.5-8.4Zm-8.4 18.3a9.8 9.8 0 0 1-5-1.4l-.4-.2-3.8 1 1-3.7-.2-.4a9.9 9.9 0 1 1 8.4 4.7Zm5.4-7.4c-.3-.2-1.8-.9-2-.9-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.4.2-.7.1-.3-.2-1.2-.5-2.4-1.5-.9-.8-1.5-1.8-1.6-2-.2-.3 0-.5.1-.6.1-.2.3-.4.5-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.2-.7-1.6-.9-2.2-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.1-.3-.2-.6-.3Z"/></svg>;
-}
 
 function FAQItem({ faq }) {
   const [open, setOpen] = useState(false);
@@ -43,40 +38,18 @@ function SectionHeader({ icon: Icon, text }) {
 }
 
 export default function GandengBantuan() {
-  const waUrl = `https://wa.me/${HELP_CONTACT.waNumber}?text=${encodeURIComponent(HELP_CONTACT.waMessage)}`;
   return (
     <div style={{fontFamily:font.body,padding:"clamp(18px,3vw,28px) clamp(16px,4vw,32px)",maxWidth:980,width:"100%",boxSizing:"border-box"}}>
 
-      {/* Header row: title + admin contact pill */}
-      <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16,marginBottom:22,flexWrap:"wrap"}}>
-        <div>
-          <div style={{fontSize:11,color:"#125AE8",textTransform:"uppercase",letterSpacing:1,fontWeight:800}}>GANDENG</div>
-          <div style={{fontSize:24,fontWeight:800,color:T.heading,marginTop:4}}>Pusat Bantuan</div>
-          <div style={{fontSize:13,color:T.muted,lineHeight:1.6,marginTop:5,maxWidth:480}}>Panduan penggunaan, pertanyaan umum, dan akses langsung ke admin GANDENG.</div>
-        </div>
-
-        {/* Admin contact pill */}
-        <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 16px",background:"#EAF1FF",borderRadius:14,border:"1px solid #C7DAFF",flexShrink:0,alignSelf:"flex-start"}}>
-          <div style={{width:36,height:36,borderRadius:10,background:"#125AE8",display:"grid",placeItems:"center",flexShrink:0}}>
-            <WhatsAppIcon size={18} color="#fff"/>
-          </div>
-          <div>
-            <div style={{fontSize:10.5,color:T.muted,fontWeight:600,lineHeight:1.3}}>Admin GANDENG</div>
-            <a href={waUrl} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:5,fontSize:13,fontWeight:800,color:"#125AE8",textDecoration:"none",marginTop:1}}>
-              {HELP_CONTACT.phone}
-            </a>
-          </div>
-          <div style={{width:1,height:28,background:"#C7DAFF",marginLeft:4}}/>
-          <a href={`tel:${HELP_CONTACT.waNumber}`} style={{display:"flex",alignItems:"center",gap:5,padding:"6px 10px",borderRadius:8,background:"#125AE8",color:"#fff",fontSize:12,fontWeight:700,textDecoration:"none",whiteSpace:"nowrap"}}>
-            <Phone size={13}/>Telepon
-          </a>
-        </div>
+      <div style={{marginBottom:22}}>
+        <div style={{fontSize:11,color:"#125AE8",textTransform:"uppercase",letterSpacing:1,fontWeight:800}}>GANDENG</div>
+        <div style={{fontSize:24,fontWeight:800,color:T.heading,marginTop:4}}>Pusat Bantuan</div>
+        <div style={{fontSize:13,color:T.muted,lineHeight:1.6,marginTop:5,maxWidth:560}}>Panduan penggunaan, pertanyaan umum, dan akses langsung ke admin GANDENG.</div>
       </div>
 
       {/* Two-column: Panduan (left) | FAQ (right) */}
       <div className="responsive-two-col" style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) minmax(0,1fr)",gap:18,alignItems:"start"}}>
 
-        {/* Left: Panduan Penggunaan */}
         <section style={section}>
           <SectionHeader icon={BookOpen} text="Panduan Penggunaan"/>
           {PANDUAN_STEPS.map((s) => (
@@ -90,7 +63,6 @@ export default function GandengBantuan() {
           ))}
         </section>
 
-        {/* Right: Pertanyaan Umum */}
         <section style={section}>
           <SectionHeader icon={HelpCircle} text="Pertanyaan Umum"/>
           {FAQS.map((faq) => <FAQItem key={faq.q} faq={faq}/>)}
@@ -100,4 +72,4 @@ export default function GandengBantuan() {
   );
 }
 
-const section = {background:T.card,border:`1px solid ${T.border}`,borderRadius:15,padding:"18px 20px",marginBottom:0,boxShadow:"0 4px 14px rgba(29,55,94,.04)"};
+const section = {background:T.card,border:`1px solid ${T.border}`,borderRadius:15,padding:"18px 20px",boxShadow:"0 4px 14px rgba(29,55,94,.04)"};
