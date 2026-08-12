@@ -48,10 +48,10 @@ export default function GandengApp({ mitraList, setMitraList, notify, onBackToPo
   return (
     <div className="gandeng-shell" style={{ "--blue":"#125AE8", "--navy":"#0B46C8", "--blue-soft":"#EAF1FF", "--danger":"#E53935", "--danger-soft":"#FDECEC" }}>
       <header className="app-topbar gandeng-topbar" style={{ position:"sticky",top:0,zIndex:30,background:T.topbarBg,backdropFilter:"blur(8px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,minHeight:58,flexShrink:0 }}>
-        <div className="gandeng-topbar-left" style={{display:"flex",alignItems:"center",gap:9,minWidth:0,flex:1}}>
-          <span className="gandeng-product-chip">GANDENG</span>
-          <ChevronRight size={14} color={T.muted} className="hide-mobile" />
-          <span className="gandeng-active-label" style={{fontSize:13,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeLabel}</span>
+        <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0,flex:1}}>
+          <span className="hide-mobile" style={{fontSize:12.5,fontWeight:800,color:"#125AE8",whiteSpace:"nowrap"}}>GANDENG</span>
+          <ChevronRight size={13} color={T.muted} className="hide-mobile" />
+          <span style={{fontSize:13,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeLabel}</span>
         </div>
 
         {/* Admin contact — hanya tampil di halaman Bantuan */}
@@ -66,12 +66,11 @@ export default function GandengApp({ mitraList, setMitraList, notify, onBackToPo
           </div>
         )}
 
-        <div className="gandeng-user-card" style={{display:"flex",alignItems:"center",gap:10,minWidth:0,maxWidth:"min(280px,40vw)"}}>
-          <div className="gandeng-user-avatar">{identityTitle.charAt(0).toUpperCase()}</div>
-          <div className="gandeng-topbar-identity" style={{minWidth:0,flex:1}}>
-            <div style={{fontSize:12.5,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{identityTitle}</div>
-            <div style={{fontSize:10.5,color:T.muted,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{identitySub}</div>
+        <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+          <div style={{width:30,height:30,borderRadius:"50%",background:"#125AE8",color:"#fff",display:"grid",placeItems:"center",fontWeight:800,fontSize:12,flexShrink:0}}>
+            {identityTitle.charAt(0).toUpperCase()}
           </div>
+          <span className="hide-mobile" style={{fontSize:12.5,fontWeight:700,color:T.text,maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{identityTitle}</span>
         </div>
       </header>
       <div className="gandeng-shell-body">

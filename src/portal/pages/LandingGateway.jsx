@@ -79,6 +79,8 @@ export default function LandingGateway({ onSelect }) {
           <p>Akses berbagai sistem dan layanan digital dalam satu portal untuk mendukung kebutuhan kerja dan kolaborasi di PLN Indonesia Power.</p>
         </section>
       </main>
+
+      <footer className="gateway-footer">© 2026. All rights reserved.</footer>
     </div>
   );
 }
