@@ -1,103 +1,156 @@
 import { useState } from "react";
-import { FileText, Plus, Trash2, Save, Printer } from "lucide-react";
+import { Download, Plus, Save, Trash2 } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { uid, rupiah } from "../../lib/utils";
+import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 
+const EMPTY_FORM = {
+  subSection: "",
+  submissionId: "",
+  tanggal: "",
+  namaPengadaan: "",
+  procost: "",
+  expType: "",
+  task: "",
+  expOrg: "",
+  vendor1: "",
+  vendor2: "",
+  vendor3: "",
+  preferredVendor: "",
+  kesesuaianProcost: "",
+  ketersediaanAnggaran: "",
+  invoiceNonPo: "",
+  ketAka: "",
+  ketMadm: "",
+  approvalMadm: "",
+  ketSrmMum: "",
+  approvalSrmMum: "",
+};
+
+function newItem() {
+  return { id: uid("LP1"), uraian: "", jumlah: "", satuan: "", hargaVendor1: "", hargaVendor2: "", hargaVendor3: "" };
+}
+
 export default function Lampiran1Page({ rab, notify }) {
-  const [data, setData] = useState({});
   const [activeRab, setActiveRab] = useState(null);
+  const [saved, setSaved] = useState({});
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [items, setItems] = useState([]);
 
-  const getItems = (rabId) => data[rabId] || [];
-  const setItems = (rabId, items) => setData((prev) => ({ ...prev, [rabId]: items }));
+  const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  const addItem = () => {
-    if (!activeRab) return;
-    const items = getItems(activeRab.idNumber);
-    setItems(activeRab.idNumber, [...items, {
+  const chooseRab = (r) => {
+    setActiveRab(r);
+    const existing = saved[r.idNumber];
+    if (existing) {
+      setForm(existing.form);
+      setItems(existing.items || []);
+      return;
+    }
+    setForm({
+      ...EMPTY_FORM,
+      namaPengadaan: r.judulKegiatan || "",
+      procost: r.procost || "",
+      expType: r.expType || "",
+      task: r.task || "",
+      expOrg: r.expOrg || "",
+      vendor1: r.vendor || "",
+      preferredVendor: r.vendor || "",
+    });
+    setItems((r.items || []).map((it) => ({
       id: uid("LP1"),
-      uraian: "", volume: "", satuan: "", hargaSatuan: "",
-    }]);
+      uraian: it.uraian || "",
+      jumlah: it.qtyEvaluasi || it.qty || "",
+      satuan: it.satuan || "",
+      hargaVendor1: it.hargaEvaluasi || it.harga || "",
+      hargaVendor2: "",
+      hargaVendor3: "",
+    })));
   };
 
-  const updateItem = (idx, key, value) => {
-    if (!activeRab) return;
-    const items = [...getItems(activeRab.idNumber)];
-    items[idx] = { ...items[idx], [key]: value };
-    setItems(activeRab.idNumber, items);
+  const updateItem = (index, key, value) => {
+    setItems((prev) => prev.map((item, i) => i === index ? { ...item, [key]: value } : item));
   };
 
-  const removeItem = (idx) => {
+  const save = () => {
     if (!activeRab) return;
-    const items = getItems(activeRab.idNumber).filter((_, i) => i !== idx);
-    setItems(activeRab.idNumber, items);
+    setSaved((prev) => ({ ...prev, [activeRab.idNumber]: { form, items } }));
+    notify?.("Lampiran 1 disimpan.", "success", "Lampiran 1 disimpan");
   };
 
-  const handlePrint = () => {
+  const grandTotal = items.reduce((sum, item) => sum + (Number(item.jumlah) || 0) * (Number(item.hargaVendor1) || 0), 0);
+
+  const downloadDocx = async () => {
     if (!activeRab) return;
-    const items = getItems(activeRab.idNumber);
-    const win = window.open("", "_blank", "width=850,height=960");
-    if (!win) return;
-    const rows = items.map((item, i) => {
-      const total = (Number(item.volume) || 0) * (Number(item.hargaSatuan) || 0);
-      return `<tr>
-        <td style="border:1px solid #333;padding:6px 8px;text-align:center;">${i + 1}</td>
-        <td style="border:1px solid #333;padding:6px 10px;">${item.uraian || "-"}</td>
-        <td style="border:1px solid #333;padding:6px 8px;text-align:center;">${item.volume || "-"}</td>
-        <td style="border:1px solid #333;padding:6px 8px;text-align:center;">${item.satuan || "-"}</td>
-        <td style="border:1px solid #333;padding:6px 8px;text-align:right;">${(Number(item.hargaSatuan) || 0).toLocaleString("id-ID")}</td>
-        <td style="border:1px solid #333;padding:6px 8px;text-align:right;">${total.toLocaleString("id-ID")}</td>
-      </tr>`;
-    }).join("");
-    const grandTotal = items.reduce((s, item) => s + (Number(item.volume) || 0) * (Number(item.hargaSatuan) || 0), 0);
-    win.document.write(`<!doctype html><html><head><meta charset="utf-8" /><title>Lampiran 1 - ${activeRab.idNumber}</title>
-      <style>body{font-family:Arial,sans-serif;padding:32px;color:#111;}h1{font-size:16px;margin:0 0 4px;text-align:center;}
-      .sub{text-align:center;color:#555;font-size:12px;margin-bottom:22px;}
-      table{width:100%;border-collapse:collapse;font-size:12px;}th{border:1px solid #333;padding:6px 8px;background:#EFEFEF;}</style>
-    </head><body>
-      <h1>LAMPIRAN 1 - RINCIAN PEKERJAAN</h1>
-      <div class="sub">${activeRab.idNumber} - ${activeRab.judulKegiatan}</div>
-      <table><thead><tr><th>No</th><th>Uraian Pekerjaan</th><th>Vol</th><th>Satuan</th><th>Harga Satuan</th><th>Jumlah</th></tr></thead>
-      <tbody>${rows}
-      <tr style="font-weight:700;"><td colspan="5" style="border:1px solid #333;padding:6px 10px;text-align:right;">TOTAL</td>
-      <td style="border:1px solid #333;padding:6px 8px;text-align:right;">${grandTotal.toLocaleString("id-ID")}</td></tr>
-      </tbody></table>
-      <script>window.onload=function(){window.print();};</script>
-    </body></html>`);
-    win.document.close();
+    const itemsText = items.map((item, index) => {
+      const qty = Number(item.jumlah) || 0;
+      return `${index + 1}. ${item.uraian || "-"} | ${qty} ${item.satuan || ""} | Vendor 1: ${rupiah(qty * (Number(item.hargaVendor1) || 0))} | Vendor 2: ${rupiah(qty * (Number(item.hargaVendor2) || 0))} | Vendor 3: ${rupiah(qty * (Number(item.hargaVendor3) || 0))}`;
+    }).join("\n");
+    try {
+      await generateDocxFromTemplate(
+        "/templates/Template_Lampiran_1.docx",
+        {
+          subSection: form.subSection,
+          submissionId: form.submissionId,
+          tanggal: formatTanggalPanjang(form.tanggal),
+          namaPengadaan: form.namaPengadaan || activeRab.judulKegiatan || "",
+          procost: form.procost,
+          expType: form.expType,
+          task: form.task,
+          expOrg: form.expOrg,
+          itemsText,
+          grandTotal: rupiah(grandTotal),
+          vendor1: form.vendor1,
+          vendor2: form.vendor2,
+          vendor3: form.vendor3,
+          preferredVendor: form.preferredVendor,
+          kesesuaianProcost: form.kesesuaianProcost,
+          ketersediaanAnggaran: form.ketersediaanAnggaran,
+          invoiceNonPo: form.invoiceNonPo,
+          ketAka: form.ketAka,
+          ketMadm: form.ketMadm,
+          approvalMadm: form.approvalMadm,
+          ketSrmMum: form.ketSrmMum,
+          approvalSrmMum: form.approvalSrmMum,
+        },
+        `Lampiran-1-${activeRab.idNumber}.docx`
+      );
+      notify?.("Lampiran 1 berhasil dibuat dari data sistem.", "success");
+    } catch (e) {
+      notify?.(`Gagal membuat Lampiran 1: ${e.message}`, "error");
+    }
   };
 
   const inputStyle = {
-    width: "100%", padding: "8px 10px", borderRadius: 6,
+    width: "100%", padding: "9px 10px", borderRadius: 7,
     border: `1px solid ${T.border}`, background: T.inputBg,
-    fontSize: 12.5, color: T.text, boxSizing: "border-box",
+    color: T.text, fontSize: 12.5, boxSizing: "border-box",
   };
 
   return (
     <div>
       <PageHeader
-        eyebrow="Pembayaran"
-        title="Lampiran 1 - Rincian Pekerjaan"
-        description="Detail rincian pekerjaan per kegiatan RAB."
+        eyebrow="Dokumen Pembayaran"
+        title="Lampiran 1 - Pengadaan Langsung / Invoice Non PO"
+        description="Data Lampiran 1 diisi dari pekerjaan/RAB yang dipilih, kemudian dilengkapi perbandingan vendor dan verifikasi sesuai kebutuhan pengadaan."
       />
 
-      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16 }}>
+      <div className="responsive-two-col" style={{ display: "grid", gridTemplateColumns: "minmax(220px, 280px) minmax(0, 1fr)", gap: 16 }}>
         <Card>
-          <div style={{ fontSize: 12, fontWeight: 700, color: T.heading, marginBottom: 10 }}>Pilih RAB</div>
-          {(!rab || rab.length === 0) ? (
-            <div style={{ fontSize: 12.5, color: T.muted }}>Belum ada RAB.</div>
-          ) : (
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.heading, marginBottom: 10 }}>Pilih RAB / Pekerjaan</div>
+          {!rab?.length ? <div style={{ color: T.muted, fontSize: 12.5 }}>Belum ada RAB.</div> : (
             <div style={{ display: "grid", gap: 6 }}>
               {rab.map((r) => (
-                <button key={r.idNumber} onClick={() => setActiveRab(r)} style={{
+                <button key={r.idNumber} onClick={() => chooseRab(r)} style={{
                   padding: "10px 12px", borderRadius: 8, textAlign: "left",
                   border: `1px solid ${activeRab?.idNumber === r.idNumber ? T.blue : T.border}`,
                   background: activeRab?.idNumber === r.idNumber ? T.blueSoft : T.bg,
-                  cursor: "pointer", fontSize: 12,
+                  color: T.text, cursor: "pointer", minWidth: 0,
                 }}>
-                  <div style={{ fontFamily: font.mono, fontWeight: 700, color: T.blue }}>{r.idNumber}</div>
-                  <div style={{ fontSize: 11.5, color: T.muted, marginTop: 2 }}>{r.judulKegiatan}</div>
+                  <div style={{ fontFamily: font.mono, fontWeight: 700, color: T.blue, fontSize: 12 }}>{r.idNumber}</div>
+                  <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3, lineHeight: 1.45, overflowWrap: "anywhere" }}>{r.judulKegiatan}</div>
                 </button>
               ))}
             </div>
@@ -106,91 +159,77 @@ export default function Lampiran1Page({ rab, notify }) {
 
         <Card>
           {!activeRab ? (
-            <div style={{ padding: "32px 0", textAlign: "center", color: T.muted, fontSize: 14 }}>
-              Pilih RAB di sebelah kiri.
-            </div>
+            <div style={{ padding: "34px 8px", textAlign: "center", color: T.muted, fontSize: 13.5 }}>Pilih RAB untuk mengisi Lampiran 1.</div>
           ) : (
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                <div>
-                  <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{activeRab.idNumber}</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: T.heading }}>{activeRab.judulKegiatan}</div>
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button onClick={addItem} style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    padding: "8px 14px", borderRadius: 8, border: "none",
-                    background: T.blue, color: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600,
-                  }}><Plus size={14} /> Tambah Baris</button>
-                  <button onClick={handlePrint} style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`,
-                    background: T.card, color: T.heading, cursor: "pointer", fontSize: 12, fontWeight: 600,
-                  }}><Printer size={14} /> Cetak</button>
-                </div>
-              </div>
+              <Section title="Identitas Pengadaan">
+                <Field label="Sub Section"><input style={inputStyle} value={form.subSection} onChange={(e) => set("subSection", e.target.value)} /></Field>
+                <Field label="Submission ID"><input style={inputStyle} value={form.submissionId} onChange={(e) => set("submissionId", e.target.value)} /></Field>
+                <Field label="Tanggal"><input style={inputStyle} type="date" value={form.tanggal} onChange={(e) => set("tanggal", e.target.value)} /></Field>
+                <Field label="Nama Pengadaan" full><input style={inputStyle} value={form.namaPengadaan} onChange={(e) => set("namaPengadaan", e.target.value)} /></Field>
+                <Field label="Procost"><input style={inputStyle} value={form.procost} onChange={(e) => set("procost", e.target.value)} /></Field>
+                <Field label="Exp. Type"><input style={inputStyle} value={form.expType} onChange={(e) => set("expType", e.target.value)} /></Field>
+                <Field label="Task"><input style={inputStyle} value={form.task} onChange={(e) => set("task", e.target.value)} /></Field>
+                <Field label="Exp. Org"><input style={inputStyle} value={form.expOrg} onChange={(e) => set("expOrg", e.target.value)} /></Field>
+              </Section>
 
-              {getItems(activeRab.idNumber).length === 0 ? (
-                <div style={{ padding: "20px 0", textAlign: "center", color: T.muted, fontSize: 13 }}>
-                  Belum ada item. Klik "Tambah Baris" untuk mulai.
+              <div style={{ marginBottom: 18 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 9 }}>
+                  <div style={{ fontFamily: font.display, fontSize: 13.5, fontWeight: 700, color: T.heading }}>RAB dan Ruang Lingkup Pengadaan</div>
+                  <button onClick={() => setItems((prev) => [...prev, newItem()])} style={buttonStyle(T.blue, "#fff", "transparent")}><Plus size={14} /> Tambah Baris</button>
                 </div>
-              ) : (
                 <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
-                    <thead>
-                      <tr style={{ background: T.bg }}>
-                        <th style={{ padding: "8px 10px", textAlign: "left", borderBottom: `1px solid ${T.border}`, width: 36 }}>No</th>
-                        <th style={{ padding: "8px 10px", textAlign: "left", borderBottom: `1px solid ${T.border}` }}>Uraian Pekerjaan</th>
-                        <th style={{ padding: "8px 10px", textAlign: "center", borderBottom: `1px solid ${T.border}`, width: 70 }}>Vol</th>
-                        <th style={{ padding: "8px 10px", textAlign: "center", borderBottom: `1px solid ${T.border}`, width: 80 }}>Satuan</th>
-                        <th style={{ padding: "8px 10px", textAlign: "right", borderBottom: `1px solid ${T.border}`, width: 120 }}>Harga Satuan</th>
-                        <th style={{ padding: "8px 10px", textAlign: "right", borderBottom: `1px solid ${T.border}`, width: 120 }}>Jumlah</th>
-                        <th style={{ padding: "8px 10px", borderBottom: `1px solid ${T.border}`, width: 40 }}></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getItems(activeRab.idNumber).map((item, i) => {
-                        const total = (Number(item.volume) || 0) * (Number(item.hargaSatuan) || 0);
-                        return (
-                          <tr key={item.id}>
-                            <td style={{ padding: "6px 10px", borderBottom: `1px solid ${T.border}` }}>{i + 1}</td>
-                            <td style={{ padding: "6px 10px", borderBottom: `1px solid ${T.border}` }}>
-                              <input style={inputStyle} value={item.uraian} onChange={(e) => updateItem(i, "uraian", e.target.value)} placeholder="Uraian pekerjaan" />
-                            </td>
-                            <td style={{ padding: "6px 10px", borderBottom: `1px solid ${T.border}` }}>
-                              <input style={{ ...inputStyle, textAlign: "center" }} type="number" value={item.volume} onChange={(e) => updateItem(i, "volume", e.target.value)} />
-                            </td>
-                            <td style={{ padding: "6px 10px", borderBottom: `1px solid ${T.border}` }}>
-                              <input style={{ ...inputStyle, textAlign: "center" }} value={item.satuan} onChange={(e) => updateItem(i, "satuan", e.target.value)} placeholder="Unit" />
-                            </td>
-                            <td style={{ padding: "6px 10px", borderBottom: `1px solid ${T.border}` }}>
-                              <input style={{ ...inputStyle, textAlign: "right" }} type="number" value={item.hargaSatuan} onChange={(e) => updateItem(i, "hargaSatuan", e.target.value)} />
-                            </td>
-                            <td style={{ padding: "6px 10px", borderBottom: `1px solid ${T.border}`, textAlign: "right", fontWeight: 600 }}>
-                              {rupiah(total)}
-                            </td>
-                            <td style={{ padding: "6px 10px", borderBottom: `1px solid ${T.border}`, textAlign: "center" }}>
-                              <button onClick={() => removeItem(i)} title="Hapus" style={{
-                                background: "transparent", border: "none", color: T.danger, cursor: "pointer", padding: 2,
-                              }}><Trash2 size={14} /></button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
+                  <table style={{ width: "100%", minWidth: 760, borderCollapse: "collapse", fontSize: 12 }}>
+                    <thead><tr style={{ background: T.bg }}>
+                      {['Uraian','Jumlah','Satuan','Harga Vendor 1 + PPN','Harga Vendor 2 + PPN','Harga Vendor 3 + PPN',''].map((h) => <th key={h} style={{ padding: 8, borderBottom: `1px solid ${T.border}`, textAlign: "left" }}>{h}</th>)}
+                    </tr></thead>
+                    <tbody>{items.map((item, i) => <tr key={item.id}>
+                      <td style={td}><input style={inputStyle} value={item.uraian} onChange={(e) => updateItem(i, "uraian", e.target.value)} /></td>
+                      <td style={td}><input style={{...inputStyle,width:76}} type="number" value={item.jumlah} onChange={(e) => updateItem(i, "jumlah", e.target.value)} /></td>
+                      <td style={td}><input style={{...inputStyle,width:80}} value={item.satuan} onChange={(e) => updateItem(i, "satuan", e.target.value)} /></td>
+                      <td style={td}><input style={inputStyle} type="number" value={item.hargaVendor1} onChange={(e) => updateItem(i, "hargaVendor1", e.target.value)} /></td>
+                      <td style={td}><input style={inputStyle} type="number" value={item.hargaVendor2} onChange={(e) => updateItem(i, "hargaVendor2", e.target.value)} /></td>
+                      <td style={td}><input style={inputStyle} type="number" value={item.hargaVendor3} onChange={(e) => updateItem(i, "hargaVendor3", e.target.value)} /></td>
+                      <td style={td}><button onClick={() => setItems((prev) => prev.filter((_, x) => x !== i))} style={{ border:0, background:"transparent", color:T.danger, cursor:"pointer" }}><Trash2 size={14}/></button></td>
+                    </tr>)}</tbody>
                   </table>
                 </div>
-              )}
+                <div style={{ textAlign: "right", marginTop: 9, fontSize: 13, fontWeight: 700, color: T.heading }}>Grand Total Vendor 1: {rupiah(grandTotal)}</div>
+              </div>
 
-              {getItems(activeRab.idNumber).length > 0 && (
-                <div style={{ textAlign: "right", marginTop: 10, fontWeight: 700, fontSize: 14, color: T.heading }}>
-                  Total: {rupiah(getItems(activeRab.idNumber).reduce((s, item) => s + (Number(item.volume) || 0) * (Number(item.hargaSatuan) || 0), 0))}
-                </div>
-              )}
+              <Section title="Vendor dan Preferred Vendor">
+                <Field label="Vendor 1"><input style={inputStyle} value={form.vendor1} onChange={(e) => set("vendor1", e.target.value)} /></Field>
+                <Field label="Vendor 2"><input style={inputStyle} value={form.vendor2} onChange={(e) => set("vendor2", e.target.value)} /></Field>
+                <Field label="Vendor 3"><input style={inputStyle} value={form.vendor3} onChange={(e) => set("vendor3", e.target.value)} /></Field>
+                <Field label="Preferred Vendor"><input style={inputStyle} value={form.preferredVendor} onChange={(e) => set("preferredVendor", e.target.value)} /></Field>
+              </Section>
+
+              <Section title="Verifikasi dan Persetujuan Pengadaan">
+                {[
+                  ["kesesuaianProcost","Kesesuaian Procost"],["ketersediaanAnggaran","Ketersediaan Anggaran"],["invoiceNonPo","Invoice Non PO"],
+                  ["ketAka","Ket. AKA"],["ketMadm","Ket. MADM"],["approvalMadm","Approval MADM"],["ketSrmMum","Ket. SRM MUM"],["approvalSrmMum","Approval SRM MUM"],
+                ].map(([key,label]) => <Field key={key} label={label}><input style={inputStyle} value={form[key]} onChange={(e) => set(key,e.target.value)} /></Field>)}
+              </Section>
+
+              <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 18 }}>
+                <button onClick={save} style={buttonStyle(T.blue, "#fff", "transparent")}><Save size={14}/> Simpan</button>
+                <button onClick={downloadDocx} style={buttonStyle(T.card, T.heading, T.border)}><Download size={14}/> Download Word</button>
+              </div>
             </div>
           )}
         </Card>
       </div>
     </div>
   );
+}
+
+const td = { padding: 6, borderBottom: "1px solid var(--border)" };
+function Section({ title, children }) {
+  return <div style={{ marginBottom: 18 }}><div style={{ fontFamily: font.display, fontSize: 13.5, fontWeight: 700, color: T.heading, marginBottom: 10 }}>{title}</div><div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 11 }}>{children}</div></div>;
+}
+function Field({ label, children, full }) {
+  return <div style={full ? { gridColumn: "1 / -1", minWidth: 0 } : { minWidth: 0 }}><label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: T.heading, marginBottom: 5 }}>{label}</label>{children}</div>;
+}
+function buttonStyle(background, color, borderColor) {
+  return { display:"inline-flex",alignItems:"center",gap:6,padding:"8px 13px",borderRadius:8,border:borderColor==="transparent"?"none":`1px solid ${borderColor}`,background,color,cursor:"pointer",fontSize:12,fontWeight:700 };
 }

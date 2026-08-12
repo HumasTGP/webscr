@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, Clock, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { FileText, Clock, CheckCircle2, XCircle, ArrowRight, Send } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { MITRA_STATUS_META } from "../../lib/data";
 import { rupiah } from "../../lib/utils";
@@ -19,12 +19,12 @@ function LiveClock() {
   });
 
   return (
-    <div>
-      <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginBottom: 2 }}>
+    <div style={{ minWidth: 0 }}>
+      <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", marginBottom: 2, lineHeight: 1.45 }}>
         {tanggal}
       </div>
-      <div style={{ fontSize: 28, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>
-        {jam} <span style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.55)" }}>WIB</span>
+      <div style={{ fontSize: "clamp(22px, 4vw, 28px)", fontWeight: 800, color: "#fff", letterSpacing: -0.5, lineHeight: 1.15 }}>
+        {jam} <span style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.62)" }}>WIB</span>
       </div>
     </div>
   );
@@ -44,21 +44,22 @@ function StatCard({ label, value, icon: Icon, color, bg }) {
       background: T.card,
       border: `1px solid ${T.border}`,
       borderRadius: 12,
-      padding: "18px 20px",
+      padding: "16px 18px",
       display: "flex",
       alignItems: "center",
-      gap: 14,
+      gap: 12,
+      minWidth: 0,
     }}>
       <div style={{
-        width: 44, height: 44, borderRadius: 10,
+        width: 42, height: 42, borderRadius: 10,
         background: bg, display: "flex", alignItems: "center", justifyContent: "center",
         flexShrink: 0,
       }}>
-        <Icon size={20} color={color} />
+        <Icon size={19} color={color} />
       </div>
-      <div>
+      <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: 22, fontWeight: 800, color: T.heading }}>{value}</div>
-        <div style={{ fontSize: 12, color: T.muted, marginTop: 1 }}>{label}</div>
+        <div style={{ fontSize: 12, color: T.muted, marginTop: 1, lineHeight: 1.35 }}>{label}</div>
       </div>
     </div>
   );
@@ -69,13 +70,45 @@ function StatusBadge({ status }) {
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 4,
-      padding: "2px 9px", borderRadius: 999,
+      padding: "3px 9px", borderRadius: 999,
       background: meta.bg, color: meta.color,
       fontSize: 11, fontWeight: 700, whiteSpace: "nowrap",
     }}>
       <span style={{ width: 5, height: 5, borderRadius: "50%", background: meta.color }} />
       {meta.label}
     </span>
+  );
+}
+
+function FlowCard() {
+  const steps = ["Pengajuan", "Humas", "ASMAN", "MADM", "Selesai"];
+  return (
+    <div style={{
+      background: T.card,
+      border: `1px solid ${T.border}`,
+      borderRadius: 12,
+      padding: "16px 18px",
+      marginBottom: 22,
+    }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: T.heading, marginBottom: 12 }}>Alur Pengajuan GANDENG</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, overflowX: "auto", paddingBottom: 2 }}>
+        {steps.map((step, index) => (
+          <div key={step} style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "7px 10px", borderRadius: 8,
+              background: index === 0 ? T.blueSoft : T.bg,
+              border: `1px solid ${T.border}`,
+              color: index === 0 ? T.blue : T.text,
+              fontSize: 11.5, fontWeight: 700,
+            }}>
+              {index === 0 && <Send size={13} />}{step}
+            </div>
+            {index < steps.length - 1 && <ArrowRight size={13} color={T.muted} />}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -90,13 +123,18 @@ export default function MitraDashboard({ mitraList, user, onGoto }) {
     .slice(0, 3);
 
   return (
-    <div style={{ fontFamily: font.body, padding: "28px 32px", maxWidth: 1000 }}>
-      {/* Hero Banner */}
+    <div style={{
+      fontFamily: font.body,
+      padding: "clamp(18px, 3vw, 28px) clamp(16px, 4vw, 32px)",
+      maxWidth: 1100,
+      width: "100%",
+      boxSizing: "border-box",
+    }}>
       <div style={{
         background: "linear-gradient(135deg, #0A1628 0%, #0E4C92 100%)",
         borderRadius: 16,
-        padding: "28px 32px",
-        marginBottom: 28,
+        padding: "clamp(20px, 4vw, 28px) clamp(20px, 4vw, 32px)",
+        marginBottom: 22,
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -104,34 +142,34 @@ export default function MitraDashboard({ mitraList, user, onGoto }) {
         flexWrap: "wrap",
         boxShadow: "0 8px 32px rgba(10,22,40,0.2)",
       }}>
-        <div>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", marginBottom: 4 }}>
-            {getGreeting()}, <strong style={{ color: "#FFC72C" }}>{user?.name || "Mitra"}</strong>
+        <div style={{ minWidth: 0, flex: "1 1 320px" }}>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginBottom: 5, lineHeight: 1.45 }}>
+            {getGreeting()}, <strong style={{ color: "#FFC72C" }}>{user?.name || "Pengguna"}</strong>
           </div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 2 }}>
-            Selamat datang di Portal Mitra
+          <div style={{ fontSize: "clamp(19px, 3vw, 23px)", fontWeight: 800, color: "#fff", marginBottom: 5, lineHeight: 1.25 }}>
+            Selamat datang di GANDENG
           </div>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
-            Pantau dan kelola pengajuan kerjasama Anda di sini.
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.62)", lineHeight: 1.6, maxWidth: 560 }}>
+            Ajukan proposal dan pantau proses pemeriksaan dari Humas, ASMAN, sampai MADM tanpa mengubah data pengajuan yang sudah dikirim.
           </div>
         </div>
         <LiveClock />
       </div>
 
-      {/* Stats */}
+      <FlowCard />
+
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
         gap: 14,
-        marginBottom: 28,
+        marginBottom: 22,
       }}>
         <StatCard label="Total Pengajuan" value={total} icon={FileText} color="#0E4C92" bg="#DEEBFA" />
-        <StatCard label="Diproses" value={diproses} icon={Clock} color="#8A6D00" bg="#FFF4D0" />
+        <StatCard label="Sedang Diproses" value={diproses} icon={Clock} color="#8A6D00" bg="#FFF4D0" />
         <StatCard label="Disetujui" value={disetujui} icon={CheckCircle2} color="#1E7F3E" bg="#DEF6E5" />
-        <StatCard label="Ditolak" value={ditolak} icon={XCircle} color="#B01818" bg="#FCE1E1" />
+        <StatCard label="Perlu Revisi / Ditolak" value={ditolak} icon={XCircle} color="#B01818" bg="#FCE1E1" />
       </div>
 
-      {/* Recent Activity */}
       <div style={{
         background: T.card,
         border: `1px solid ${T.border}`,
@@ -144,10 +182,10 @@ export default function MitraDashboard({ mitraList, user, onGoto }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
         }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: T.heading }}>
-            Pengajuan Terbaru
-          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: T.heading }}>Pengajuan Terbaru</div>
           <button
             onClick={() => onGoto("riwayat")}
             style={{
@@ -163,8 +201,8 @@ export default function MitraDashboard({ mitraList, user, onGoto }) {
         </div>
 
         {recent.length === 0 ? (
-          <div style={{ padding: "32px 20px", textAlign: "center", color: T.muted, fontSize: 13 }}>
-            Belum ada pengajuan. Buat pengajuan baru untuk memulai.
+          <div style={{ padding: "32px 20px", textAlign: "center", color: T.muted, fontSize: 13, lineHeight: 1.6 }}>
+            Belum ada pengajuan. Buat pengajuan baru untuk memulai proses GANDENG.
           </div>
         ) : (
           <div>
@@ -181,11 +219,11 @@ export default function MitraDashboard({ mitraList, user, onGoto }) {
                   flexWrap: "wrap",
                 }}
               >
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: T.heading, marginBottom: 2 }}>
+                <div style={{ minWidth: 0, flex: "1 1 260px" }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: T.heading, marginBottom: 3, lineHeight: 1.45, overflowWrap: "anywhere" }}>
                     {m.judulPengajuan}
                   </div>
-                  <div style={{ fontSize: 11, color: T.muted }}>
+                  <div style={{ fontSize: 11, color: T.muted, lineHeight: 1.5, overflowWrap: "anywhere" }}>
                     {m.namaLembaga} &bull; {m.nilaiDiajukan ? rupiah(m.nilaiDiajukan) : "-"}
                   </div>
                 </div>
@@ -196,7 +234,6 @@ export default function MitraDashboard({ mitraList, user, onGoto }) {
         )}
       </div>
 
-      {/* Quick Actions */}
       <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap" }}>
         <button
           onClick={() => onGoto("pengajuan-baru")}

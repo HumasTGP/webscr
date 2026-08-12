@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Inbox as InboxIcon, ThumbsDown, ThumbsUp, Clock } from "lucide-react";
+import { CheckCircle2, Inbox as InboxIcon, ThumbsDown, ThumbsUp, Clock, FileSignature } from "lucide-react";
 import { T, font } from "../../../lib/theme";
 import { DOC_STATUS, STATUS_META } from "../../../lib/data";
 import PageHeader from "../../../components/PageHeader";
@@ -21,10 +21,10 @@ function LiveClock() {
   return (
     <div style={{
       display: "inline-flex", alignItems: "center", gap: 6,
-      padding: "4px 12px", borderRadius: 8,
+      padding: "5px 11px", borderRadius: 8,
       background: T.blueSoft, border: `1px solid ${T.border}`,
-      fontSize: 12.5, color: T.blue, fontWeight: 600,
-      fontFamily: font.mono,
+      fontSize: 12, color: T.blue, fontWeight: 600,
+      fontFamily: font.mono, flexWrap: "wrap",
     }}>
       <Clock size={13} />
       {dateStr} - {timeStr} WIB
@@ -42,14 +42,15 @@ function CounterTile({ icon: Icon, label, value, meta, onClick }) {
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        gap: 10,
-        padding: "18px 18px 16px",
+        gap: 9,
+        padding: "17px 17px 15px",
         borderRadius: 14,
         border: `1px solid ${meta.color}40`,
-        background: `linear-gradient(140deg, ${meta.bg} 0%, #fff 130%)`,
+        background: `linear-gradient(140deg, ${meta.bg} 0%, ${T.card} 130%)`,
         cursor: "pointer",
         textAlign: "left",
         overflow: "hidden",
+        minWidth: 0,
         transition: "transform .12s ease, box-shadow .15s ease",
       }}
       onMouseEnter={(e) => {
@@ -69,17 +70,13 @@ function CounterTile({ icon: Icon, label, value, meta, onClick }) {
         <Icon size={19} />
       </div>
       <div style={{
-        fontSize: 10.5, letterSpacing: 1.4, textTransform: "uppercase",
+        fontSize: 10.5, letterSpacing: 1,
+        textTransform: "uppercase", lineHeight: 1.4,
         fontFamily: font.mono, color: meta.color, fontWeight: 700,
       }}>{label}</div>
       <div style={{
-        fontFamily: font.display, fontSize: 32, lineHeight: 1, color: T.heading,
+        fontFamily: font.display, fontSize: 31, lineHeight: 1, color: T.heading,
       }}>{value}</div>
-      <span aria-hidden style={{
-        position: "absolute", right: -18, bottom: -18,
-        width: 90, height: 90, borderRadius: "50%",
-        background: meta.color, opacity: 0.05,
-      }}/>
     </button>
   );
 }
@@ -114,55 +111,76 @@ export default function AsmanDashboard({ user, packages, evaluasiList = [], goto
       .slice(0, 8);
   }, [packages]);
 
-  const roleLabel = user.role === "asman" ? "Asman" : "MADM";
-  const desc = user.role === "asman"
-    ? "Ringkasan paket kas yang masuk untuk direview. Klik counter untuk buka Inbox."
-    : "Ringkasan paket kas yang menunggu diproses. Klik counter untuk buka Inbox.";
+  const isAsman = user.role === "asman";
+  const roleLabel = isAsman ? "ASMAN" : "MADM";
+  const desc = isAsman
+    ? "Ringkasan dokumen yang menjadi tanggung jawab ASMAN untuk diperiksa sebelum diteruskan ke MADM."
+    : "Ringkasan dokumen yang telah melalui pemeriksaan ASMAN dan menunggu keputusan atau proses MADM.";
+
+  const packageLabels = isAsman
+    ? ["Menunggu Review ASMAN", "Disetujui ASMAN", "Ditolak ASMAN", "Telah Diproses MADM"]
+    : ["Menunggu Persetujuan MADM", "Siap Diproses MADM", "Ditolak", "Selesai Diproses MADM"];
+
+  const evalLabels = isAsman
+    ? ["Evaluasi Menunggu ASMAN", "Evaluasi Disetujui", "Evaluasi Ditolak", "Evaluasi Selesai"]
+    : ["Evaluasi Menunggu MADM", "Evaluasi Siap Diproses", "Evaluasi Ditolak", "Evaluasi Selesai"];
 
   return (
-    <div>
+    <div style={{ minWidth: 0 }}>
       <PageHeader
         eyebrow={`Panel ${roleLabel}`}
-        title="Dashboard Ringkasan"
+        title={`Dashboard ${roleLabel}`}
         description={desc}
       />
 
-      <div style={{ marginBottom: 14 }}>
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: 12, flexWrap: "wrap", marginBottom: 16,
+      }}>
         <LiveClock />
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 7,
+          padding: "6px 10px", borderRadius: 8,
+          border: `1px solid ${T.border}`, background: T.card,
+          fontSize: 11.5, color: T.muted, lineHeight: 1.4,
+        }}>
+          <FileSignature size={14} color={T.blue} />
+          {isAsman ? "ASMAN: pemeriksaan / paraf sebelum MADM" : "MADM: persetujuan / proses akhir"}
+        </div>
       </div>
 
       <div style={{
-        fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2,
+        fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.1,
         textTransform: "uppercase", color: T.muted, marginBottom: 8,
       }}>
-        Inbox RAB
+        Paket Kas dan Dokumen RAB
       </div>
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-        gap: 14, marginBottom: 18,
+        gridTemplateColumns: "repeat(auto-fit, minmax(185px, 1fr))",
+        gap: 14, marginBottom: 20,
       }}>
-        <CounterTile icon={InboxIcon}    label="Dokumen Baru Masuk" value={counts.submitted} meta={STATUS_META.submitted} onClick={() => goto("inbox")} />
-        <CounterTile icon={ThumbsUp}     label="Dokumen Disetujui"  value={counts.approved}  meta={STATUS_META.approved}  onClick={() => goto("inbox")} />
-        <CounterTile icon={ThumbsDown}   label="Dokumen Ditolak"    value={counts.rejected}  meta={STATUS_META.rejected}  onClick={() => goto("inbox")} />
-        <CounterTile icon={CheckCircle2} label="Telah Diproses"     value={counts.processed} meta={STATUS_META.processed} onClick={() => goto("inbox")} />
+        <CounterTile icon={InboxIcon} label={packageLabels[0]} value={counts.submitted} meta={STATUS_META.submitted} onClick={() => goto("inbox")} />
+        <CounterTile icon={ThumbsUp} label={packageLabels[1]} value={counts.approved} meta={STATUS_META.approved} onClick={() => goto("inbox")} />
+        <CounterTile icon={ThumbsDown} label={packageLabels[2]} value={counts.rejected} meta={STATUS_META.rejected} onClick={() => goto("inbox")} />
+        <CounterTile icon={CheckCircle2} label={packageLabels[3]} value={counts.processed} meta={STATUS_META.processed} onClick={() => goto("inbox")} />
       </div>
 
       <div style={{
-        fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2,
+        fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.1,
         textTransform: "uppercase", color: T.muted, marginBottom: 8,
       }}>
-        Inbox Form Evaluasi
+        Form Evaluasi
       </div>
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-        gap: 14, marginBottom: 18,
+        gridTemplateColumns: "repeat(auto-fit, minmax(185px, 1fr))",
+        gap: 14, marginBottom: 20,
       }}>
-        <CounterTile icon={InboxIcon}    label="Eval Baru Masuk" value={evalCounts.submitted} meta={STATUS_META.submitted} onClick={() => goto("inbox-evaluasi")} />
-        <CounterTile icon={ThumbsUp}     label="Eval Disetujui"  value={evalCounts.approved}  meta={STATUS_META.approved}  onClick={() => goto("inbox-evaluasi")} />
-        <CounterTile icon={ThumbsDown}   label="Eval Ditolak"    value={evalCounts.rejected}  meta={STATUS_META.rejected}  onClick={() => goto("inbox-evaluasi")} />
-        <CounterTile icon={CheckCircle2} label="Telah Diproses"  value={evalCounts.processed} meta={STATUS_META.processed} onClick={() => goto("inbox-evaluasi")} />
+        <CounterTile icon={InboxIcon} label={evalLabels[0]} value={evalCounts.submitted} meta={STATUS_META.submitted} onClick={() => goto("inbox-evaluasi")} />
+        <CounterTile icon={ThumbsUp} label={evalLabels[1]} value={evalCounts.approved} meta={STATUS_META.approved} onClick={() => goto("inbox-evaluasi")} />
+        <CounterTile icon={ThumbsDown} label={evalLabels[2]} value={evalCounts.rejected} meta={STATUS_META.rejected} onClick={() => goto("inbox-evaluasi")} />
+        <CounterTile icon={CheckCircle2} label={evalLabels[3]} value={evalCounts.processed} meta={STATUS_META.processed} onClick={() => goto("inbox-evaluasi")} />
       </div>
 
       <Card padded={false}>
@@ -171,16 +189,16 @@ export default function AsmanDashboard({ user, packages, evaluasiList = [], goto
           borderBottom: `1px solid ${T.border}`,
           fontFamily: font.display, fontSize: 14,
         }}>
-          Aktivitas Terbaru
+          Aktivitas Dokumen Terbaru
         </div>
         <DataTable
           rows={recent}
           columns={[
             { key: "idRab", label: "ID Paket",
               render: (r) => <span style={{ fontFamily: font.mono, fontWeight: 700, fontSize: 12.5 }}>{r.idRab}</span> },
-            { key: "judul",    label: "Judul" },
+            { key: "judul", label: "Judul" },
             { key: "kategori", label: "Kategori" },
-            { key: "status",   label: "Status",
+            { key: "status", label: "Status",
               render: (r) => {
                 const m = STATUS_META[r.status] || STATUS_META.draft;
                 return (

@@ -1,14 +1,8 @@
-import { ChevronRight, HelpCircle, Moon, Sun } from "lucide-react";
+import { ChevronRight, HelpCircle } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { roleInitials, roleLabel } from "../../lib/utils";
 
-export default function Topbar({
-  activeLabel,
-  user,
-  onHelpClick,
-  themeMode,
-  onToggleTheme,
-}) {
+export default function Topbar({ activeLabel, user, onHelpClick }) {
   return (
     <div
       className="app-topbar"
@@ -37,7 +31,7 @@ export default function Topbar({
           minWidth: 0,
         }}
       >
-        <span className="hide-mobile">Sakti</span>
+        <span className="hide-mobile">SAKTI</span>
         <ChevronRight size={13} className="hide-mobile" />
         <span
           style={{
@@ -53,26 +47,6 @@ export default function Topbar({
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
-        <button
-          onClick={onToggleTheme}
-          aria-label={themeMode === "dark" ? "Ganti ke tema terang" : "Ganti ke tema gelap"}
-          title={themeMode === "dark" ? "Tema terang" : "Tema gelap"}
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            display: "grid",
-            placeItems: "center",
-            background: T.blueSoft,
-            border: `1px solid ${T.border}`,
-            color: T.blue,
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
-        >
-          {themeMode === "dark" ? <Sun size={15} /> : <Moon size={15} />}
-        </button>
-
         <button
           onClick={onHelpClick}
           style={{

@@ -12,30 +12,11 @@ export default function MitraApp({ mitraList, setMitraList, notify, onBackToPort
   const renderContent = () => {
     switch (active) {
       case "dashboard":
-        return (
-          <MitraDashboard
-            mitraList={mitraList}
-            user={user}
-            onGoto={setActive}
-          />
-        );
-
+        return <MitraDashboard mitraList={mitraList} user={user} onGoto={setActive} />;
       case "pengajuan-baru":
-        return (
-          <div style={{ padding: "28px 32px" }}>
-            <PengajuanMitraPage
-              mitraList={mitraList}
-              setMitraList={setMitraList}
-              user={user}
-              notify={notify}
-              onBackToPortal={null}
-            />
-          </div>
-        );
-
       case "riwayat":
         return (
-          <div style={{ padding: "28px 32px" }}>
+          <div style={{ padding: "clamp(18px, 3vw, 28px) clamp(16px, 4vw, 32px)" }}>
             <PengajuanMitraPage
               mitraList={mitraList}
               setMitraList={setMitraList}
@@ -45,28 +26,27 @@ export default function MitraApp({ mitraList, setMitraList, notify, onBackToPort
             />
           </div>
         );
-
       case "tracking":
         return <MitraTracking mitraList={mitraList} />;
-
       case "bantuan":
         return <MitraBantuan />;
-
       default:
-        return (
-          <MitraDashboard
-            mitraList={mitraList}
-            user={user}
-            onGoto={setActive}
-          />
-        );
+        return <MitraDashboard mitraList={mitraList} user={user} onGoto={setActive} />;
     }
   };
+
+  const activeLabel = {
+    dashboard: "Dashboard",
+    "pengajuan-baru": "Pengajuan Baru",
+    riwayat: "Riwayat Pengajuan",
+    tracking: "Tracking Status",
+    bantuan: "Bantuan",
+  }[active] || "Dashboard";
 
   return (
     <div style={{
       display: "flex",
-      height: "100vh",
+      minHeight: "100vh",
       overflow: "hidden",
       background: T.bg,
       fontFamily: font.body,
@@ -87,7 +67,6 @@ export default function MitraApp({ mitraList, setMitraList, notify, onBackToPort
         flexDirection: "column",
         overflowY: "auto",
       }}>
-        {/* Topbar */}
         <div style={{
           position: "sticky", top: 0, zIndex: 10,
           background: T.topbarBg,
@@ -96,41 +75,44 @@ export default function MitraApp({ mitraList, setMitraList, notify, onBackToPort
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 12,
           minHeight: 54,
-          padding: "0 28px",
+          padding: "0 clamp(14px, 3vw, 28px)",
           flexShrink: 0,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 13, color: T.muted }}>Portal Mitra</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+            <span style={{ fontSize: 13, color: T.muted, whiteSpace: "nowrap" }}>GANDENG</span>
             <span style={{ fontSize: 13, color: T.muted }}>›</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: T.heading }}>
-              {active === "dashboard" && "Dashboard"}
-              {active === "pengajuan-baru" && "Pengajuan Baru"}
-              {active === "riwayat" && "Riwayat Pengajuan"}
-              {active === "tracking" && "Tracking Status"}
-              {active === "bantuan" && "Bantuan"}
+            <span style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: T.heading,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}>
+              {activeLabel}
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
             <div style={{
               width: 30, height: 30, borderRadius: "50%",
               background: "#0E4C92",
               display: "grid", placeItems: "center",
             }}>
               <span style={{ fontSize: 12, fontWeight: 800, color: "#fff" }}>
-                {(user?.name || "M").charAt(0).toUpperCase()}
+                {(user?.name || "G").charAt(0).toUpperCase()}
               </span>
             </div>
-            <div>
+            <div className="hide-mobile">
               <div style={{ fontSize: 13, fontWeight: 600, color: T.heading, lineHeight: 1.2 }}>
-                {user?.name || "Mitra User"}
+                {user?.name || "Pengguna GANDENG"}
               </div>
-              <div style={{ fontSize: 11, color: T.muted }}>Portal Mitra</div>
+              <div style={{ fontSize: 11, color: T.muted }}>GANDENG</div>
             </div>
           </div>
         </div>
 
-        {/* Page Content */}
         <div style={{ flex: 1, minHeight: 0 }}>
           {renderContent()}
         </div>

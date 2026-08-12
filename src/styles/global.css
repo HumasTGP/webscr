@@ -6,14 +6,10 @@
   --font-display: 'Montserrat', Arial, sans-serif;
   --font-body: Arial, 'Helvetica Neue', sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
-
-  /* Brand - konstan di dark & light */
   --brand-navy-deep: #071B36;
   --brand-yellow: #FFC72C;
   --brand-yellow-deep: #E6A700;
   --brand-yellow-text: #8A6100;
-
-  /* Light palette (default) */
   --bg: #F3F5F9;
   --card: #FFFFFF;
   --input-bg: #FFFFFF;
@@ -30,11 +26,9 @@
   --success: #166E49;
   --success-soft: #E7F5EE;
   --topbar-bg: rgba(243, 245, 249, 0.85);
-
   --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.05);
   --shadow-md: 0 8px 20px rgba(14, 76, 146, 0.12);
   --shadow-lg: 0 20px 60px rgba(7, 27, 54, 0.35);
-
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -72,38 +66,20 @@ html, body {
 ::selection { background: var(--brand-yellow); color: var(--brand-navy-deep); }
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: #C7D0DE;
-  border-radius: 20px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
+::-webkit-scrollbar-thumb { background: #C7D0DE; border-radius: 20px; border: 2px solid transparent; background-clip: content-box; }
 ::-webkit-scrollbar-thumb:hover { background: #AFBACC; background-clip: content-box; }
 ::placeholder { color: #7C879E; opacity: 1; }
-
 button, input, select, textarea { font: inherit; }
-p { line-height: 1.6; }
-
-input, select, textarea {
-  transition: border-color .15s ease, box-shadow .15s ease;
-}
+p { line-height: 1.6; overflow-wrap: anywhere; }
+input, select, textarea { transition: border-color .15s ease, box-shadow .15s ease; }
 input:focus, select:focus, textarea:focus {
   border-color: var(--blue) !important;
   box-shadow: 0 0 0 3px var(--blue-soft);
   outline: none;
 }
-button:focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 1px;
-}
-button {
-  transition: transform .05s ease, box-shadow .15s ease,
-              background-color .15s ease, border-color .15s ease, color .15s ease;
-}
+button:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+button { transition: transform .05s ease, box-shadow .15s ease, background-color .15s ease, border-color .15s ease, color .15s ease; }
 
-/* Sembunyikan ikon kalender bawaan Chromium - kita render ikon Lucide
-   sendiri agar konsisten lintas browser, tapi biarkan area indicator tetap
-   menerima klik sehingga picker tetap terbuka bila showPicker() gagal. */
 input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0;
   position: absolute;
@@ -114,14 +90,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   padding: 0;
 }
-/* Firefox: tidak ada indicator webkit - cursor pointer di field-nya sendiri
-   sudah dihandle inline. */
 
-/* Glass card di halaman login - override placeholder/focus/autofill agar
-   kontras di atas background gelap dan tidak muncul kotak kuning Chrome. */
-.login-glass input::placeholder {
-  color: rgba(255, 255, 255, 0.68);
-}
+.login-glass input::placeholder { color: rgba(255, 255, 255, 0.68); }
 .login-glass input:focus {
   border-color: rgba(255, 255, 255, 0.55) !important;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12) !important;
@@ -135,28 +105,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Sembunyikan ikon mata bawaan browser (Chrome, Edge, IE) pada input password
-   agar tidak muncul dobel bersama ikon mata custom Lucide kita. */
 input[type="password"]::-ms-reveal,
-input[type="password"]::-ms-clear {
-  display: none;
-}
+input[type="password"]::-ms-clear { display: none; }
 input[type="password"]::-webkit-credentials-auto-fill-button,
 input[type="password"]::-webkit-textfield-decoration-container {
   display: none !important;
   visibility: hidden;
   pointer-events: none;
 }
-/* Chrome 86+: sembunyikan password-reveal-button */
-::-webkit-password-auto-fill-button {
-  display: none !important;
-}
-
+::-webkit-password-auto-fill-button { display: none !important; }
 
 /* ---------- Responsive shell ---------- */
-.app-content { padding: 28px 34px; }
+.app-content { padding: 28px 34px; min-width: 0; }
 .app-topbar { padding: 14px 34px; }
 .hide-mobile { display: inline-flex; }
+.responsive-two-col { min-width: 0; }
 
 /* ---------- Login page ---------- */
 .login-page {
@@ -166,12 +129,10 @@ input[type="password"]::-webkit-textfield-decoration-container {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  padding-bottom: 100px; /* ruang untuk powered-by strip */
+  padding-bottom: 100px;
   position: relative;
   box-sizing: border-box;
 }
-
-/* Powered-by strip - di semua ukuran layar selalu di bawah, tengah */
 .powered-by-strip {
   position: fixed;
   bottom: 0;
@@ -198,14 +159,7 @@ input[type="password"]::-webkit-textfield-decoration-container {
   white-space: nowrap;
   flex-shrink: 0;
 }
-.powered-by-logos {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-/* Setiap logo dibungkus box yang sama persis agar semua sama tinggi */
+.powered-by-logos { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .powered-by-logo-box {
   display: flex;
   align-items: center;
@@ -218,53 +172,41 @@ input[type="password"]::-webkit-textfield-decoration-container {
   box-sizing: border-box;
   flex-shrink: 0;
 }
-.powered-by-logo-box img {
-  display: block;
-  height: 28px;
-  width: auto;
-  max-width: 90px;
-  object-fit: contain;
-}
-/* Divider tipis antar logo */
-.powered-by-divider {
-  width: 1px;
-  height: 24px;
-  background: rgba(10,42,80,0.12);
-  flex-shrink: 0;
+.powered-by-logo-box img { display: block; height: 28px; width: auto; max-width: 90px; object-fit: contain; }
+.powered-by-divider { width: 1px; height: 24px; background: rgba(10,42,80,0.12); flex-shrink: 0; }
+
+@media (max-width: 900px) {
+  .responsive-two-col { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 780px) {
   .login-visual { display: none !important; }
+  .gandeng-sidebar { width: 176px !important; }
 }
+
 @media (max-width: 640px) {
   .app-content { padding: 18px 16px; }
   .app-topbar { padding: 12px 16px; }
   .hide-mobile { display: none !important; }
   h1 { font-size: 20px !important; }
-  .stat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .stat-grid { grid-template-columns: 1fr !important; }
+  .gandeng-sidebar { width: 64px !important; }
+  .gandeng-sidebar nav button span,
+  .gandeng-sidebar > div:first-child > div > div:last-child,
+  .gandeng-sidebar > div:last-child button span { display: none !important; }
+  .gandeng-sidebar nav button,
+  .gandeng-sidebar > div:last-child button { justify-content: center; padding-left: 8px !important; padding-right: 8px !important; }
 
-  /* Login di mobile */
   .login-page {
     padding: 16px;
     padding-bottom: 90px;
     justify-content: flex-start;
     padding-top: 40px;
   }
-  .login-glass {
-    padding: 28px 20px 24px !important;
-    border-radius: 18px !important;
-  }
-  .powered-by-logo-box {
-    height: 30px;
-    padding: 3px 6px;
-  }
-  .powered-by-logo-box img {
-    height: 22px;
-    max-width: 70px;
-  }
-  .powered-by-divider {
-    height: 18px;
-  }
+  .login-glass { padding: 28px 20px 24px !important; border-radius: 18px !important; }
+  .powered-by-logo-box { height: 30px; padding: 3px 6px; }
+  .powered-by-logo-box img { height: 22px; max-width: 70px; }
+  .powered-by-divider { height: 18px; }
 }
 
 /* ---------- Motion ---------- */
