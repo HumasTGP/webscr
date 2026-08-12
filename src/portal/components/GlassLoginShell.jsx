@@ -22,10 +22,11 @@ export default function GlassLoginShell({
   const visualTitle = brandTitle || title;
   const appLogo = APP_LOGOS[visualTitle];
   const lightVisual = visualTitle === "SI LAPAK PRIOK";
+  const compactMode = /^(DAFTAR|RESET|BUAT AKUN BARU)/i.test(title);
 
   return (
     <div
-      className={`gl-page${lightVisual ? " gl-page--silapak" : ""}`}
+      className={`gl-page${lightVisual ? " gl-page--silapak" : ""}${compactMode ? " gl-page--compact" : ""}`}
       style={{
         "--gl-accent": accent,
         "--gl-soft": accentSoft,
