@@ -1,131 +1,170 @@
 import { useState } from "react";
-import { CheckSquare, Printer } from "lucide-react";
+import { Download, Save } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { printChecklist } from "../../lib/utils";
+import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 
-const INTERNAL_CHECKLIST = [
-  "Daftar Hadir",
-  "Form Verifikasi",
-  "Lampiran 1 (Rincian Pekerjaan)",
-  "Lampiran 2 (Checklist)",
-  "Berita Acara Serah Terima (BAST)",
-  "Berita Acara Pemeriksaan Pekerjaan (BAPP)",
-  "Pakta Integritas (PI)",
-  "Dokumentasi Kegiatan",
-  "Eviden Pendukung",
-];
+const EMPTY = {
+  nilaiPenawaran: "",
+  nilaiNegosiasi: "",
+  tanggalNegosiasi: "",
+  pelaksanaPekerjaan: "",
+  keterangan: "",
+  tanggalSpk: "",
+  waktuMulai: "",
+  waktuSelesai: "",
+  hargaSeluruhnya: "",
+  terbilang: "",
+};
 
 export default function Lampiran2Page({ rab, notify }) {
-  const [checked, setChecked] = useState({});
+  const [activeRab, setActiveRab] = useState(null);
+  const [forms, setForms] = useState({});
+  const [form, setForm] = useState(EMPTY);
 
-  const toggle = (rabId, item) => {
-    setChecked((prev) => {
-      const key = `${rabId}::${item}`;
-      return { ...prev, [key]: !prev[key] };
+  const inputStyle = {
+    width: "100%", padding: "9px 11px", borderRadius: 7,
+    border: `1px solid ${T.border}`, background: T.inputBg,
+    color: T.text, fontSize: 12.5, boxSizing: "border-box",
+  };
+  const labelStyle = { display: "block", marginBottom: 5, fontSize: 11.5, fontWeight: 700, color: T.heading };
+
+  const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+
+  const selectRab = (r) => {
+    setActiveRab(r);
+    setForm(forms[r.idNumber] || {
+      ...EMPTY,
+      hargaSeluruhnya: r.totalEvaluasi || "",
     });
   };
 
-  const getProgress = (rabId) => {
-    const total = INTERNAL_CHECKLIST.length;
-    const done = INTERNAL_CHECKLIST.filter((item) => checked[`${rabId}::${item}`]).length;
-    return { total, done, pct: Math.round((done / total) * 100) };
+  const save = () => {
+    if (!activeRab) return;
+    setForms((prev) => ({ ...prev, [activeRab.idNumber]: form }));
+    notify?.("Data Lampiran 2 disimpan.", "success", "Lampiran 2 disimpan");
   };
 
-  const handlePrint = (r) => {
-    const items = INTERNAL_CHECKLIST.map((nama) => ({
-      nama,
-      ada: !!checked[`${r.idNumber}::${nama}`],
-    }));
-    printChecklist({
-      title: "Lampiran 2 - Checklist Internal",
-      subtitle: `${r.idNumber} - ${r.judulKegiatan}`,
-      items,
-    });
+  const downloadDocx = async () => {
+    if (!activeRab) return;
+    try {
+      await generateDocxFromTemplate(
+        "/templates/Template_Lampiran_2.docx",
+        {
+          namaPengadaan: activeRab.judulKegiatan || "",
+          nilaiPenawaran: form.nilaiPenawaran || "",
+          nilaiNegosiasi: form.nilaiNegosiasi || "",
+          tanggalNegosiasi: formatTanggalPanjang(form.tanggalNegosiasi),
+          pelaksanaPekerjaan: form.pelaksanaPekerjaan || activeRab.vendor || "",
+          keterangan: form.keterangan || "",
+          tanggalSpk: formatTanggalPanjang(form.tanggalSpk),
+          waktuMulai: form.waktuMulai || "",
+          waktuSelesai: form.waktuSelesai || "",
+          hargaSeluruhnya: form.hargaSeluruhnya || "",
+          terbilang: form.terbilang || "",
+        },
+        `Lampiran-2-${activeRab.idNumber}.docx`
+      );
+      notify?.("Lampiran 2 berhasil dibuat dari data sistem.", "success");
+    } catch (e) {
+      notify?.(`Gagal membuat Lampiran 2: ${e.message}`, "error");
+    }
   };
 
   return (
     <div>
       <PageHeader
-        eyebrow="Pembayaran"
-        title="Lampiran 2 - Checklist"
-        description="Checklist internal kelengkapan dokumen untuk proses pembayaran."
+        eyebrow="Dokumen Pembayaran"
+        title="Lampiran 2 - Negosiasi, SPK/SPB & BAST"
+        description="Isi data berdasarkan RAB terpilih. Data tetap terhubung ke pekerjaan yang sama dan tidak meminta input ulang nomor RAB."
       />
 
-      {(!rab || rab.length === 0) ? (
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(220px, 280px) minmax(0, 1fr)", gap: 16 }} className="responsive-two-col">
         <Card>
-          <div style={{ padding: "32px 0", textAlign: "center", color: T.muted, fontSize: 14 }}>
-            Belum ada RAB.
-          </div>
-        </Card>
-      ) : (
-        <div style={{ display: "grid", gap: 14 }}>
-          {rab.map((r) => {
-            const progress = getProgress(r.idNumber);
-            const complete = progress.done === progress.total;
-            return (
-              <Card key={r.idNumber}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                  <div>
-                    <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{r.idNumber}</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: T.heading, marginTop: 2 }}>{r.judulKegiatan}</div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{
-                      padding: "4px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700,
-                      background: complete ? "#DEF6E5" : "#FFF4D0",
-                      color: complete ? "#1E7F3E" : "#8A6D00",
-                    }}>
-                      {progress.done}/{progress.total} ({progress.pct}%)
-                    </div>
-                    <button onClick={() => handlePrint(r)} style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`,
-                      background: T.card, color: T.heading, cursor: "pointer", fontSize: 12, fontWeight: 600,
-                    }}><Printer size={14} /> Cetak</button>
-                  </div>
-                </div>
-
-                <div style={{
-                  height: 4, borderRadius: 2, background: T.border, marginBottom: 14, overflow: "hidden",
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.heading, marginBottom: 10 }}>Pilih RAB / Pekerjaan</div>
+          {!rab?.length ? (
+            <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.55 }}>Belum ada RAB.</div>
+          ) : (
+            <div style={{ display: "grid", gap: 6 }}>
+              {rab.map((r) => (
+                <button key={r.idNumber} onClick={() => selectRab(r)} style={{
+                  padding: "10px 12px", borderRadius: 8, textAlign: "left",
+                  border: `1px solid ${activeRab?.idNumber === r.idNumber ? T.blue : T.border}`,
+                  background: activeRab?.idNumber === r.idNumber ? T.blueSoft : T.bg,
+                  color: T.text, cursor: "pointer", minWidth: 0,
                 }}>
-                  <div style={{
-                    height: "100%", borderRadius: 2, width: `${progress.pct}%`,
-                    background: complete ? "#1E7F3E" : T.blue,
-                    transition: "width .3s ease",
-                  }} />
-                </div>
+                  <div style={{ fontFamily: font.mono, fontWeight: 700, fontSize: 12, color: T.blue }}>{r.idNumber}</div>
+                  <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3, lineHeight: 1.45, overflowWrap: "anywhere" }}>{r.judulKegiatan}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </Card>
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 8 }}>
-                  {INTERNAL_CHECKLIST.map((item) => {
-                    const key = `${r.idNumber}::${item}`;
-                    const isChecked = !!checked[key];
-                    return (
-                      <button
-                        key={item}
-                        onClick={() => toggle(r.idNumber, item)}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          padding: "10px 12px", borderRadius: 8,
-                          border: `1px solid ${isChecked ? "#1E7F3E" : T.border}`,
-                          background: isChecked ? "#DEF6E5" : T.bg,
-                          cursor: "pointer", textAlign: "left", fontSize: 12.5,
-                          color: isChecked ? "#1E7F3E" : T.text,
-                          fontWeight: isChecked ? 600 : 500,
-                        }}
-                      >
-                        <CheckSquare size={16} color={isChecked ? "#1E7F3E" : T.muted} />
-                        {item}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+        <Card>
+          {!activeRab ? (
+            <div style={{ padding: "34px 10px", textAlign: "center", color: T.muted, fontSize: 13.5, lineHeight: 1.6 }}>
+              Pilih RAB untuk mengisi Lampiran 2.
+            </div>
+          ) : (
+            <div>
+              <div style={{ marginBottom: 18 }}>
+                <div style={{ fontFamily: font.mono, fontWeight: 700, fontSize: 12, color: T.blue }}>{activeRab.idNumber}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: T.heading, marginTop: 3, lineHeight: 1.45 }}>{activeRab.judulKegiatan}</div>
+              </div>
+
+              <Section title="Berita Acara Negosiasi">
+                <Field label="Nilai Penawaran"><input style={inputStyle} type="number" value={form.nilaiPenawaran} onChange={(e) => set("nilaiPenawaran", e.target.value)} /></Field>
+                <Field label="Nilai Negosiasi"><input style={inputStyle} type="number" value={form.nilaiNegosiasi} onChange={(e) => set("nilaiNegosiasi", e.target.value)} /></Field>
+                <Field label="Tanggal Negosiasi"><input style={inputStyle} type="date" value={form.tanggalNegosiasi} onChange={(e) => set("tanggalNegosiasi", e.target.value)} /></Field>
+                <Field label="Pelaksana Pekerjaan"><input style={inputStyle} value={form.pelaksanaPekerjaan} onChange={(e) => set("pelaksanaPekerjaan", e.target.value)} placeholder={activeRab.vendor || "Nama vendor/pelaksana"} /></Field>
+                <Field label="Keterangan" full><textarea style={{ ...inputStyle, minHeight: 72, resize: "vertical" }} value={form.keterangan} onChange={(e) => set("keterangan", e.target.value)} /></Field>
+              </Section>
+
+              <Section title="Surat Perintah Kerja (SPK) / Surat Pesanan Barang (SPB)">
+                <Field label="Tanggal SPK"><input style={inputStyle} type="date" value={form.tanggalSpk} onChange={(e) => set("tanggalSpk", e.target.value)} /></Field>
+                <Field label="Waktu Mulai Pelaksanaan"><input style={inputStyle} value={form.waktuMulai} onChange={(e) => set("waktuMulai", e.target.value)} placeholder="Contoh: 12 Agustus 2026" /></Field>
+                <Field label="Waktu Selesai Pelaksanaan"><input style={inputStyle} value={form.waktuSelesai} onChange={(e) => set("waktuSelesai", e.target.value)} placeholder="Contoh: 20 Agustus 2026" /></Field>
+                <Field label="Harga Seluruhnya"><input style={inputStyle} type="number" value={form.hargaSeluruhnya} onChange={(e) => set("hargaSeluruhnya", e.target.value)} /></Field>
+                <Field label="Terbilang" full><input style={inputStyle} value={form.terbilang} onChange={(e) => set("terbilang", e.target.value)} /></Field>
+              </Section>
+
+              <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 18 }}>
+                <button onClick={save} style={actionStyle(T.blue, "#fff", "transparent")}><Save size={14} /> Simpan</button>
+                <button onClick={downloadDocx} style={actionStyle(T.card, T.heading, T.border)}><Download size={14} /> Download Word</button>
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
+}
+
+function Section({ title, children }) {
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <div style={{ fontFamily: font.display, fontSize: 13.5, fontWeight: 700, color: T.heading, marginBottom: 10 }}>{title}</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12 }}>{children}</div>
+    </div>
+  );
+}
+
+function Field({ label, children, full }) {
+  return (
+    <div style={full ? { gridColumn: "1 / -1", minWidth: 0 } : { minWidth: 0 }}>
+      <label style={{ display: "block", marginBottom: 5, fontSize: 11.5, fontWeight: 700, color: T.heading }}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function actionStyle(background, color, borderColor) {
+  return {
+    display: "inline-flex", alignItems: "center", gap: 6,
+    padding: "9px 15px", borderRadius: 8,
+    border: borderColor === "transparent" ? "none" : `1px solid ${borderColor}`,
+    background, color, cursor: "pointer", fontSize: 12.5, fontWeight: 700,
+  };
 }
