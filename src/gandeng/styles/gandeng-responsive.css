@@ -1,17 +1,41 @@
+/* Gandeng shell layout: full-width header at top, sidebar+content below */
+.gandeng-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--text);
+}
+.gandeng-shell-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+.gandeng-shell .system-sidebar-wrap {
+  height: 100%;
+}
+.gandeng-shell .system-sidebar {
+  height: calc(100% - 32px);
+}
+.gandeng-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
 .gandeng-topbar-identity{min-width:0}
 .gandeng-product-chip{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:0 10px;border-radius:999px;background:#edf3ff;color:#0b46c8;font-size:10.5px;font-weight:800;letter-spacing:.5px;white-space:nowrap}
 .gandeng-user-card{padding:5px 8px 5px 5px;border:1px solid #e3e9f2;border-radius:14px;background:#fff;box-shadow:0 4px 14px rgba(29,55,94,.04)}
 .gandeng-user-avatar{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#ff9a2f,#ff7a00);display:grid;place-items:center;color:#fff;font-weight:800;flex-shrink:0;box-shadow:0 7px 16px rgba(255,122,0,.2)}
 
-@media(max-width:900px){
-  .gandeng-contact-card{position:static!important;top:auto!important}
-}
-
 @media(max-width:760px){
   .gandeng-admin-hero-art{width:104px!important;height:104px!important;right:14px!important;opacity:.68!important}
   .gandeng-admin-hero-art svg{width:56px;height:56px}
   .gandeng-admin-hero-copy{padding-right:110px!important}
-  .gandeng-topbar{min-height:60px!important}
+  .gandeng-topbar{min-height:52px!important}
   .gandeng-product-chip{min-height:26px;padding:0 8px;font-size:9.5px}
 }
 
