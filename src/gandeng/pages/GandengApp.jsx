@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { T } from "../../lib/theme";
 import GandengSidebar from "../components/GandengSidebar";
 import GandengDashboard from "./GandengDashboard";
@@ -9,7 +9,7 @@ import PengajuanGandengPage from "./PengajuanGandeng";
 import GandengAccountManagement from "./GandengAccountManagement";
 import "../styles/gandeng-responsive.css";
 
-export default function GandengApp({ mitraList, setMitraList, notify, onBackToPortal, user, onLogout }) {
+export default function GandengApp({ mitraList, setMitraList, notify, user, onLogout }) {
   const [active, setActive] = useState(user?.isAdmin ? "account-management" : "dashboard");
 
   const accountList = useMemo(() => {
@@ -36,19 +36,25 @@ export default function GandengApp({ mitraList, setMitraList, notify, onBackToPo
 
   const activeLabel = { dashboard:"Dashboard", "pengajuan-baru":"Pengajuan Baru", riwayat:"Riwayat Pengajuan", tracking:"Tracking Status", bantuan:"Bantuan", "account-management":"Manajemen Akun" }[active] || "Dashboard";
   const identityTitle = user?.isAdmin ? "Administrator GANDENG" : (user?.organization || user?.username || "Pengguna GANDENG");
-  const identitySub = user?.isAdmin ? "admin" : (user?.email || "Akun GANDENG");
+  const identitySub = user?.isAdmin ? "Administrator" : (user?.email || "Akun GANDENG");
 
   return <div className="system-page-shell" style={{ "--blue":"#125AE8", "--navy":"#0B46C8", "--blue-soft":"#EAF1FF", "--danger":"#E53935", "--danger-soft":"#FDECEC" }}>
-    <GandengSidebar active={active} onSelect={setActive} onLogout={onLogout} onBackToPortal={onBackToPortal} user={user} />
+    <GandengSidebar active={active} onSelect={setActive} onLogout={onLogout} user={user} />
     <div className="system-main">
-      <div className="app-topbar" style={{ position:"sticky",top:0,zIndex:20,background:"rgba(255,255,255,.92)",backdropFilter:"blur(10px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,minHeight:62,flexShrink:0 }}>
-        <div style={{display:"flex",alignItems:"center",gap:7,minWidth:0}}><span className="hide-mobile" style={{fontSize:12.5,color:T.muted}}>GANDENG</span><ChevronRight size={13} className="hide-mobile"/><span style={{fontSize:12.5,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeLabel}</span></div>
-        <div style={{display:"flex",alignItems:"center",gap:9,minWidth:0,maxWidth:"min(360px,46vw)"}}>
-          <div style={{width:34,height:34,borderRadius:"50%",background:"#FF8A1E",display:"grid",placeItems:"center",color:"#fff",fontWeight:800,flexShrink:0,boxShadow:"0 6px 14px rgba(255,138,30,.22)"}}>{identityTitle.charAt(0).toUpperCase()}</div>
-          <div className="gandeng-topbar-identity" style={{minWidth:0,flex:1}}><div style={{fontSize:12.5,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{identityTitle}</div><div style={{fontSize:10.5,color:T.muted,marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{identitySub}</div></div>
-          <ChevronDown className="hide-mobile" size={14} color={T.muted} style={{flexShrink:0}}/>
+      <header className="app-topbar gandeng-topbar" style={{ position:"sticky",top:0,zIndex:20,background:"rgba(255,255,255,.95)",backdropFilter:"blur(12px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,minHeight:68,flexShrink:0 }}>
+        <div className="gandeng-topbar-left" style={{display:"flex",alignItems:"center",gap:9,minWidth:0}}>
+          <span className="gandeng-product-chip">GANDENG</span>
+          <ChevronRight size={14} color={T.muted} className="hide-mobile" />
+          <span className="gandeng-active-label" style={{fontSize:13,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeLabel}</span>
         </div>
-      </div>
+        <div className="gandeng-user-card" style={{display:"flex",alignItems:"center",gap:10,minWidth:0,maxWidth:"min(360px,48vw)"}}>
+          <div className="gandeng-user-avatar">{identityTitle.charAt(0).toUpperCase()}</div>
+          <div className="gandeng-topbar-identity" style={{minWidth:0,flex:1}}>
+            <div style={{fontSize:12.5,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{identityTitle}</div>
+            <div style={{fontSize:10.5,color:T.muted,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{identitySub}</div>
+          </div>
+        </div>
+      </header>
       <div style={{flex:1,minHeight:0}}>{renderContent()}</div>
     </div>
   </div>;
