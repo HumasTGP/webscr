@@ -1,15 +1,18 @@
 import { ChevronRight, HelpCircle, Moon, Sun } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { roleInitials, roleLabel } from "../../lib/utils";
+import { roleInitials } from "../../lib/utils";
+
+const ROLE_NAME = { humas: "Humas", asman: "Asman", madm: "MADM" };
 
 export default function Topbar({ activeLabel, user, onHelpClick, themeMode, onToggleTheme }) {
+  const roleName = ROLE_NAME[user?.role] || user?.role || "User";
   return <div className="app-topbar" style={{ position:"sticky",top:0,zIndex:50,background:T.topbarBg,backdropFilter:"blur(8px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,minHeight:58 }}>
     <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,color:T.muted,fontFamily:font.body,minWidth:0}}><span className="hide-mobile">SAKTI</span><ChevronRight size={13} className="hide-mobile"/><span style={{color:T.heading,fontWeight:800,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeLabel}</span></div>
     <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
       <button onClick={onHelpClick} title="Bantuan" style={iconTextBtn}><HelpCircle size={16}/><span className="hide-mobile">Bantuan</span></button>
       {onToggleTheme&&<button onClick={onToggleTheme} title={themeMode==="dark"?"Mode Terang":"Mode Gelap"} aria-label={themeMode==="dark"?"Aktifkan mode terang":"Aktifkan mode gelap"} style={roundBtn}>{themeMode==="dark"?<Sun size={16}/>:<Moon size={16}/>}</button>}
       <div className="hide-mobile" style={{width:1,height:20,background:T.border}}/>
-      <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:30,height:30,borderRadius:"50%",background:T.navy,color:"#fff",display:"grid",placeItems:"center",fontSize:10.5,fontFamily:font.display,fontWeight:800,flexShrink:0}}>{roleInitials(user.role)}</div><span className="hide-mobile" style={{fontSize:12.5,fontWeight:700,color:T.text}}>{roleLabel(user.role)}</span></div>
+      <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{width:30,height:30,borderRadius:"50%",background:T.navy,color:"#fff",display:"grid",placeItems:"center",fontSize:10.5,fontFamily:font.display,fontWeight:800,flexShrink:0}}>{roleInitials(user.role)}</div><span className="hide-mobile" style={{fontSize:12.5,fontWeight:700,color:T.text}}>{roleName}</span></div>
     </div>
   </div>;
 }

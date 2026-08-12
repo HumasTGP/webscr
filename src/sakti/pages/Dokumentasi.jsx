@@ -56,7 +56,7 @@ export default function DokumentasiPage({ rab, notify }) {
         <Search size={16} color={T.muted} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari ID RAB atau judul kegiatan..." style={{ width: "100%", height: 42, boxSizing: "border-box", padding: "0 14px 0 38px", borderRadius: 10, border: `1px solid ${T.border}`, background: T.inputBg, color: T.text }} />
       </div>
-      <div style={{ fontSize: 12, color: T.muted, whiteSpace: "nowrap" }}>{filteredRab.length} RAB</div>
+      <span className="count-summary">Menampilkan {filteredRab.length} RAB</span>
     </div>
 
     {!rab?.length ? <Card><Empty text="Belum ada RAB. Buat RAB terlebih dahulu untuk mengunggah dokumentasi." /></Card> : <div className="responsive-two-col" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, alignItems: "start" }}>
@@ -70,14 +70,14 @@ export default function DokumentasiPage({ rab, notify }) {
 
     <UploadDocModal open={!!showUpload} onClose={() => setShowUpload(null)} title={showUpload ? `Upload Dokumentasi - ${showUpload.idNumber}` : ""} subtitle={showUpload?.judulKegiatan} accept="image/*,.pdf,.doc,.docx" onSave={(files, keterangan) => handleSave(showUpload, files, keterangan)} />
 
-    {preview && <Modal open onClose={() => setPreview(null)} title={preview.fileName} icon={Eye} width={600}>{preview.fileType?.startsWith("image/") ? <img src={preview.url} alt={preview.fileName} style={{ width: "100%", maxHeight: "70vh", objectFit: "contain", borderRadius: 8 }} /> : <div style={{ textAlign: "center", padding: "32px 0", color: T.muted }}><p>Preview tidak tersedia untuk tipe file ini.</p><a href={preview.url} download={preview.fileName} style={{ color: T.blue, fontWeight: 700 }}>Download file</a></div>}</Modal>}
+    {preview && <Modal open onClose={() => setPreview(null)} title={preview.fileName} icon={Eye} width={600}>{preview.fileType?.startsWith("image/") ? <img src={preview.url} alt={preview.fileName} style={{ width: "100%", maxHeight: "70vh", objectFit: "contain", borderRadius: 8 }} /> : <div style={{ textAlign: "center", padding: "32px 0", color: T.muted }}><p style={{margin:"0 0 12px"}}>Preview tidak tersedia untuk tipe file ini.</p><a href={preview.url} download={preview.fileName} style={{ color: T.blue, fontWeight: 700 }}>Download file</a></div>}</Modal>}
   </div>;
 }
 
 function StatusColumn({ title, count, tone, children }) {
   const success = tone === "success";
   return <section style={{ minWidth: 0 }}>
-    <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 10, padding: "0 2px" }}><div style={{ fontFamily: font.display, fontSize: 14, fontWeight: 800, color: T.heading }}>{title}</div><span style={{ minWidth: 28, height: 24, padding: "0 8px", borderRadius: 999, display: "grid", placeItems: "center", background: success ? T.successSoft : "#FFF4D0", color: success ? T.success : "#8A6D00", fontSize: 11.5, fontWeight: 800 }}>{count}</span></div>
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", marginBottom: 10, padding: "0 2px", minHeight: 28 }}><div style={{ fontFamily: font.display, fontSize: 14, fontWeight: 800, color: T.heading, lineHeight:1.35, minWidth:0 }}>{title}</div><span style={{ minWidth: 28, height: 24, padding: "0 8px", borderRadius: 999, display: "grid", placeItems: "center", background: success ? T.successSoft : "#FFF4D0", color: success ? T.success : "#8A6D00", fontSize: 11.5, fontWeight: 800, flexShrink:0 }}>{count}</span></div>
     <div style={{ display: "grid", gap: 10 }}>{children}</div>
   </section>;
 }

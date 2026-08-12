@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ChevronRight } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import GandengSidebar from "../components/GandengSidebar";
 import GandengDashboard from "./GandengDashboard";
@@ -32,17 +33,16 @@ export default function GandengApp({ mitraList, setMitraList, notify, onBackToPo
     }
   };
 
-  const activeLabel = { dashboard:"Dashboard", "pengajuan-baru":"Pengajuan Baru", riwayat:"Riwayat Pengajuan", tracking:"Tracking Status", bantuan:"Bantuan", "account-management":"Manajemen Akun GANDENG" }[active] || "Dashboard";
+  const activeLabel = { dashboard:"Dashboard", "pengajuan-baru":"Pengajuan Baru", riwayat:"Riwayat Pengajuan", tracking:"Tracking Status", bantuan:"Bantuan", "account-management":"Manajemen Akun" }[active] || "Dashboard";
+  const identityTitle = user?.isAdmin ? "Administrator GANDENG" : (user?.organization || user?.username || "Pengguna GANDENG");
+  const identitySub = user?.isAdmin ? "admin" : (user?.email || "Akun GANDENG");
 
-  return <div style={{
-    "--blue":"#CF0000", "--navy":"#A90000", "--blue-soft":"#FDEAEA", "--danger":"#CF0000", "--danger-soft":"#FDEAEA",
-    display:"flex", minHeight:"100vh", overflow:"hidden", background:T.bg, fontFamily:font.body, color:T.text,
-  }}>
+  return <div className="system-page-shell" style={{ "--blue":"#CF0000", "--navy":"#A90000", "--blue-soft":"#FDEAEA", "--danger":"#CF0000", "--danger-soft":"#FDEAEA" }}>
     <GandengSidebar active={active} onSelect={setActive} onLogout={onLogout} onBackToPortal={onBackToPortal} user={user} />
-    <div style={{ flex:1, minWidth:0, height:"100vh", display:"flex", flexDirection:"column", overflowY:"auto" }}>
-      <div className="app-topbar" style={{ position:"sticky",top:0,zIndex:10,background:T.topbarBg,backdropFilter:"blur(8px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,minHeight:58,flexShrink:0 }}>
-        <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><span style={{fontSize:12.5,color:T.muted,whiteSpace:"nowrap"}}>GANDENG</span><span style={{color:T.muted}}>›</span><span style={{fontSize:12.5,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeLabel}</span></div>
-        <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}><div style={{width:32,height:32,borderRadius:"50%",background:T.navy,display:"grid",placeItems:"center",color:"#fff",fontWeight:800,flexShrink:0}}>{(user?.organization||user?.username||"G").charAt(0).toUpperCase()}</div><div className="hide-mobile" style={{minWidth:0}}><div style={{fontSize:12.5,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:240}}>{user?.organization || user?.username || "Pengguna GANDENG"}</div><div style={{fontSize:10.5,color:T.muted}}>{user?.isAdmin ? "Administrator GANDENG" : user?.email || "Akun GANDENG"}</div></div></div>
+    <div className="system-main">
+      <div className="app-topbar" style={{ position:"sticky",top:0,zIndex:20,background:T.topbarBg,backdropFilter:"blur(8px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,minHeight:58,flexShrink:0 }}>
+        <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><span className="hide-mobile" style={{fontSize:12.5,color:T.muted}}>GANDENG</span><ChevronRight size={13} className="hide-mobile"/><span style={{fontSize:12.5,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeLabel}</span></div>
+        <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}><div style={{width:30,height:30,borderRadius:"50%",background:T.navy,display:"grid",placeItems:"center",color:"#fff",fontWeight:800,flexShrink:0}}>{identityTitle.charAt(0).toUpperCase()}</div><div className="hide-mobile" style={{minWidth:0}}><div style={{fontSize:12.5,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:240}}>{identityTitle}</div><div style={{fontSize:10.5,color:T.muted,marginTop:1}}>{identitySub}</div></div></div>
       </div>
       <div style={{flex:1,minHeight:0}}>{renderContent()}</div>
     </div>
