@@ -1,6 +1,7 @@
 import { T, font } from "../../lib/theme";
 import { MITRA_STATUS_META } from "../../lib/data";
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import PageHeader from "../../components/PageHeader";
 
 const STEPS = [
   { label: "Humas", key: "humas" },
@@ -149,18 +150,12 @@ function TrackingCard({ item }) {
 
 export default function GandengTracking({ mitraList }) {
   return (
-    <div style={{ fontFamily: font.body, padding: "28px 32px", maxWidth: 900 }}>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4, fontWeight: 700 }}>
-          Modul Tracking
-        </div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: T.heading, marginBottom: 4 }}>
-          Tracking Status Pengajuan
-        </div>
-        <div style={{ fontSize: 13, color: T.muted }}>
-          Pantau perkembangan setiap pengajuan mitra secara real-time.
-        </div>
-      </div>
+    <div style={{ fontFamily: font.body, padding: "clamp(18px,3vw,28px) clamp(16px,4vw,32px)", maxWidth: 900, width: "100%", boxSizing: "border-box" }}>
+      <PageHeader
+        eyebrow="Modul Tracking"
+        title="Tracking Status Pengajuan"
+        description="Pantau perkembangan setiap pengajuan mitra secara real-time."
+      />
 
       {mitraList.length === 0 ? (
         <div style={{

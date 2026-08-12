@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BookOpen, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
 import { T, font } from "../../lib/theme";
+import PageHeader from "../../components/PageHeader";
 
 const PANDUAN_STEPS = [
   { step: 1, judul: "Daftar Akun GANDENG", desc: "Daftar menggunakan email perusahaan/lembaga, lalu buat username dan password sendiri." },
@@ -41,11 +42,11 @@ export default function GandengBantuan() {
   return (
     <div style={{fontFamily:font.body,padding:"clamp(18px,3vw,28px) clamp(16px,4vw,32px)",maxWidth:980,width:"100%",boxSizing:"border-box"}}>
 
-      <div style={{marginBottom:22}}>
-        <div style={{fontSize:11,color:"#125AE8",textTransform:"uppercase",letterSpacing:1,fontWeight:800}}>GANDENG</div>
-        <div style={{fontSize:24,fontWeight:800,color:T.heading,marginTop:4}}>Pusat Bantuan</div>
-        <div style={{fontSize:13,color:T.muted,lineHeight:1.6,marginTop:5,maxWidth:560}}>Panduan penggunaan, pertanyaan umum, dan akses langsung ke admin GANDENG.</div>
-      </div>
+      <PageHeader
+        eyebrow="GANDENG"
+        title="Pusat Bantuan"
+        description="Panduan penggunaan, pertanyaan umum, dan akses langsung ke admin GANDENG."
+      />
 
       {/* Two-column: Panduan (left) | FAQ (right) */}
       <div className="responsive-two-col" style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) minmax(0,1fr)",gap:18,alignItems:"start"}}>
