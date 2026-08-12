@@ -141,12 +141,22 @@ export default function App() {
   }, []);
 
   const PACKAGE_SEED = [
-    { idRab: "RAB-2026-001", judul: "Bantuan Perbaikan Jalan Metro Marina Ancol", kategori: "NON PO", status: DOC_STATUS.SUBMITTED },
-    { idRab: "RAB-2026-002", judul: "Fasilitasi Kegiatan Sinergi Kota Hijau", kategori: "Cash Card", status: DOC_STATUS.APPROVED, submittedAt: "2026-04-20T09:00:00Z", reviewedAt: "2026-04-21T10:00:00Z", reviewedBy: "asman" },
-    { idRab: "RAB-2026-003", judul: "Bantuan Rehabilitasi Mangrove Cilincing", kategori: "NON PO", status: DOC_STATUS.PROCESSED, submittedAt: "2026-03-15T09:00:00Z", reviewedAt: "2026-03-16T09:00:00Z", reviewedBy: "asman", processedAt: "2026-03-17T14:00:00Z", processedBy: "madm" },
+    { idRab: "RAB-2026-001", judul: "Bantuan Perbaikan Jalan Metro Marina Ancol", kategori: "NON PO",    status: DOC_STATUS.SUBMITTED },
+    { idRab: "RAB-2026-002", judul: "Fasilitasi Kegiatan Sinergi Kota Hijau",     kategori: "Cash Card", status: DOC_STATUS.APPROVED,  submittedAt: "2026-04-20T09:00:00Z", reviewedAt: "2026-04-21T10:00:00Z", reviewedBy: "asman" },
+    { idRab: "RAB-2026-003", judul: "Bantuan Rehabilitasi Mangrove Cilincing",    kategori: "NON PO",    status: DOC_STATUS.PROCESSED, submittedAt: "2026-03-15T09:00:00Z", reviewedAt: "2026-03-16T09:00:00Z", reviewedBy: "asman", processedAt: "2026-03-17T14:00:00Z", processedBy: "madm" },
   ];
-  const seedSubDoc = (idField, judulField) => PACKAGE_SEED.map((p) => ({ [idField]: p.idRab, [judulField]: p.judul, kategori: p.kategori }));
-  const [rab, setRab] = useState(() => PACKAGE_SEED.map((p) => ({ idNumber: p.idRab, judulKegiatan: p.judul, kategori: p.kategori, tanggalRab: "2026-04-20", totalEvaluasi: 15000000 })));
+  const seedSubDoc = (idField, judulField) =>
+    PACKAGE_SEED.map((p) => ({
+      [idField]: p.idRab,
+      [judulField]: p.judul,
+      kategori: p.kategori,
+    }));
+  const [rab, setRab] = useState(() =>
+    PACKAGE_SEED.map((p) => ({
+      idNumber: p.idRab, judulKegiatan: p.judul, kategori: p.kategori,
+      tanggalRab: "2026-04-20", totalEvaluasi: 15000000,
+    }))
+  );
   const [tor, setTor] = useState(() => seedSubDoc("id", "judulKegiatan"));
   const [bast, setBast] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
@@ -166,11 +176,25 @@ export default function App() {
     return DEFAULT_USERS;
   });
   useEffect(() => {
-    try { if (typeof window !== "undefined") window.localStorage.setItem(USERS_LS_KEY, JSON.stringify(users)); } catch (_) {}
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(USERS_LS_KEY, JSON.stringify(users));
+      }
+    } catch (_) {}
   }, [users]);
   const authenticate = (role, uname, pw) => authenticateUser(users, role, uname, pw);
 
-  const [packages, setPackages] = useState(() => PACKAGE_SEED.map((p) => ({ idRab: p.idRab, judul: p.judul, kategori: p.kategori, formEvaluasi: true, status: p.status, submittedAt: p.submittedAt || new Date().toISOString(), reviewedAt: p.reviewedAt || "", reviewedBy: p.reviewedBy || "", reviewNote: "", processedAt: p.processedAt || "", processedBy: p.processedBy || "" })));
+  const [packages, setPackages] = useState(() =>
+    PACKAGE_SEED.map((p) => ({
+      idRab: p.idRab, judul: p.judul, kategori: p.kategori,
+      formEvaluasi: true,
+      status: p.status,
+      submittedAt: p.submittedAt || new Date().toISOString(),
+      reviewedAt: p.reviewedAt || "", reviewedBy: p.reviewedBy || "",
+      reviewNote: "",
+      processedAt: p.processedAt || "", processedBy: p.processedBy || "",
+    }))
+  );
   const [vendors, setVendors] = useState(() => seed("VND", VENDOR_SEED));
   const [proposals, setProposals] = useState(() => seed("PRP", PROPOSAL_SEED));
   const [konten, setKonten] = useState(() => seed("KTN", KONTEN_SEED));
@@ -180,71 +204,462 @@ export default function App() {
 
   const addHistory = (jenis) => {
     const now = new Date();
-    setHistory((prev) => [{ id: uid("HIS"), jenis, tanggal: now.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }), waktu: now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) }, ...prev]);
+    setHistory((prev) => [
+      {
+        id: uid("HIS"),
+        jenis,
+        tanggal: now.toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }),
+        waktu: now.toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }),
+      },
+      ...prev,
+    ]);
   };
-  const notify = (message, type = "success", jenis = null) => { setToast({ message, type }); setTimeout(() => setToast(null), 3200); if (type === "success" && jenis) addHistory(jenis); };
-  const updatePackage = (idRab, patch) => setPackages((prev) => prev.map((p) => (p.idRab === idRab ? { ...p, ...patch } : p)));
-  const updateEvaluasi = (id, patch) => setEvaluasi((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
-  const upsertPackage = (idRab, patch) => setPackages((prev) => prev.some((p) => p.idRab === idRab) ? prev.map((p) => (p.idRab === idRab ? { ...p, ...patch } : p)) : [...prev, { idRab, ...patch }]);
+
+  const notify = (message, type = "success", jenis = null) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3200);
+    if (type === "success" && jenis) addHistory(jenis);
+  };
+
+  const updatePackage = (idRab, patch) => {
+    setPackages((prev) => prev.map((p) => (p.idRab === idRab ? { ...p, ...patch } : p)));
+  };
+  const updateEvaluasi = (id, patch) => {
+    setEvaluasi((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
+  };
+  const upsertPackage = (idRab, patch) => {
+    setPackages((prev) => {
+      const found = prev.some((p) => p.idRab === idRab);
+      if (found) return prev.map((p) => (p.idRab === idRab ? { ...p, ...patch } : p));
+      return [...prev, { idRab, ...patch }];
+    });
+  };
+
   const rabIdOptions = useMemo(() => rab.map((r) => r.idNumber), [rab]);
-  const rabByKategori = useMemo(() => ({ "NON PO": rab.filter((r) => r.kategori === "NON PO"), "PO": rab.filter((r) => r.kategori === "PO"), "Cash Card": rab.filter((r) => r.kategori === "Cash Card") }), [rab]);
-  const rabIdOptionsByKategori = useMemo(() => ({ "NON PO": rabByKategori["NON PO"].map((r) => r.idNumber), "PO": rabByKategori["PO"].map((r) => r.idNumber), "Cash Card": rabByKategori["Cash Card"].map((r) => r.idNumber) }), [rabByKategori]);
 
-  const handleBackToPortal = () => { setUser(null); setPortal(null); };
+  // Data per kategori — dipakai buat 3 varian menu Pembayaran & Laporan
+  // (NON PO / PO / Cash Card) yang masing-masing berdiri sendiri di sidebar.
+  const rabByKategori = useMemo(() => ({
+    "NON PO": rab.filter((r) => r.kategori === "NON PO"),
+    "PO": rab.filter((r) => r.kategori === "PO"),
+    "Cash Card": rab.filter((r) => r.kategori === "Cash Card"),
+  }), [rab]);
+  const rabIdOptionsByKategori = useMemo(() => ({
+    "NON PO": rabByKategori["NON PO"].map((r) => r.idNumber),
+    "PO": rabByKategori["PO"].map((r) => r.idNumber),
+    "Cash Card": rabByKategori["Cash Card"].map((r) => r.idNumber),
+  }), [rabByKategori]);
 
-  const modules = useMemo(() => ({
-    dashboard: <Dashboard user={user} data={{ rab, tor, bast, pakta, laporan, proposals, konten }} goto={setActive} />,
-    "proposal-rekap": <ProposalRekapPage proposals={proposals} setProposals={setProposals} notify={notify} />,
-    "proposal-evaluasi": <ProposalEvaluasiPage proposals={proposals} evaluasiList={evaluasi} setEvaluasiList={setEvaluasi} notify={notify} />,
-    konten: <PengelolaanKomunikasi list={konten} setList={setKonten} notify={notify} />,
-    rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} />,
-    "kategori-npo": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="NON PO" />,
-    "kategori-po": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="PO" />,
-    "kategori-cc": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="Cash Card" />,
-    tor: <GenericWizard title="TOR" eyebrow="Modul TOR" description="Term of Reference kegiatan, dirujuk dari ID RAB." buildFields={torFields(rabIdOptions)} idPrefix="TOR" autoFrom={{ key: "id", source: rab, map: autoFromRab.tor }} list={tor} setList={setTor} notify={notify} pdfEnabled docxTemplate={DOCX_TEMPLATES.tor} />,
-    bast: <GenericWizard title="BAST" eyebrow="Modul BAST" description="Berita Acara Serah Terima kegiatan." buildFields={bastFields(rabIdOptions)} idPrefix="BAST" autoFrom={{ key: "id", source: rab, map: autoFromRab.bast }} list={bast} setList={setBast} notify={notify} pdfEnabled docxTemplate={DOCX_TEMPLATES.bast} DocPreview={BastDocPreview} />,
-    pakta: <GenericWizard title="Pakta Integritas" eyebrow="Modul Pakta Integritas" description="Dokumen pakta integritas kegiatan." buildFields={paktaFields(rabIdOptions)} idPrefix="PI" autoFrom={{ key: "id", source: rab, map: autoFromRab.pakta }} list={pakta} setList={setPakta} notify={notify} pdfEnabled docxTemplate={DOCX_TEMPLATES.pakta} DocPreview={PaktaDocPreview} />,
-    bapp: <BAPPPage rab={rab} list={bapp} setList={setBapp} notify={notify} />,
-    laporan: <GenericWizard title="Laporan" eyebrow="Modul Laporan" description="Laporan pelaksanaan kegiatan." buildFields={laporanFields(rabIdOptions)} idPrefix="LAP" list={laporan} setList={setLaporan} notify={notify} />,
-    vendor: <VendorPage vendors={vendors} setVendors={setVendors} notify={notify} />,
-    history: <HistoryPage history={history} />,
-    panduan: <Panduan />,
-    "proposal-inbox": <InboxPage proposals={proposals} setProposals={setProposals} user={user} notify={notify} />,
-    "inbox-evaluasi": <InboxEvaluasiPage packages={packages} updatePackage={updatePackage} evaluasi={evaluasi} updateEvaluasi={updateEvaluasi} user={user} notify={notify} />,
-    "asman-dashboard": <AsmanDashboard packages={packages} proposals={proposals} />,
-    "madm-dashboard": <MADMDashboard packages={packages} proposals={proposals} />,
-    "paket-kas": <PaketKasPage packages={packages} updatePackage={updatePackage} upsertPackage={upsertPackage} notify={notify} />,
-    "manajemen-akses": <ManajemenAksesPage users={users} setUsers={setUsers} notify={notify} />,
-    dokumentasi: <DokumentasiPage rab={rab} notify={notify} />,
-    "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
-    eviden: <EvidenPage rab={rab} notify={notify} />,
-    checklist: <ChecklistDokumenPage rab={rab} notify={notify} />,
-    verifikasi: <FormVerifikasiPage rab={rab} notify={notify} />,
-    "lampiran-1": <Lampiran1Page rab={rab} notify={notify} />,
-    "lampiran-2": <Lampiran2Page rab={rab} notify={notify} />,
-    rka: <RKAPage rka={rka} setRka={setRka} notify={notify} />,
-    "rekap-anggaran": <RekapAnggaranPage rab={rab} />,
-  }), [user, rab, tor, bast, pakta, bapp, laporan, vendors, history, proposals, konten, evaluasi, rabIdOptions, packages, users, rka, rabByKategori, rabIdOptionsByKategori]);
+  const handleBackToPortal = () => {
+    setUser(null);
+    setPortal(null);
+  };
 
-  if (!portal) return <LandingGateway onSelect={setPortal} />;
+  const modules = useMemo(
+    () => ({
+      dashboard: (
+        <Dashboard
+          user={user}
+          data={{ rab, tor, bast, pakta, laporan, proposals, konten }}
+          goto={setActive}
+        />
+      ),
+      "proposal-rekap": (
+        <ProposalRekapPage
+          proposals={proposals}
+          setProposals={setProposals}
+          notify={notify}
+        />
+      ),
+      "proposal-evaluasi": (
+        <ProposalEvaluasiPage
+          proposals={proposals}
+          evaluasiList={evaluasi}
+          setEvaluasiList={setEvaluasi}
+          notify={notify}
+        />
+      ),
+      konten: (
+        <PengelolaanKomunikasi
+          list={konten}
+          setList={setKonten}
+          notify={notify}
+        />
+      ),
+      rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} />,
+      "kategori-npo": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="NON PO" />,
+      "kategori-po":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="PO" />,
+      "kategori-cc":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="Cash Card" />,
+      tor: (
+        <GenericWizard
+          title="TOR"
+          eyebrow="Modul TOR"
+          description="Term of Reference kegiatan, dirujuk dari ID RAB."
+          buildFields={torFields(rabIdOptions)}
+          idPrefix="TOR"
+          autoFrom={{ key: "id", source: rab, map: autoFromRab.tor }}
+          list={tor}
+          setList={setTor}
+          notify={notify}
+          pdfEnabled
+          docxTemplate={DOCX_TEMPLATES.tor}
+          buildDocPreview={(v) => <TorDocPreview values={v} />}
+          hideIdSelector
+          columns={[
+            { key: "id", label: "ID TOR" },
+            {
+              key: "tanggalInput",
+              label: "Tanggal Input",
+              render: (r) =>
+                r.tanggalInput
+                  ? new Date(r.tanggalInput).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
+                  : "-",
+            },
+            { key: "kategori", label: "Kategori" },
+            { key: "judulKegiatan", label: "Judul Kegiatan" },
+            { key: "tempat", label: "Tempat" },
+            { key: "hariTanggal", label: "Tanggal" },
+          ]}
+        />
+      ),
+      "laporan-nonpo": (
+        <GenericWizard
+          title="Laporan - NON PO"
+          eyebrow="Modul Laporan"
+          description="Laporan realisasi bantuan untuk pengajuan kategori NON PO."
+          buildFields={laporanFields(rabIdOptionsByKategori["NON PO"])}
+          idPrefix="LAP"
+          autoFrom={{ key: "id", source: rab, map: autoFromRab.laporan }}
+          list={laporan.filter((l) => l.kategori === "NON PO")}
+          setList={setLaporan}
+          notify={notify}
+          pdfEnabled
+          columns={[
+            { key: "id", label: "ID Laporan" },
+            { key: "namaBarang", label: "Nama Barang" },
+            { key: "namaInstansiPenerima", label: "Instansi Penerima" },
+          ]}
+        />
+      ),
+      "laporan-po": (
+        <GenericWizard
+          title="Laporan - PO"
+          eyebrow="Modul Laporan"
+          description="Laporan realisasi bantuan untuk pengajuan kategori PO."
+          buildFields={laporanFields(rabIdOptionsByKategori["PO"])}
+          idPrefix="LAP"
+          autoFrom={{ key: "id", source: rab, map: autoFromRab.laporan }}
+          list={laporan.filter((l) => l.kategori === "PO")}
+          setList={setLaporan}
+          notify={notify}
+          pdfEnabled
+          columns={[
+            { key: "id", label: "ID Laporan" },
+            { key: "namaBarang", label: "Nama Barang" },
+            { key: "namaInstansiPenerima", label: "Instansi Penerima" },
+          ]}
+        />
+      ),
+      "laporan-cc": (
+        <GenericWizard
+          title="Laporan - CC"
+          eyebrow="Modul Laporan"
+          description="Laporan realisasi bantuan untuk pengajuan kategori Cash Card."
+          buildFields={laporanFields(rabIdOptionsByKategori["Cash Card"])}
+          idPrefix="LAP"
+          autoFrom={{ key: "id", source: rab, map: autoFromRab.laporan }}
+          list={laporan.filter((l) => l.kategori === "Cash Card")}
+          setList={setLaporan}
+          notify={notify}
+          pdfEnabled
+          columns={[
+            { key: "id", label: "ID Laporan" },
+            { key: "namaBarang", label: "Nama Barang" },
+            { key: "namaInstansiPenerima", label: "Instansi Penerima" },
+          ]}
+        />
+      ),
+      rka: <RKAPage rka={rka} setRka={setRka} notify={notify} />,
+      "rekap-anggaran": <RekapAnggaranPage rka={rka} rab={rab} laporan={laporan} />,
+      vendor: (
+        <VendorPage vendors={vendors} setVendors={setVendors} notify={notify} />
+      ),
+      inbox: (
+        <InboxPage
+          user={user}
+          packages={packages}
+          rab={rab} tor={tor} bast={bast} pakta={pakta}
+          onUpdatePackage={updatePackage}
+          notify={notify}
+        />
+      ),
+      "inbox-evaluasi": (
+        <InboxEvaluasiPage
+          user={user}
+          evaluasiList={evaluasi}
+          onUpdateEvaluasi={updateEvaluasi}
+          notify={notify}
+        />
+      ),
+      "asman-dashboard": (
+        <AsmanDashboard user={user} packages={packages} evaluasiList={evaluasi} goto={setActive} />
+      ),
+      "madm-dashboard": (
+        <MADMDashboard user={user} packages={packages} evaluasiList={evaluasi} goto={setActive} />
+      ),
+      "paket-kas": (
+        <PaketKasPage
+          rab={rab} tor={tor} bast={bast} pakta={pakta}
+          packages={packages}
+          onUpsertPackage={upsertPackage}
+          notify={notify}
+          goto={setActive}
+        />
+      ),
+      "user-mgmt": (
+        <ManajemenAksesPage
+          users={users}
+          setUsers={setUsers}
+          notify={notify}
+        />
+      ),
+      ...(() => {
+        const kategoriList = [
+          { suffix: "nonpo", kategori: "NON PO" },
+          { suffix: "po", kategori: "PO" },
+          { suffix: "cc", kategori: "Cash Card" },
+        ];
+        const routes = {};
+        kategoriList.forEach(({ suffix, kategori }) => {
+          routes[`bast-${suffix}`] = (
+            <GenericWizard
+              title={`BAST - ${kategori}`}
+              eyebrow="Modul BAST"
+              description={`Berita Acara Serah Terima untuk pengajuan kategori ${kategori}.`}
+              buildFields={bastFields(rabIdOptionsByKategori[kategori])}
+              idPrefix="BAST"
+              autoFrom={{ key: "id", source: rab, map: autoFromRab.bast }}
+              list={bast.filter((b) => b.kategori === kategori)}
+              setList={setBast}
+              notify={notify}
+              pdfEnabled
+              docxTemplate={DOCX_TEMPLATES.bast}
+              buildDocPreview={(v) => <BastDocPreview values={v} />}
+              columns={[
+                { key: "id", label: "ID" },
+                { key: "nomor", label: "Nomor" },
+                { key: "jumlahBantuan", label: "Jumlah Bantuan" },
+              ]}
+            />
+          );
+          routes[`pakta-${suffix}`] = (
+            <GenericWizard
+              title={`Pakta Integritas - ${kategori}`}
+              eyebrow="Modul Pakta Integritas"
+              description={`Pakta Integritas penerima bantuan untuk pengajuan kategori ${kategori}.`}
+              buildFields={paktaFields(rabIdOptionsByKategori[kategori])}
+              idPrefix="PI"
+              autoFrom={{ key: "id", source: rab, map: autoFromRab.pakta }}
+              list={pakta.filter((p) => p.kategori === kategori)}
+              setList={setPakta}
+              notify={notify}
+              pdfEnabled
+              docxTemplate={DOCX_TEMPLATES.pakta}
+              buildDocPreview={(v) => <PaktaDocPreview values={v} />}
+              columns={[
+                { key: "id", label: "ID" },
+                { key: "namaPenerima", label: "Nama Penerima" },
+                { key: "lembagaPenerima", label: "Lembaga" },
+              ]}
+            />
+          );
+          routes[`bapp-${suffix}`] = (
+            <BAPPPage
+              rab={rabByKategori[kategori]}
+              list={bapp.filter((b) => b.kategori === kategori)}
+              setList={setBapp}
+              notify={notify}
+            />
+          );
+          routes[`form-verifikasi-${suffix}`] = (
+            <FormVerifikasiPage rab={rabByKategori[kategori]} notify={notify} />
+          );
+          routes[`lmp1-${suffix}`] = (
+            <Lampiran1Page rab={rabByKategori[kategori]} notify={notify} />
+          );
+          routes[`lmp2-${suffix}`] = (
+            <Lampiran2Page rab={rabByKategori[kategori]} notify={notify} />
+          );
+        });
+        return routes;
+      })(),
+      dokumentasi: <DokumentasiPage rab={rab} notify={notify} />,
+      "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
+      eviden: <EvidenPage rab={rab} notify={notify} />,
+      "checklist-dokumen": <ChecklistDokumenPage rab={rab} tor={tor} bast={bast} pakta={pakta} notify={notify} />,
+      "proposal-evaluasi-pembayaran": (
+        <ProposalEvaluasiPage
+          proposals={proposals}
+          evaluasiList={evaluasi}
+          setEvaluasiList={setEvaluasi}
+          notify={notify}
+        />
+      ),
+      history: <HistoryPage history={history} />,
+      panduan: <Panduan />,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      user,
+      rab, tor, bast, pakta, bapp, laporan, vendors, history,
+      proposals, konten, evaluasi, rabIdOptions, packages, users, rka,
+      rabByKategori, rabIdOptionsByKategori,
+    ]
+  );
+
+  if (!portal) {
+    return <LandingGateway onSelect={setPortal} />;
+  }
+
   if (portal === "silapak") {
-    if (!silapakLoggedIn) return <SiLapakLogin authenticate={authenticate} onLogin={() => setSilapakLoggedIn(true)} onBack={() => setPortal(null)} />;
-    return <SiLapakApp onLogout={() => { setSilapakLoggedIn(false); setPortal(null); }} />;
+    if (!silapakLoggedIn) {
+      return (
+        <SiLapakLogin
+          authenticate={authenticate}
+          onLogin={() => setSilapakLoggedIn(true)}
+          onBack={() => setPortal(null)}
+        />
+      );
+    }
+    return (
+      <SiLapakApp
+        onLogout={() => {
+          setSilapakLoggedIn(false);
+          setPortal(null);
+        }}
+      />
+    );
   }
+
   if (portal === "mitra") {
-    if (!mitraLoggedIn) return <GandengLogin authenticate={authenticate} onLogin={(u) => { setMitraUser(u); setMitraLoggedIn(true); }} onBack={() => setPortal(null)} />;
-    return <><GandengApp mitraList={mitraList} setMitraList={setMitraList} notify={notify} user={mitraUser} onLogout={() => { setMitraLoggedIn(false); setMitraUser(null); setPortal(null); }} /><Toast toast={toast} /></>;
+    if (!mitraLoggedIn) {
+      return (
+        <GandengLogin
+          authenticate={authenticate}
+          onLogin={(u) => {
+            setMitraUser(u);
+            setMitraLoggedIn(true);
+          }}
+          onBack={() => setPortal(null)}
+        />
+      );
+    }
+    return (
+      <>
+        <GandengApp
+          mitraList={mitraList}
+          setMitraList={setMitraList}
+          notify={notify}
+          onBackToPortal={() => {
+            setMitraLoggedIn(false);
+            setMitraUser(null);
+            setPortal(null);
+          }}
+          user={mitraUser}
+          onLogout={() => {
+            setMitraLoggedIn(false);
+            setMitraUser(null);
+          }}
+        />
+        <Toast toast={toast} />
+      </>
+    );
   }
-  if (!user) return <LoginScreen authenticate={authenticate} onBack={() => setPortal(null)} onLogin={(u) => { setUser(u); setActive(u.role === "humas" ? "dashboard" : u.role === "madm" ? "madm-dashboard" : "asman-dashboard"); }} />;
+
+  if (!user)
+    return (
+      <LoginScreen
+        authenticate={authenticate}
+        onBack={() => setPortal(null)}
+        onLogin={(u) => {
+          setUser(u);
+          setActive(u.role === "humas" ? "dashboard" : u.role === "madm" ? "madm-dashboard" : "asman-dashboard");
+        }}
+      />
+    );
 
   const activeLabel = MENU.find((m) => m.key === active)?.label || "";
-  return <div style={{ display:"flex", height:"100vh", overflow:"hidden", background:T.bg, fontFamily:font.body, color:T.text }}>
-    <Sidebar active={active} onSelect={setActive} user={user} onLogout={() => setUser(null)} onBackToPortal={handleBackToPortal} collapsed={collapsed} setCollapsed={setCollapsed} themeMode={themeMode} onToggleTheme={() => setThemeMode((m) => (m === "dark" ? "light" : "dark"))} />
-    <div style={{ flex:1, minWidth:0, height:"100vh", display:"flex", flexDirection:"column", overflowY:"auto" }}>
-      <Topbar activeLabel={activeLabel} user={user} onHelpClick={() => setHelpOpen(true)} themeMode={themeMode} onToggleTheme={() => setThemeMode((m) => (m === "dark" ? "light" : "dark"))} />
-      <div key={active} className="app-content" style={{ width:"100%", maxWidth:1240, margin:"0 auto", animation:"fade-in .2s ease" }}>{modules[active]}</div>
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        overflow: "hidden",
+        background: T.bg,
+        fontFamily: font.body,
+        color: T.text,
+      }}
+    >
+      <Sidebar
+        active={active}
+        onSelect={setActive}
+        user={user}
+        onLogout={() => setUser(null)}
+        onBackToPortal={handleBackToPortal}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        themeMode={themeMode}
+        onToggleTheme={() =>
+          setThemeMode((m) => (m === "dark" ? "light" : "dark"))
+        }
+      />
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          overflowY: "auto",
+        }}
+      >
+        <Topbar
+          activeLabel={activeLabel}
+          user={user}
+          onHelpClick={() => setHelpOpen(true)}
+          themeMode={themeMode}
+          onToggleTheme={() =>
+            setThemeMode((m) => (m === "dark" ? "light" : "dark"))
+          }
+        />
+        <div
+          key={active}
+          className="app-content"
+          style={{
+            width: "100%",
+            maxWidth: 1240,
+            margin: "0 auto",
+            animation: "fade-in .2s ease",
+          }}
+        >
+          {modules[active]}
+        </div>
+      </div>
+      <Toast toast={toast} />
+      <HelpModal
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        onGotoPanduan={() => setActive("panduan")}
+      />
     </div>
-    <Toast toast={toast} />
-    <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} onGotoPanduan={() => setActive("panduan")} />
-  </div>;
+  );
 }
