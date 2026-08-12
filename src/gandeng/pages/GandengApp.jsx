@@ -7,6 +7,7 @@ import GandengTracking from "./GandengTracking";
 import GandengBantuan from "./GandengBantuan";
 import PengajuanGandengPage from "./PengajuanGandeng";
 import GandengAccountManagement from "./GandengAccountManagement";
+import "../styles/gandeng-responsive.css";
 
 export default function GandengApp({ mitraList, setMitraList, notify, onBackToPortal, user, onLogout }) {
   const [active, setActive] = useState(user?.isAdmin ? "account-management" : "dashboard");
