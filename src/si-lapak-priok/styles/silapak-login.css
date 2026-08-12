@@ -1,0 +1,30 @@
+.gl-page--silapak .gl-visual-panel--light {
+  background:
+    radial-gradient(circle at 72% 24%, rgba(255,255,255,.28), transparent 30%),
+    linear-gradient(145deg, #c7aa28 0%, #d6bd43 52%, #b89c1d 115%);
+  color: #102f60;
+}
+
+.gl-page--silapak .gl-visual-panel--light .gl-brand-title,
+.gl-page--silapak .gl-visual-panel--light .gl-visual-copy {
+  color: #102f60;
+}
+
+.gl-page--silapak .gl-submit {
+  background: #c9a91e;
+  color: #102f60;
+  box-shadow: 0 9px 20px rgba(201,169,30,.24);
+}
+
+.gl-page--silapak .gl-submit:hover:not(:disabled) {
+  box-shadow: 0 12px 26px rgba(201,169,30,.3);
+}
+
+.gl-page--silapak .gl-forgot a {
+  color: #8b7110;
+}
+
+.gl-page--silapak .gl-input:focus {
+  border-color: #b99b1c;
+  box-shadow: 0 0 0 3px rgba(201,169,30,.16);
+}
