@@ -1,27 +1,55 @@
 import { useState } from "react";
-import { FilePlus, Save, Printer } from "lucide-react";
+import { Download, Save } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { uid } from "../../lib/utils";
+import { uid, rupiah } from "../../lib/utils";
+import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 
+const EMPTY = {
+  nomorVerifikasi: "",
+  tanggal: "",
+  kegiatan: "",
+  jumlahBiaya: "",
+  terbilang: "",
+  kepada: "",
+};
+
 export default function FormVerifikasiPage({ rab, notify }) {
   const [forms, setForms] = useState([]);
-
   const [activeRab, setActiveRab] = useState(null);
-  const [formData, setFormData] = useState({
-    tpb: "", procost: "", nomorSPK: "", tanggalSPK: "",
-    nilaiKontrak: "", keterangan: "",
-  });
+  const [formData, setFormData] = useState(EMPTY);
 
   const set = (k, v) => setFormData((p) => ({ ...p, [k]: v }));
 
   const inputStyle = {
-    width: "100%", padding: "10px 14px", borderRadius: 8,
+    width: "100%", padding: "10px 12px", borderRadius: 8,
     border: `1px solid ${T.border}`, background: T.inputBg,
     fontSize: 13, color: T.text, boxSizing: "border-box",
   };
-  const labelStyle = { fontSize: 12, fontWeight: 600, color: T.heading, marginBottom: 4, display: "block" };
+  const labelStyle = { fontSize: 12, fontWeight: 600, color: T.heading, marginBottom: 5, display: "block" };
+
+  const loadForm = (r) => {
+    setActiveRab(r);
+    const existing = forms.find((f) => f.rabId === r.idNumber);
+    if (existing) {
+      setFormData({
+        nomorVerifikasi: existing.nomorVerifikasi || "",
+        tanggal: existing.tanggal || "",
+        kegiatan: existing.kegiatan || r.judulKegiatan || "",
+        jumlahBiaya: existing.jumlahBiaya || r.totalEvaluasi || "",
+        terbilang: existing.terbilang || "",
+        kepada: existing.kepada || "",
+      });
+      return;
+    }
+    setFormData({
+      ...EMPTY,
+      kegiatan: r.judulKegiatan || "",
+      jumlahBiaya: r.totalEvaluasi || "",
+      kepada: "Manager Administrasi UBP Priok",
+    });
+  };
 
   const handleSave = () => {
     if (!activeRab) return;
@@ -30,68 +58,46 @@ export default function FormVerifikasiPage({ rab, notify }) {
       setForms((prev) => prev.map((f) => f.rabId === activeRab.idNumber ? { ...f, ...formData, updatedAt: new Date().toISOString() } : f));
     } else {
       setForms((prev) => [...prev, {
-        id: uid("VRF"),
-        rabId: activeRab.idNumber,
-        ...formData,
-        createdAt: new Date().toISOString(),
+        id: uid("VRF"), rabId: activeRab.idNumber, ...formData, createdAt: new Date().toISOString(),
       }]);
     }
-    if (notify) notify("Form verifikasi disimpan.", "success", "Form Verifikasi disimpan");
+    notify?.("Form verifikasi disimpan.", "success", "Form Verifikasi disimpan");
   };
 
-  const loadForm = (r) => {
-    setActiveRab(r);
-    const existing = forms.find((f) => f.rabId === r.idNumber);
-    if (existing) {
-      setFormData({
-        tpb: existing.tpb || "", procost: existing.procost || "",
-        nomorSPK: existing.nomorSPK || "", tanggalSPK: existing.tanggalSPK || "",
-        nilaiKontrak: existing.nilaiKontrak || "", keterangan: existing.keterangan || "",
-      });
-    } else {
-      setFormData({ tpb: "", procost: "", nomorSPK: "", tanggalSPK: "", nilaiKontrak: "", keterangan: "" });
-    }
-  };
-
-  const handlePrint = () => {
+  const handleDownload = async () => {
     if (!activeRab) return;
-    const win = window.open("", "_blank", "width=850,height=960");
-    if (!win) return;
-    win.document.write(`<!doctype html><html><head><meta charset="utf-8" /><title>Form Verifikasi - ${activeRab.idNumber}</title>
-      <style>body{font-family:Arial,sans-serif;padding:32px;color:#111;}h1{font-size:16px;margin:0 0 4px;text-align:center;}
-      .sub{text-align:center;color:#555;font-size:12px;margin-bottom:22px;}
-      table{width:100%;border-collapse:collapse;font-size:13px;}
-      td{padding:8px 12px;border:1px solid #ccc;vertical-align:top;}
-      .label{font-weight:600;width:35%;background:#f9f9f9;}</style>
-    </head><body>
-      <h1>FORM VERIFIKASI</h1>
-      <div class="sub">${activeRab.idNumber} - ${activeRab.judulKegiatan}</div>
-      <table>
-        <tr><td class="label">TPB</td><td>${formData.tpb || "-"}</td></tr>
-        <tr><td class="label">Procost</td><td>${formData.procost || "-"}</td></tr>
-        <tr><td class="label">Nomor SPK</td><td>${formData.nomorSPK || "-"}</td></tr>
-        <tr><td class="label">Tanggal SPK</td><td>${formData.tanggalSPK || "-"}</td></tr>
-        <tr><td class="label">Nilai Kontrak</td><td>${formData.nilaiKontrak || "-"}</td></tr>
-        <tr><td class="label">Keterangan</td><td>${formData.keterangan || "-"}</td></tr>
-      </table>
-      <script>window.onload=function(){window.print();};</script>
-    </body></html>`);
-    win.document.close();
+    try {
+      await generateDocxFromTemplate(
+        "/templates/Template_Verifikasi.docx",
+        {
+          nomorVerifikasi: formData.nomorVerifikasi || "",
+          tanggal: formatTanggalPanjang(formData.tanggal),
+          kegiatan: formData.kegiatan || activeRab.judulKegiatan || "",
+          jumlahBiaya: formData.jumlahBiaya ? rupiah(Number(formData.jumlahBiaya)) : "",
+          terbilang: formData.terbilang || "",
+          kepada: formData.kepada || "",
+        },
+        `Form-Verifikasi-${activeRab.idNumber}.docx`
+      );
+      notify?.("Form verifikasi berhasil dibuat dari data sistem.", "success");
+    } catch (e) {
+      notify?.(`Gagal membuat Form Verifikasi: ${e.message}`, "error");
+    }
   };
 
   return (
     <div>
       <PageHeader
-        eyebrow="Pembayaran"
+        eyebrow="Dokumen Pembayaran"
         title="Form Verifikasi"
-        description="Isi data verifikasi meliputi TPB, Procost, dan dokumen terkait."
+        description="Format pengisian disesuaikan dengan Formulir Verifikasi resmi dan tetap mengambil konteks pekerjaan dari RAB yang dipilih."
       />
 
-      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(220px, 280px) minmax(0, 1fr)", gap: 16 }} className="responsive-two-col">
         <Card>
-          <div style={{ fontSize: 12, fontWeight: 700, color: T.heading, marginBottom: 10 }}>Pilih RAB</div>
-          {(!rab || rab.length === 0) ? (
-            <div style={{ fontSize: 12.5, color: T.muted }}>Belum ada RAB.</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.heading, marginBottom: 10 }}>Pilih RAB / Pekerjaan</div>
+          {!rab?.length ? (
+            <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.55 }}>Belum ada RAB.</div>
           ) : (
             <div style={{ display: "grid", gap: 6 }}>
               {rab.map((r) => {
@@ -102,12 +108,11 @@ export default function FormVerifikasiPage({ rab, notify }) {
                     padding: "10px 12px", borderRadius: 8, textAlign: "left",
                     border: `1px solid ${isActive ? T.blue : T.border}`,
                     background: isActive ? T.blueSoft : T.bg,
-                    cursor: "pointer", fontSize: 12,
+                    color: T.text, cursor: "pointer", minWidth: 0,
                   }}>
-                    <div style={{ fontFamily: font.mono, fontWeight: 700, color: T.blue }}>{r.idNumber}</div>
-                    <div style={{ fontSize: 11.5, color: T.muted, marginTop: 2 }}>
-                      {r.judulKegiatan}
-                      {hasSaved && <span style={{ color: "#1E7F3E", fontWeight: 600 }}> (tersimpan)</span>}
+                    <div style={{ fontFamily: font.mono, fontWeight: 700, color: T.blue, fontSize: 12 }}>{r.idNumber}</div>
+                    <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3, lineHeight: 1.45, overflowWrap: "anywhere" }}>
+                      {r.judulKegiatan}{hasSaved && <span style={{ color: "#1E7F3E", fontWeight: 700 }}> · tersimpan</span>}
                     </div>
                   </button>
                 );
@@ -118,58 +123,54 @@ export default function FormVerifikasiPage({ rab, notify }) {
 
         <Card>
           {!activeRab ? (
-            <div style={{ padding: "32px 0", textAlign: "center", color: T.muted, fontSize: 14 }}>
-              Pilih RAB di sebelah kiri untuk mengisi form verifikasi.
+            <div style={{ padding: "34px 10px", textAlign: "center", color: T.muted, fontSize: 13.5, lineHeight: 1.6 }}>
+              Pilih RAB di sebelah kiri untuk mengisi Form Verifikasi.
             </div>
           ) : (
             <div>
-              <div style={{ marginBottom: 16 }}>
+              <div style={{ marginBottom: 17 }}>
                 <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{activeRab.idNumber}</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: T.heading, marginTop: 2 }}>{activeRab.judulKegiatan}</div>
+                <div style={{ fontSize: 14.5, fontWeight: 700, color: T.heading, marginTop: 3, lineHeight: 1.45 }}>{activeRab.judulKegiatan}</div>
               </div>
 
-              <div style={{ display: "grid", gap: 14 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div>
-                    <label style={labelStyle}>TPB</label>
-                    <input style={inputStyle} value={formData.tpb} onChange={(e) => set("tpb", e.target.value)} placeholder="Nomor TPB" />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Procost</label>
-                    <input style={inputStyle} value={formData.procost} onChange={(e) => set("procost", e.target.value)} placeholder="Kode Procost" />
-                  </div>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div>
-                    <label style={labelStyle}>Nomor SPK</label>
-                    <input style={inputStyle} value={formData.nomorSPK} onChange={(e) => set("nomorSPK", e.target.value)} />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Tanggal SPK</label>
-                    <input style={inputStyle} type="date" value={formData.tanggalSPK} onChange={(e) => set("tanggalSPK", e.target.value)} />
-                  </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 13 }}>
+                <div>
+                  <label style={labelStyle}>Nomor Verifikasi</label>
+                  <input style={inputStyle} value={formData.nomorVerifikasi} onChange={(e) => set("nomorVerifikasi", e.target.value)} placeholder="Nomor verifikasi" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Nilai Kontrak</label>
-                  <input style={inputStyle} type="number" value={formData.nilaiKontrak} onChange={(e) => set("nilaiKontrak", e.target.value)} />
+                  <label style={labelStyle}>Tanggal</label>
+                  <input style={inputStyle} type="date" value={formData.tanggal} onChange={(e) => set("tanggal", e.target.value)} />
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label style={labelStyle}>Kegiatan</label>
+                  <input style={inputStyle} value={formData.kegiatan} onChange={(e) => set("kegiatan", e.target.value)} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Keterangan</label>
-                  <textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} value={formData.keterangan} onChange={(e) => set("keterangan", e.target.value)} />
+                  <label style={labelStyle}>Jumlah Biaya</label>
+                  <input style={inputStyle} type="number" value={formData.jumlahBiaya} onChange={(e) => set("jumlahBiaya", e.target.value)} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Terbilang</label>
+                  <input style={inputStyle} value={formData.terbilang} onChange={(e) => set("terbilang", e.target.value)} placeholder="Contoh: lima belas juta rupiah" />
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label style={labelStyle}>Kepada</label>
+                  <input style={inputStyle} value={formData.kepada} onChange={(e) => set("kepada", e.target.value)} />
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
+              <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 18 }}>
                 <button onClick={handleSave} style={{
-                  display: "flex", alignItems: "center", gap: 6,
-                  padding: "10px 18px", borderRadius: 8, border: "none",
-                  background: T.blue, color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600,
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  padding: "9px 15px", borderRadius: 8, border: "none",
+                  background: T.blue, color: "#fff", cursor: "pointer", fontSize: 12.5, fontWeight: 700,
                 }}><Save size={14} /> Simpan</button>
-                <button onClick={handlePrint} style={{
-                  display: "flex", alignItems: "center", gap: 6,
-                  padding: "10px 18px", borderRadius: 8, border: `1px solid ${T.border}`,
-                  background: T.card, color: T.heading, cursor: "pointer", fontSize: 13, fontWeight: 600,
-                }}><Printer size={14} /> Cetak</button>
+                <button onClick={handleDownload} style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  padding: "9px 15px", borderRadius: 8, border: `1px solid ${T.border}`,
+                  background: T.card, color: T.heading, cursor: "pointer", fontSize: 12.5, fontWeight: 700,
+                }}><Download size={14} /> Download Word</button>
               </div>
             </div>
           )}
