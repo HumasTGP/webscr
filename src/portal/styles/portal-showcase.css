@@ -1,5 +1,7 @@
 .gateway-page {
-  min-height: 100vh;
+  width: 100%;
+  height: 100svh;
+  min-height: 100svh;
   position: relative;
   overflow: hidden;
   background: url('/portal-utama.png') center center / cover no-repeat;
@@ -18,8 +20,10 @@
   min-width: 0;
   min-height: 86px;
   padding: 12px clamp(24px, 3.6vw, 58px) 0;
-  background: transparent;
+  background: linear-gradient(180deg, rgba(255,255,255,.78) 0%, rgba(255,255,255,.42) 52%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
 }
+.gateway-header > * { pointer-events: auto; }
 
 .gateway-brand {
   border: 0;
@@ -34,12 +38,11 @@
 
 .gateway-logo {
   display: block;
-  width: clamp(210px, 17vw, 285px);
+  width: clamp(200px, 16.5vw, 270px);
   height: auto;
-  max-height: 72px;
+  max-height: 68px;
   object-fit: contain;
   object-position: left center;
-  background: transparent;
 }
 
 .gateway-nav {
@@ -60,7 +63,7 @@
   min-height: 48px;
   border: 0;
   background: transparent;
-  color: #062a67;
+  color: #082f66;
   font: inherit;
   font-size: clamp(13px, 1.2vw, 17px);
   font-weight: 800;
@@ -68,13 +71,14 @@
   cursor: pointer;
   padding: 0;
   white-space: nowrap;
-  text-shadow: 0 1px 12px rgba(255,255,255,.88);
+  text-shadow: 0 1px 2px rgba(255,255,255,.96), 0 0 14px rgba(255,255,255,.88);
 }
 
 .gateway-nav-link svg {
   width: clamp(13px, 1.2vw, 17px);
   height: clamp(13px, 1.2vw, 17px);
   flex: 0 0 auto;
+  filter: drop-shadow(0 1px 2px rgba(255,255,255,.9));
 }
 
 .gateway-nav-link::after {
@@ -93,11 +97,7 @@
 .gateway-nav-link:hover::after,
 .gateway-nav-link.active::after { transform: scaleX(1); }
 
-.gateway-sakti {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
+.gateway-sakti { position: relative; display: flex; align-items: center; }
 
 .gateway-dropdown {
   position: absolute;
@@ -107,9 +107,9 @@
   min-width: 190px;
   padding: 8px;
   border-radius: 14px;
-  background: rgba(255,255,255,.96);
-  box-shadow: 0 18px 42px rgba(6, 42, 103, .15);
-  border: 1px solid rgba(226,233,243,.9);
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 18px 42px rgba(6, 42, 103, .17);
+  border: 1px solid rgba(226,233,243,.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -129,7 +129,9 @@
 .gateway-dropdown button:hover { background: #f1f6fd; }
 
 .gateway-hero {
-  min-height: 100vh;
+  width: 100%;
+  height: 100svh;
+  min-height: 0;
   position: relative;
   overflow: hidden;
   background: transparent;
@@ -138,93 +140,102 @@
 .gateway-hero-fade {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg,
-      rgba(255,255,255,.995) 0%,
-      rgba(255,255,255,.98) 17%,
-      rgba(255,255,255,.92) 30%,
-      rgba(255,255,255,.64) 43%,
-      rgba(255,255,255,.18) 56%,
-      rgba(255,255,255,0) 68%);
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.995) 0%,
+    rgba(255,255,255,.98) 17%,
+    rgba(255,255,255,.93) 30%,
+    rgba(255,255,255,.66) 43%,
+    rgba(255,255,255,.20) 56%,
+    rgba(255,255,255,0) 69%);
   pointer-events: none;
 }
 
 .gateway-copy {
-  position: relative;
+  position: absolute;
   z-index: 2;
-  width: min(650px, 45vw);
-  padding: clamp(210px, 25vh, 300px) 0 90px clamp(42px, 5vw, 86px);
+  left: clamp(42px, 5vw, 86px);
+  top: 50%;
+  transform: translateY(-42%);
+  width: min(640px, 44vw);
+  max-height: calc(100svh - 150px);
 }
 
 .gateway-eyebrow {
   color: #0877cf;
-  font-size: clamp(18px, 1.55vw, 24px);
+  font-size: clamp(17px, 1.5vw, 23px);
   font-weight: 800;
-  margin-bottom: 28px;
+  margin-bottom: clamp(18px, 2.2vh, 28px);
 }
 
 .gateway-copy h1 {
   margin: 0;
   color: #062a67;
-  font-size: clamp(54px, 5.1vw, 88px);
+  font-size: clamp(50px, 4.9vw, 84px);
   line-height: 1.02;
-  letter-spacing: -2.4px;
+  letter-spacing: -2.2px;
   font-weight: 800;
 }
 .gateway-copy h1 span { color: #f5c400; }
 
 .gateway-accent {
-  width: 72px;
+  width: 68px;
   height: 4px;
   border-radius: 99px;
   background: #f5c400;
-  margin: 38px 0 28px;
+  margin: clamp(24px, 3vh, 36px) 0 clamp(18px, 2.5vh, 28px);
 }
 
 .gateway-copy p {
   margin: 0;
   color: #0a2e67;
-  font-size: clamp(15px, 1.25vw, 19px);
-  line-height: 1.72;
+  font-size: clamp(14px, 1.18vw, 18px);
+  line-height: 1.68;
   font-weight: 400;
   max-width: 560px;
 }
 
+@media (max-height: 720px) and (min-width: 761px) {
+  .gateway-header { min-height: 72px; padding-top: 7px; }
+  .gateway-logo { width: clamp(165px, 14vw, 220px); max-height: 54px; }
+  .gateway-nav-link { min-height: 40px; font-size: clamp(12px, 1vw, 15px); }
+  .gateway-copy { transform: translateY(-37%); }
+  .gateway-copy h1 { font-size: clamp(44px, 4.4vw, 70px); }
+  .gateway-eyebrow { margin-bottom: 14px; }
+  .gateway-accent { margin: 20px 0 16px; }
+}
+
 @media (max-width: 900px) {
-  .gateway-header {
-    min-height: 74px;
-    padding: 10px 18px 0;
-    gap: 14px;
-  }
-  .gateway-logo { width: clamp(150px, 22vw, 190px); max-height: 56px; }
+  .gateway-header { min-height: 74px; padding: 10px 18px 0; gap: 14px; }
+  .gateway-logo { width: clamp(145px, 21vw, 185px); max-height: 54px; }
   .gateway-nav { gap: clamp(12px, 2.3vw, 24px); }
   .gateway-nav-link { min-height: 42px; font-size: clamp(10px, 1.8vw, 13px); }
-  .gateway-copy { width: min(620px, 58vw); padding-left: 34px; }
+  .gateway-copy { left: 34px; width: min(600px, 58vw); }
 }
 
 @media (max-width: 760px) {
   .gateway-page { background-position: 68% center; }
-  .gateway-header { grid-template-columns: auto 1fr; padding: 8px 12px 0; gap: 10px; }
+  .gateway-header { grid-template-columns: auto 1fr; padding: 8px 12px 0; gap: 10px; background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.52) 58%,transparent); }
   .gateway-logo { width: clamp(104px, 25vw, 132px); max-height: 42px; }
   .gateway-nav { gap: clamp(7px, 2vw, 12px); }
-  .gateway-nav-link { min-height: 38px; font-size: clamp(8.5px, 2.25vw, 10.5px); gap: 3px; text-shadow: 0 1px 8px #fff; }
+  .gateway-nav-link { min-height: 38px; font-size: clamp(8.5px, 2.25vw, 10.5px); gap: 3px; }
   .gateway-nav-link svg { width: 10px; height: 10px; }
   .gateway-nav-link::after { height: 2px; }
   .gateway-dropdown { min-width: 150px; top: calc(100% + 5px); }
   .gateway-dropdown button { font-size: 11px; padding: 9px 10px; }
-  .gateway-hero-fade { background: linear-gradient(90deg, rgba(255,255,255,.99), rgba(255,255,255,.88) 64%, rgba(255,255,255,.22)); }
-  .gateway-copy { width: auto; padding: 150px 22px 58px; }
-  .gateway-copy h1 { font-size: clamp(42px, 12vw, 60px); letter-spacing: -1.4px; }
-  .gateway-eyebrow { font-size: 16px; margin-bottom: 20px; }
-  .gateway-copy p { font-size: 14px; }
-  .gateway-desktop-break { display: none; }
+  .gateway-hero-fade { background: linear-gradient(90deg, rgba(255,255,255,.99), rgba(255,255,255,.90) 64%, rgba(255,255,255,.26)); }
+  .gateway-copy { left:22px; right:22px; top:52%; width:auto; transform:translateY(-42%); }
+  .gateway-copy h1 { font-size: clamp(40px, 11.5vw, 58px); letter-spacing: -1.3px; }
+  .gateway-eyebrow { font-size: 15px; margin-bottom: 18px; }
+  .gateway-copy p { font-size: 13.5px; max-width:520px; }
 }
 
 @media (max-width: 430px) {
   .gateway-header { gap: 7px; padding: 6px 8px 0; }
-  .gateway-logo { width: 88px; max-height: 34px; }
-  .gateway-nav { gap: 6px; }
-  .gateway-nav-link { min-height: 34px; font-size: 7.9px; gap: 2px; }
+  .gateway-logo { width: 84px; max-height: 32px; }
+  .gateway-nav { gap: 5px; }
+  .gateway-nav-link { min-height: 34px; font-size: 7.6px; gap: 2px; }
   .gateway-nav-link svg { width: 9px; height: 9px; }
-  .gateway-copy { padding: 132px 18px 46px; }
+  .gateway-copy { left:18px; right:18px; top:54%; }
+  .gateway-copy h1 { font-size:clamp(36px,12vw,50px); }
+  .gateway-copy p { font-size:13px; line-height:1.58; }
 }
