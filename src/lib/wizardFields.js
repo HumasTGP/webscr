@@ -57,6 +57,7 @@ export const proposalFields = () => () => [
     section: "Lampiran",
   },
   { key: "dokumentasiKegiatan", label: "Dokumentasi Kegiatan", type: "file-upload" },
+  { key: "laporanKegiatan", label: "Laporan Kegiatan", type: "file-upload" },
 ];
 
 export const proposalAdminFields = () => [
@@ -65,6 +66,8 @@ export const proposalAdminFields = () => [
     label: "Status Proposal",
     type: "select",
     options: OPT.statusProposal,
+    disabled: true,
+    hint: "otomatis - ditentukan dari hasil review Asman/MADM, bukan diisi manual",
     section: "Status & Catatan",
   },
   { key: "catatanInternal", label: "Catatan Internal", type: "textarea", full: true },
@@ -72,8 +75,6 @@ export const proposalAdminFields = () => [
 
 export const bastStepFields = () => [
   { key: "tanggalBast", label: "Tanggal BAST", type: "date", section: "Berita Acara Serah Terima (BAST)" },
-  { key: "namaPihakPertama", label: "Nama Pihak Pertama (PLN)" },
-  { key: "jabatanPihakPertama", label: "Jabatan Pihak Pertama (PLN)" },
   { key: "namaPihakKedua", label: "Nama Pihak Kedua (Penerima)" },
   { key: "jabatanPihakKedua", label: "Jabatan Pihak Kedua (Penerima)" },
   {

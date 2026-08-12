@@ -20,10 +20,16 @@ import {
   FileSearch,
   Paperclip,
   Tags,
+  BarChart3,
 } from "lucide-react";
 
 export const OPT = {
   kategori: ["NON PO", "Cash Card", "PO"],
+  jenisKegiatanCsr: [
+    "Bakti Pelayanan Masyarakat",
+    "Bakti Pemberdayaan Masyarakat",
+    "Bakti Pembinaan Hubungan",
+  ],
   bidang: ["Niaga", "Keuangan", "SDM & Umum", "Perencanaan", "K3L"],
   jenisProgram: ["CSR", "Bina Lingkungan", "Sponsorship", "Donasi"],
   subprogram: [
@@ -245,60 +251,130 @@ export const HELP_CONTACT = {
   hours: "Senin-Jumat, 08.00-16.00 WIB",
 };
 
-export const MENU = [
-  { key: "dashboard",       label: "Dashboard",              icon: LayoutDashboard, group: "utama", roles: ["humas"] },
-  { key: "asman-dashboard", label: "Dashboard Asman",        icon: LayoutDashboard, group: "utama", roles: ["asman"] },
-  { key: "madm-dashboard",  label: "Dashboard MADM",         icon: LayoutDashboard, group: "utama", roles: ["madm"] },
-  { key: "inbox",           label: "Inbox Paket Kas",        icon: Inbox,           group: "utama", roles: ["asman", "madm"] },
+// Struktur sidebar baru — mendukung nesting sampai 3 level (mis. Pembayaran > NON PO > LMP 1).
+// Setiap node TANPA `children` = halaman yang bisa diklik (leaf).
+// Setiap node DENGAN `children` = grup yang bisa dibuka/ditutup (gak punya halaman sendiri).
+export const MENU_TREE = [
+  { key: "user-mgmt", label: "Manajemen Akses", icon: UserCog, roles: ["humas"], adminOnly: true },
 
-  { key: "proposal-rekap",    label: "Rekap Pengajuan Proposal", icon: Handshake, group: "humas", roles: ["humas"] },
-  { key: "proposal-evaluasi", label: "Cetak Form Evaluasi",      icon: FileText,  group: "humas", roles: ["humas"] },
-  { key: "konten",            label: "Pengelolaan Komunikasi",   icon: Megaphone, group: "humas", roles: ["humas"] },
+  { key: "dashboard",       label: "Dashboard", icon: LayoutDashboard, roles: ["humas"] },
+  { key: "asman-dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["asman"] },
+  { key: "madm-dashboard",  label: "Dashboard", icon: LayoutDashboard, roles: ["madm"] },
+  { key: "inbox",           label: "Inbox Paket Kas",     icon: Inbox,      roles: ["asman", "madm"] },
+  { key: "inbox-evaluasi",  label: "Inbox Form Evaluasi", icon: FileSearch, roles: ["asman", "madm"] },
 
-  { key: "rab",      label: "RAB & Jenis Paket", icon: FileSpreadsheet, group: "perencanaan", roles: ["humas"] },
-  { key: "tor",      label: "TOR",               icon: FileText,        group: "perencanaan", roles: ["humas"] },
   {
-    key: "kategori", label: "Kategori", icon: Tags, group: "perencanaan", roles: ["humas"],
+    key: "grp-proposal", label: "Proposal & Publikasi", icon: Handshake, roles: ["humas"],
     children: [
-      { key: "kategori-npo", label: "NON PO" },
-      { key: "kategori-po",  label: "PO" },
-      { key: "kategori-cc",  label: "Cash Card" },
+      { key: "proposal-rekap",    label: "Rekap Pengajuan Proposal", icon: Handshake },
+      { key: "proposal-evaluasi", label: "Form Evaluasi",            icon: FileText },
+      { key: "konten",            label: "Pengelolaan Komunikasi",   icon: Megaphone },
     ],
   },
 
-  { key: "dokumentasi",   label: "Dokumentasi",    icon: Camera,     group: "pelaksanaan", roles: ["humas"] },
-  { key: "daftar-hadir",  label: "Daftar Hadir",   icon: Users,      group: "pelaksanaan", roles: ["humas"] },
-  { key: "eviden",        label: "Eviden Lainnya",  icon: Paperclip,  group: "pelaksanaan", roles: ["humas"] },
+  {
+    key: "grp-perencanaan", label: "Perencanaan & Anggaran", icon: FileSpreadsheet, roles: ["humas"],
+    children: [
+      { key: "rab", label: "RAB", icon: FileSpreadsheet },
+      { key: "tor", label: "TOR", icon: FileText },
+    ],
+  },
 
-  { key: "bast",              label: "BAST",                icon: ClipboardList,   group: "pembayaran", roles: ["humas"] },
-  { key: "bapp",              label: "BAPP",                icon: FileCheck,       group: "pembayaran", roles: ["humas"] },
-  { key: "pakta",             label: "PI",                  icon: ShieldCheck,     group: "pembayaran", roles: ["humas"] },
-  { key: "checklist-dokumen", label: "Checklist Dokumen",   icon: CheckSquare,     group: "pembayaran", roles: ["humas"] },
-  { key: "proposal-evaluasi-pembayaran", label: "Form Evaluasi", icon: FileSearch, group: "pembayaran", roles: ["humas"] },
-  { key: "form-verifikasi",  label: "Form Verifikasi",      icon: FilePlus,        group: "pembayaran", roles: ["humas"] },
-  { key: "lampiran-1",       label: "Lampiran 1 - Rincian Pekerjaan", icon: FileText, group: "pembayaran", roles: ["humas"] },
-  { key: "lampiran-2",       label: "Lampiran 2 - Checklist",         icon: CheckSquare, group: "pembayaran", roles: ["humas"] },
+  {
+    key: "grp-pelaksanaan", label: "Pelaksanaan", icon: Camera, roles: ["humas"],
+    children: [
+      { key: "dokumentasi",  label: "Dokumentasi",  icon: Camera },
+      { key: "daftar-hadir", label: "Daftar Hadir", icon: Users },
+    ],
+  },
 
-  { key: "paket-kas", label: "Paket Kas (Kirim ke Asman)", icon: FolderCheck,     group: "administrasi", roles: ["humas"] },
-  { key: "laporan",   label: "Laporan",                    icon: FileText,        group: "administrasi", roles: ["humas"] },
-  { key: "vendor",    label: "Vendor",                     icon: Building2,       group: "administrasi", roles: ["humas"] },
+  {
+    key: "grp-pembayaran", label: "Pembayaran", icon: ClipboardList, roles: ["humas"],
+    children: [
+      {
+        key: "grp-pembayaran-nonpo", label: "NON PO", icon: FileText,
+        children: [
+          { key: "lmp1-nonpo",            label: "LMP 1",           icon: FileText },
+          { key: "lmp2-nonpo",            label: "LMP 2",           icon: FileText },
+          { key: "bast-nonpo",            label: "BAST",            icon: ClipboardList },
+          { key: "form-verifikasi-nonpo", label: "Form Verifikasi", icon: FilePlus },
+          { key: "pakta-nonpo",           label: "PI",              icon: ShieldCheck },
+          { key: "bapp-nonpo",            label: "BAPP",            icon: FileCheck },
+        ],
+      },
+      {
+        key: "grp-pembayaran-po", label: "PO", icon: FileText,
+        children: [
+          { key: "lmp1-po",            label: "LMP 1",           icon: FileText },
+          { key: "lmp2-po",            label: "LMP 2",           icon: FileText },
+          { key: "bast-po",            label: "BAST",            icon: ClipboardList },
+          { key: "form-verifikasi-po", label: "Form Verifikasi", icon: FilePlus },
+          { key: "pakta-po",           label: "PI",              icon: ShieldCheck },
+          { key: "bapp-po",            label: "BAPP",            icon: FileCheck },
+        ],
+      },
+      {
+        key: "grp-pembayaran-cc", label: "CC", icon: FileText,
+        children: [
+          { key: "lmp1-cc",            label: "LMP 1",           icon: FileText },
+          { key: "lmp2-cc",            label: "LMP 2",           icon: FileText },
+          { key: "bast-cc",            label: "BAST",            icon: ClipboardList },
+          { key: "form-verifikasi-cc", label: "Form Verifikasi", icon: FilePlus },
+          { key: "pakta-cc",           label: "PI",              icon: ShieldCheck },
+          { key: "bapp-cc",            label: "BAPP",            icon: FileCheck },
+        ],
+      },
+      { key: "checklist-dokumen", label: "Checklist Dokumen", icon: CheckSquare },
+    ],
+  },
 
-  { key: "history", label: "History", icon: Clock,       group: "master" },
-  { key: "panduan", label: "Panduan", icon: HelpCircle,  group: "master" },
+  {
+    key: "grp-rka", label: "Rekapitulasi Realisasi Anggaran", icon: BarChart3, roles: ["humas"],
+    children: [
+      { key: "rka",            label: "RKA",            icon: BarChart3 },
+      { key: "rekap-anggaran", label: "Rekap Anggaran", icon: BarChart3 },
+    ],
+  },
 
-  { key: "user-mgmt", label: "Manajemen Akses", icon: UserCog, group: "admin", roles: ["humas"], adminOnly: true },
+  {
+    key: "grp-administrasi", label: "Administrasi", icon: FolderCheck, roles: ["humas"],
+    children: [
+      { key: "paket-kas", label: "Paket Kas (Kirim ke Asman)", icon: FolderCheck },
+      {
+        key: "grp-laporan", label: "Laporan", icon: FileText,
+        children: [
+          { key: "laporan-nonpo", label: "NON PO", icon: FileText },
+          { key: "laporan-po",    label: "PO",      icon: FileText },
+          { key: "laporan-cc",    label: "CC",      icon: FileText },
+        ],
+      },
+      { key: "vendor", label: "Vendor", icon: Building2 },
+    ],
+  },
+
+  {
+    key: "grp-history", label: "History & Guide", icon: Clock,
+    children: [
+      { key: "history", label: "History", icon: Clock },
+      { key: "panduan", label: "Panduan", icon: HelpCircle },
+    ],
+  },
 ];
 
-export const MENU_GROUPS = [
-  { key: "admin", label: "Admin" },
-  { key: "utama", label: "Ringkasan" },
-  { key: "humas", label: "Humas & Publikasi" },
-  { key: "perencanaan", label: "Perencanaan & RAB" },
-  { key: "pelaksanaan", label: "Pelaksanaan" },
-  { key: "pembayaran", label: "Pembayaran" },
-  { key: "administrasi", label: "Administrasi" },
-  { key: "master", label: "Master & Bantuan" },
-];
+// Diturunkan otomatis dari MENU_TREE — dipakai di tempat-tempat yang butuh daftar
+// datar semua halaman (mis. lookup judul halaman aktif untuk breadcrumb Topbar).
+// Cukup ubah MENU_TREE di atas; MENU akan selalu ikut sinkron.
+function flattenMenuTree(nodes, acc = []) {
+  for (const node of nodes) {
+    if (node.children) {
+      flattenMenuTree(node.children, acc);
+    } else {
+      acc.push(node);
+    }
+  }
+  return acc;
+}
+export const MENU = flattenMenuTree(MENU_TREE);
 
 export const VENDOR_SEED = [
   { nama: "CV Cahaya Abadi", alamat: "Jl. Yos Sudarso No.12, Jakarta Utara" },

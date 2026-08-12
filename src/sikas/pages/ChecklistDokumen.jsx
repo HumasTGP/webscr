@@ -1,46 +1,70 @@
 import { useState } from "react";
-import { CheckSquare, Printer } from "lucide-react";
+import { CheckSquare, Plus, Printer, Trash2 } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { printChecklist } from "../../lib/utils";
+import { uid } from "../../lib/utils";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 
-const CHECKLIST_ITEMS = [
-  "RAB",
-  "TOR",
-  "BAST",
-  "BAPP",
-  "Pakta Integritas",
-  "Dokumentasi Kegiatan",
-  "Daftar Hadir",
-  "Form Evaluasi",
-  "Form Verifikasi",
-  "Lampiran 1 (Rincian Pekerjaan)",
-  "Lampiran 2 (Checklist)",
-  "Eviden Pendukung",
+const STANDAR_CHECKLIST_DOCS = [
+  "Surat Permohonan Pembayaran (SPP)",
+  "Kwitansi",
+  "Invoice",
+  "Faktur Pajak (FP)/Surat Keterangan Non PKP (bila tidak dapat menerbitkan FP)",
+  "Surat Pengukuhan Pengusaha Kena Pajak (bila ada FP)",
+  "NPWP (bila ada)/KTP (bila tidak ada NPWP)",
+  "Berita Acara Pemeriksaan Pekerjaan (BAPP)",
+  "Berita Acara Serah Terima Pekerjaan (BASTP)",
+  "Kontrak (PJ/SPK)",
+  "Laporan",
+  "Bank Garansi",
 ];
 
-export default function ChecklistDokumenPage({ rab, tor, bast, pakta, notify }) {
+export default function ChecklistDokumenPage({ rab, notify }) {
   const [checked, setChecked] = useState({});
+  const [lainnya, setLainnya] = useState({}); // { [rabId]: [{ id, nama, ada }] }
 
-  const toggle = (rabId, item) => {
+  const toggleStandar = (rabId, item) => {
     setChecked((prev) => {
       const key = `${rabId}::${item}`;
       return { ...prev, [key]: !prev[key] };
     });
   };
 
+  const addLainnya = (rabId) => {
+    setLainnya((prev) => ({
+      ...prev,
+      [rabId]: [...(prev[rabId] || []), { id: uid("CKL"), nama: "", ada: false }],
+    }));
+  };
+  const updateLainnya = (rabId, id, patch) => {
+    setLainnya((prev) => ({
+      ...prev,
+      [rabId]: (prev[rabId] || []).map((it) => (it.id === id ? { ...it, ...patch } : it)),
+    }));
+  };
+  const removeLainnya = (rabId, id) => {
+    setLainnya((prev) => ({
+      ...prev,
+      [rabId]: (prev[rabId] || []).filter((it) => it.id !== id),
+    }));
+  };
+
   const getProgress = (rabId) => {
-    const total = CHECKLIST_ITEMS.length;
-    const done = CHECKLIST_ITEMS.filter((item) => checked[`${rabId}::${item}`]).length;
-    return { total, done, pct: Math.round((done / total) * 100) };
+    const extra = lainnya[rabId] || [];
+    const total = STANDAR_CHECKLIST_DOCS.length + extra.length;
+    const doneStandar = STANDAR_CHECKLIST_DOCS.filter((item) => checked[`${rabId}::${item}`]).length;
+    const doneExtra = extra.filter((it) => it.ada).length;
+    const done = doneStandar + doneExtra;
+    return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
   };
 
   const handlePrint = (r) => {
-    const items = CHECKLIST_ITEMS.map((nama) => ({
-      nama,
-      ada: !!checked[`${r.idNumber}::${nama}`],
-    }));
+    const extra = lainnya[r.idNumber] || [];
+    const items = [
+      ...STANDAR_CHECKLIST_DOCS.map((nama) => ({ nama, ada: !!checked[`${r.idNumber}::${nama}`] })),
+      ...extra.filter((it) => it.nama.trim()).map((it) => ({ nama: it.nama, ada: it.ada })),
+    ];
     printChecklist({
       title: "Checklist Kelengkapan Dokumen",
       subtitle: `${r.idNumber} - ${r.judulKegiatan}`,
@@ -53,7 +77,7 @@ export default function ChecklistDokumenPage({ rab, tor, bast, pakta, notify }) 
       <PageHeader
         eyebrow="Pembayaran"
         title="Checklist Dokumen"
-        description="Periksa kelengkapan dokumen sebelum proses pembayaran."
+        description="Centang dokumen standar yang sudah tersedia sebelum proses pembayaran. Dokumen di luar daftar bisa ditambahkan lewat bagian Lainnya."
       />
 
       {(!rab || rab.length === 0) ? (
@@ -67,9 +91,10 @@ export default function ChecklistDokumenPage({ rab, tor, bast, pakta, notify }) 
           {rab.map((r) => {
             const progress = getProgress(r.idNumber);
             const complete = progress.done === progress.total;
+            const extra = lainnya[r.idNumber] || [];
             return (
               <Card key={r.idNumber}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
                   <div>
                     <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{r.idNumber}</div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: T.heading, marginTop: 2 }}>{r.judulKegiatan}</div>
@@ -100,14 +125,17 @@ export default function ChecklistDokumenPage({ rab, tor, bast, pakta, notify }) 
                   }} />
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 8 }}>
-                  {CHECKLIST_ITEMS.map((item) => {
+                <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>
+                  Dokumen Standar
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 8, marginBottom: 16 }}>
+                  {STANDAR_CHECKLIST_DOCS.map((item, i) => {
                     const key = `${r.idNumber}::${item}`;
                     const isChecked = !!checked[key];
                     return (
                       <button
                         key={item}
-                        onClick={() => toggle(r.idNumber, item)}
+                        onClick={() => toggleStandar(r.idNumber, item)}
                         style={{
                           display: "flex", alignItems: "center", gap: 10,
                           padding: "10px 12px", borderRadius: 8,
@@ -118,12 +146,65 @@ export default function ChecklistDokumenPage({ rab, tor, bast, pakta, notify }) 
                           fontWeight: isChecked ? 600 : 500,
                         }}
                       >
-                        <CheckSquare size={16} color={isChecked ? "#1E7F3E" : T.muted} />
-                        {item}
+                        <CheckSquare size={16} color={isChecked ? "#1E7F3E" : T.muted} style={{ flexShrink: 0 }} />
+                        <span>{i + 1}. {item}</span>
                       </button>
                     );
                   })}
                 </div>
+
+                <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>
+                  Lainnya (diisi manual)
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
+                  {extra.length === 0 && (
+                    <div style={{ padding: "12px 14px", border: `1px dashed ${T.border}`, borderRadius: 8, color: T.muted, fontSize: 12 }}>
+                      Belum ada dokumen tambahan.
+                    </div>
+                  )}
+                  {extra.map((it) => (
+                    <div key={it.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => updateLainnya(r.idNumber, it.id, { ada: !it.ada })}
+                        style={{
+                          flexShrink: 0, width: 24, height: 24, borderRadius: 6,
+                          border: `1px solid ${it.ada ? "#1E7F3E" : T.border}`,
+                          background: it.ada ? "#DEF6E5" : T.card,
+                          display: "grid", placeItems: "center", cursor: "pointer",
+                        }}
+                      >
+                        {it.ada && <CheckSquare size={13} color="#1E7F3E" />}
+                      </button>
+                      <input
+                        value={it.nama}
+                        onChange={(e) => updateLainnya(r.idNumber, it.id, { nama: e.target.value })}
+                        placeholder="Nama dokumen lainnya…"
+                        style={{
+                          flex: 1, padding: "8px 10px", borderRadius: 7,
+                          border: `1px solid ${T.border}`, background: T.card, color: T.text, fontSize: 12.5,
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeLainnya(r.idNumber, it.id)}
+                        style={{ flexShrink: 0, border: "none", background: "transparent", color: T.danger, cursor: "pointer", padding: 4 }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => addLainnya(r.idNumber)}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`,
+                    background: T.bg, color: T.text, cursor: "pointer", fontSize: 12, fontWeight: 600,
+                  }}
+                >
+                  <Plus size={13} /> Tambah dokumen lainnya
+                </button>
               </Card>
             );
           })}

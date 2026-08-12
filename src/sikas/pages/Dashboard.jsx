@@ -154,16 +154,6 @@ function Pipeline({ counts, goto }) {
             <div style={{ fontSize: 11, color: T.muted, letterSpacing: 0.3 }}>
               {n.label}
             </div>
-            <div
-              style={{
-                fontFamily: font.display,
-                fontSize: 20,
-                color: T.heading,
-                lineHeight: 1,
-              }}
-            >
-              {n.value}
-            </div>
             {i < nodes.length - 1 && (
               <ArrowRight
                 size={14}
@@ -431,25 +421,6 @@ export default function Dashboard({ data, goto, user }) {
           borderBottom: `1px solid ${T.border}`,
         }}
       >
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "3px 10px",
-            borderRadius: 999,
-            background: T.blueSoft,
-            color: T.blue,
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: 0.8,
-            textTransform: "uppercase",
-            fontFamily: font.mono,
-            marginBottom: 6,
-          }}
-        >
-          <Sparkles size={11} /> UBP Priok - TJSL
-        </div>
         <h1
           style={{
             fontFamily: font.display,
@@ -465,16 +436,6 @@ export default function Dashboard({ data, goto, user }) {
         <div style={{ marginTop: 8 }}>
           <LiveClock />
         </div>
-        <p
-          style={{
-            color: T.muted,
-            fontSize: 13,
-            margin: "4px 0 0",
-          }}
-        >
-          {kontenPerluAksi} konten menunggu terbit,{" "}
-          {proposalCounts.baru} proposal baru masuk.
-        </p>
       </div>
 
       {/* Stakeholder + Konten tiles */}
@@ -482,7 +443,7 @@ export default function Dashboard({ data, goto, user }) {
         className="stat-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
           gap: 12,
           marginBottom: 20,
         }}
@@ -505,12 +466,6 @@ export default function Dashboard({ data, goto, user }) {
           value={data.rab.length}
           label="RAB diajukan"
           onClick={() => goto("rab")}
-        />
-        <Tile
-          icon={FileText}
-          value={data.laporan.length}
-          label="Laporan realisasi"
-          onClick={() => goto("laporan")}
         />
       </div>
 
@@ -535,7 +490,6 @@ export default function Dashboard({ data, goto, user }) {
             Alur Kerja SIKAS
           </h3>
           <span style={{ fontSize: 11.5, color: T.muted }}>
-            proposal → administrasi kas → realisasi
           </span>
         </div>
         <Pipeline

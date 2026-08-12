@@ -38,6 +38,7 @@ import ProposalRekapPage from "./sikas/pages/ProposalRekap";
 import ProposalEvaluasiPage from "./sikas/pages/ProposalEvaluasi";
 import PengelolaanKomunikasi from "./sikas/pages/PengelolaanKomunikasi";
 import InboxPage from "./sikas/pages/Inbox";
+import InboxEvaluasiPage from "./sikas/pages/InboxEvaluasi";
 import AsmanDashboard from "./sikas/asman/pages/AsmanDashboard";
 import MadmDashboard from "./sikas/madm/pages/MadmDashboard";
 import KasPackagesPage from "./sikas/pages/KasPackages";
@@ -53,6 +54,8 @@ import ChecklistDokumenPage from "./sikas/pages/ChecklistDokumen";
 import FormVerifikasiPage from "./sikas/pages/FormVerifikasi";
 import Lampiran1Page from "./sikas/pages/Lampiran1";
 import Lampiran2Page from "./sikas/pages/Lampiran2";
+import RkaPage from "./sikas/pages/RkaPage";
+import RekapAnggaranPage from "./sikas/pages/RekapAnggaranPage";
 import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
 
 const seed = (prefix, rows) =>
@@ -159,6 +162,7 @@ export default function App() {
   const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [bapp, setBapp] = useState([]);
   const [laporan, setLaporan] = useState([]);
+  const [rka, setRka] = useState([]);
 
   const USERS_LS_KEY = "sikas.users.v1";
   const [users, setUsers] = useState(() => {
@@ -228,6 +232,9 @@ export default function App() {
   const updatePackage = (idRab, patch) => {
     setPackages((prev) => prev.map((p) => (p.idRab === idRab ? { ...p, ...patch } : p)));
   };
+  const updateEvaluasi = (id, patch) => {
+    setEvaluasi((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
+  };
   const upsertPackage = (idRab, patch) => {
     setPackages((prev) => {
       const found = prev.some((p) => p.idRab === idRab);
@@ -237,6 +244,19 @@ export default function App() {
   };
 
   const rabIdOptions = useMemo(() => rab.map((r) => r.idNumber), [rab]);
+
+  // Data per kategori — dipakai buat 3 varian menu Pembayaran & Laporan
+  // (NON PO / PO / Cash Card) yang masing-masing berdiri sendiri di sidebar.
+  const rabByKategori = useMemo(() => ({
+    "NON PO": rab.filter((r) => r.kategori === "NON PO"),
+    "PO": rab.filter((r) => r.kategori === "PO"),
+    "Cash Card": rab.filter((r) => r.kategori === "Cash Card"),
+  }), [rab]);
+  const rabIdOptionsByKategori = useMemo(() => ({
+    "NON PO": rabByKategori["NON PO"].map((r) => r.idNumber),
+    "PO": rabByKategori["PO"].map((r) => r.idNumber),
+    "Cash Card": rabByKategori["Cash Card"].map((r) => r.idNumber),
+  }), [rabByKategori]);
 
   const handleBackToPortal = () => {
     setUser(null);
@@ -292,8 +312,17 @@ export default function App() {
           pdfEnabled
           docxTemplate={DOCX_TEMPLATES.tor}
           buildDocPreview={(v) => <TorDocPreview values={v} />}
+          hideIdSelector
           columns={[
             { key: "id", label: "ID TOR" },
+            {
+              key: "tanggalInput",
+              label: "Tanggal Input",
+              render: (r) =>
+                r.tanggalInput
+                  ? new Date(r.tanggalInput).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
+                  : "-",
+            },
             { key: "kategori", label: "Kategori" },
             { key: "judulKegiatan", label: "Judul Kegiatan" },
             { key: "tempat", label: "Tempat" },
@@ -301,81 +330,65 @@ export default function App() {
           ]}
         />
       ),
-      bast: (
+      "laporan-nonpo": (
         <GenericWizard
-          title="BAST"
-          eyebrow="Modul BAST"
-          description="Berita Acara Serah Terima. Kategori (NON PO / Cash Card) otomatis mengikuti ID RAB yang dipilih."
-          buildFields={bastFields(rabIdOptions)}
-          idPrefix="BAST"
-          autoFrom={{ key: "id", source: rab, map: autoFromRab.bast }}
-          list={bast}
-          setList={setBast}
-          notify={notify}
-          pdfEnabled
-          docxTemplate={DOCX_TEMPLATES.bast}
-          buildDocPreview={(v) => <BastDocPreview values={v} />}
-          columns={[
-            { key: "id", label: "ID" },
-            { key: "kategori", label: "Kategori" },
-            { key: "nomor", label: "Nomor" },
-            { key: "jumlahBantuan", label: "Jumlah Bantuan" },
-          ]}
-        />
-      ),
-      pakta: (
-        <GenericWizard
-          title="Pakta Integritas"
-          eyebrow="Modul Pakta Integritas"
-          description="Pakta Integritas penerima bantuan. Kategori (NON PO / Cash Card) otomatis mengikuti ID RAB yang dipilih."
-          buildFields={paktaFields(rabIdOptions)}
-          idPrefix="PI"
-          autoFrom={{ key: "id", source: rab, map: autoFromRab.pakta }}
-          list={pakta}
-          setList={setPakta}
-          notify={notify}
-          pdfEnabled
-          docxTemplate={DOCX_TEMPLATES.pakta}
-          buildDocPreview={(v) => <PaktaDocPreview values={v} />}
-          columns={[
-            { key: "id", label: "ID" },
-            { key: "kategori", label: "Kategori" },
-            { key: "namaPenerima", label: "Nama Penerima" },
-            { key: "lembagaPenerima", label: "Lembaga" },
-          ]}
-        />
-      ),
-      bapp: (
-        <BappPage
-          rab={rab}
-          list={bapp}
-          setList={setBapp}
-          notify={notify}
-        />
-      ),
-      laporan: (
-        <GenericWizard
-          title="Laporan"
+          title="Laporan - NON PO"
           eyebrow="Modul Laporan"
-          description="Laporan realisasi bantuan, CC atau NON PO."
-          opsiOptions={["Laporan CC", "Laporan NON PO"]}
-          opsiLabel="Opsi: Laporan CC / Laporan NON PO"
-          confirmOpsi
-          buildFields={laporanFields(rabIdOptions)}
+          description="Laporan realisasi bantuan untuk pengajuan kategori NON PO."
+          buildFields={laporanFields(rabIdOptionsByKategori["NON PO"])}
           idPrefix="LAP"
           autoFrom={{ key: "id", source: rab, map: autoFromRab.laporan }}
-          list={laporan}
+          list={laporan.filter((l) => l.kategori === "NON PO")}
           setList={setLaporan}
           notify={notify}
           pdfEnabled
           columns={[
             { key: "id", label: "ID Laporan" },
-            { key: "opsi", label: "Jenis" },
             { key: "namaBarang", label: "Nama Barang" },
             { key: "namaInstansiPenerima", label: "Instansi Penerima" },
           ]}
         />
       ),
+      "laporan-po": (
+        <GenericWizard
+          title="Laporan - PO"
+          eyebrow="Modul Laporan"
+          description="Laporan realisasi bantuan untuk pengajuan kategori PO."
+          buildFields={laporanFields(rabIdOptionsByKategori["PO"])}
+          idPrefix="LAP"
+          autoFrom={{ key: "id", source: rab, map: autoFromRab.laporan }}
+          list={laporan.filter((l) => l.kategori === "PO")}
+          setList={setLaporan}
+          notify={notify}
+          pdfEnabled
+          columns={[
+            { key: "id", label: "ID Laporan" },
+            { key: "namaBarang", label: "Nama Barang" },
+            { key: "namaInstansiPenerima", label: "Instansi Penerima" },
+          ]}
+        />
+      ),
+      "laporan-cc": (
+        <GenericWizard
+          title="Laporan - CC"
+          eyebrow="Modul Laporan"
+          description="Laporan realisasi bantuan untuk pengajuan kategori Cash Card."
+          buildFields={laporanFields(rabIdOptionsByKategori["Cash Card"])}
+          idPrefix="LAP"
+          autoFrom={{ key: "id", source: rab, map: autoFromRab.laporan }}
+          list={laporan.filter((l) => l.kategori === "Cash Card")}
+          setList={setLaporan}
+          notify={notify}
+          pdfEnabled
+          columns={[
+            { key: "id", label: "ID Laporan" },
+            { key: "namaBarang", label: "Nama Barang" },
+            { key: "namaInstansiPenerima", label: "Instansi Penerima" },
+          ]}
+        />
+      ),
+      rka: <RkaPage rka={rka} setRka={setRka} notify={notify} />,
+      "rekap-anggaran": <RekapAnggaranPage rka={rka} rab={rab} laporan={laporan} />,
       vendor: (
         <VendorPage vendors={vendors} setVendors={setVendors} notify={notify} />
       ),
@@ -388,11 +401,19 @@ export default function App() {
           notify={notify}
         />
       ),
+      "inbox-evaluasi": (
+        <InboxEvaluasiPage
+          user={user}
+          evaluasiList={evaluasi}
+          onUpdateEvaluasi={updateEvaluasi}
+          notify={notify}
+        />
+      ),
       "asman-dashboard": (
-        <AsmanDashboard user={user} packages={packages} goto={setActive} />
+        <AsmanDashboard user={user} packages={packages} evaluasiList={evaluasi} goto={setActive} />
       ),
       "madm-dashboard": (
-        <MadmDashboard user={user} packages={packages} goto={setActive} />
+        <MadmDashboard user={user} packages={packages} evaluasiList={evaluasi} goto={setActive} />
       ),
       "paket-kas": (
         <KasPackagesPage
@@ -410,6 +431,76 @@ export default function App() {
           notify={notify}
         />
       ),
+      ...(() => {
+        const kategoriList = [
+          { suffix: "nonpo", kategori: "NON PO" },
+          { suffix: "po", kategori: "PO" },
+          { suffix: "cc", kategori: "Cash Card" },
+        ];
+        const routes = {};
+        kategoriList.forEach(({ suffix, kategori }) => {
+          routes[`bast-${suffix}`] = (
+            <GenericWizard
+              title={`BAST - ${kategori}`}
+              eyebrow="Modul BAST"
+              description={`Berita Acara Serah Terima untuk pengajuan kategori ${kategori}.`}
+              buildFields={bastFields(rabIdOptionsByKategori[kategori])}
+              idPrefix="BAST"
+              autoFrom={{ key: "id", source: rab, map: autoFromRab.bast }}
+              list={bast.filter((b) => b.kategori === kategori)}
+              setList={setBast}
+              notify={notify}
+              pdfEnabled
+              docxTemplate={DOCX_TEMPLATES.bast}
+              buildDocPreview={(v) => <BastDocPreview values={v} />}
+              columns={[
+                { key: "id", label: "ID" },
+                { key: "nomor", label: "Nomor" },
+                { key: "jumlahBantuan", label: "Jumlah Bantuan" },
+              ]}
+            />
+          );
+          routes[`pakta-${suffix}`] = (
+            <GenericWizard
+              title={`Pakta Integritas - ${kategori}`}
+              eyebrow="Modul Pakta Integritas"
+              description={`Pakta Integritas penerima bantuan untuk pengajuan kategori ${kategori}.`}
+              buildFields={paktaFields(rabIdOptionsByKategori[kategori])}
+              idPrefix="PI"
+              autoFrom={{ key: "id", source: rab, map: autoFromRab.pakta }}
+              list={pakta.filter((p) => p.kategori === kategori)}
+              setList={setPakta}
+              notify={notify}
+              pdfEnabled
+              docxTemplate={DOCX_TEMPLATES.pakta}
+              buildDocPreview={(v) => <PaktaDocPreview values={v} />}
+              columns={[
+                { key: "id", label: "ID" },
+                { key: "namaPenerima", label: "Nama Penerima" },
+                { key: "lembagaPenerima", label: "Lembaga" },
+              ]}
+            />
+          );
+          routes[`bapp-${suffix}`] = (
+            <BappPage
+              rab={rabByKategori[kategori]}
+              list={bapp.filter((b) => b.kategori === kategori)}
+              setList={setBapp}
+              notify={notify}
+            />
+          );
+          routes[`form-verifikasi-${suffix}`] = (
+            <FormVerifikasiPage rab={rabByKategori[kategori]} notify={notify} />
+          );
+          routes[`lmp1-${suffix}`] = (
+            <Lampiran1Page rab={rabByKategori[kategori]} notify={notify} />
+          );
+          routes[`lmp2-${suffix}`] = (
+            <Lampiran2Page rab={rabByKategori[kategori]} notify={notify} />
+          );
+        });
+        return routes;
+      })(),
       dokumentasi: <DokumentasiPage rab={rab} notify={notify} />,
       "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
       eviden: <EvidenPage rab={rab} notify={notify} />,
@@ -422,9 +513,6 @@ export default function App() {
           notify={notify}
         />
       ),
-      "form-verifikasi": <FormVerifikasiPage rab={rab} notify={notify} />,
-      "lampiran-1": <Lampiran1Page rab={rab} notify={notify} />,
-      "lampiran-2": <Lampiran2Page rab={rab} notify={notify} />,
       history: <HistoryPage history={history} />,
       panduan: <Panduan />,
     }),
@@ -432,7 +520,8 @@ export default function App() {
     [
       user,
       rab, tor, bast, pakta, bapp, laporan, vendors, history,
-      proposals, konten, evaluasi, rabIdOptions, packages, users,
+      proposals, konten, evaluasi, rabIdOptions, packages, users, rka,
+      rabByKategori, rabIdOptionsByKategori,
     ]
   );
 
@@ -528,6 +617,10 @@ export default function App() {
         onBackToPortal={handleBackToPortal}
         collapsed={collapsed}
         setCollapsed={setCollapsed}
+        themeMode={themeMode}
+        onToggleTheme={() =>
+          setThemeMode((m) => (m === "dark" ? "light" : "dark"))
+        }
       />
       <div
         style={{

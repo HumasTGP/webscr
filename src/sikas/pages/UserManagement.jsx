@@ -35,12 +35,10 @@ function RolePill({ role }) {
 function StatusPill({ user }) {
   const t = localDateStr();
   let label, color, bg;
-  if (user.activeFrom && t < user.activeFrom) {
-    label = "Belum Aktif"; color = "#8A6D00"; bg = "#FFF4D0";
-  } else if (user.activeTo && t > user.activeTo) {
-    label = "Kadaluarsa"; color = "#B01818"; bg = "#FCE1E1";
-  } else {
+  if (isUserActive(user)) {
     label = "Aktif"; color = "#1E7F3E"; bg = "#DEF6E5";
+  } else {
+    label = "Non-Aktif"; color = "#B01818"; bg = "#FCE1E1";
   }
   return (
     <span style={{
@@ -207,6 +205,13 @@ export default function UserManagementPage({ users, setUsers, notify }) {
     return c;
   }, [users]);
 
+  const [statusFilter, setStatusFilter] = useState("all");
+  const filteredUsers = useMemo(() => {
+    if (statusFilter === "active") return users.filter((u) => isUserActive(u));
+    if (statusFilter === "inactive") return users.filter((u) => !isUserActive(u));
+    return users;
+  }, [users, statusFilter]);
+
   const openAdd = () => {
     setEditTarget(null);
     setFormOpen(true);
@@ -283,7 +288,6 @@ export default function UserManagementPage({ users, setUsers, notify }) {
       <PageHeader
         eyebrow="Admin Panel"
         title="Manajemen Akses"
-        description="Kelola username, password, dan rentang tanggal aktif untuk akun Humas, Asman, dan MADM. Akun di luar rentang tanggal aktif tidak bisa login."
         right={
           <Button icon={UserPlus} onClick={openAdd}>
             Tambah User
@@ -329,16 +333,48 @@ export default function UserManagementPage({ users, setUsers, notify }) {
           }}><ShieldAlert size={16} /></div>
           <div>
             <div style={{ fontSize: 10.5, letterSpacing: 1, textTransform: "uppercase",
-                          fontFamily: font.mono, color: T.muted }}>Belum/Kadaluarsa</div>
+                          fontFamily: font.mono, color: T.muted }}>Non-Aktif</div>
             <div style={{ fontFamily: font.display, fontSize: 20, color: T.heading }}>{stats.inactive}</div>
           </div>
         </Card>
       </div>
 
+      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+        {[
+          { key: "all", label: "Semua", count: stats.total },
+          { key: "active", label: "Aktif", count: stats.active },
+          { key: "inactive", label: "Non-Aktif", count: stats.inactive },
+        ].map((f) => {
+          const isActive = statusFilter === f.key;
+          return (
+            <button
+              key={f.key}
+              onClick={() => setStatusFilter(f.key)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "8px 14px", borderRadius: 999,
+                border: `1.5px solid ${isActive ? T.navy : T.border}`,
+                background: isActive ? T.blueSoft : T.card,
+                color: isActive ? T.navy : T.muted,
+                fontSize: 13, fontWeight: 600, cursor: "pointer",
+                transition: "border-color .15s ease, background-color .15s ease",
+              }}
+            >
+              {f.label}
+              <span style={{
+                fontFamily: font.mono, fontSize: 11, padding: "1px 7px",
+                borderRadius: 999, background: isActive ? "rgba(255,255,255,0.6)" : T.bg,
+              }}>{f.count}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <Card padded={false}>
         <DataTable
-          rows={users}
+          rows={filteredUsers}
           columns={columns}
+          searchable={false}
           emptyLabel="Belum ada akun terdaftar. Klik 'Tambah User' untuk menambah akses."
           onRowClick={openEdit}
         />

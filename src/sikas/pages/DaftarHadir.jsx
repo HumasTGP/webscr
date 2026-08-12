@@ -1,16 +1,37 @@
 import { useState } from "react";
-import { Users, Plus, Trash2, Printer } from "lucide-react";
+import { Eye, Plus, Printer, Trash2, Upload, Users } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { uid } from "../../lib/utils";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
+import UploadDocModal from "../../components/UploadDocModal";
 
 export default function DaftarHadirPage({ rab, notify }) {
   const [lists, setLists] = useState([]);
   const [showForm, setShowForm] = useState(null);
   const [formName, setFormName] = useState("");
   const [formInstansi, setFormInstansi] = useState("");
+  const [docs, setDocs] = useState([]);
+  const [showUpload, setShowUpload] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  const handleSaveDocs = (rabItem, files) => {
+    const newDocs = files.map((f) => ({
+      id: uid("DH-DOC"),
+      rabId: rabItem.idNumber,
+      fileName: f.name,
+      fileSize: f.size,
+      fileType: f.type,
+      url: URL.createObjectURL(f),
+    }));
+    setDocs((prev) => [...prev, ...newDocs]);
+    if (notify) notify(`${newDocs.length} file daftar hadir berhasil disimpan.`, "success", "Upload Daftar Hadir");
+  };
+  const handleDeleteDoc = (id) => {
+    setDocs((prev) => prev.filter((d) => d.id !== id));
+    if (notify) notify("File daftar hadir dihapus.", "success");
+  };
 
   const addEntry = (rabId) => {
     if (!formName.trim()) return;
@@ -88,12 +109,17 @@ export default function DaftarHadirPage({ rab, notify }) {
                     <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{r.idNumber}</div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: T.heading, marginTop: 2 }}>{r.judulKegiatan}</div>
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button onClick={() => setShowForm(showForm === r.idNumber ? null : r.idNumber)} style={{
                       display: "flex", alignItems: "center", gap: 6,
                       padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`,
                       background: T.card, color: T.blue, cursor: "pointer", fontSize: 12, fontWeight: 600,
                     }}><Plus size={14} /> Tambah</button>
+                    <button onClick={() => setShowUpload(r)} style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`,
+                      background: T.card, color: T.blue, cursor: "pointer", fontSize: 12, fontWeight: 600,
+                    }}><Upload size={14} /> Upload</button>
                     <button onClick={() => printList(r)} style={{
                       display: "flex", alignItems: "center", gap: 6,
                       padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`,
@@ -150,10 +176,70 @@ export default function DaftarHadirPage({ rab, notify }) {
                 <div style={{ fontSize: 11, color: T.muted, marginTop: 8 }}>
                   Total peserta: {entries.length}
                 </div>
+
+                {docs.filter((d) => d.rabId === r.idNumber).length > 0 && (
+                  <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px dashed ${T.border}` }}>
+                    <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>
+                      File Daftar Hadir Terupload
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10 }}>
+                      {docs.filter((d) => d.rabId === r.idNumber).map((d) => (
+                        <div key={d.id} style={{
+                          padding: "10px 12px", borderRadius: 8,
+                          border: `1px solid ${T.border}`, background: T.bg,
+                          display: "flex", alignItems: "center", gap: 10,
+                        }}>
+                          {d.fileType?.startsWith("image/") ? (
+                            <img src={d.url} alt={d.fileName} style={{ width: 34, height: 34, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
+                          ) : (
+                            <Users size={16} color={T.muted} style={{ flexShrink: 0 }} />
+                          )}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{
+                              fontSize: 12.5, fontWeight: 600, color: T.heading,
+                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                            }}>{d.fileName}</div>
+                            <div style={{ fontSize: 10.5, color: T.muted }}>{(d.fileSize / 1024).toFixed(1)} KB</div>
+                          </div>
+                          <button onClick={() => setPreview(d)} title="Lihat" style={{
+                            background: "transparent", border: "none", color: T.blue, cursor: "pointer", padding: 4,
+                          }}><Eye size={14} /></button>
+                          <button onClick={() => handleDeleteDoc(d.id)} title="Hapus" style={{
+                            background: "transparent", border: "none", color: T.danger, cursor: "pointer", padding: 4,
+                          }}><Trash2 size={14} /></button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </Card>
             );
           })}
         </div>
+      )}
+
+      <UploadDocModal
+        open={!!showUpload}
+        onClose={() => setShowUpload(null)}
+        title={showUpload ? `Upload Daftar Hadir - ${showUpload.idNumber}` : ""}
+        subtitle={showUpload?.judulKegiatan}
+        accept="image/*,.pdf,.doc,.docx"
+        onSave={(files) => handleSaveDocs(showUpload, files)}
+      />
+
+      {preview && (
+        <Modal open onClose={() => setPreview(null)} title={preview.fileName} icon={Eye} width={600}>
+          {preview.fileType && preview.fileType.startsWith("image/") ? (
+            <img src={preview.url} alt={preview.fileName} style={{ width: "100%", borderRadius: 8 }} />
+          ) : (
+            <div style={{ textAlign: "center", padding: "32px 0", color: T.muted }}>
+              <p>Preview tidak tersedia untuk tipe file ini.</p>
+              <a href={preview.url} download={preview.fileName} style={{ color: T.blue, fontWeight: 600 }}>
+                Download file
+              </a>
+            </div>
+          )}
+        </Modal>
       )}
     </div>
   );
