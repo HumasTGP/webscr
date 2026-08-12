@@ -40,22 +40,26 @@ export default function GlassLoginShell({
           <button type="button" className="gl-back-btn" onClick={onBack}>
             <ArrowLeft size={18} /> Kembali ke Beranda
           </button>
-          <div className="gl-title">{title}</div>
-          <div className="gl-subtitle">{subtitle}</div>
+          <div className="gl-login-heading">
+            <div className="gl-mini-brand">{visualTitle}</div>
+            <div className="gl-title">{title}</div>
+            <div className="gl-subtitle">{subtitle}</div>
+          </div>
           {children}
         </div>
 
         <div className="gl-visual-panel">
+          <div className="gl-visual-glow" aria-hidden="true" />
           <div className="gl-visual-icon">
             {appLogo ? <img className="gl-app-logo" src={appLogo} alt={visualTitle} /> : illustration}
           </div>
           <div className="gl-brand-title">{visualTitle}</div>
           {roleLabel && <div className="gl-role-pill">{roleLabel}</div>}
-          <div className="gl-yellow-line" />
+          <p className="gl-visual-copy">Akses sistem secara aman melalui Portal Digital PLN Indonesia Power UBP Priok.</p>
         </div>
       </div>
 
-      <footer className="gl-footer">© 2026 PLN Indonesia Power. All rights reserved.</footer>
+      <footer className="gl-footer">© 2026 PLN Indonesia Power</footer>
     </div>
   );
 }
