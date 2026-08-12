@@ -28,7 +28,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           git mv src/sikas src/sakti
           git mv src/pengajuan-mitra src/gandeng
           git mv src/silapak-priok src/si-lapak-priok
@@ -62,56 +61,60 @@ jobs:
           git mv src/assets/silapak-logo.svg src/assets/si-lapak-priok-logo.svg
           git mv src/lib/silapakData.js src/lib/siLapakPriokData.js
 
-          grep -RIl 'sikas/' src | xargs -r sed -i 's#sikas/#sakti/#g'
-          grep -RIl 'pengajuan-mitra/' src | xargs -r sed -i 's#pengajuan-mitra/#gandeng/#g'
-          grep -RIl 'silapak-priok/' src | xargs -r sed -i 's#silapak-priok/#si-lapak-priok/#g'
+          python3 <<'PY'
+          from pathlib import Path
 
-          for pair in \
-            'MitraSidebar:GandengSidebar' \
-            'MitraAccountManagement:GandengAccountManagement' \
-            'MitraApp:GandengApp' \
-            'MitraBantuan:GandengBantuan' \
-            'MitraDashboard:GandengDashboard' \
-            'MitraLogin:GandengLogin' \
-            'MitraTracking:GandengTracking' \
-            'PengajuanMitraPage:PengajuanGandengPage' \
-            'PengajuanMitra:PengajuanGandeng' \
-            '"./accounts":"./gandengAccounts"'; do
-            from="${pair%%:*}"; to="${pair#*:}"
-            grep -RIl "$from" src/gandeng src/App.jsx 2>/dev/null | xargs -r sed -i "s#$from#$to#g"
-          done
+          replacements = [
+              ('sikas/', 'sakti/'),
+              ('pengajuan-mitra/', 'gandeng/'),
+              ('silapak-priok/', 'si-lapak-priok/'),
+              ('MitraSidebar', 'GandengSidebar'),
+              ('MitraAccountManagement', 'GandengAccountManagement'),
+              ('MitraApp', 'GandengApp'),
+              ('MitraBantuan', 'GandengBantuan'),
+              ('MitraDashboard', 'GandengDashboard'),
+              ('MitraLogin', 'GandengLogin'),
+              ('MitraTracking', 'GandengTracking'),
+              ('PengajuanMitraPage', 'PengajuanGandengPage'),
+              ('PengajuanMitra', 'PengajuanGandeng'),
+              ('./accounts', './gandengAccounts'),
+              ('SilapakApp', 'SiLapakApp'),
+              ('SilapakBantuan', 'SiLapakBantuan'),
+              ('SilapakLogin', 'SiLapakLogin'),
+              ('SilapakMenu', 'SiLapakMenu'),
+              ('SilapakShell', 'SiLapakShell'),
+              ('SilapakSidebar', 'SiLapakSidebar'),
+              ('silapakData', 'siLapakPriokData'),
+              ('RabPage', 'RABPage'),
+              ('./sakti/pages/Rab', './sakti/pages/RAB'),
+              ('RkaPage', 'RKAPage'),
+              ('./sakti/pages/RkaPage', './sakti/pages/RKAPage'),
+              ('BappPage', 'BAPPPage'),
+              ('./sakti/pages/BappPage', './sakti/pages/BAPPPage'),
+              ('KasPackagesPage', 'PaketKasPage'),
+              ('./sakti/pages/KasPackages', './sakti/pages/PaketKas'),
+              ('UserManagementPage', 'ManajemenAksesPage'),
+              ('./sakti/pages/UserManagement', './sakti/pages/ManajemenAkses'),
+              ('MadmDashboard', 'MADMDashboard'),
+              ('./sakti/madm/pages/MadmDashboard', './sakti/madm/pages/MADMDashboard'),
+          ]
 
-          for pair in \
-            'SilapakApp:SiLapakApp' \
-            'SilapakBantuan:SiLapakBantuan' \
-            'SilapakLogin:SiLapakLogin' \
-            'SilapakMenu:SiLapakMenu' \
-            'SilapakShell:SiLapakShell' \
-            'SilapakSidebar:SiLapakSidebar' \
-            'silapakData:siLapakPriokData'; do
-            from="${pair%%:*}"; to="${pair#*:}"
-            grep -RIl "$from" src 2>/dev/null | xargs -r sed -i "s#$from#$to#g"
-          done
-
-          for pair in \
-            'RabPage:RABPage' \
-            '"./sakti/pages/Rab":"./sakti/pages/RAB"' \
-            'RkaPage:RKAPage' \
-            '"./sakti/pages/RkaPage":"./sakti/pages/RKAPage"' \
-            'BappPage:BAPPPage' \
-            '"./sakti/pages/BappPage":"./sakti/pages/BAPPPage"' \
-            'KasPackagesPage:PaketKasPage' \
-            '"./sakti/pages/KasPackages":"./sakti/pages/PaketKas"' \
-            'UserManagementPage:ManajemenAksesPage' \
-            '"./sakti/pages/UserManagement":"./sakti/pages/ManajemenAkses"' \
-            'MadmDashboard:MADMDashboard' \
-            '"./sakti/madm/pages/MadmDashboard":"./sakti/madm/pages/MADMDashboard"'; do
-            from="${pair%%:*}"; to="${pair#*:}"
-            grep -RIl "$from" src 2>/dev/null | xargs -r sed -i "s#$from#$to#g"
-          done
+          for p in Path('src').rglob('*'):
+              if not p.is_file() or p.suffix not in {'.js', '.jsx', '.css'}:
+                  continue
+              try:
+                  text = p.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              new = text
+              for old, repl in replacements:
+                  new = new.replace(old, repl)
+              if new != text:
+                  p.write_text(new, encoding='utf-8')
+          PY
 
           rm -f __noop__
-          if ! grep -RIl 'AutoLogo' src --exclude='AutoLogo.jsx' | grep -q .; then
+          if ! grep -RIl 'AutoLogo' src --exclude='AutoLogo.jsx' 2>/dev/null | grep -q .; then
             git rm -f src/components/AutoLogo.jsx
           fi
 
@@ -210,7 +213,11 @@ jobs:
           test -d src/sakti
           test -d src/gandeng
           test -d src/si-lapak-priok
-          ! find src -type f \( -iname '*sikas*' -o -iname '*mitra*' -o -iname '*silapak*' \) | grep -q .
+          if find src -type f \( -iname '*sikas*' -o -iname '*mitra*' -o -iname '*silapak*' \) | grep -q .; then
+            echo 'Legacy product filenames still found:'
+            find src -type f \( -iname '*sikas*' -o -iname '*mitra*' -o -iname '*silapak*' \)
+            exit 1
+          fi
 
       - name: Commit verified refactor
         shell: bash
