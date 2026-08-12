@@ -87,16 +87,22 @@ jobs:
               ('silapakData', 'siLapakPriokData'),
               ('RabPage', 'RABPage'),
               ('./sakti/pages/Rab', './sakti/pages/RAB'),
+              ('./Rab', './RAB'),
               ('RkaPage', 'RKAPage'),
               ('./sakti/pages/RkaPage', './sakti/pages/RKAPage'),
+              ('./RkaPage', './RKAPage'),
               ('BappPage', 'BAPPPage'),
               ('./sakti/pages/BappPage', './sakti/pages/BAPPPage'),
+              ('./BappPage', './BAPPPage'),
               ('KasPackagesPage', 'PaketKasPage'),
               ('./sakti/pages/KasPackages', './sakti/pages/PaketKas'),
+              ('./KasPackages', './PaketKas'),
               ('UserManagementPage', 'ManajemenAksesPage'),
               ('./sakti/pages/UserManagement', './sakti/pages/ManajemenAkses'),
+              ('./UserManagement', './ManajemenAkses'),
               ('MadmDashboard', 'MADMDashboard'),
               ('./sakti/madm/pages/MadmDashboard', './sakti/madm/pages/MADMDashboard'),
+              ('./MadmDashboard', './MADMDashboard'),
           ]
 
           for p in Path('src').rglob('*'):
