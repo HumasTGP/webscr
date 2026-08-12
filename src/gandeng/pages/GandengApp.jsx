@@ -38,16 +38,16 @@ export default function GandengApp({ mitraList, setMitraList, notify, onBackToPo
   const identityTitle = user?.isAdmin ? "Administrator GANDENG" : (user?.organization || user?.username || "Pengguna GANDENG");
 
   return (
-    <div className="gandeng-shell" style={{ "--blue":"#125AE8", "--navy":"#0B46C8", "--blue-soft":"#EAF1FF", "--danger":"#E53935", "--danger-soft":"#FDECEC" }}>
+    <div className="gandeng-shell" style={{ "--blue":"#CF0000", "--navy":"#A80000", "--blue-soft":"#FDEAEA", "--danger":"#CF0000", "--danger-soft":"#FDEAEA" }}>
       <header className="app-topbar gandeng-topbar" style={{ position:"sticky",top:0,zIndex:30,background:T.topbarBg,backdropFilter:"blur(8px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,minHeight:58,flexShrink:0 }}>
         <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0,flex:1}}>
-          <span className="hide-mobile" style={{fontSize:12.5,fontWeight:800,color:"#125AE8",whiteSpace:"nowrap"}}>GANDENG</span>
+          <span className="hide-mobile" style={{fontSize:12.5,fontWeight:800,color:"#CF0000",whiteSpace:"nowrap"}}>GANDENG</span>
           <ChevronRight size={13} color={T.muted} className="hide-mobile" />
           <span style={{fontSize:13,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{activeLabel}</span>
         </div>
 
         <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-          <div style={{width:30,height:30,borderRadius:"50%",background:"#125AE8",color:"#fff",display:"grid",placeItems:"center",fontWeight:800,fontSize:12,flexShrink:0}}>
+          <div style={{width:30,height:30,borderRadius:"50%",background:"#CF0000",color:"#fff",display:"grid",placeItems:"center",fontWeight:800,fontSize:12,flexShrink:0}}>
             {identityTitle.charAt(0).toUpperCase()}
           </div>
           <span className="hide-mobile" style={{fontSize:12.5,fontWeight:700,color:T.text,maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{identityTitle}</span>

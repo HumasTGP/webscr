@@ -1,316 +1,133 @@
 .gl-page {
+  width: 100%;
+  height: 100svh;
   min-height: 100svh;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 82px 24px 48px;
+  padding: clamp(64px, 9vh, 82px) 24px clamp(34px, 6vh, 48px);
   box-sizing: border-box;
   background: #eef4f9;
   color: #0f2b5b;
 }
-.gl-page::before {
-  content: "";
-  position: absolute;
-  inset: -32px;
-  background: var(--gl-background-image) center/cover no-repeat;
-  filter: blur(14px) saturate(.9);
-  transform: scale(1.08);
-}
-.gl-page::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(120deg, rgba(248,251,254,.94), rgba(239,246,251,.72) 50%, rgba(255,255,255,.58));
-  pointer-events: none;
-}
-.gl-top-brand {
-  position: absolute;
-  top: 22px;
-  left: clamp(24px, 4vw, 54px);
-  z-index: 3;
-  display: flex;
-  align-items: center;
-}
-.gl-top-brand img {
-  display: block;
-  width: clamp(170px, 15vw, 235px);
-  height: auto;
-  max-height: 60px;
-  object-fit: contain;
-  object-position: left center;
-}
-.gl-card {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
-  width: min(960px, 90vw);
-  min-height: 520px;
-  max-height: calc(100svh - 128px);
-  border-radius: 24px;
-  overflow: hidden;
-  background: rgba(255,255,255,.96);
-  border: 1px solid rgba(215,225,237,.9);
-  box-shadow: 0 24px 70px rgba(25, 57, 96, .18);
-}
-.gl-form-panel {
-  position: relative;
-  background: rgba(255,255,255,.985);
-  padding: 56px clamp(28px, 4vw, 48px) 28px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  overflow-y: auto;
-}
-.gl-login-heading { margin-bottom: 4px; }
-.gl-visual-panel {
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 72% 24%, rgba(255,255,255,.26), transparent 30%),
-    linear-gradient(145deg, color-mix(in srgb, var(--gl-accent) 92%, #0b2e64) 0%, var(--gl-accent) 58%, color-mix(in srgb, var(--gl-soft) 60%, #ffffff) 160%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 44px 32px;
-  box-sizing: border-box;
-  text-align: center;
-  color: #fff;
-}
-.gl-visual-panel--light {
-  background:
-    radial-gradient(circle at 72% 24%, rgba(255,255,255,.34), transparent 30%),
-    linear-gradient(145deg, #e8cf45 0%, #f3df69 52%, #d7bd31 115%);
-  color: #16335c;
-}
-.gl-visual-panel::before,
-.gl-visual-panel::after {
-  content: "";
-  position: absolute;
-  width: 340px;
-  height: 340px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.18);
-  pointer-events: none;
-}
-.gl-visual-panel--light::before,
-.gl-visual-panel--light::after { border-color: rgba(22,51,92,.12); }
-.gl-visual-panel::before { right: -150px; top: -130px; }
-.gl-visual-panel::after { left: -210px; bottom: -210px; }
-.gl-visual-glow {
-  position: absolute;
-  inset: auto -40px -70px auto;
-  width: 270px;
-  height: 270px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.12);
-  filter: blur(2px);
-}
-.gl-visual-panel--light .gl-visual-glow { background: rgba(255,255,255,.28); }
-.gl-back-btn {
-  position: absolute;
-  top: 26px;
-  left: clamp(28px, 3vw, 42px);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  background: transparent;
-  color: #37516f;
-  padding: 0;
-  font: inherit;
-  font-weight: 700;
-  font-size: 12.5px;
-  cursor: pointer;
-}
-.gl-title {
-  color: #112d55;
-  font-size: clamp(27px, 2.4vw, 34px);
-  line-height: 1.08;
-  letter-spacing: -.7px;
-  font-weight: 800;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-.gl-subtitle {
-  color: #617087;
-  font-size: 13px;
-  line-height: 1.5;
-  margin-bottom: 18px;
-  max-width: 520px;
-}
-.gl-field { position: relative; margin-bottom: 13px; }
-.gl-label {
-  display: block;
-  color: #253c5d;
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 5px;
-}
-.gl-input {
-  width: 100%;
-  height: 42px;
-  box-sizing: border-box;
-  border: 1px solid #d5deea;
-  border-radius: 11px;
-  background: #fbfdff;
-  padding: 0 15px;
-  color: #102f60;
-  font-size: 14px;
-  outline: none;
-  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
-}
-.gl-input:hover { background: #fff; }
-.gl-input.has-eye { padding-right: 46px; }
-.gl-input:focus { border-color: var(--gl-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gl-accent) 16%, transparent); background:#fff; }
-.gl-input::placeholder { color: #9aa8ba; }
-.gl-eye-btn {
-  position: absolute;
-  right: 11px;
-  bottom: 8px;
-  border: 0;
-  background: transparent;
-  color: #496887;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-}
-.gl-error {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 12px;
-  margin: -3px 0 12px;
-  border-radius: 9px;
-  border: 1px solid #f1b4b4;
-  background: #fff5f5;
-  color: #a51d1d;
-  font-size: 12px;
-}
-.gl-submit {
-  width: 100%;
-  height: 42px;
-  border: 0;
-  border-radius: 12px;
-  color: #fff;
-  background: var(--gl-accent);
-  box-shadow: 0 9px 20px color-mix(in srgb, var(--gl-accent) 26%, transparent);
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
-}
-.gl-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 26px color-mix(in srgb, var(--gl-accent) 30%, transparent); }
-.gl-submit:disabled { opacity: .62; cursor: wait; }
-.gl-forgot {
-  margin-top: 14px;
-  text-align: center;
-  color: #66758a;
-  font-size: 12.5px;
-}
-.gl-forgot a { color: var(--gl-accent); font-weight: 800; text-decoration: none; }
-.gl-visual-icon {
-  position: relative;
-  z-index: 1;
-  width: 138px;
-  height: 138px;
-  border-radius: 30px;
-  display: grid;
-  place-items: center;
-  background: rgba(255,255,255,.94);
-  box-shadow: 0 18px 46px rgba(0,0,0,.14), inset 0 0 0 1px rgba(255,255,255,.9);
-}
-.gl-visual-icon svg { width: 94px !important; height: 94px !important; }
-.gl-app-logo {
-  display: block;
-  width: 104px;
-  max-width: 78%;
-  max-height: 96px;
-  object-fit: contain;
-}
-.gl-brand-title {
-  position: relative;
-  z-index: 1;
-  margin-top: 24px;
-  color: #fff;
-  font-size: 23px;
-  font-weight: 800;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: .2px;
-}
-.gl-visual-panel--light .gl-brand-title,
-.gl-visual-panel--light .gl-visual-copy { color: #16335c; }
-.gl-role-pill {
-  position: relative;
-  z-index: 1;
-  margin-top: 9px;
-  min-width: 106px;
-  text-align: center;
-  color: var(--gl-accent);
-  background: rgba(255,255,255,.96);
-  border-radius: 18px;
-  padding: 6px 16px;
-  font-size: 12px;
-  font-weight: 800;
-}
-.gl-visual-copy {
-  position: relative;
-  z-index: 1;
-  max-width: 260px;
-  margin: 18px 0 0;
-  color: rgba(255,255,255,.86);
-  font-size: 11.5px;
-  line-height: 1.6;
-}
-.gl-footer {
-  position: absolute;
-  z-index: 3;
-  left: 0;
-  right: 0;
-  bottom: 14px;
-  text-align: center;
-  color: rgba(17,45,85,.62);
-  background: transparent;
-  font-size: 11.5px;
-  pointer-events: none;
-}
-.gl-role-tabs { display: none; }
+.gl-page::before { content:""; position:absolute; inset:-32px; background:var(--gl-background-image) center/cover no-repeat; filter:blur(14px) saturate(.9); transform:scale(1.08); }
+.gl-page::after { content:""; position:absolute; inset:0; background:linear-gradient(120deg,rgba(248,251,254,.94),rgba(239,246,251,.72) 50%,rgba(255,255,255,.58)); pointer-events:none; }
+.gl-top-brand { position:absolute; top:clamp(14px,2.6vh,22px); left:clamp(20px,4vw,54px); z-index:3; display:flex; align-items:center; }
+.gl-top-brand img { display:block; width:clamp(145px,15vw,235px); height:auto; max-height:clamp(44px,7vh,60px); object-fit:contain; object-position:left center; }
+.gl-card { position:relative; z-index:2; display:grid; grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr); width:min(960px,90vw); min-height:min(520px,calc(100svh - 126px)); max-height:calc(100svh - 108px); border-radius:24px; overflow:hidden; background:rgba(255,255,255,.96); border:1px solid rgba(215,225,237,.9); box-shadow:0 24px 70px rgba(25,57,96,.18); }
+.gl-form-panel { position:relative; background:rgba(255,255,255,.985); padding:clamp(54px,8vh,70px) clamp(28px,4vw,48px) clamp(22px,4vh,32px); display:flex; flex-direction:column; justify-content:center; min-width:0; overflow:hidden; box-sizing:border-box; }
+.gl-login-heading { margin-bottom:4px; }
+.gl-visual-panel { position:relative; overflow:hidden; background:radial-gradient(circle at 72% 24%,rgba(255,255,255,.26),transparent 30%),linear-gradient(145deg,color-mix(in srgb,var(--gl-accent) 92%,#0b2e64) 0%,var(--gl-accent) 58%,color-mix(in srgb,var(--gl-soft) 60%,#ffffff) 160%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:44px 32px; box-sizing:border-box; text-align:center; color:#fff; }
+.gl-visual-panel--light { background:radial-gradient(circle at 72% 24%,rgba(255,255,255,.24),transparent 30%),linear-gradient(145deg,#d4bd3e 0%,#e0c94f 52%,#bfa628 115%); color:#16335c; }
+.gl-visual-panel::before,.gl-visual-panel::after { content:""; position:absolute; width:340px; height:340px; border-radius:50%; border:1px solid rgba(255,255,255,.18); pointer-events:none; }
+.gl-visual-panel--light::before,.gl-visual-panel--light::after { border-color:rgba(22,51,92,.12); }
+.gl-visual-panel::before { right:-150px; top:-130px; }
+.gl-visual-panel::after { left:-210px; bottom:-210px; }
+.gl-visual-glow { position:absolute; inset:auto -40px -70px auto; width:270px; height:270px; border-radius:50%; background:rgba(255,255,255,.12); filter:blur(2px); }
+.gl-visual-panel--light .gl-visual-glow { background:rgba(255,255,255,.22); }
+.gl-back-btn { position:absolute; top:clamp(18px,3vh,26px); left:clamp(24px,3vw,42px); display:inline-flex; align-items:center; gap:8px; border:0; background:transparent; color:#37516f; padding:0; font:inherit; font-weight:700; font-size:12.5px; cursor:pointer; }
+.gl-title { color:#112d55; font-size:clamp(25px,2.4vw,34px); line-height:1.08; letter-spacing:-.7px; font-weight:800; margin-bottom:8px; text-transform:uppercase; }
+.gl-subtitle { color:#617087; font-size:clamp(11.5px,1.1vw,13px); line-height:1.45; margin-bottom:clamp(12px,2.4vh,18px); max-width:520px; }
+.gl-field { position:relative; margin-bottom:clamp(9px,1.8vh,13px); }
+.gl-label { display:block; color:#253c5d; font-size:12px; font-weight:700; margin-bottom:5px; }
+.gl-input { width:100%; height:clamp(38px,5.8vh,42px); box-sizing:border-box; border:1px solid #d5deea; border-radius:11px; background:#fbfdff; padding:0 15px; color:#102f60; font-size:14px; outline:none; transition:border-color .16s ease,box-shadow .16s ease,background .16s ease; }
+.gl-input:hover { background:#fff; }
+.gl-input.has-eye { padding-right:46px; }
+.gl-input:focus { border-color:var(--gl-accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--gl-accent) 16%,transparent); background:#fff; }
+.gl-input::placeholder { color:#9aa8ba; }
+.gl-eye-btn { position:absolute; right:10px; bottom:calc((clamp(38px,5.8vh,42px) - 30px)/2); width:30px; height:30px; border:0; border-radius:8px; background:transparent; color:#496887; cursor:pointer; padding:0; display:grid; place-items:center; }
+.gl-eye-btn:hover { background:#edf3f8; color:#173d68; }
+.gl-error { display:flex; align-items:center; gap:7px; padding:8px 11px; margin:-2px 0 10px; border-radius:9px; border:1px solid #f1b4b4; background:#fff5f5; color:#a51d1d; font-size:11.5px; }
+.gl-submit { width:100%; height:clamp(38px,5.8vh,42px); border:0; border-radius:12px; color:#fff; background:var(--gl-accent); box-shadow:0 9px 20px color-mix(in srgb,var(--gl-accent) 26%,transparent); font-size:14px; font-weight:800; cursor:pointer; text-transform:uppercase; transition:transform .12s ease,opacity .12s ease,box-shadow .12s ease; }
+.gl-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 26px color-mix(in srgb,var(--gl-accent) 30%,transparent)}
+.gl-submit:disabled{opacity:.62;cursor:wait}
+.gl-forgot { margin-top:clamp(9px,1.8vh,14px); text-align:center; color:#66758a; font-size:12.5px; }
+.gl-forgot a { color:var(--gl-accent); font-weight:800; text-decoration:none; }
+.gl-visual-icon { position:relative; z-index:1; width:clamp(108px,14vh,138px); height:clamp(108px,14vh,138px); border-radius:30px; display:grid; place-items:center; background:rgba(255,255,255,.94); box-shadow:0 18px 46px rgba(0,0,0,.14),inset 0 0 0 1px rgba(255,255,255,.9); }
+.gl-visual-icon svg { width:94px!important; height:94px!important; }
+.gl-app-logo { display:block; width:104px; max-width:78%; max-height:96px; object-fit:contain; }
+.gl-brand-title { position:relative; z-index:1; margin-top:clamp(16px,3vh,24px); color:#fff; font-size:23px; font-weight:800; text-align:center; text-transform:uppercase; letter-spacing:.2px; }
+.gl-visual-panel--light .gl-brand-title,.gl-visual-panel--light .gl-visual-copy { color:#16335c; }
+.gl-role-pill { position:relative; z-index:1; margin-top:9px; min-width:106px; text-align:center; color:var(--gl-accent); background:rgba(255,255,255,.96); border-radius:18px; padding:6px 16px; font-size:12px; font-weight:800; }
+.gl-visual-copy { position:relative; z-index:1; max-width:260px; margin:clamp(12px,2.4vh,18px) 0 0; color:rgba(255,255,255,.86); font-size:11.5px; line-height:1.55; }
+.gl-footer { position:absolute; z-index:3; left:0; right:0; bottom:clamp(6px,1.8vh,14px); text-align:center; color:rgba(17,45,85,.62); background:transparent; font-size:11.5px; pointer-events:none; }
+.gl-role-tabs{display:none}
 
-@media (max-height: 720px) and (min-width: 801px) {
-  .gl-page { padding-top: 70px; padding-bottom: 34px; }
-  .gl-card { min-height: 470px; max-height: calc(100svh - 100px); }
-  .gl-form-panel { padding-top: 62px; padding-bottom: 26px; }
-  .gl-visual-icon { width: 116px; height: 116px; }
-  .gl-brand-title { margin-top: 17px; }
-  .gl-visual-copy { margin-top: 12px; }
-  .gl-footer { bottom: 8px; }
+/* Longer account forms use the same shell without introducing a scrollbar. */
+.gl-page--compact .gl-card { min-height:0; height:min(580px,calc(100svh - 92px)); }
+.gl-page--compact .gl-form-panel { padding-top:52px; padding-bottom:18px; justify-content:center; }
+.gl-page--compact .gl-title { font-size:clamp(23px,2.1vw,30px); margin-bottom:5px; }
+.gl-page--compact .gl-subtitle { margin-bottom:10px; font-size:11.5px; }
+.gl-page--compact .gl-field { margin-bottom:8px; }
+.gl-page--compact .gl-input { height:36px; font-size:12.5px; border-radius:9px; }
+.gl-page--compact .gl-label { font-size:10.5px; margin-bottom:3px; }
+.gl-page--compact .gl-eye-btn { bottom:3px; }
+.gl-page--compact .gl-submit { height:37px; font-size:12.5px; }
+.gl-page--compact .gl-forgot { margin-top:8px; font-size:11px; }
+.gl-page--compact .gl-error { padding:6px 9px; margin:0 0 7px; font-size:10.5px; }
+
+@media(max-height:720px) and (min-width:801px){
+  .gl-page{padding-top:62px;padding-bottom:28px}
+  .gl-card{min-height:0;height:min(470px,calc(100svh - 82px));max-height:calc(100svh - 82px)}
+  .gl-form-panel{padding-top:54px;padding-bottom:18px}
+  .gl-title{font-size:clamp(23px,2.1vw,30px)}
+  .gl-subtitle{margin-bottom:10px}
+  .gl-field{margin-bottom:8px}
+  .gl-input,.gl-submit{height:36px}
+  .gl-eye-btn{bottom:3px}
+  .gl-visual-icon{width:104px;height:104px}
+  .gl-brand-title{margin-top:14px}
+  .gl-visual-copy{margin-top:10px}
+  .gl-footer{bottom:5px}
+  .gl-page--compact .gl-card{height:min(520px,calc(100svh - 72px));max-height:calc(100svh - 72px)}
+  .gl-page--compact .gl-form-panel{padding-top:46px;padding-bottom:12px}
+  .gl-page--compact .gl-field{margin-bottom:6px}
+  .gl-page--compact .gl-input{height:33px}
+  .gl-page--compact .gl-submit{height:34px}
+  .gl-page--compact .gl-eye-btn{bottom:1px}
 }
 
-@media (max-width: 800px) {
-  .gl-page { padding: 80px 15px 40px; align-items:flex-start; overflow-y:auto; }
-  .gl-top-brand { top: 18px; left: 20px; }
-  .gl-top-brand img { width: 160px; max-height: 50px; }
-  .gl-card { grid-template-columns: 1fr; min-height: auto; max-height:none; width: min(540px, 94vw); border-radius:20px; }
-  .gl-visual-panel { display: none; }
-  .gl-form-panel { padding: 60px 24px 28px; overflow:visible; }
-  .gl-back-btn { top:20px; left:24px; }
-  .gl-title { font-size: 28px; }
-  .gl-subtitle { font-size: 12.5px; margin-bottom: 16px; }
-  .gl-footer { position:relative; bottom:auto; margin-top:14px; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+@media(max-width:800px){
+  .gl-page{padding:68px 14px 30px;align-items:center;overflow:hidden}
+  .gl-top-brand{top:14px;left:18px}
+  .gl-top-brand img{width:145px;max-height:44px}
+  .gl-card{grid-template-columns:1fr;width:min(540px,94vw);height:auto;min-height:0;max-height:calc(100svh - 92px);border-radius:20px}
+  .gl-visual-panel{display:none}
+  .gl-form-panel{padding:56px 26px 24px;overflow:hidden;justify-content:center}
+  .gl-back-btn{top:18px;left:26px}
+  .gl-title{font-size:27px}
+  .gl-subtitle{font-size:12px;margin-bottom:14px}
+  .gl-footer{bottom:6px;font-size:10.5px}
+  .gl-page--compact .gl-card{height:auto;max-height:calc(100svh - 78px)}
+  .gl-page--compact .gl-form-panel{padding:48px 24px 16px}
 }
 
-@media (max-width: 430px) {
-  .gl-page { padding: 80px 12px 38px; }
-  .gl-top-brand { left:14px; }
-  .gl-top-brand img { width: 138px; }
-  .gl-form-panel { padding: 64px 20px 26px; }
-  .gl-title { font-size: 25px; letter-spacing:-.4px; }
-  .gl-subtitle { margin-bottom:20px; }
-  .gl-card { width:100%; }
+@media(max-width:430px){
+  .gl-page{padding:62px 10px 26px}
+  .gl-top-brand{left:12px;top:12px}
+  .gl-top-brand img{width:124px;max-height:38px}
+  .gl-card{width:100%;border-radius:17px;max-height:calc(100svh - 76px)}
+  .gl-form-panel{padding:50px 18px 20px}
+  .gl-back-btn{left:18px;top:16px;font-size:11.5px}
+  .gl-title{font-size:23px;letter-spacing:-.35px}
+  .gl-subtitle{margin-bottom:12px}
+  .gl-field{margin-bottom:9px}
+  .gl-input,.gl-submit{height:36px;font-size:12.5px}
+  .gl-eye-btn{bottom:3px}
+  .gl-page--compact .gl-form-panel{padding:44px 16px 12px}
+  .gl-page--compact .gl-title{font-size:21px}
+  .gl-page--compact .gl-subtitle{font-size:10.5px;margin-bottom:7px}
+  .gl-page--compact .gl-field{margin-bottom:5px}
+  .gl-page--compact .gl-input{height:31px;font-size:11px;padding:0 11px}
+  .gl-page--compact .gl-label{font-size:9.5px;margin-bottom:2px}
+  .gl-page--compact .gl-eye-btn{width:28px;height:28px;bottom:1px}
+  .gl-page--compact .gl-submit{height:32px;font-size:11.5px}
+  .gl-page--compact .gl-forgot{margin-top:5px;font-size:10px}
+}
+
+@media(max-height:620px){
+  .gl-page--compact .gl-card{transform:scale(.9);transform-origin:center center;max-height:none}
+  .gl-page:not(.gl-page--compact) .gl-card{transform:scale(.94);transform-origin:center center;max-height:none}
 }
