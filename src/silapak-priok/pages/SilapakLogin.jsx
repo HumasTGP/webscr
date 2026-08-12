@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { font } from "../../lib/theme";
-import { HELP_CONTACT } from "../../lib/data";
+import { HELP_CONTACT } from "../../lib/helpContact";
 import GlassLoginShell from "../../portal/components/GlassLoginShell";
 import { SilapakIllustration } from "../../portal/components/LoginIllustrations";
 
