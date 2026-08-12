@@ -15,7 +15,6 @@ export default function GandengDashboard({mitraList,user,onGoto}){
   const recent=[...mitraList].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).slice(0,3);
   return <div style={{fontFamily:font.body,padding:"clamp(18px,3vw,28px) clamp(16px,4vw,32px)",maxWidth:1100,width:"100%",boxSizing:"border-box"}}>
     <PageHeader
-      eyebrow="GANDENG"
       title="Dashboard"
       description={`Selamat datang, ${user?.organization||user?.name||"Pengguna"}. Ajukan proposal dan pantau proses pemeriksaan dari Humas, ASMAN, sampai MADM.`}
       right={<LiveClock/>}
