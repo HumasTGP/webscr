@@ -65,7 +65,6 @@ export default function LandingGateway({ onSelect }) {
       </header>
 
       <main className="gateway-hero">
-        <div className="gateway-hero-photo" aria-hidden="true" />
         <div className="gateway-hero-fade" aria-hidden="true" />
         <section className="gateway-copy">
           <div className="gateway-eyebrow">Portal Layanan Terintegrasi</div>
@@ -81,8 +80,6 @@ export default function LandingGateway({ onSelect }) {
           </p>
         </section>
       </main>
-
-      <footer className="gateway-footer">© 2026 PLN Indonesia Power. Seluruh hak dilindungi.</footer>
     </div>
   );
 }
