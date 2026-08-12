@@ -9,7 +9,7 @@ import PengajuanGandengPage from "./PengajuanGandeng";
 import GandengAccountManagement from "./GandengAccountManagement";
 import "../styles/gandeng-responsive.css";
 
-export default function GandengApp({ mitraList, setMitraList, notify, user, onLogout }) {
+export default function GandengApp({ mitraList, setMitraList, notify, onBackToPortal, user }) {
   const [active, setActive] = useState(user?.isAdmin ? "account-management" : "dashboard");
 
   const accountList = useMemo(() => {
@@ -39,7 +39,7 @@ export default function GandengApp({ mitraList, setMitraList, notify, user, onLo
   const identitySub = user?.isAdmin ? "Administrator" : (user?.email || "Akun GANDENG");
 
   return <div className="system-page-shell" style={{ "--blue":"#125AE8", "--navy":"#0B46C8", "--blue-soft":"#EAF1FF", "--danger":"#E53935", "--danger-soft":"#FDECEC" }}>
-    <GandengSidebar active={active} onSelect={setActive} onLogout={onLogout} user={user} />
+    <GandengSidebar active={active} onSelect={setActive} onLogout={onBackToPortal} user={user} />
     <div className="system-main">
       <header className="app-topbar gandeng-topbar" style={{ position:"sticky",top:0,zIndex:20,background:"rgba(255,255,255,.95)",backdropFilter:"blur(12px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,minHeight:68,flexShrink:0 }}>
         <div className="gandeng-topbar-left" style={{display:"flex",alignItems:"center",gap:9,minWidth:0}}>
