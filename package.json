@@ -1,8 +1,8 @@
 {
-  "name": "sikas-pln",
+  "name": "pln-ip-priok-digital-portal",
   "private": true,
   "version": "0.1.0",
-  "description": "SIKAS PLN — Sistem Administrasi Kas PLN Indonesia Power UBP Priok",
+  "description": "Portal digital PLN Indonesia Power UBP Priok untuk SAKTI, Si Lapak Priok, dan GANDENG.",
   "type": "module",
   "scripts": {
     "dev": "vite",

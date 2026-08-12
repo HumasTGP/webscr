@@ -18,44 +18,44 @@ import {
   torFields,
 } from "./lib/wizardFields";
 
-import Sidebar from "./sikas/components/Sidebar";
-import Topbar from "./sikas/components/Topbar";
+import Sidebar from "./sakti/components/Sidebar";
+import Topbar from "./sakti/components/Topbar";
 import HelpModal from "./components/HelpModal";
 import Toast from "./components/Toast";
 
 import LandingGateway from "./portal/pages/LandingGateway";
-import SilapakLogin from "./silapak-priok/pages/SilapakLogin";
-import SilapakApp from "./silapak-priok/pages/SilapakApp";
-import LoginScreen from "./sikas/pages/Login";
-import Dashboard from "./sikas/pages/Dashboard";
-import RabPage from "./sikas/pages/Rab";
-import VendorPage from "./sikas/pages/Vendor";
-import HistoryPage from "./sikas/pages/History";
-import Panduan from "./sikas/pages/Panduan";
-import GenericWizard from "./sikas/pages/GenericWizard";
+import SiLapakLogin from "./si-lapak-priok/pages/SiLapakLogin";
+import SiLapakApp from "./si-lapak-priok/pages/SiLapakApp";
+import LoginScreen from "./sakti/pages/Login";
+import Dashboard from "./sakti/pages/Dashboard";
+import RABPage from "./sakti/pages/RAB";
+import VendorPage from "./sakti/pages/Vendor";
+import HistoryPage from "./sakti/pages/History";
+import Panduan from "./sakti/pages/Panduan";
+import GenericWizard from "./sakti/pages/GenericWizard";
 import { TorDocPreview, BastDocPreview, PaktaDocPreview } from "./components/DocTemplatePreview";
-import ProposalRekapPage from "./sikas/pages/ProposalRekap";
-import ProposalEvaluasiPage from "./sikas/pages/ProposalEvaluasi";
-import PengelolaanKomunikasi from "./sikas/pages/PengelolaanKomunikasi";
-import InboxPage from "./sikas/pages/Inbox";
-import InboxEvaluasiPage from "./sikas/pages/InboxEvaluasi";
-import AsmanDashboard from "./sikas/asman/pages/AsmanDashboard";
-import MadmDashboard from "./sikas/madm/pages/MadmDashboard";
-import KasPackagesPage from "./sikas/pages/KasPackages";
-import UserManagementPage from "./sikas/pages/UserManagement";
-import PengajuanMitraPage from "./pengajuan-mitra/pages/PengajuanMitra";
-import MitraLogin from "./pengajuan-mitra/pages/MitraLogin";
-import MitraApp from "./pengajuan-mitra/pages/MitraApp";
-import DokumentasiPage from "./sikas/pages/Dokumentasi";
-import DaftarHadirPage from "./sikas/pages/DaftarHadir";
-import EvidenPage from "./sikas/pages/Eviden";
-import BappPage from "./sikas/pages/BappPage";
-import ChecklistDokumenPage from "./sikas/pages/ChecklistDokumen";
-import FormVerifikasiPage from "./sikas/pages/FormVerifikasi";
-import Lampiran1Page from "./sikas/pages/Lampiran1";
-import Lampiran2Page from "./sikas/pages/Lampiran2";
-import RkaPage from "./sikas/pages/RkaPage";
-import RekapAnggaranPage from "./sikas/pages/RekapAnggaranPage";
+import ProposalRekapPage from "./sakti/pages/ProposalRekap";
+import ProposalEvaluasiPage from "./sakti/pages/ProposalEvaluasi";
+import PengelolaanKomunikasi from "./sakti/pages/PengelolaanKomunikasi";
+import InboxPage from "./sakti/pages/Inbox";
+import InboxEvaluasiPage from "./sakti/pages/InboxEvaluasi";
+import AsmanDashboard from "./sakti/asman/pages/AsmanDashboard";
+import MADMDashboard from "./sakti/madm/pages/MADMDashboard";
+import PaketKasPage from "./sakti/pages/PaketKas";
+import ManajemenAksesPage from "./sakti/pages/ManajemenAkses";
+import PengajuanGandengPage from "./gandeng/pages/PengajuanGandeng";
+import GandengLogin from "./gandeng/pages/GandengLogin";
+import GandengApp from "./gandeng/pages/GandengApp";
+import DokumentasiPage from "./sakti/pages/Dokumentasi";
+import DaftarHadirPage from "./sakti/pages/DaftarHadir";
+import EvidenPage from "./sakti/pages/Eviden";
+import BAPPPage from "./sakti/pages/BAPPPage";
+import ChecklistDokumenPage from "./sakti/pages/ChecklistDokumen";
+import FormVerifikasiPage from "./sakti/pages/FormVerifikasi";
+import Lampiran1Page from "./sakti/pages/Lampiran1";
+import Lampiran2Page from "./sakti/pages/Lampiran2";
+import RKAPage from "./sakti/pages/RKAPage";
+import RekapAnggaranPage from "./sakti/pages/RekapAnggaranPage";
 import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
 
 const seed = (prefix, rows) =>
@@ -294,10 +294,10 @@ export default function App() {
           notify={notify}
         />
       ),
-      rab: <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} />,
-      "kategori-npo": <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="NON PO" />,
-      "kategori-po":  <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="PO" />,
-      "kategori-cc":  <RabPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="Cash Card" />,
+      rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} />,
+      "kategori-npo": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="NON PO" />,
+      "kategori-po":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="PO" />,
+      "kategori-cc":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="Cash Card" />,
       tor: (
         <GenericWizard
           title="TOR"
@@ -387,7 +387,7 @@ export default function App() {
           ]}
         />
       ),
-      rka: <RkaPage rka={rka} setRka={setRka} notify={notify} />,
+      rka: <RKAPage rka={rka} setRka={setRka} notify={notify} />,
       "rekap-anggaran": <RekapAnggaranPage rka={rka} rab={rab} laporan={laporan} />,
       vendor: (
         <VendorPage vendors={vendors} setVendors={setVendors} notify={notify} />
@@ -413,10 +413,10 @@ export default function App() {
         <AsmanDashboard user={user} packages={packages} evaluasiList={evaluasi} goto={setActive} />
       ),
       "madm-dashboard": (
-        <MadmDashboard user={user} packages={packages} evaluasiList={evaluasi} goto={setActive} />
+        <MADMDashboard user={user} packages={packages} evaluasiList={evaluasi} goto={setActive} />
       ),
       "paket-kas": (
-        <KasPackagesPage
+        <PaketKasPage
           rab={rab} tor={tor} bast={bast} pakta={pakta}
           packages={packages}
           onUpsertPackage={upsertPackage}
@@ -425,7 +425,7 @@ export default function App() {
         />
       ),
       "user-mgmt": (
-        <UserManagementPage
+        <ManajemenAksesPage
           users={users}
           setUsers={setUsers}
           notify={notify}
@@ -482,7 +482,7 @@ export default function App() {
             />
           );
           routes[`bapp-${suffix}`] = (
-            <BappPage
+            <BAPPPage
               rab={rabByKategori[kategori]}
               list={bapp.filter((b) => b.kategori === kategori)}
               setList={setBapp}
@@ -532,7 +532,7 @@ export default function App() {
   if (portal === "silapak") {
     if (!silapakLoggedIn) {
       return (
-        <SilapakLogin
+        <SiLapakLogin
           authenticate={authenticate}
           onLogin={() => setSilapakLoggedIn(true)}
           onBack={() => setPortal(null)}
@@ -540,7 +540,7 @@ export default function App() {
       );
     }
     return (
-      <SilapakApp
+      <SiLapakApp
         onLogout={() => {
           setSilapakLoggedIn(false);
           setPortal(null);
@@ -552,7 +552,7 @@ export default function App() {
   if (portal === "mitra") {
     if (!mitraLoggedIn) {
       return (
-        <MitraLogin
+        <GandengLogin
           authenticate={authenticate}
           onLogin={(u) => {
             setMitraUser(u);
@@ -564,7 +564,7 @@ export default function App() {
     }
     return (
       <>
-        <MitraApp
+        <GandengApp
           mitraList={mitraList}
           setMitraList={setMitraList}
           notify={notify}
