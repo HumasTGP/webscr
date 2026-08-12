@@ -5,28 +5,37 @@ const DEFAULT_ADMIN = {
   id: "gandeng-admin",
   email: "admin@gandeng.local",
   username: "admin",
-  password: "admin123",
+  password: "admin",
   organization: "Administrator GANDENG",
   role: "gandeng",
   isAdmin: true,
   active: true,
 };
 
+function normalizeAccounts(accounts) {
+  const source = Array.isArray(accounts) ? accounts : [];
+  const regularAccounts = source.filter((account) => !account?.isAdmin);
+
+  // Selalu gunakan kredensial admin bawaan terbaru. Ini sekaligus memigrasikan
+  // localStorage lama yang masih menyimpan password admin sebelumnya.
+  return [DEFAULT_ADMIN, ...regularAccounts];
+}
+
 export function loadGandengAccounts() {
   try {
     const raw = window.localStorage.getItem(ACCOUNTS_KEY);
     if (!raw) return [DEFAULT_ADMIN];
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [DEFAULT_ADMIN];
-    const hasAdmin = parsed.some((a) => a.isAdmin);
-    return hasAdmin ? parsed : [DEFAULT_ADMIN, ...parsed];
+    const normalized = normalizeAccounts(parsed);
+    window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(normalized));
+    return normalized;
   } catch (_) {
     return [DEFAULT_ADMIN];
   }
 }
 
 export function saveGandengAccounts(accounts) {
-  window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+  window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(normalizeAccounts(accounts)));
 }
 
 export function registerGandengAccount({ email, username, password, organization }) {
