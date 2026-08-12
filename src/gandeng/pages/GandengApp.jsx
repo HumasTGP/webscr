@@ -38,10 +38,9 @@ export default function GandengApp({ mitraList, setMitraList, notify, onBackToPo
   const identityTitle = user?.isAdmin ? "Administrator GANDENG" : (user?.organization || user?.username || "Pengguna GANDENG");
   const identitySub = user?.isAdmin ? "Administrator" : (user?.email || "Akun GANDENG");
 
-  return <div className="system-page-shell" style={{ "--blue":"#125AE8", "--navy":"#0B46C8", "--blue-soft":"#EAF1FF", "--danger":"#E53935", "--danger-soft":"#FDECEC" }}>
-    <GandengSidebar active={active} onSelect={setActive} onLogout={onBackToPortal} user={user} />
-    <div className="system-main">
-      <header className="app-topbar gandeng-topbar" style={{ position:"sticky",top:0,zIndex:20,background:"rgba(255,255,255,.95)",backdropFilter:"blur(12px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,minHeight:68,flexShrink:0 }}>
+  return (
+    <div className="gandeng-shell" style={{ "--blue":"#125AE8", "--navy":"#0B46C8", "--blue-soft":"#EAF1FF", "--danger":"#E53935", "--danger-soft":"#FDECEC" }}>
+      <header className="app-topbar gandeng-topbar" style={{ position:"sticky",top:0,zIndex:30,background:T.topbarBg,backdropFilter:"blur(8px)",borderBottom:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,minHeight:58,flexShrink:0 }}>
         <div className="gandeng-topbar-left" style={{display:"flex",alignItems:"center",gap:9,minWidth:0}}>
           <span className="gandeng-product-chip">GANDENG</span>
           <ChevronRight size={14} color={T.muted} className="hide-mobile" />
@@ -55,7 +54,12 @@ export default function GandengApp({ mitraList, setMitraList, notify, onBackToPo
           </div>
         </div>
       </header>
-      <div style={{flex:1,minHeight:0}}>{renderContent()}</div>
+      <div className="gandeng-shell-body">
+        <GandengSidebar active={active} onSelect={setActive} onLogout={onBackToPortal} user={user} />
+        <div className="gandeng-main">
+          {renderContent()}
+        </div>
+      </div>
     </div>
-  </div>;
+  );
 }
