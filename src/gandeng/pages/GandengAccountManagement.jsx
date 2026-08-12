@@ -21,9 +21,9 @@ export default function GandengAccountManagement({ notify }) {
   const remove = (id) => { setAccounts((prev) => prev.filter((a) => a.id !== id)); notify?.("Akun GANDENG dihapus.", "success"); };
 
   return <div className="system-body" style={{maxWidth:1180}}>
-    <section style={{position:"relative",overflow:"hidden",borderRadius:18,padding:"24px clamp(20px,3vw,30px)",marginBottom:16,background:"linear-gradient(135deg,#FFF8F0 0%,#FFFDFC 58%,#F7FAFF 100%)",border:"1px solid #F0E4D7"}}>
-      <div style={{position:"absolute",right:"clamp(12px,4vw,46px)",top:"50%",transform:"translateY(-50%)",width:132,height:132,borderRadius:"50%",background:"linear-gradient(145deg,#FFF0DD,#FFF8EF)",display:"grid",placeItems:"center",color:"#FF8A1E",opacity:.95}}><ShieldCheck size={72} strokeWidth={1.5}/></div>
-      <div style={{position:"relative",zIndex:1,maxWidth:650,paddingRight:"clamp(0px,14vw,150px)"}}>
+    <section className="gandeng-admin-hero" style={{position:"relative",overflow:"hidden",borderRadius:18,padding:"24px clamp(20px,3vw,30px)",marginBottom:16,background:"linear-gradient(135deg,#FFF8F0 0%,#FFFDFC 58%,#F7FAFF 100%)",border:"1px solid #F0E4D7"}}>
+      <div className="gandeng-admin-hero-art" style={{position:"absolute",right:"clamp(12px,4vw,46px)",top:"50%",transform:"translateY(-50%)",width:132,height:132,borderRadius:"50%",background:"linear-gradient(145deg,#FFF0DD,#FFF8EF)",display:"grid",placeItems:"center",color:"#FF8A1E",opacity:.95}}><ShieldCheck size={72} strokeWidth={1.5}/></div>
+      <div className="gandeng-admin-hero-copy" style={{position:"relative",zIndex:1,maxWidth:650,paddingRight:"clamp(0px,14vw,150px)"}}>
         <div style={{fontSize:10.5,fontWeight:800,letterSpacing:1.2,textTransform:"uppercase",color:"#FF8A1E",marginBottom:8}}>Administrator GANDENG</div>
         <h1 style={{margin:0,color:T.heading,fontFamily:font.display,fontSize:"clamp(26px,3vw,36px)",lineHeight:1.08}}>Manajemen Akun</h1>
         <p style={{margin:"10px 0 0",color:T.muted,fontSize:13,lineHeight:1.65,maxWidth:610}}>Kelola akun perusahaan atau lembaga yang menggunakan GANDENG tanpa mencampurkannya dengan akses internal SAKTI dan Si Lapak Priok.</p>
