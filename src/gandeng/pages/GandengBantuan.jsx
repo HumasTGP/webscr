@@ -28,7 +28,7 @@ export default function GandengBantuan() {
   const wa = `https://wa.me/${HELP_CONTACT.waNumber}?text=${encodeURIComponent(HELP_CONTACT.waMessage)}`;
   return (
     <div style={{fontFamily:font.body,padding:"clamp(18px,3vw,28px) clamp(16px,4vw,32px)",maxWidth:820,width:"100%",boxSizing:"border-box"}}>
-      <PageHeader eyebrow="GANDENG" title="Pusat Bantuan" description="Panduan penggunaan, pertanyaan umum, dan akses langsung ke admin GANDENG." />
+      <PageHeader title="Pusat Bantuan" description="Panduan penggunaan, pertanyaan umum, dan akses langsung ke admin GANDENG." />
 
       <section style={section}>
         <SectionTitle icon={BookOpen} text="Panduan Penggunaan"/>

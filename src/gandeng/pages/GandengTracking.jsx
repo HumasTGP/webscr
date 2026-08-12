@@ -152,7 +152,6 @@ export default function GandengTracking({ mitraList }) {
   return (
     <div style={{ fontFamily: font.body, padding: "clamp(18px,3vw,28px) clamp(16px,4vw,32px)", maxWidth: 900, width: "100%", boxSizing: "border-box" }}>
       <PageHeader
-        eyebrow="Modul Tracking"
         title="Tracking Status Pengajuan"
         description="Pantau perkembangan setiap pengajuan mitra secara real-time."
       />
