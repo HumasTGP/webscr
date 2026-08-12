@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Clock, XCircle, ArrowRight, Send, Eye, Plus, ChevronRight } from "lucide-react";
+import { CheckCircle2, XCircle, Send, Eye, Plus, ChevronRight } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { MITRA_STATUS, MITRA_STATUS_META } from "../../lib/data";
 import { uid, rupiah } from "../../lib/utils";
@@ -9,7 +9,7 @@ import Modal from "../../components/Modal";
 
 const STEPS = [
   { label: "Humas", key: "humas" },
-  { label: "Asman", key: "asman" },
+  { label: "ASMAN", key: "asman" },
   { label: "MADM", key: "madm" },
   { label: "Disetujui", key: "final" },
 ];
@@ -43,8 +43,8 @@ function ProgressTimeline({ timeline, currentStatus }) {
   const rejected = isRejected(currentStatus);
 
   return (
-    <div style={{ padding: "8px 0" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 20 }}>
+    <div style={{ padding: "8px 0", overflowX: "auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 20, minWidth: 360 }}>
         {STEPS.map((s, i) => {
           const done = currentStep > i + 1 || (currentStep === 4 && i === 3);
           const active = currentStep === i + 1;
@@ -88,24 +88,24 @@ function ProgressTimeline({ timeline, currentStatus }) {
           {timeline.map((t, i) => {
             const meta = MITRA_STATUS_META[t.status] || {};
             return (
-              <div key={i} style={{ marginBottom: 14, position: "relative" }}>
+              <div key={i} style={{ marginBottom: 14, position: "relative", minWidth: 0 }}>
                 <div style={{
                   position: "absolute", left: -25, top: 3,
                   width: 10, height: 10, borderRadius: "50%",
                   background: meta.color || T.muted,
                   border: `2px solid ${T.card}`,
                 }} />
-                <div style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>
+                <div style={{ fontSize: 11, color: T.muted, marginBottom: 2, lineHeight: 1.45 }}>
                   {new Date(t.tanggal).toLocaleString("id-ID", {
                     weekday: "long", day: "2-digit", month: "long", year: "numeric",
                     hour: "2-digit", minute: "2-digit",
                   })} WIB - {t.oleh}
                 </div>
-                <div style={{ fontSize: 13, color: T.heading, fontWeight: 600 }}>
+                <div style={{ fontSize: 13, color: T.heading, fontWeight: 600, lineHeight: 1.45 }}>
                   {meta.label || t.status}
                 </div>
                 {t.catatan && (
-                  <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>{t.catatan}</div>
+                  <div style={{ fontSize: 12, color: T.muted, marginTop: 2, lineHeight: 1.55, overflowWrap: "anywhere" }}>{t.catatan}</div>
                 )}
               </div>
             );
@@ -135,17 +135,14 @@ function MitraForm({ onSubmit, onClose }) {
     <form onSubmit={(e) => {
       e.preventDefault();
       if (!form.namaLembaga || !form.judulPengajuan) return;
-      onSubmit({
-        ...form,
-        nilaiDiajukan: Number(form.nilaiDiajukan) || 0,
-      });
+      onSubmit({ ...form, nilaiDiajukan: Number(form.nilaiDiajukan) || 0 });
     }}>
       <div style={{ display: "grid", gap: 14 }}>
         <div>
           <label style={labelStyle}>Nama Lembaga / Organisasi</label>
           <input style={inputStyle} value={form.namaLembaga} onChange={(e) => set("namaLembaga", e.target.value)} required />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
           <div>
             <label style={labelStyle}>Kontak PIC</label>
             <input style={inputStyle} value={form.kontakPIC} onChange={(e) => set("kontakPIC", e.target.value)} />
@@ -168,7 +165,7 @@ function MitraForm({ onSubmit, onClose }) {
           <textarea style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} value={form.deskripsi} onChange={(e) => set("deskripsi", e.target.value)} />
         </div>
       </div>
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 18 }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
         <button type="button" onClick={onClose} style={{
           padding: "10px 20px", borderRadius: 8, border: `1px solid ${T.border}`,
           background: T.card, color: T.text, cursor: "pointer", fontSize: 13, fontWeight: 600,
@@ -202,12 +199,12 @@ function ReviewPanel({ item, userRole, onApprove, onReject }) {
       background: T.blueSoft, border: `1px solid ${T.border}`,
     }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: T.heading, marginBottom: 10 }}>
-        Review Pengajuan
+        Review Pengajuan GANDENG
       </div>
       <textarea
         value={catatan}
         onChange={(e) => setCatatan(e.target.value)}
-        placeholder="Catatan (opsional)"
+        placeholder="Catatan / alasan / permintaan revisi"
         style={{
           width: "100%", padding: "10px 14px", borderRadius: 8,
           border: `1px solid ${T.border}`, background: T.inputBg,
@@ -215,7 +212,7 @@ function ReviewPanel({ item, userRole, onApprove, onReject }) {
           boxSizing: "border-box",
         }}
       />
-      <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+      <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
         <button onClick={() => onApprove(catatan)} style={{
           padding: "9px 18px", borderRadius: 8, border: "none",
           background: "#1E7F3E", color: "#fff", cursor: "pointer",
@@ -228,7 +225,7 @@ function ReviewPanel({ item, userRole, onApprove, onReject }) {
           background: "#B01818", color: "#fff", cursor: "pointer",
           fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6,
         }}>
-          <XCircle size={14} /> Tolak
+          <XCircle size={14} /> Tolak / Kembalikan
         </button>
       </div>
     </div>
@@ -247,17 +244,17 @@ export default function PengajuanMitraPage({ mitraList, setMitraList, user, noti
       status: MITRA_STATUS.MENUNGGU_HUMAS,
       createdAt: now,
       timeline: [
-        { status: MITRA_STATUS.MENUNGGU_HUMAS, tanggal: now, oleh: "Mitra", catatan: "Pengajuan diterima" },
+        { status: MITRA_STATUS.MENUNGGU_HUMAS, tanggal: now, oleh: "Pengaju", catatan: "Pengajuan diterima melalui GANDENG" },
       ],
     };
     setMitraList((prev) => [...prev, newItem]);
     setShowForm(false);
-    if (notify) notify("Pengajuan mitra berhasil dikirim.", "success", "Pengajuan Mitra baru");
+    if (notify) notify("Pengajuan GANDENG berhasil dikirim.", "success", "Pengajuan GANDENG baru");
   };
 
   const handleApprove = (item, catatan) => {
     const now = new Date().toISOString();
-    const roleLabel = user?.role === "humas" ? "Humas" : user?.role === "asman" ? "Asman" : "MADM";
+    const approverLabel = user?.role === "humas" ? "Humas" : user?.role === "asman" ? "ASMAN" : "MADM";
     let nextStatus;
     if (item.status === MITRA_STATUS.MENUNGGU_HUMAS || item.status === MITRA_STATUS.DIPROSES_HUMAS) {
       nextStatus = MITRA_STATUS.MENUNGGU_ASMAN;
@@ -273,18 +270,18 @@ export default function PengajuanMitraPage({ mitraList, setMitraList, user, noti
         ...m,
         status: nextStatus,
         timeline: [...(m.timeline || []), {
-          status: nextStatus, tanggal: now, oleh: roleLabel,
-          catatan: catatan || `Disetujui oleh ${roleLabel}`,
+          status: nextStatus, tanggal: now, oleh: approverLabel,
+          catatan: catatan || `Disetujui oleh ${approverLabel}`,
         }],
       };
     }));
     setDetailItem(null);
-    if (notify) notify(`Pengajuan ${item.id} disetujui oleh ${roleLabel}.`, "success");
+    if (notify) notify(`Pengajuan ${item.id} disetujui oleh ${approverLabel}.`, "success");
   };
 
   const handleReject = (item, catatan) => {
     const now = new Date().toISOString();
-    const roleLabel = user?.role === "humas" ? "Humas" : user?.role === "asman" ? "Asman" : "MADM";
+    const approverLabel = user?.role === "humas" ? "Humas" : user?.role === "asman" ? "ASMAN" : "MADM";
     let rejectStatus;
     if (item.status === MITRA_STATUS.MENUNGGU_HUMAS || item.status === MITRA_STATUS.DIPROSES_HUMAS) {
       rejectStatus = MITRA_STATUS.DITOLAK_HUMAS;
@@ -300,21 +297,21 @@ export default function PengajuanMitraPage({ mitraList, setMitraList, user, noti
         ...m,
         status: rejectStatus,
         timeline: [...(m.timeline || []), {
-          status: rejectStatus, tanggal: now, oleh: roleLabel,
-          catatan: catatan || `Ditolak oleh ${roleLabel}`,
+          status: rejectStatus, tanggal: now, oleh: approverLabel,
+          catatan: catatan || `Ditolak / dikembalikan oleh ${approverLabel}`,
         }],
       };
     }));
     setDetailItem(null);
-    if (notify) notify(`Pengajuan ${item.id} ditolak.`, "error");
+    if (notify) notify(`Pengajuan ${item.id} dikembalikan / ditolak.`, "error");
   };
 
   return (
-    <div style={{ fontFamily: font.body }}>
+    <div style={{ fontFamily: font.body, minWidth: 0 }}>
       <PageHeader
-        eyebrow="Modul Pengajuan Mitra"
-        title="Pengajuan Mitra"
-        description="Kelola pengajuan proposal kerjasama mitra. Pantau proses approval dari Humas, Asman, hingga MADM."
+        eyebrow="GANDENG"
+        title="Pengajuan GANDENG"
+        description="Pengajuan proposal dari masyarakat/vendor dengan alur pemeriksaan Humas → ASMAN → MADM. Catatan review tetap tersimpan pada tracking pengajuan."
       />
 
       <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
@@ -346,14 +343,14 @@ export default function PengajuanMitraPage({ mitraList, setMitraList, user, noti
 
       {mitraList.length === 0 ? (
         <Card>
-          <div style={{ padding: "32px 0", textAlign: "center", color: T.muted, fontSize: 14 }}>
-            Belum ada pengajuan mitra. Klik "Buat Pengajuan Baru" untuk memulai.
+          <div style={{ padding: "32px 0", textAlign: "center", color: T.muted, fontSize: 14, lineHeight: 1.6 }}>
+            Belum ada pengajuan GANDENG. Klik "Buat Pengajuan Baru" untuk memulai.
           </div>
         </Card>
       ) : (
         <Card padded={false}>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <table style={{ width: "100%", minWidth: 720, borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: T.bg }}>
                   {["ID", "Lembaga", "Judul Pengajuan", "Nilai", "Status", ""].map((h) => (
@@ -379,9 +376,7 @@ export default function PengajuanMitraPage({ mitraList, setMitraList, user, noti
                     <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}`, maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.judulPengajuan}</td>
                     <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>{m.nilaiDiajukan ? rupiah(m.nilaiDiajukan) : "-"}</td>
                     <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}><StatusBadgeMitra status={m.status} /></td>
-                    <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}>
-                      <ChevronRight size={14} color={T.muted} />
-                    </td>
+                    <td style={{ padding: "13px 16px", borderBottom: `1px solid ${T.border}` }}><ChevronRight size={14} color={T.muted} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -391,29 +386,29 @@ export default function PengajuanMitraPage({ mitraList, setMitraList, user, noti
       )}
 
       {showForm && (
-        <Modal open onClose={() => setShowForm(false)} title="Buat Pengajuan Mitra Baru" icon={Plus} width={520}>
+        <Modal open onClose={() => setShowForm(false)} title="Buat Pengajuan GANDENG Baru" icon={Plus} width={520}>
           <MitraForm onSubmit={handleSubmit} onClose={() => setShowForm(false)} />
         </Modal>
       )}
 
       {detailItem && (
-        <Modal open onClose={() => setDetailItem(null)} title={`Detail Pengajuan - ${detailItem.id}`} icon={Eye} width={560}>
-          <div style={{ display: "grid", gap: 12 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <Modal open onClose={() => setDetailItem(null)} title={`Detail Pengajuan GANDENG - ${detailItem.id}`} icon={Eye} width={560}>
+          <div style={{ display: "grid", gap: 12, minWidth: 0 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>Lembaga</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: T.heading }}>{detailItem.namaLembaga}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.heading, overflowWrap: "anywhere" }}>{detailItem.namaLembaga}</div>
               </div>
               <div>
                 <div style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>Kontak PIC</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: T.heading }}>{detailItem.kontakPIC || "-"}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: T.heading, overflowWrap: "anywhere" }}>{detailItem.kontakPIC || "-"}</div>
               </div>
             </div>
             <div>
               <div style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>Judul Pengajuan</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: T.heading }}>{detailItem.judulPengajuan}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: T.heading, lineHeight: 1.5, overflowWrap: "anywhere" }}>{detailItem.judulPengajuan}</div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>Nilai Diajukan</div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: T.heading }}>{detailItem.nilaiDiajukan ? rupiah(detailItem.nilaiDiajukan) : "-"}</div>
@@ -426,7 +421,7 @@ export default function PengajuanMitraPage({ mitraList, setMitraList, user, noti
             {detailItem.deskripsi && (
               <div>
                 <div style={{ fontSize: 11, color: T.muted, marginBottom: 2 }}>Deskripsi</div>
-                <div style={{ fontSize: 13, color: T.text, lineHeight: 1.5 }}>{detailItem.deskripsi}</div>
+                <div style={{ fontSize: 13, color: T.text, lineHeight: 1.6, overflowWrap: "anywhere" }}>{detailItem.deskripsi}</div>
               </div>
             )}
 
