@@ -60,7 +60,7 @@ export default function GandengBantuan() {
           </a>
           <div style={contact}>
             <span style={{width:34,height:34,borderRadius:8,background:"#EAF1FF",display:"grid",placeItems:"center",color:"#125AE8",flexShrink:0}}><MapPin size={16}/></span>
-            <div><div style={{fontSize:11,color:T.muted}}>Lokasi</div><div style={{fontSize:12.5,fontWeight:700,color:T.heading}}>UBP Priok, Jakarta Utara</div></div>
+            <div><div style={{fontSize:11,color:T.muted}}>Lokasi</div><div style={{fontSize:12,fontWeight:700,color:T.heading}}>PT. PLN Indonesia Power UBP Priok</div></div>
           </div>
         </div>
       </section>

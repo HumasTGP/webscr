@@ -58,7 +58,7 @@
 .gl-form-panel {
   position: relative;
   background: rgba(255,255,255,.985);
-  padding: 70px clamp(34px, 4vw, 54px) 38px;
+  padding: 56px clamp(28px, 4vw, 48px) 28px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -138,22 +138,22 @@
 }
 .gl-subtitle {
   color: #617087;
-  font-size: 13.5px;
-  line-height: 1.55;
-  margin-bottom: 24px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 18px;
   max-width: 520px;
 }
-.gl-field { position: relative; margin-bottom: 16px; }
+.gl-field { position: relative; margin-bottom: 13px; }
 .gl-label {
   display: block;
   color: #253c5d;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
-  margin-bottom: 7px;
+  margin-bottom: 5px;
 }
 .gl-input {
   width: 100%;
-  height: 46px;
+  height: 42px;
   box-sizing: border-box;
   border: 1px solid #d5deea;
   border-radius: 11px;
@@ -171,7 +171,7 @@
 .gl-eye-btn {
   position: absolute;
   right: 11px;
-  bottom: 10px;
+  bottom: 8px;
   border: 0;
   background: transparent;
   color: #496887;
@@ -193,7 +193,7 @@
 }
 .gl-submit {
   width: 100%;
-  height: 46px;
+  height: 42px;
   border: 0;
   border-radius: 12px;
   color: #fff;
@@ -293,16 +293,16 @@
 }
 
 @media (max-width: 800px) {
-  .gl-page { padding: 88px 15px 48px; align-items:flex-start; overflow-y:auto; }
+  .gl-page { padding: 80px 15px 40px; align-items:flex-start; overflow-y:auto; }
   .gl-top-brand { top: 18px; left: 20px; }
   .gl-top-brand img { width: 160px; max-height: 50px; }
   .gl-card { grid-template-columns: 1fr; min-height: auto; max-height:none; width: min(540px, 94vw); border-radius:20px; }
   .gl-visual-panel { display: none; }
-  .gl-form-panel { padding: 68px 28px 34px; overflow:visible; }
-  .gl-back-btn { top:24px; left:28px; }
-  .gl-title { font-size: 30px; }
-  .gl-subtitle { font-size: 13px; }
-  .gl-footer { position:relative; bottom:auto; margin-top:14px; font-size:11px; }
+  .gl-form-panel { padding: 60px 24px 28px; overflow:visible; }
+  .gl-back-btn { top:20px; left:24px; }
+  .gl-title { font-size: 28px; }
+  .gl-subtitle { font-size: 12.5px; margin-bottom: 16px; }
+  .gl-footer { position:relative; bottom:auto; margin-top:14px; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 }
 
 @media (max-width: 430px) {

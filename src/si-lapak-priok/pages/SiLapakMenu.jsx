@@ -19,7 +19,7 @@ export default function SiLapakMenu({ duty, onOpenDuty, paket, tamu }) {
   ];
 
   return <div>
-    <PageHeader eyebrow="Si Lapak Priok" title="Dashboard" description="Ringkasan aktivitas paket, kunjungan tamu, dan petugas yang sedang berjaga." />
+    <PageHeader title="Dashboard" description="Ringkasan aktivitas paket, kunjungan tamu, dan petugas yang sedang berjaga." />
     <DutyBanner duty={duty} onOpen={onOpenDuty} />
 
     <div className="responsive-card-grid silapak-kpi-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,minmax(0,1fr))", gap:12, margin:"18px 0" }}>

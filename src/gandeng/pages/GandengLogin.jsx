@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, Eye, EyeOff, Mail } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Copy, Eye, EyeOff, Mail } from "lucide-react";
 import { font } from "../../lib/theme";
 import GlassLoginShell from "../../portal/components/GlassLoginShell";
 import { MitraIllustration } from "../../portal/components/LoginIllustrations";
@@ -20,9 +20,11 @@ export default function GandengLogin({ onLogin, onBack }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [resetLink, setResetLink] = useState("");
+  const [copied, setCopied] = useState(false);
   const set = (key, value) => setForm((p) => ({ ...p, [key]: value }));
 
-  const switchMode = (next) => { setMode(next); setError(""); setNotice(""); setResetLink(""); };
+  const switchMode = (next) => { setMode(next); setError(""); setNotice(""); setResetLink(""); setCopied(false); };
+  const copyLink = () => { navigator.clipboard?.writeText(resetLink).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); };
 
   const login = (e) => {
     e.preventDefault(); setError("");
@@ -87,7 +89,16 @@ export default function GandengLogin({ onLogin, onBack }) {
       {mode === "reset" && <div className="gl-field"><label className="gl-label">Konfirmasi Password</label><input className="gl-input has-eye" type={showConfirm ? "text" : "password"} value={form.confirm} onChange={(e) => set("confirm", e.target.value)} placeholder="Ulangi password" autoComplete="new-password" /><button type="button" className="gl-eye-btn" onClick={() => setShowConfirm((p) => !p)}>{showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>}
       {error && <div className="gl-error" role="alert"><AlertTriangle size={14} /> {error}</div>}
       {notice && <div style={{ display:"flex",gap:8,alignItems:"flex-start",padding:"10px 12px",marginBottom:12,borderRadius:8,background:"#EFFAF3",color:"#166E49",fontSize:12.5,lineHeight:1.45 }}><CheckCircle2 size={15} style={{flexShrink:0,marginTop:1}} />{notice}</div>}
-      {resetLink && <a href={`mailto:${encodeURIComponent(form.email)}?subject=${encodeURIComponent("Reset Akun GANDENG")}&body=${encodeURIComponent(`Gunakan tautan berikut untuk membuat username dan password baru:\n\n${resetLink}\n\nTautan berlaku 30 menit.`)}`} style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:7,minHeight:42,borderRadius:8,border:"1px solid #CF0000",color:"#CF0000",textDecoration:"none",fontWeight:700,fontSize:12.5,marginBottom:12 }}><Mail size={15}/> Kirim Tautan melalui Email</a>}
+      {resetLink && <div style={{marginBottom:12}}>
+        <div style={{padding:"10px 12px",borderRadius:8,background:"#F7FAFF",border:"1px solid #D0DFF4",marginBottom:8}}>
+          <div style={{fontSize:10.5,fontWeight:700,color:"#5F7A9A",marginBottom:5}}>TAUTAN RESET</div>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:11,color:"#1A3D6B",wordBreak:"break-all",flex:1,lineHeight:1.4}}>{resetLink}</span>
+            <button type="button" onClick={copyLink} title="Salin tautan" style={{flexShrink:0,border:"1px solid #D0DFF4",background:"#fff",borderRadius:7,padding:"5px 8px",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontSize:11,fontWeight:700,color:copied?"#1E7F3E":"#125AE8"}}><Copy size={13}/>{copied?"Tersalin":"Salin"}</button>
+          </div>
+        </div>
+        <a href={`mailto:${encodeURIComponent(form.email)}?subject=${encodeURIComponent("Reset Akun GANDENG")}&body=${encodeURIComponent(`Gunakan tautan berikut untuk membuat username dan password baru:\n\n${resetLink}\n\nTautan berlaku 30 menit.`)}`} style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:7,minHeight:40,borderRadius:8,border:"1px solid #CF0000",color:"#CF0000",textDecoration:"none",fontWeight:700,fontSize:12.5 }}><Mail size={15}/> Kirim via Email</a>
+      </div>}
       <button type="submit" className="gl-submit">{mode === "register" ? "BUAT AKUN" : mode === "forgot" ? "BUAT TAUTAN RESET" : mode === "reset" ? "SIMPAN AKUN BARU" : "LOGIN"}</button>
       <div className="gl-forgot" style={{ display:"flex",justifyContent:"center",gap:10,flexWrap:"wrap" }}>{mode === "login" ? <><button type="button" onClick={() => switchMode("register")} style={linkBtn}>Daftar akun</button><span>·</span><button type="button" onClick={() => switchMode("forgot")} style={linkBtn}>Lupa password?</button></> : <button type="button" onClick={() => switchMode("login")} style={linkBtn}>Kembali ke Login</button>}</div>
     </form>
