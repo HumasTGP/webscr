@@ -21,6 +21,7 @@ export default function GlassLoginShell({
 }) {
   const visualTitle = brandTitle || title;
   const appLogo = APP_LOGOS[visualTitle];
+  const lightVisual = visualTitle === "SI LAPAK PRIOK";
 
   return (
     <div
@@ -41,14 +42,13 @@ export default function GlassLoginShell({
             <ArrowLeft size={18} /> Kembali ke Beranda
           </button>
           <div className="gl-login-heading">
-            <div className="gl-mini-brand">{visualTitle}</div>
             <div className="gl-title">{title}</div>
             <div className="gl-subtitle">{subtitle}</div>
           </div>
           {children}
         </div>
 
-        <div className="gl-visual-panel">
+        <div className={`gl-visual-panel${lightVisual ? " gl-visual-panel--light" : ""}`}>
           <div className="gl-visual-glow" aria-hidden="true" />
           <div className="gl-visual-icon">
             {appLogo ? <img className="gl-app-logo" src={appLogo} alt={visualTitle} /> : illustration}

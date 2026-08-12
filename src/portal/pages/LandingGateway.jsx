@@ -73,11 +73,7 @@ export default function LandingGateway({ onSelect }) {
             Berbagai Solusi<span>.</span>
           </h1>
           <div className="gateway-accent" />
-          <p>
-            Akses mudah ke berbagai sistem dan layanan digital<br className="gateway-desktop-break" />
-            untuk mendukung kinerja dan kolaborasi di<br className="gateway-desktop-break" />
-            PLN Indonesia Power.
-          </p>
+          <p>Akses berbagai sistem dan layanan digital dalam satu portal untuk mendukung kebutuhan kerja dan kolaborasi di PLN Indonesia Power.</p>
         </section>
       </main>
     </div>

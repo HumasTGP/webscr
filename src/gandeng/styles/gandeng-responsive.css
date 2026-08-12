@@ -1,0 +1,12 @@
+.gandeng-topbar-identity{min-width:0}
+@media(max-width:760px){
+  .gandeng-admin-hero-art{width:104px!important;height:104px!important;right:14px!important;opacity:.68!important}
+  .gandeng-admin-hero-art svg{width:56px;height:56px}
+  .gandeng-admin-hero-copy{padding-right:110px!important}
+}
+@media(max-width:560px){
+  .gandeng-admin-hero{padding:20px 18px!important}
+  .gandeng-admin-hero-art{display:none!important}
+  .gandeng-admin-hero-copy{padding-right:0!important;max-width:none!important}
+  .gandeng-topbar-identity{display:none!important}
+}
