@@ -77,7 +77,9 @@ export default function GandengApp({ mitraList, setMitraList, notify, onBackToPo
       <div className="gandeng-shell-body">
         <GandengSidebar active={active} onSelect={setActive} onLogout={onBackToPortal} user={user} />
         <div className="gandeng-main">
-          {renderContent()}
+          <div key={active} style={{ animation: "fade-in .2s ease" }}>
+            {renderContent()}
+          </div>
         </div>
       </div>
     </div>
