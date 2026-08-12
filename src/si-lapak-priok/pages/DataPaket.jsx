@@ -44,7 +44,13 @@ export default function DataPaket({ paket, onBack, onProsesAmbil, onUpdate, onDe
       <h2 style={{ fontSize: 16, fontWeight: 700, color: T.heading, margin: "0 0 20px" }}>Data paket</h2>
 
       {paket.length === 0 ? (
-        <div style={{ fontSize: 12.5, color: T.muted }}>Belum ada paket tercatat.</div>
+        <div style={{ textAlign: "center", padding: "40px 20px", color: T.muted }}>
+          <div style={{ width: 56, height: 56, borderRadius: 14, background: "#FFF7C2", display: "grid", placeItems: "center", margin: "0 auto 12px" }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8C7600" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 8h14M5 8a2 2 0 1 1 0-4h14a2 2 0 1 1 0 4M5 8v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/></svg>
+          </div>
+          <div style={{ fontWeight: 700, fontSize: 13.5, color: "#5B4B00", marginBottom: 4 }}>Belum ada paket</div>
+          <div style={{ fontSize: 12 }}>Paket yang tercatat akan muncul di sini.</div>
+        </div>
       ) : (
         <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "flex-start" }}>
           <div style={{ flex: "1.3 1 340px" }}>

@@ -48,4 +48,17 @@
   .gandeng-user-avatar{width:32px;height:32px;border-radius:10px}
   .gandeng-topbar-left{gap:6px!important}
   .gandeng-active-label{font-size:11.5px!important}
+  .gandeng-main { padding-bottom: env(safe-area-inset-bottom, 0px); }
+}
+
+/* Prevent horizontal overflow on all Gandeng pages */
+.gandeng-main > * { max-width: 100%; box-sizing: border-box; }
+.gandeng-shell table { word-break: break-word; }
+.gandeng-shell .responsive-card-grid { display: grid !important; }
+@media(max-width:640px){
+  .gandeng-shell .responsive-card-grid[style*="repeat(4"] { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .gandeng-shell .responsive-card-grid[style*="repeat(3"] { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .gandeng-shell .responsive-form-grid { grid-template-columns: 1fr !important; }
+  .gandeng-shell .responsive-actions { flex-wrap: wrap !important; }
+  .gandeng-shell .responsive-actions button { flex: 1 1 auto; min-width: 0; }
 }
