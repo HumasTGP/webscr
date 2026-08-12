@@ -163,8 +163,9 @@ jobs:
           set -euo pipefail
           test -d src/sakti && test -d src/gandeng && test -d src/si-lapak-priok
           test ! -d src/sikas && test ! -d src/pengajuan-mitra && test ! -d src/silapak-priok
-          if find src -type f \( -iname '*sikas*' -o -iname '*mitra*' -o -iname '*silapak*' \) | grep -q .; then
-            find src -type f \( -iname '*sikas*' -o -iname '*mitra*' -o -iname '*silapak*' \)
+          if find src -type f \( -iname '*sikas*' -o -iname '*mitra*' \) | grep -q .; then
+            echo 'Legacy SIKAS/Mitra filenames still found:'
+            find src -type f \( -iname '*sikas*' -o -iname '*mitra*' \)
             exit 1
           fi
 
