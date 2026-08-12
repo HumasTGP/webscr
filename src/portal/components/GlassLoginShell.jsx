@@ -25,7 +25,7 @@ export default function GlassLoginShell({
 
   return (
     <div
-      className="gl-page"
+      className={`gl-page${lightVisual ? " gl-page--silapak" : ""}`}
       style={{
         "--gl-accent": accent,
         "--gl-soft": accentSoft,
