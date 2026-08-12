@@ -1,0 +1,235 @@
+name: Repository Naming Refactor
+
+on:
+  push:
+    branches:
+      - align-repo-naming-20260812
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: ${{ !contains(github.event.head_commit.message, '[repo-align]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Rename product folders and files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git mv src/sikas src/sakti
+          git mv src/pengajuan-mitra src/gandeng
+          git mv src/silapak-priok src/si-lapak-priok
+
+          git mv src/gandeng/components/MitraSidebar.jsx src/gandeng/components/GandengSidebar.jsx
+          git mv src/gandeng/pages/MitraAccountManagement.jsx src/gandeng/pages/GandengAccountManagement.jsx
+          git mv src/gandeng/pages/MitraApp.jsx src/gandeng/pages/GandengApp.jsx
+          git mv src/gandeng/pages/MitraBantuan.jsx src/gandeng/pages/GandengBantuan.jsx
+          git mv src/gandeng/pages/MitraDashboard.jsx src/gandeng/pages/GandengDashboard.jsx
+          git mv src/gandeng/pages/MitraLogin.jsx src/gandeng/pages/GandengLogin.jsx
+          git mv src/gandeng/pages/MitraTracking.jsx src/gandeng/pages/GandengTracking.jsx
+          git mv src/gandeng/pages/PengajuanMitra.jsx src/gandeng/pages/PengajuanGandeng.jsx
+          git mv src/gandeng/lib/accounts.js src/gandeng/lib/gandengAccounts.js
+
+          git mv src/si-lapak-priok/pages/SilapakApp.jsx src/si-lapak-priok/pages/SiLapakApp.jsx
+          git mv src/si-lapak-priok/pages/SilapakBantuan.jsx src/si-lapak-priok/pages/SiLapakBantuan.jsx
+          git mv src/si-lapak-priok/pages/SilapakLogin.jsx src/si-lapak-priok/pages/SiLapakLogin.jsx
+          git mv src/si-lapak-priok/pages/SilapakMenu.jsx src/si-lapak-priok/pages/SiLapakMenu.jsx
+          git mv src/si-lapak-priok/pages/SilapakShell.jsx src/si-lapak-priok/pages/SiLapakShell.jsx
+          git mv src/si-lapak-priok/pages/SilapakSidebar.jsx src/si-lapak-priok/pages/SiLapakSidebar.jsx
+
+          git mv src/sakti/pages/Rab.jsx src/sakti/pages/RAB.jsx
+          git mv src/sakti/pages/RkaPage.jsx src/sakti/pages/RKAPage.jsx
+          git mv src/sakti/pages/BappPage.jsx src/sakti/pages/BAPPPage.jsx
+          git mv src/sakti/pages/KasPackages.jsx src/sakti/pages/PaketKas.jsx
+          git mv src/sakti/pages/UserManagement.jsx src/sakti/pages/ManajemenAkses.jsx
+          git mv src/sakti/madm/pages/MadmDashboard.jsx src/sakti/madm/pages/MADMDashboard.jsx
+
+          git mv src/assets/mitra-logo.svg src/assets/gandeng-logo.svg
+          git mv src/assets/sikas-logo.svg src/assets/sakti-logo.svg
+          git mv src/assets/silapak-logo.svg src/assets/si-lapak-priok-logo.svg
+          git mv src/lib/silapakData.js src/lib/siLapakPriokData.js
+
+          # Update folder references.
+          grep -RIl 'sikas/' src | xargs -r sed -i 's#sikas/#sakti/#g'
+          grep -RIl 'pengajuan-mitra/' src | xargs -r sed -i 's#pengajuan-mitra/#gandeng/#g'
+          grep -RIl 'silapak-priok/' src | xargs -r sed -i 's#silapak-priok/#si-lapak-priok/#g'
+
+          # Update GANDENG component/file identifiers.
+          for pair in \
+            'MitraSidebar:GandengSidebar' \
+            'MitraAccountManagement:GandengAccountManagement' \
+            'MitraApp:GandengApp' \
+            'MitraBantuan:GandengBantuan' \
+            'MitraDashboard:GandengDashboard' \
+            'MitraLogin:GandengLogin' \
+            'MitraTracking:GandengTracking' \
+            'PengajuanMitraPage:PengajuanGandengPage' \
+            'PengajuanMitra:PengajuanGandeng' \
+            '"./accounts":"./gandengAccounts"'; do
+            from="${pair%%:*}"; to="${pair#*:}"
+            grep -RIl "$from" src/gandeng src/App.jsx 2>/dev/null | xargs -r sed -i "s#$from#$to#g"
+          done
+
+          # Update Si Lapak Priok component/file identifiers.
+          for pair in \
+            'SilapakApp:SiLapakApp' \
+            'SilapakBantuan:SiLapakBantuan' \
+            'SilapakLogin:SiLapakLogin' \
+            'SilapakMenu:SiLapakMenu' \
+            'SilapakShell:SiLapakShell' \
+            'SilapakSidebar:SiLapakSidebar' \
+            'silapakData:siLapakPriokData'; do
+            from="${pair%%:*}"; to="${pair#*:}"
+            grep -RIl "$from" src 2>/dev/null | xargs -r sed -i "s#$from#$to#g"
+          done
+
+          # Update SAKTI filenames/component identifiers only; role/data keys stay unchanged.
+          for pair in \
+            'RabPage:RABPage' \
+            '"./sakti/pages/Rab":"./sakti/pages/RAB"' \
+            'RkaPage:RKAPage' \
+            '"./sakti/pages/RkaPage":"./sakti/pages/RKAPage"' \
+            'BappPage:BAPPPage' \
+            '"./sakti/pages/BappPage":"./sakti/pages/BAPPPage"' \
+            'KasPackagesPage:PaketKasPage' \
+            '"./sakti/pages/KasPackages":"./sakti/pages/PaketKas"' \
+            'UserManagementPage:ManajemenAksesPage' \
+            '"./sakti/pages/UserManagement":"./sakti/pages/ManajemenAkses"' \
+            'MadmDashboard:MADMDashboard' \
+            '"./sakti/madm/pages/MadmDashboard":"./sakti/madm/pages/MADMDashboard"'; do
+            from="${pair%%:*}"; to="${pair#*:}"
+            grep -RIl "$from" src 2>/dev/null | xargs -r sed -i "s#$from#$to#g"
+          done
+
+          # Remove known temporary/legacy files only when no active source imports them.
+          rm -f __noop__
+          if ! grep -RIl 'AutoLogo' src --exclude='AutoLogo.jsx' | grep -q .; then
+            git rm -f src/components/AutoLogo.jsx
+          fi
+
+      - name: Refresh repository-facing metadata files
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
+          pkg.name = 'pln-ip-priok-digital-portal';
+          pkg.description = 'Portal digital PLN Indonesia Power UBP Priok untuk SAKTI, Si Lapak Priok, dan GANDENG.';
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          const lock = JSON.parse(fs.readFileSync('package-lock.json','utf8'));
+          lock.name = pkg.name;
+          if (lock.packages && lock.packages['']) {
+            lock.packages[''].name = pkg.name;
+          }
+          fs.writeFileSync('package-lock.json', JSON.stringify(lock, null, 2) + '\n');
+          NODE
+
+          sed -i 's#<title>.*</title>#<title>Portal Digital PLN Indonesia Power UBP Priok</title>#' index.html
+
+          cat > README.md <<'EOF'
+          # Portal Digital PLN Indonesia Power UBP Priok
+
+          Portal web terpadu untuk tiga sistem utama **SAKTI**, **Si Lapak Priok**, dan **GANDENG**. Aplikasi dibangun dengan React + Vite dan mempertahankan alur kerja masing-masing sistem dalam satu portal utama.
+
+          ## Sistem
+
+          | Sistem | Pengguna | Fungsi utama |
+          |---|---|---|
+          | **SAKTI** | Humas, Asman, MADM | Pengajuan proposal, evaluasi, RAB, TOR, pelaksanaan, pembayaran, dokumen, rekap anggaran, inbox review, dan tracking administrasi. |
+          | **Si Lapak Priok** | Petugas/operator | Pengelolaan paket masuk/keluar, pengambilan paket, buku tamu, petugas jaga, riwayat, dan bantuan. |
+          | **GANDENG** | Perusahaan/lembaga eksternal dan admin GANDENG | Registrasi akun, pengajuan proposal, riwayat, tracking status Humas → Asman → MADM, bantuan, serta isolasi data per akun. |
+
+          ## Struktur Source
+
+          ```text
+          src/
+          ├── portal/             # Landing portal dan shared login shell
+          ├── sakti/              # SAKTI - Humas, Asman, MADM
+          ├── si-lapak-priok/     # Si Lapak Priok
+          ├── gandeng/            # GANDENG
+          ├── components/         # Komponen bersama
+          ├── lib/                # Data, helper, generator dokumen
+          └── styles/             # Global responsive styling
+          ```
+
+          ## Warna Sistem
+
+          - **SAKTI:** `#036D9A`
+          - **Si Lapak Priok:** `#FDEA6F`
+          - **GANDENG:** `#CF0000`
+
+          ## Menjalankan Project
+
+          ```bash
+          npm ci
+          npm run dev
+          ```
+
+          Build production:
+
+          ```bash
+          npm run build
+          ```
+
+          GitHub Actions menjalankan build Linux pada pull request untuk memastikan perubahan dapat dikompilasi sebelum masuk ke `main`.
+
+          ## Catatan Arsitektur
+
+          - Authentication dan business flow existing dipertahankan.
+          - Manajemen akses internal mencakup SAKTI dan Si Lapak Priok.
+          - Manajemen akun GANDENG terpisah dari akun internal.
+          - Data pengajuan GANDENG difilter berdasarkan akun/perusahaan yang login.
+          - Reset akun GANDENG menghasilkan link reset; pengiriman email otomatis membutuhkan integrasi email service/backend.
+
+          ---
+
+          **PLN Indonesia Power UBP Priok**
+          EOF
+
+          # Remove indentation added by YAML block formatting.
+          sed -i 's/^          //' README.md
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build after rename
+        run: npm run build
+
+      - name: Verify legacy product paths are gone
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -d src/sikas
+          test ! -d src/pengajuan-mitra
+          test ! -d src/silapak-priok
+          test -d src/sakti
+          test -d src/gandeng
+          test -d src/si-lapak-priok
+          ! find src -type f \( -iname '*sikas*' -o -iname '*mitra*' -o -iname '*silapak*' \) | grep -q .
+
+      - name: Commit verified refactor
+        shell: bash
+        env:
+          BRANCH: align-repo-naming-20260812
+        run: |
+          set -euo pipefail
+          git rm -f .github/workflows/repo-align.yml
+          git config user.name "HumasTGP"
+          git config user.email "humastgp@gmail.com"
+          git add -A
+          git commit -m "[repo-align] Align repository naming with SAKTI, Si Lapak Priok, and GANDENG"
+          git push origin HEAD:"$BRANCH"
