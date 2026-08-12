@@ -1,65 +1,85 @@
-import { useState } from "react";
-import { AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AlertTriangle, CheckCircle2, Eye, EyeOff, Mail } from "lucide-react";
 import { font } from "../../lib/theme";
-import { HELP_CONTACT } from "../../lib/helpContact";
 import GlassLoginShell from "../../portal/components/GlassLoginShell";
 import { MitraIllustration } from "../../portal/components/LoginIllustrations";
+import { authenticateGandeng, consumeResetToken, createResetLink, registerGandengAccount } from "../lib/accounts";
 
-export default function MitraLogin({ onLogin, onBack, authenticate }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+function getResetToken() {
+  if (typeof window === "undefined") return "";
+  const match = window.location.hash.match(/gandeng-reset=([^&]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+export default function MitraLogin({ onLogin, onBack }) {
+  const resetToken = useMemo(getResetToken, []);
+  const [mode, setMode] = useState(resetToken ? "reset" : "login");
+  const [form, setForm] = useState({ email: "", organization: "", username: "", password: "", confirm: "" });
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [resetLink, setResetLink] = useState("");
+  const set = (key, value) => setForm((p) => ({ ...p, [key]: value }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
-    if (!username.trim() || !password.trim()) {
-      setError("Username dan password wajib diisi.");
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      const res = authenticate ? authenticate("mitra", username.trim(), password) : { ok: false, reason: "wrong" };
-      if (!res.ok) {
-        setError(res.reason === "inactive" ? "Akun sedang tidak aktif (di luar rentang tanggal berlaku)." : "Username atau password salah.");
-        setLoading(false);
-      } else {
-        onLogin({ username: res.user.username, name: res.user.username, role: "mitra" });
-      }
-    }, 500);
+  const switchMode = (next) => { setMode(next); setError(""); setNotice(""); setResetLink(""); };
+
+  const login = (e) => {
+    e.preventDefault(); setError("");
+    if (!form.username.trim() || !form.password) return setError("Username/email dan password wajib diisi.");
+    const res = authenticateGandeng(form.username, form.password);
+    if (!res.ok) return setError(res.reason === "inactive" ? "Akun GANDENG sedang dinonaktifkan." : "Username/email atau password salah.");
+    onLogin({ ...res.account, name: res.account.organization || res.account.username });
   };
 
-  const waUrl = `https://wa.me/${HELP_CONTACT.waNumber}?text=${encodeURIComponent(HELP_CONTACT.waMessage)}`;
+  const register = (e) => {
+    e.preventDefault(); setError("");
+    if (!form.email.trim() || !form.organization.trim() || !form.username.trim() || !form.password) return setError("Email, nama perusahaan/lembaga, username, dan password wajib diisi.");
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return setError("Format email belum valid.");
+    if (form.password.length < 6) return setError("Password minimal 6 karakter.");
+    if (form.password !== form.confirm) return setError("Konfirmasi password belum sama.");
+    const res = registerGandengAccount(form);
+    if (!res.ok) return setError(res.reason === "email" ? "Email sudah terdaftar." : "Username sudah digunakan.");
+    setNotice("Akun GANDENG berhasil dibuat. Silakan login menggunakan username/email dan password yang baru dibuat.");
+    setForm((p) => ({ ...p, username: res.account.username, password: "", confirm: "" }));
+    setMode("login");
+  };
 
-  return (
-    <GlassLoginShell
-      title="GANDENG"
-      subtitle="Sistem Pengajuan dan Pengelolaan Kerja Sama"
-      onBack={onBack}
-      illustration={<MitraIllustration />}
-      accent="#EEF8CD"
-      accentSoft="#F8FCEB"
-      brandTitle="GANDENG"
-      backgroundImage="/login-plant.png"
-    >
-      <form onSubmit={handleSubmit} style={{ fontFamily: font.body }}>
-        <div className="gl-field">
-          <label className="gl-label">Username</label>
-          <input className="gl-input" type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Masukkan username" autoComplete="username" autoFocus />
-        </div>
-        <div className="gl-field">
-          <label className="gl-label">Password</label>
-          <input className="gl-input has-eye" type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Masukkan password" autoComplete="current-password" />
-          <button type="button" className="gl-eye-btn" onClick={() => setShowPw((p) => !p)} aria-label={showPw ? "Sembunyikan password" : "Tampilkan password"}>
-            {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-        </div>
-        {error && <div className="gl-error" role="alert"><AlertTriangle size={14} /> {error}</div>}
-        <button type="submit" disabled={loading} className="gl-submit">{loading ? "Memeriksa akun…" : "LOGIN"}</button>
-        <div className="gl-forgot">Lupa password? <a href={waUrl} target="_blank" rel="noopener noreferrer">Klik di sini</a></div>
-      </form>
-    </GlassLoginShell>
-  );
+  const requestReset = (e) => {
+    e.preventDefault(); setError(""); setNotice("");
+    if (!form.email.trim()) return setError("Masukkan email akun GANDENG.");
+    const res = createResetLink(form.email);
+    if (!res.ok) return setError("Email tersebut belum terdaftar sebagai akun GANDENG.");
+    setResetLink(res.link);
+    setNotice("Tautan reset sudah dibuat dan berlaku 30 menit. Pengiriman email otomatis memerlukan email service; sementara tautan dapat dikirim melalui aplikasi email perangkat ini.");
+  };
+
+  const reset = (e) => {
+    e.preventDefault(); setError("");
+    if (!form.username.trim() || !form.password) return setError("Username baru dan password baru wajib diisi.");
+    if (form.password.length < 6) return setError("Password minimal 6 karakter.");
+    if (form.password !== form.confirm) return setError("Konfirmasi password belum sama.");
+    const res = consumeResetToken(resetToken, form.username, form.password);
+    if (!res.ok) return setError(res.reason === "username" ? "Username sudah digunakan akun lain." : "Tautan reset tidak valid atau sudah kedaluwarsa.");
+    if (typeof window !== "undefined") window.history.replaceState(null, "", window.location.pathname);
+    setNotice("Username dan password berhasil diperbarui. Silakan login.");
+    setForm((p) => ({ ...p, password: "", confirm: "" })); setMode("login");
+  };
+
+  const title = mode === "register" ? "DAFTAR GANDENG" : mode === "forgot" ? "RESET GANDENG" : mode === "reset" ? "BUAT AKUN BARU" : "GANDENG";
+  return <GlassLoginShell title={title} subtitle="Sistem Pengajuan dan Pengelolaan Kerja Sama" onBack={onBack} illustration={<MitraIllustration />} accent="#CF0000" accentSoft="#FDEAEA" brandTitle="GANDENG" backgroundImage="/login-plant.png">
+    <form onSubmit={mode === "register" ? register : mode === "forgot" ? requestReset : mode === "reset" ? reset : login} style={{ fontFamily: font.body }}>
+      {mode === "register" && <><Field label="Email"><input className="gl-input" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="nama@perusahaan.co.id" autoFocus /></Field><Field label="Nama Perusahaan / Lembaga"><input className="gl-input" value={form.organization} onChange={(e) => set("organization", e.target.value)} placeholder="Contoh: PT Polisi Baik" /></Field></>}
+      {mode === "forgot" && <Field label="Email Terdaftar"><input className="gl-input" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="nama@perusahaan.co.id" autoFocus /></Field>}
+      {(mode === "login" || mode === "register" || mode === "reset") && <Field label={mode === "login" ? "Username atau Email" : "Username"}><input className="gl-input" value={form.username} onChange={(e) => set("username", e.target.value)} placeholder={mode === "login" ? "Masukkan username atau email" : "Buat username"} autoFocus={mode !== "register"} autoComplete="username" /></Field>}
+      {(mode === "login" || mode === "register" || mode === "reset") && <div className="gl-field"><label className="gl-label">{mode === "login" ? "Password" : "Password Baru"}</label><input className="gl-input has-eye" type={showPw ? "text" : "password"} value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Masukkan password" autoComplete={mode === "login" ? "current-password" : "new-password"} /><button type="button" className="gl-eye-btn" onClick={() => setShowPw((p) => !p)}>{showPw ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>}
+      {(mode === "register" || mode === "reset") && <Field label="Konfirmasi Password"><input className="gl-input" type="password" value={form.confirm} onChange={(e) => set("confirm", e.target.value)} placeholder="Ulangi password" autoComplete="new-password" /></Field>}
+      {error && <div className="gl-error" role="alert"><AlertTriangle size={14} /> {error}</div>}
+      {notice && <div style={{ display:"flex",gap:8,alignItems:"flex-start",padding:"10px 12px",marginBottom:12,borderRadius:8,background:"#EFFAF3",color:"#166E49",fontSize:12.5,lineHeight:1.45 }}><CheckCircle2 size={15} style={{flexShrink:0,marginTop:1}} />{notice}</div>}
+      {resetLink && <a href={`mailto:${encodeURIComponent(form.email)}?subject=${encodeURIComponent("Reset Akun GANDENG")}&body=${encodeURIComponent(`Gunakan tautan berikut untuk membuat username dan password baru:\n\n${resetLink}\n\nTautan berlaku 30 menit.`)}`} style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:7,minHeight:42,borderRadius:8,border:"1px solid #CF0000",color:"#CF0000",textDecoration:"none",fontWeight:700,fontSize:12.5,marginBottom:12 }}><Mail size={15}/> Kirim Tautan melalui Email</a>}
+      <button type="submit" className="gl-submit">{mode === "register" ? "BUAT AKUN" : mode === "forgot" ? "BUAT TAUTAN RESET" : mode === "reset" ? "SIMPAN AKUN BARU" : "LOGIN"}</button>
+      <div className="gl-forgot" style={{ display:"flex",justifyContent:"center",gap:10,flexWrap:"wrap" }}>{mode === "login" ? <><button type="button" onClick={() => switchMode("register")} style={linkBtn}>Daftar akun</button><span>·</span><button type="button" onClick={() => switchMode("forgot")} style={linkBtn}>Lupa password?</button></> : <button type="button" onClick={() => switchMode("login")} style={linkBtn}>Kembali ke Login</button>}</div>
+    </form>
+  </GlassLoginShell>;
 }
+function Field({ label, children }) { return <div className="gl-field"><label className="gl-label">{label}</label>{children}</div>; }
+const linkBtn = { border:0,background:"transparent",padding:0,color:"#CF0000",cursor:"pointer",fontWeight:700,fontSize:"inherit" };
