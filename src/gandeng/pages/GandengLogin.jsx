@@ -75,29 +75,24 @@ export default function GandengLogin({ onLogin, onBack }) {
         <Field label="Email"><input className="gl-input" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="nama@perusahaan.co.id" autoFocus /></Field>
         <Field label="Nama Perusahaan / Lembaga"><input className="gl-input" value={form.organization} onChange={(e) => set("organization", e.target.value)} placeholder="Contoh: PT Sejahtera Abadi" /></Field>
         <Field label="Username"><input className="gl-input" value={form.username} onChange={(e) => set("username", e.target.value)} placeholder="Buat username unik" autoComplete="username" /></Field>
-        <div style={{display:"flex",alignItems:"center",gap:10,margin:"6px 0 14px"}}>
-          <div style={{flex:1,height:1,background:"#E8EEF6"}}/>
-          <span style={{fontSize:11,fontWeight:700,color:"#8FA3BF",whiteSpace:"nowrap",letterSpacing:.3}}>KEAMANAN AKUN</span>
-          <div style={{flex:1,height:1,background:"#E8EEF6"}}/>
-        </div>
-        <div className="gl-field"><label className="gl-label">Password</label><input className="gl-input has-eye" type={showPw ? "text" : "password"} value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Minimal 6 karakter" autoComplete="new-password" /><button type="button" className="gl-eye-btn" onClick={() => setShowPw((p) => !p)}>{showPw ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
-        <div className="gl-field"><label className="gl-label">Konfirmasi Password</label><input className="gl-input has-eye" type={showConfirm ? "text" : "password"} value={form.confirm} onChange={(e) => set("confirm", e.target.value)} placeholder="Ulangi password" autoComplete="new-password" /><button type="button" className="gl-eye-btn" onClick={() => setShowConfirm((p) => !p)}>{showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>
+        <PasswordField label="Password" visible={showPw} setVisible={setShowPw} value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Minimal 6 karakter" autoComplete="new-password" />
+        <PasswordField label="Konfirmasi Password" visible={showConfirm} setVisible={setShowConfirm} value={form.confirm} onChange={(e) => set("confirm", e.target.value)} placeholder="Ulangi password" autoComplete="new-password" />
       </>}
       {mode === "forgot" && <Field label="Email Terdaftar"><input className="gl-input" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="nama@perusahaan.co.id" autoFocus /></Field>}
       {(mode === "login" || mode === "reset") && <Field label={mode === "login" ? "Username atau Email" : "Username"}><input className="gl-input" value={form.username} onChange={(e) => set("username", e.target.value)} placeholder={mode === "login" ? "Masukkan username atau email" : "Buat username"} autoFocus autoComplete="username" /></Field>}
-      {(mode === "login" || mode === "reset") && <div className="gl-field"><label className="gl-label">{mode === "login" ? "Password" : "Password Baru"}</label><input className="gl-input has-eye" type={showPw ? "text" : "password"} value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Masukkan password" autoComplete={mode === "login" ? "current-password" : "new-password"} /><button type="button" className="gl-eye-btn" onClick={() => setShowPw((p) => !p)}>{showPw ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>}
-      {mode === "reset" && <div className="gl-field"><label className="gl-label">Konfirmasi Password</label><input className="gl-input has-eye" type={showConfirm ? "text" : "password"} value={form.confirm} onChange={(e) => set("confirm", e.target.value)} placeholder="Ulangi password" autoComplete="new-password" /><button type="button" className="gl-eye-btn" onClick={() => setShowConfirm((p) => !p)}>{showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}</button></div>}
+      {(mode === "login" || mode === "reset") && <PasswordField label={mode === "login" ? "Password" : "Password Baru"} visible={showPw} setVisible={setShowPw} value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Masukkan password" autoComplete={mode === "login" ? "current-password" : "new-password"} />}
+      {mode === "reset" && <PasswordField label="Konfirmasi Password" visible={showConfirm} setVisible={setShowConfirm} value={form.confirm} onChange={(e) => set("confirm", e.target.value)} placeholder="Ulangi password" autoComplete="new-password" />}
       {error && <div className="gl-error" role="alert"><AlertTriangle size={14} /> {error}</div>}
-      {notice && <div style={{ display:"flex",gap:8,alignItems:"flex-start",padding:"10px 12px",marginBottom:12,borderRadius:8,background:"#EFFAF3",color:"#166E49",fontSize:12.5,lineHeight:1.45 }}><CheckCircle2 size={15} style={{flexShrink:0,marginTop:1}} />{notice}</div>}
-      {resetLink && <div style={{marginBottom:12}}>
-        <div style={{padding:"10px 12px",borderRadius:8,background:"#F7FAFF",border:"1px solid #D0DFF4",marginBottom:8}}>
-          <div style={{fontSize:10.5,fontWeight:700,color:"#5F7A9A",marginBottom:5}}>TAUTAN RESET</div>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:11,color:"#1A3D6B",wordBreak:"break-all",flex:1,lineHeight:1.4}}>{resetLink}</span>
-            <button type="button" onClick={copyLink} title="Salin tautan" style={{flexShrink:0,border:"1px solid #D0DFF4",background:"#fff",borderRadius:7,padding:"5px 8px",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontSize:11,fontWeight:700,color:copied?"#1E7F3E":"#125AE8"}}><Copy size={13}/>{copied?"Tersalin":"Salin"}</button>
+      {notice && <div style={{ display:"flex",gap:8,alignItems:"flex-start",padding:"9px 11px",marginBottom:9,borderRadius:8,background:"#EFFAF3",color:"#166E49",fontSize:11.5,lineHeight:1.4 }}><CheckCircle2 size={14} style={{flexShrink:0,marginTop:1}} />{notice}</div>}
+      {resetLink && <div style={{marginBottom:9}}>
+        <div style={{padding:"8px 10px",borderRadius:8,background:"#F7FAFF",border:"1px solid #D0DFF4",marginBottom:7}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#5F7A9A",marginBottom:4}}>TAUTAN RESET</div>
+          <div style={{display:"flex",alignItems:"center",gap:7}}>
+            <span style={{fontSize:10.5,color:"#1A3D6B",wordBreak:"break-all",flex:1,lineHeight:1.35}}>{resetLink}</span>
+            <button type="button" onClick={copyLink} title="Salin tautan" style={{flexShrink:0,border:"1px solid #D0DFF4",background:"#fff",borderRadius:7,padding:"5px 7px",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontSize:10.5,fontWeight:700,color:copied?"#1E7F3E":"#CF0000"}}><Copy size={12}/>{copied?"Tersalin":"Salin"}</button>
           </div>
         </div>
-        <a href={`mailto:${encodeURIComponent(form.email)}?subject=${encodeURIComponent("Reset Akun GANDENG")}&body=${encodeURIComponent(`Gunakan tautan berikut untuk membuat username dan password baru:\n\n${resetLink}\n\nTautan berlaku 30 menit.`)}`} style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:7,minHeight:40,borderRadius:8,border:"1px solid #CF0000",color:"#CF0000",textDecoration:"none",fontWeight:700,fontSize:12.5 }}><Mail size={15}/> Kirim via Email</a>
+        <a href={`mailto:${encodeURIComponent(form.email)}?subject=${encodeURIComponent("Reset Akun GANDENG")}&body=${encodeURIComponent(`Gunakan tautan berikut untuk membuat username dan password baru:\n\n${resetLink}\n\nTautan berlaku 30 menit.`)}`} style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:7,minHeight:35,borderRadius:8,border:"1px solid #CF0000",color:"#CF0000",textDecoration:"none",fontWeight:700,fontSize:11.5 }}><Mail size={14}/> Kirim via Email</a>
       </div>}
       <button type="submit" className="gl-submit">{mode === "register" ? "BUAT AKUN" : mode === "forgot" ? "BUAT TAUTAN RESET" : mode === "reset" ? "SIMPAN AKUN BARU" : "LOGIN"}</button>
       <div className="gl-forgot" style={{ display:"flex",justifyContent:"center",gap:10,flexWrap:"wrap" }}>{mode === "login" ? <><button type="button" onClick={() => switchMode("register")} style={linkBtn}>Daftar akun</button><span>·</span><button type="button" onClick={() => switchMode("forgot")} style={linkBtn}>Lupa password?</button></> : <button type="button" onClick={() => switchMode("login")} style={linkBtn}>Kembali ke Login</button>}</div>
@@ -105,4 +100,5 @@ export default function GandengLogin({ onLogin, onBack }) {
   </GlassLoginShell>;
 }
 function Field({ label, children }) { return <div className="gl-field"><label className="gl-label">{label}</label>{children}</div>; }
+function PasswordField({ label, visible, setVisible, ...inputProps }) { return <div className="gl-field"><label className="gl-label">{label}</label><input className="gl-input has-eye" type={visible ? "text" : "password"} {...inputProps} /><button type="button" className="gl-eye-btn" onClick={() => setVisible((p) => !p)} aria-label={visible ? "Sembunyikan password" : "Tampilkan password"}>{visible ? <Eye size={18} /> : <EyeOff size={18} />}</button></div>; }
 const linkBtn = { border:0,background:"transparent",padding:0,color:"#CF0000",cursor:"pointer",fontWeight:700,fontSize:"inherit" };
