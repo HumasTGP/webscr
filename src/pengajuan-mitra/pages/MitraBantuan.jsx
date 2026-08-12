@@ -1,117 +1,23 @@
 import { useState } from "react";
-import { HelpCircle, Phone, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, HelpCircle, Phone } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { HELP_CONTACT } from "../../lib/helpContact";
 
 const PANDUAN_STEPS = [
-  { step: 1, judul: "Login ke GANDENG", desc: "Masuk menggunakan username dan password yang telah diberikan oleh admin PLN." },
-  { step: 2, judul: "Buat Pengajuan Baru", desc: "Klik menu Pengajuan Baru, lalu isi formulir proposal dengan lengkap." },
-  { step: 3, judul: "Kirim Pengajuan", desc: "Pengajuan yang dikirim akan masuk ke antrean pemeriksaan Humas." },
+  { step: 1, judul: "Daftar Akun GANDENG", desc: "Daftar menggunakan email perusahaan/lembaga, lalu buat username dan password sendiri." },
+  { step: 2, judul: "Login ke GANDENG", desc: "Masuk menggunakan username atau email beserta password yang sudah dibuat saat registrasi." },
+  { step: 3, judul: "Buat Pengajuan Baru", desc: "Klik Pengajuan Baru dan isi proposal. Nama perusahaan/lembaga mengikuti akun yang sedang login." },
   { step: 4, judul: "Pantau Status", desc: "Gunakan Tracking Status untuk memantau tahapan Humas → ASMAN → MADM." },
-  { step: 5, judul: "Lihat Catatan Review", desc: "Keputusan dan catatan reviewer dapat dilihat pada detail serta riwayat pengajuan." },
+  { step: 5, judul: "Reset Akun jika Lupa Password", desc: "Gunakan menu Lupa Password pada halaman login untuk membuat tautan reset dan menetapkan username/password baru." },
 ];
-
 const FAQS = [
-  {
-    q: "Bagaimana alur review pengajuan GANDENG?",
-    a: "Pengajuan masuk ke Humas, kemudian diteruskan ke ASMAN dan MADM sesuai hasil pemeriksaan pada setiap tahap.",
-  },
-  {
-    q: "Apa yang harus dilakukan jika pengajuan dikembalikan atau ditolak?",
-    a: "Buka detail pengajuan untuk melihat catatan reviewer. Catatan tersebut menjadi acuan untuk perbaikan atau pengajuan kembali.",
-  },
-  {
-    q: "Apakah pengajuan yang sudah dikirim dapat diubah langsung?",
-    a: "Pengajuan yang sudah dikirim tidak diubah langsung agar riwayat review tetap konsisten. Hubungi admin melalui WhatsApp apabila diperlukan tindak lanjut.",
-  },
+  { q: "Apakah akun lain dapat melihat pengajuan perusahaan saya?", a: "Tidak. Pengajuan GANDENG ditampilkan berdasarkan akun perusahaan/lembaga yang sedang login." },
+  { q: "Bagaimana alur review pengajuan GANDENG?", a: "Pengajuan masuk ke Humas, kemudian diteruskan ke ASMAN dan MADM sesuai hasil pemeriksaan setiap tahap." },
+  { q: "Apa yang harus dilakukan jika pengajuan dikembalikan atau ditolak?", a: "Buka detail pengajuan untuk melihat status dan riwayat proses sebagai acuan tindak lanjut." },
+  { q: "Bagaimana jika lupa password?", a: "Masukkan email terdaftar pada fitur Lupa Password. Sistem akan membuat tautan reset untuk membuat username dan password baru." },
 ];
-
-function WhatsAppIcon({ size = 16, color = "currentColor" }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M20.52 3.48A11.82 11.82 0 0 0 12.1 0C5.56 0 .24 5.32.24 11.86c0 2.09.55 4.13 1.59 5.93L.14 24l6.36-1.67a11.84 11.84 0 0 0 5.6 1.43h.01C18.65 23.76 24 18.44 24 11.9c0-3.18-1.24-6.17-3.48-8.42Zm-8.41 18.28h-.01a9.83 9.83 0 0 1-5.01-1.37l-.36-.21-3.77.99 1.01-3.68-.23-.38a9.86 9.86 0 0 1-1.51-5.25C2.23 6.43 6.66 2 12.1 2c2.64 0 5.12 1.03 6.98 2.9a9.8 9.8 0 0 1 2.9 6.99c0 5.44-4.43 9.87-9.87 9.87Zm5.41-7.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.95 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47a8.93 8.93 0 0 1-1.64-2.04c-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.08-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.19 1.87.12.57-.08 1.75-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35Z" fill={color} />
-    </svg>
-  );
-}
-
-function FAQItem({ faq }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden", marginBottom: 10 }}>
-      <button onClick={() => setOpen((p) => !p)} style={{
-        width: "100%", padding: "14px 18px", display: "flex", alignItems: "center",
-        justifyContent: "space-between", gap: 12, background: open ? T.blueSoft : T.card,
-        border: "none", cursor: "pointer", fontFamily: font.body, textAlign: "left",
-      }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: T.heading, lineHeight: 1.5 }}>{faq.q}</span>
-        {open ? <ChevronUp size={16} color={T.muted} /> : <ChevronDown size={16} color={T.muted} />}
-      </button>
-      {open && (
-        <div style={{ padding: "14px 18px", background: T.card, borderTop: `1px solid ${T.border}`, fontSize: 13, color: T.text, lineHeight: 1.65, overflowWrap: "anywhere" }}>
-          {faq.a}
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default function MitraBantuan() {
-  const waUrl = `https://wa.me/${HELP_CONTACT.waNumber}?text=${encodeURIComponent(HELP_CONTACT.waMessage)}`;
-
-  return (
-    <div style={{ fontFamily: font.body, padding: "clamp(18px, 3vw, 28px) clamp(16px, 4vw, 32px)", maxWidth: 820, width: "100%", boxSizing: "border-box" }}>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4, fontWeight: 700 }}>GANDENG</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: T.heading, marginBottom: 5 }}>Pusat Bantuan GANDENG</div>
-        <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.6 }}>Panduan penggunaan, FAQ, dan kontak bantuan untuk proses pengajuan proposal.</div>
-      </div>
-
-      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden", marginBottom: 24 }}>
-        <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 8, background: T.bg }}>
-          <BookOpen size={16} color={T.blue} />
-          <span style={{ fontSize: 14, fontWeight: 700, color: T.heading }}>Panduan Penggunaan</span>
-        </div>
-        <div style={{ padding: "20px" }}>
-          {PANDUAN_STEPS.map((s) => (
-            <div key={s.step} style={{ display: "flex", gap: 14, marginBottom: 16, alignItems: "flex-start" }}>
-              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#0E4C92", color: "#fff", display: "grid", placeItems: "center", fontSize: 12, fontWeight: 800, flexShrink: 0, marginTop: 1 }}>{s.step}</div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: T.heading, marginBottom: 3, lineHeight: 1.45 }}>{s.judul}</div>
-                <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.6, overflowWrap: "anywhere" }}>{s.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden", marginBottom: 24 }}>
-        <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", gap: 8, background: T.bg }}>
-          <HelpCircle size={16} color={T.blue} />
-          <span style={{ fontSize: 14, fontWeight: 700, color: T.heading }}>Pertanyaan Umum (FAQ)</span>
-        </div>
-        <div style={{ padding: "16px 20px" }}>{FAQS.map((faq, i) => <FAQItem key={i} faq={faq} />)}</div>
-      </div>
-
-      <div style={{ background: "linear-gradient(135deg, #0A1628 0%, #0E4C92 100%)", borderRadius: 12, padding: "22px 24px", color: "#fff" }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 4 }}>Hubungi Admin</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.68)", marginBottom: 18, lineHeight: 1.5 }}>Jam operasional: {HELP_CONTACT.hours}</div>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <a href={waUrl} target="_blank" rel="noopener noreferrer" style={{
-            display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 8,
-            background: "#25D366", color: "#fff", textDecoration: "none", fontSize: 13,
-            fontWeight: 700, fontFamily: font.body,
-          }}>
-            <WhatsAppIcon size={16} color="#fff" /> WhatsApp {HELP_CONTACT.phone}
-          </a>
-          <a href={`tel:${HELP_CONTACT.waNumber}`} style={{
-            display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 8,
-            background: "rgba(255,255,255,0.12)", color: "#fff", textDecoration: "none",
-            fontSize: 13, fontWeight: 700, fontFamily: font.body, border: "1px solid rgba(255,255,255,0.2)",
-          }}>
-            <Phone size={15} /> Telepon
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
+function WhatsAppIcon({ size=16,color="currentColor" }) { return <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true"><path fill={color} d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .2 5.3.2 11.9c0 2.1.6 4.1 1.6 5.9L.1 24l6.4-1.7a11.8 11.8 0 0 0 5.6 1.4C18.7 23.8 24 18.4 24 11.9c0-3.2-1.2-6.2-3.5-8.4Zm-8.4 18.3a9.8 9.8 0 0 1-5-1.4l-.4-.2-3.8 1 1-3.7-.2-.4a9.9 9.9 0 1 1 8.4 4.7Zm5.4-7.4c-.3-.2-1.8-.9-2-.9-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.4.2-.7.1-.3-.2-1.2-.5-2.4-1.5-.9-.8-1.5-1.8-1.6-2-.2-.3 0-.5.1-.6.1-.2.3-.4.5-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.2-.7-1.6-.9-2.2-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.1-.3-.2-.6-.3Z"/></svg>; }
+function FAQItem({ faq }) { const [open,setOpen]=useState(false); return <div style={{border:`1px solid ${T.border}`,borderRadius:10,overflow:"hidden",marginBottom:10}}><button onClick={()=>setOpen((p)=>!p)} style={{width:"100%",padding:"14px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,background:open?T.blueSoft:T.card,border:0,cursor:"pointer",textAlign:"left",color:T.heading,fontWeight:700}}><span>{faq.q}</span>{open?<ChevronUp size={16}/>:<ChevronDown size={16}/>}</button>{open&&<div style={{padding:"14px 18px",borderTop:`1px solid ${T.border}`,fontSize:13,color:T.muted,lineHeight:1.65}}>{faq.a}</div>}</div>; }
+export default function MitraBantuan() { const waUrl=`https://wa.me/${HELP_CONTACT.waNumber}?text=${encodeURIComponent(HELP_CONTACT.waMessage)}`; return <div style={{fontFamily:font.body,padding:"clamp(18px,3vw,28px) clamp(16px,4vw,32px)",maxWidth:840,width:"100%",boxSizing:"border-box"}}><div style={{marginBottom:24}}><div style={{fontSize:11,color:T.blue,textTransform:"uppercase",letterSpacing:1,fontWeight:800}}>GANDENG</div><div style={{fontSize:22,fontWeight:800,color:T.heading,marginTop:4}}>Pusat Bantuan GANDENG</div><div style={{fontSize:13,color:T.muted,lineHeight:1.6,marginTop:4}}>Panduan akun, pengajuan, tracking, reset akses, dan bantuan admin.</div></div><section style={section}><Header icon={BookOpen} text="Panduan Penggunaan"/><div>{PANDUAN_STEPS.map((s)=><div key={s.step} style={{display:"flex",gap:14,marginBottom:16,alignItems:"flex-start"}}><div style={{width:29,height:29,borderRadius:"50%",background:T.blue,color:"#fff",display:"grid",placeItems:"center",fontWeight:800,fontSize:12,flexShrink:0}}>{s.step}</div><div><div style={{fontSize:13,fontWeight:800,color:T.heading,lineHeight:1.45}}>{s.judul}</div><div style={{fontSize:12.5,color:T.muted,lineHeight:1.6,marginTop:3}}>{s.desc}</div></div></div>)}</div></section><section style={section}><Header icon={HelpCircle} text="Pertanyaan Umum"/>{FAQS.map((faq)=><FAQItem key={faq.q} faq={faq}/>)}</section><div style={{background:"linear-gradient(135deg,#780000 0%,#CF0000 100%)",borderRadius:14,padding:"22px 24px",color:"#fff"}}><div style={{fontSize:14,fontWeight:800}}>Hubungi Admin</div><div style={{fontSize:12.5,opacity:.72,margin:"4px 0 16px"}}>Jam operasional: {HELP_CONTACT.hours}</div><div className="responsive-actions" style={{display:"flex",gap:10}}><a href={waUrl} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",gap:8,minHeight:40,padding:"0 15px",borderRadius:8,background:"#25D366",color:"#fff",fontWeight:800,fontSize:12.5,textDecoration:"none"}}><WhatsAppIcon color="#fff"/>WhatsApp {HELP_CONTACT.phone}</a><a href={`tel:${HELP_CONTACT.waNumber}`} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",gap:7,minHeight:40,padding:"0 15px",borderRadius:8,border:"1px solid rgba(255,255,255,.28)",color:"#fff",fontWeight:700,fontSize:12.5,textDecoration:"none"}}><Phone size={15}/>Telepon</a></div></div></div>; }
+function Header({ icon:Icon,text }) { return <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}><div style={{width:32,height:32,borderRadius:9,background:T.blueSoft,color:T.blue,display:"grid",placeItems:"center"}}><Icon size={16}/></div><b style={{fontSize:14,color:T.heading}}>{text}</b></div>; }
+const section={background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"18px 20px",marginBottom:20};
