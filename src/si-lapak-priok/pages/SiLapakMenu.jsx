@@ -1,15 +1,30 @@
+import { useEffect, useState } from "react";
 import { BarChart3, Boxes, PackageCheck, UserRoundCheck, Users } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import Card from "../../components/Card";
 import PageHeader from "../../components/PageHeader";
 import { DutyBanner } from "./DutyPicker";
 
+function formatClock(date) {
+  return {
+    tanggal: date.toLocaleDateString("id-ID", { weekday:"long", day:"2-digit", month:"long", year:"numeric" }),
+    waktu: `${date.toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false })} WIB`,
+  };
+}
+
 export default function SiLapakMenu({ duty, onOpenDuty, paket, tamu }) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const belumDiambil = paket.filter((p) => p.status === "Belum Diambil").length;
   const tamuHariIni = tamu.filter((t) => t.tanggalKey === new Date().toDateString()).length;
   const paketMasukPerBulan = groupByBulan(paket, (p) => p.diterimaTanggal);
   const paketKeluarPerBulan = groupByBulan(paket.filter((p) => p.status === "Sudah Diambil"), (p) => p.diterimaTanggal);
   const tamuPerBulan = groupByBulan(tamu, (t) => t.tanggal, true);
+  const clock = formatClock(now);
 
   const stats = [
     { icon: Boxes, label: "Paket Belum Diambil", value: belumDiambil, note: "Menunggu proses pengambilan" },
@@ -19,7 +34,11 @@ export default function SiLapakMenu({ duty, onOpenDuty, paket, tamu }) {
   ];
 
   return <div>
-    <PageHeader title="Dashboard" description="Ringkasan aktivitas paket, kunjungan tamu, dan petugas yang sedang berjaga." />
+    <PageHeader
+      title="Dashboard"
+      description="Ringkasan aktivitas paket, kunjungan tamu, dan petugas yang sedang berjaga."
+      meta={[{ label:"Tanggal", value:clock.tanggal }, { label:"Waktu", value:clock.waktu }]}
+    />
     <DutyBanner duty={duty} onOpen={onOpenDuty} />
 
     <div className="responsive-card-grid silapak-kpi-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,minmax(0,1fr))", gap:12, margin:"18px 0" }}>
