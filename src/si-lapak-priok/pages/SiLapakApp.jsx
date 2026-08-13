@@ -33,7 +33,8 @@ export default function SiLapakApp({ onLogout }) {
   const handleProsesAmbil = (item) => { setPrefillAmbilId(item.id); setView("ambil"); };
   const handleAmbilSaved = ({ id, pengambil, satpamTugas, bulanKeluar, fotoBukti }) => {
     setPaket((prev) => prev.map((p) => p.id === id ? { ...p, status: "Sudah Diambil", pengambil, satpamTugasAmbil: satpamTugas, bulanKeluar, fotoBukti } : p));
-    setPrefillAmbilId(null); setView("data");
+    setPrefillAmbilId(null);
+    setView("data");
   };
   const updatePaket = (updated) => setPaket((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
   const deletePaket = (id) => setPaket((prev) => prev.filter((p) => p.id !== id));
@@ -42,16 +43,16 @@ export default function SiLapakApp({ onLogout }) {
 
   const framed = (key, node, help = false) => {
     const meta = VIEW_META[key];
-    return <div className="silapak-view-frame"><SiLapakPageHeader title={meta.title} description={meta.description} onBack={key === "bantuan" ? null : () => setView("dashboard")} /><div className={`silapak-framed-content${help ? " silapak-help-content" : ""}`}>{node}</div></div>;
+    return <div className="silapak-view-frame"><SiLapakPageHeader title={meta.title} description={meta.description} /><div className={`silapak-framed-content${help ? " silapak-help-content" : ""}`}>{node}</div></div>;
   };
 
   return <SiLapakShell active={view} onSelect={goto} onLogout={onLogout}>
     {view === "dashboard" && <SiLapakMenu duty={duty} onOpenDuty={() => setDutyModalOpen(true)} paket={paket} tamu={tamu} />}
-    {view === "tambah" && framed("tambah", <TambahPaket duty={duty} onBack={() => setView("dashboard")} onSaved={(entry) => setPaket((prev) => [entry, ...prev])} />)}
-    {view === "data" && framed("data", <DataPaket paket={paket} onBack={() => setView("dashboard")} onProsesAmbil={handleProsesAmbil} onUpdate={updatePaket} onDelete={deletePaket} />)}
-    {view === "ambil" && framed("ambil", <AmbilPaket paket={paket} prefillId={prefillAmbilId} duty={duty} onBack={() => setView("dashboard")} onSaved={handleAmbilSaved} />)}
-    {view === "tamu" && framed("tamu", <BukuTamu onBack={() => setView("dashboard")} onSaved={(entry) => setTamu((prev) => [entry, ...prev])} />)}
-    {view === "riwayat" && framed("riwayat", <Riwayat paket={paket} tamu={tamu} onBack={() => setView("dashboard")} onUpdateTamu={updateTamu} onDeleteTamu={deleteTamu} />)}
+    {view === "tambah" && framed("tambah", <TambahPaket duty={duty} onSaved={(entry) => setPaket((prev) => [entry, ...prev])} />)}
+    {view === "data" && framed("data", <DataPaket paket={paket} onProsesAmbil={handleProsesAmbil} onUpdate={updatePaket} onDelete={deletePaket} />)}
+    {view === "ambil" && framed("ambil", <AmbilPaket paket={paket} prefillId={prefillAmbilId} duty={duty} onSaved={handleAmbilSaved} />)}
+    {view === "tamu" && framed("tamu", <BukuTamu onSaved={(entry) => setTamu((prev) => [entry, ...prev])} />)}
+    {view === "riwayat" && framed("riwayat", <Riwayat paket={paket} tamu={tamu} onUpdateTamu={updateTamu} onDeleteTamu={deleteTamu} />)}
     {view === "bantuan" && framed("bantuan", <SiLapakBantuan />, true)}
     <DutyPickerModal open={dutyModalOpen} onClose={() => setDutyModalOpen(false)} duty={duty} onSave={setDuty} satpamList={satpamList} onAddSatpam={(name) => setSatpamList((prev) => [...prev, name])} />
   </SiLapakShell>;
