@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { T } from "../../lib/theme";
 import { EKSPEDISI_OPT, uidSilapak, nowJam, nowTanggal } from "../../lib/siLapakPriokData";
 
@@ -26,7 +25,7 @@ function Field({ label, required, hint, full, children }) {
   );
 }
 
-export default function TambahPaket({ duty, onBack, onSaved }) {
+export default function TambahPaket({ duty, onSaved }) {
   const [namaPenerima, setNamaPenerima] = useState("");
   const [ekspedisi, setEkspedisi] = useState("");
   const [noResi, setNoResi] = useState("");
@@ -66,10 +65,7 @@ export default function TambahPaket({ duty, onBack, onSaved }) {
           <Row label="Ekspedisi" value={saved.ekspedisi} />
           <Row label="Status" value={saved.status} />
         </div>
-        <button type="button" onClick={onBack} style={{ width: "100%", padding: 11, borderRadius: 8, border: "none", background: T.navy, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-          Lihat di data paket
-        </button>
-        <button type="button" onClick={() => setSaved(null)} style={{ width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${T.border}`, background: T.card, color: T.text, fontWeight: 600, fontSize: 12.5, cursor: "pointer", marginTop: 8 }}>
+        <button type="button" onClick={() => setSaved(null)} style={{ width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${T.border}`, background: T.card, color: T.text, fontWeight: 600, fontSize: 12.5, cursor: "pointer" }}>
           Tambah paket lain
         </button>
       </div>
@@ -78,11 +74,6 @@ export default function TambahPaket({ duty, onBack, onSaved }) {
 
   return (
     <div style={{ maxWidth: 640 }}>
-      <button type="button" onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", color: T.muted, fontSize: 12, cursor: "pointer", marginBottom: 16, padding: 0 }}>
-        <ArrowLeft size={14} /> Kembali
-      </button>
-      <h2 style={{ fontSize: 16, fontWeight: 700, color: T.heading, margin: "0 0 20px" }}>Tambah paket baru</h2>
-
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <Field label="Nama penerima" required full hint="Contoh: Budi Santoso, Divisi Umum. Boleh diketik bebas bila belum ada di daftar.">
           <input style={inputStyle} value={namaPenerima} onChange={(e) => setNamaPenerima(e.target.value)} placeholder="Pilih dari daftar atau ketik nama baru" />
@@ -99,11 +90,7 @@ export default function TambahPaket({ duty, onBack, onSaved }) {
           <input style={inputStyle} value={noResi} onChange={(e) => setNoResi(e.target.value)} placeholder="Nomor resi" />
         </Field>
 
-        <Field
-          label="Satpam penerima paket"
-          full
-          hint={dutyOptions.length ? "Daftar mengikuti satpam yang aktif pada shift berjalan." : "Belum ada satpam bertugas dipilih untuk shift ini."}
-        >
+        <Field label="Satpam penerima paket" full hint={dutyOptions.length ? "Daftar mengikuti satpam yang aktif pada shift berjalan." : "Belum ada satpam bertugas dipilih untuk shift ini."}>
           <select style={inputStyle} value={satpam} onChange={(e) => setSatpam(e.target.value)}>
             <option value="">Pilih satpam</option>
             {dutyOptions.map((n) => (<option key={n} value={n}>{n}</option>))}
