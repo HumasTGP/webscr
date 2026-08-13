@@ -22,7 +22,7 @@ export default function SiLapakLogin({ onLogin, onBack, authenticate }) {
   };
 
   const waUrl = `https://wa.me/${HELP_CONTACT.waNumber}?text=${encodeURIComponent(HELP_CONTACT.waMessage)}`;
-  return <GlassLoginShell title="SI LAPAK PRIOK" subtitle="Sistem Pengelolaan Penerimaan Tamu dan Paket" onBack={onBack} illustration={<SilapakIllustration />} accent="#C9A91E" accentSoft="#F7F0C7" brandTitle="SI LAPAK PRIOK" backgroundImage="/portal-bg.png">
+  return <GlassLoginShell title="SI LAPAK PRIOK" subtitle="Sistem Pengelolaan Penerimaan Tamu dan Paket" onBack={onBack} illustration={<SilapakIllustration />} accent="#FDEA6F" accentSoft="#FFF8D5" brandTitle="SI LAPAK PRIOK" backgroundImage="/portal-bg.png">
     <form onSubmit={submit} style={{ fontFamily: font.body }}>
       <div className="gl-field"><label className="gl-label">Username</label><input className="gl-input" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Masukkan username" autoComplete="username" autoFocus /></div>
       <div className="gl-field"><label className="gl-label">Password</label><input className="gl-input has-eye" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Masukkan password" autoComplete="current-password" /><button type="button" className="gl-eye-btn" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}>{showPassword ? <Eye size={18} /> : <EyeOff size={18} />}</button></div>
