@@ -292,6 +292,7 @@ export default function App() {
           pdfEnabled
           docxTemplate={DOCX_TEMPLATES.tor}
           buildDocPreview={(v) => <TorDocPreview values={v} />}
+          editViaWizard
           columns={[
             { key: "id", label: "ID TOR" },
             { key: "kategori", label: "Kategori" },

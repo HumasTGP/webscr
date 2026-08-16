@@ -25,18 +25,10 @@ import Modal from "../../components/Modal";
 import PageHeader from "../../components/PageHeader";
 import FlowSteps from "../../components/FlowSteps";
 import DataTable from "../../components/DataTable";
-import DetailModal from "../../components/DetailModal";
 import FormGrid, { ReviewList } from "../../components/FormGrid";
 import MiniField, { miniInputStyle } from "../../components/MiniField";
 
-const STEPS = [
-  "Checklist Dokumen",
-  "Uraian RAB",
-  "Konfirmasi Uraian",
-  "Data RAB",
-  "Konfirmasi Data",
-  "Simpan",
-];
+const STEPS = ["Data RAB", "Uraian RAB", "Konfirmasi RAB", "Simpan"];
 
 const STANDAR_CHECKLIST_DOCS = [
   "Surat Permohonan Pembayaran (SPP)",
@@ -69,8 +61,7 @@ const LIST_COLUMNS = [
   { key: "idNumber", label: "ID Number" },
   { key: "judulKegiatan", label: "Judul Kegiatan" },
   { key: "kategori", label: "Kategori" },
-  { key: "bidang", label: "Bidang" },
-  { key: "vendor", label: "Vendor" },
+  { key: "tanggalRab", label: "Tanggal RAB" },
   {
     key: "totalEvaluasi",
     label: "Total Evaluasi",
@@ -78,33 +69,21 @@ const LIST_COLUMNS = [
   },
 ];
 
-const buildHeaderFields = (vendors) => [
+const buildHeaderFields = () => [
   {
     key: "idNumber",
     label: "ID Number",
     hint: "otomatis (lanjut dari ID terakhir) - bisa diubah manual",
     placeholder: "cth. RAB-2026-001",
   },
-  { key: "bidang", label: "Bidang", type: "select", options: OPT.bidang },
-  { key: "jenisProgram", label: "Jenis Program", type: "select", options: OPT.jenisProgram },
-  { key: "subprogram", label: "Subprogram", type: "select", options: OPT.subprogram },
-  {
-    key: "kategoriProgram",
-    label: "Kategori Program",
-    type: "select",
-    options: OPT.kategoriProgram,
-  },
-  { key: "procost", label: "Procost", type: "select", options: OPT.procost },
-  { key: "task", label: "Task", type: "select", options: OPT.task },
-  { key: "expType", label: "Exp. Type", type: "select", options: OPT.expType },
-  { key: "expOrg", label: "Exp. Org", type: "select", options: OPT.expOrg },
   { key: "tanggalRab", label: "Tanggal RAB", type: "date" },
-  { key: "judulKegiatan", label: "Judul Kegiatan", full: true },
+  { key: "kategori", label: "Kategori", type: "select", options: OPT.kategori },
+  { key: "judulKegiatan", label: "Judul Program", full: true },
   {
-    key: "vendor",
-    label: "Vendor",
-    type: "select",
-    options: vendors.map((v) => v.nama),
+    key: "dokumenTor",
+    label: "Dokumen TOR",
+    type: "file-upload",
+    placeholder: "Klik untuk lampirkan file TOR (PDF/Word, maks 10MB)",
     full: true,
   },
 ];
@@ -131,18 +110,19 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
   const [rowDraft, setRowDraft] = useState({});
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [detailRow, setDetailRow] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [rabPreview, setRabPreview] = useState(null);
   const [selectedId, setSelectedId] = useState("");
+  const [editingRab, setEditingRab] = useState(null);
 
-  const headerFields = buildHeaderFields(vendors);
+  const headerFields = buildHeaderFields();
   const totalEvaluasi = items.reduce((s, r) => s + (r.totalEvaluasi || 0), 0);
 
   const startWizard = () => {
     setItems([]);
     setRowDraft({});
     setEditingId(null);
+    setEditingRab(null);
     setChecklist(buildInitialChecklist());
     setHeader({
       idNumber: nextIdFor("RAB", rab, "idNumber"),
@@ -150,6 +130,25 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
     });
     setStep(0);
     setMode("wizard");
+  };
+
+  const startEditRab = (record) => {
+    setEditingRab(record);
+    setHeader({ ...record });
+    setItems(record.items || []);
+    setChecklist(record.checklist || buildInitialChecklist());
+    setRowDraft({});
+    setEditingId(null);
+    setStep(0);
+    setMode("wizard");
+  };
+
+  const deleteRab = (record) => {
+    if (typeof window !== "undefined" && !window.confirm(`Hapus RAB ${record.idNumber}?`)) {
+      return;
+    }
+    setRab((prev) => prev.filter((r) => r !== record));
+    notify("Data RAB berhasil dihapus.");
   };
 
   const saveRow = () => {
@@ -192,7 +191,13 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
   };
 
   const saveAll = () => {
-    setRab((prev) => [...prev, { ...header, checklist, items, totalEvaluasi }]);
+    setRab((prev) =>
+      editingRab
+        ? prev.map((r) =>
+            r === editingRab ? { ...header, checklist, items, totalEvaluasi } : r
+          )
+        : [...prev, { ...header, checklist, items, totalEvaluasi }]
+    );
     setShowSaveModal(false);
     setShowSuccessModal(true);
   };
@@ -200,11 +205,12 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
   const finish = () => {
     setShowSuccessModal(false);
     setMode("list");
+    setEditingRab(null);
     notify("Data RAB berhasil disimpan!", "success", "RAB");
   };
 
   const doDownloadRabPdf = async (record) => {
-    const recFields = buildHeaderFields(vendors);
+    const recFields = buildHeaderFields().filter((f) => f.type !== "file-upload");
     await generateSikasPdf({
       title: "Rencana Anggaran Biaya (RAB)",
       subtitle: `${record.idNumber || "-"} · Total Evaluasi ${rupiah(record.totalEvaluasi || 0)}`,
@@ -253,7 +259,6 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
   };
 
   const openRabPreview = (record) => {
-    setDetailRow(null);
     setRabPreview(record);
   };
   const closeRabPreview = () => {
@@ -303,13 +308,48 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
   };
 
   if (mode === "list") {
-    const detailColumns = headerFields.map((f) => ({ key: f.key, label: f.label }));
     const displayRab = defaultKategori ? rab.filter((r) => r.kategori === defaultKategori) : rab;
     const pageTitle = defaultKategori ? `RAB - ${defaultKategori}` : "Rencana Anggaran Biaya";
     const pageDesc = defaultKategori
-      ? `Daftar RAB dengan kategori ${defaultKategori}. Klik baris untuk melihat detail.`
-      : "Kelola seluruh data Rencana Anggaran Biaya. Klik salah satu baris untuk melihat detail atau mengubah data.";
+      ? `Daftar RAB dengan kategori ${defaultKategori}. Klik baris untuk mengubah data.`
+      : "Kelola seluruh data Rencana Anggaran Biaya. Klik salah satu baris untuk mengubah data.";
     const addLabel = defaultKategori ? `Buat RAB ${defaultKategori}` : "Add New RAB";
+    const listColumns = [
+      ...LIST_COLUMNS,
+      {
+        key: "aksi",
+        label: "Aksi",
+        align: "center",
+        render: (r) => (
+          <div style={{ display: "inline-flex", gap: 4 }}>
+            <button
+              type="button"
+              aria-label="Edit RAB"
+              title="Edit RAB"
+              onClick={(e) => {
+                e.stopPropagation();
+                startEditRab(r);
+              }}
+              style={iconBtn(T.blue)}
+            >
+              <Pencil size={14} />
+            </button>
+            <button
+              type="button"
+              aria-label="Hapus RAB"
+              title="Hapus RAB"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteRab(r);
+              }}
+              style={iconBtn(T.danger)}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ),
+      },
+    ];
     return (
       <div>
         <PageHeader
@@ -364,22 +404,12 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
         <Card padded={false}>
           <DataTable
             emptyLabel={`Belum ada RAB${defaultKategori ? ` kategori ${defaultKategori}` : ""}. Klik "${addLabel}" untuk membuat pengajuan pertama.`}
-            columns={LIST_COLUMNS}
+            searchPlaceholder="Cari berdasarkan ID atau judul kegiatan…"
+            columns={listColumns}
             rows={displayRab}
-            onRowClick={setDetailRow}
+            onRowClick={startEditRab}
           />
         </Card>
-        <DetailModal
-          open={!!detailRow}
-          onClose={() => setDetailRow(null)}
-          data={detailRow}
-          columns={detailColumns}
-          onSave={(draft) => {
-            setRab((prev) => prev.map((r) => (r === detailRow ? { ...r, ...draft } : r)));
-            notify("Data RAB berhasil diperbarui!");
-          }}
-          onDownloadPdf={openRabPreview}
-        />
         {renderRabPreview()}
       </div>
     );
@@ -398,14 +428,24 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
           </Button>
         }
       />
-      <FlowSteps steps={STEPS} current={savingNow ? 5 : step} />
+      <FlowSteps steps={STEPS} current={savingNow ? 3 : step} />
 
       {step === 0 && (
-        <StepChecklist
-          checklist={checklist}
-          setChecklist={setChecklist}
-          onNext={() => setStep(1)}
-        />
+        <Card>
+          <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 14 }}>
+            Data RAB
+          </h3>
+          <FormGrid
+            fields={headerFields}
+            values={header}
+            onChange={(k, v) => setHeader({ ...header, [k]: v })}
+          />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
+            <Button onClick={() => setStep(1)}>
+              Lanjutkan <ArrowRight size={15} />
+            </Button>
+          </div>
+        </Card>
       )}
 
       {step === 1 && (
@@ -424,49 +464,15 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
       )}
 
       {step === 2 && (
-        <StepKonfirmasiUraian
+        <StepKonfirmasi
+          header={header}
+          headerFields={headerFields}
           items={items}
+          checklist={checklist}
+          setChecklist={setChecklist}
           onBack={() => setStep(1)}
-          onNext={() => setStep(3)}
+          onSubmit={() => setShowSaveModal(true)}
         />
-      )}
-
-      {step === 3 && (
-        <Card>
-          <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 14 }}>
-            Isi Data RAB
-          </h3>
-          <FormGrid
-            fields={headerFields}
-            values={header}
-            onChange={(k, v) => setHeader({ ...header, [k]: v })}
-          />
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
-            <Button onClick={() => setStep(4)}>
-              Lanjutkan <ArrowRight size={15} />
-            </Button>
-          </div>
-        </Card>
-      )}
-
-      {step === 4 && (
-        <Card>
-          <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 4 }}>
-            Datanya udah bener?
-          </h3>
-          <p style={{ color: T.muted, fontSize: 13, marginBottom: 16 }}>
-            Tinjau data induk RAB sebelum disimpan.
-          </p>
-          <ReviewList fields={headerFields} values={header} />
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
-            <Button variant="ghost" icon={ArrowLeft} onClick={() => setStep(3)}>
-              Tidak, edit lagi
-            </Button>
-            <Button onClick={() => setShowSaveModal(true)}>
-              Ya, sudah benar <ArrowRight size={15} />
-            </Button>
-          </div>
-        </Card>
       )}
 
       <Modal
@@ -504,7 +510,7 @@ export default function RabPage({ rab, setRab, vendors, notify, defaultKategori 
   );
 }
 
-function StepChecklist({ checklist, setChecklist, onNext }) {
+function ChecklistFields({ checklist, setChecklist }) {
   const standarItems = checklist.filter((c) => c.fixed);
   const lainnyaItems = checklist.filter((c) => !c.fixed);
   const standarAda = standarItems.filter((c) => c.ada).length;
@@ -522,17 +528,13 @@ function StepChecklist({ checklist, setChecklist, onNext }) {
     setChecklist((prev) => prev.filter((c) => c.id !== id));
 
   return (
-    <Card>
-      <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 4 }}>
-        Checklist Kelengkapan Dokumen
-      </h3>
-      <p style={{ fontSize: 12.5, color: T.muted, marginBottom: 18, lineHeight: 1.6 }}>
-        Sebelum masuk ke uraian RAB, centang dokumen standar yang sudah tersedia untuk laporan
-        ini. Kalau ada dokumen lain di luar daftar (menyesuaikan data/instansi masing-masing),
-        tambahkan lewat bagian "Lainnya" di bawah.
+    <>
+      <SectionHeader dashed>Checklist Kelengkapan Dokumen</SectionHeader>
+      <p style={{ fontSize: 12.5, color: T.muted, marginBottom: 14, lineHeight: 1.6 }}>
+        Centang dokumen standar yang sudah tersedia untuk laporan ini. Kalau ada dokumen lain di
+        luar daftar (menyesuaikan data/instansi masing-masing), tambahkan lewat bagian "Lainnya".
       </p>
 
-      <SectionHeader>Dokumen Standar</SectionHeader>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 18 }}>
         {standarItems.map((c, i) => (
           <button
@@ -663,7 +665,7 @@ function StepChecklist({ checklist, setChecklist, onNext }) {
         {lainnyaFilled.length} dokumen lainnya dicatat.
       </p>
 
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 10, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", justifyContent: "flex-start", marginTop: 4 }}>
         <Button
           variant="ghost"
           icon={Printer}
@@ -680,11 +682,8 @@ function StepChecklist({ checklist, setChecklist, onNext }) {
         >
           Print Checklist
         </Button>
-        <Button onClick={onNext}>
-          Lanjutkan <ArrowRight size={15} />
-        </Button>
       </div>
-    </Card>
+    </>
   );
 }
 
@@ -904,7 +903,15 @@ function StepUraian({
   );
 }
 
-function StepKonfirmasiUraian({ items, onBack, onNext }) {
+function StepKonfirmasi({
+  header,
+  headerFields,
+  items,
+  checklist,
+  setChecklist,
+  onBack,
+  onSubmit,
+}) {
   const totalPengajuan = items.reduce((s, r) => s + (r.total || 0), 0);
   const totalEvaluasi = items.reduce((s, r) => s + (r.totalEvaluasi || 0), 0);
   return (
@@ -913,11 +920,25 @@ function StepKonfirmasiUraian({ items, onBack, onNext }) {
         Datanya udah bener?
       </h3>
       <p style={{ color: T.muted, fontSize: 13, marginBottom: 16 }}>
-        Periksa kembali {items.length} baris uraian RAB. Semua kolom
-        perhitungan (qty, harga, PPN) ditampilkan supaya hasil total mudah
-        ditelusuri.
+        Periksa kembali data RAB, {items.length} baris uraian, dan kelengkapan dokumen sebelum
+        disimpan.
       </p>
 
+      <SectionHeader>Data RAB</SectionHeader>
+      <div style={{ marginBottom: 8 }}>
+        <ReviewList
+          fields={headerFields.filter((f) => f.type !== "file-upload")}
+          values={header}
+        />
+      </div>
+      <p style={{ fontSize: 12.5, color: T.muted, marginBottom: 18 }}>
+        Dokumen TOR:{" "}
+        <b style={{ color: T.text }}>
+          {header.dokumenTor?.name || "belum dilampirkan"}
+        </b>
+      </p>
+
+      <SectionHeader dashed>Uraian RAB ({items.length} baris)</SectionHeader>
       <BreakdownTable items={items} />
 
       <div
@@ -945,7 +966,7 @@ function StepKonfirmasiUraian({ items, onBack, onNext }) {
           </div>
           <div>
             <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4 }}>
-              Total Evaluasi
+              Total Jumlah Realisasi Evaluasi
             </div>
             <div style={{ fontFamily: font.display, fontSize: 18, color: T.navy, marginTop: 2 }}>
               {rupiah(totalEvaluasi)}
@@ -954,11 +975,15 @@ function StepKonfirmasiUraian({ items, onBack, onNext }) {
         </div>
       </div>
 
+      <div style={{ marginTop: 4 }}>
+        <ChecklistFields checklist={checklist} setChecklist={setChecklist} />
+      </div>
+
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18 }}>
         <Button variant="ghost" icon={ArrowLeft} onClick={onBack}>
           Tidak, edit lagi
         </Button>
-        <Button onClick={onNext}>
+        <Button onClick={onSubmit}>
           Ya, sudah benar <ArrowRight size={15} />
         </Button>
       </div>

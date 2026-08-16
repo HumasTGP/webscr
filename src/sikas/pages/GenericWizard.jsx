@@ -7,7 +7,9 @@ import {
   Download,
   Eye,
   FileText,
+  Pencil,
   Plus,
+  Trash2,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { nextIdFor, uid } from "../../lib/utils";
@@ -41,6 +43,7 @@ export default function GenericWizard({
   pdfEnabled = false,
   docxTemplate,
   buildDocPreview,
+  editViaWizard = false,
 }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(opsiOptions ? 0 : 1);
@@ -51,6 +54,7 @@ export default function GenericWizard({
   const [detailRow, setDetailRow] = useState(null);
   const [docxPreview, setDocxPreview] = useState(null);
   const [selectedId, setSelectedId] = useState("");
+  const [editingRecord, setEditingRecord] = useState(null);
 
   const fields = useMemo(
     () => buildFields(opsi, values, autoFrom),
@@ -59,12 +63,29 @@ export default function GenericWizard({
 
   const start = () => {
     setOpsi(null);
+    setEditingRecord(null);
     const isReferenceId = autoFrom?.key === "id";
     setValues({
       id: isReferenceId ? uid(idPrefix) : nextIdFor(idPrefix, list),
     });
     setStep(opsiOptions ? 0 : 1);
     setMode("wizard");
+  };
+
+  const startEdit = (record) => {
+    setEditingRecord(record);
+    setOpsi(record.opsi ?? null);
+    setValues({ ...record });
+    setStep(opsiOptions ? (record.opsi ? 1 : 0) : 1);
+    setMode("wizard");
+  };
+
+  const deleteRecord = (record) => {
+    if (typeof window !== "undefined" && !window.confirm(`Hapus data ${title} ${record.id}?`)) {
+      return;
+    }
+    setList((prev) => prev.filter((r) => r !== record));
+    notify(`Data ${title} berhasil dihapus.`);
   };
 
   const onChange = (key, val) => {
@@ -77,10 +98,13 @@ export default function GenericWizard({
   };
 
   const save = () => {
-    setList((prev) => [
-      ...prev,
-      { ...values, opsi, id: values.id || uid(idPrefix) },
-    ]);
+    setList((prev) =>
+      editingRecord
+        ? prev.map((r) =>
+            r === editingRecord ? { ...values, opsi, id: values.id || uid(idPrefix) } : r
+          )
+        : [...prev, { ...values, opsi, id: values.id || uid(idPrefix) }]
+    );
     setShowSaveModal(false);
     setShowSuccessModal(true);
   };
@@ -88,6 +112,7 @@ export default function GenericWizard({
   const finish = () => {
     setShowSuccessModal(false);
     setMode("list");
+    setEditingRecord(null);
     notify(`Data ${title} berhasil disimpan!`, "success", title);
   };
 
@@ -199,12 +224,50 @@ export default function GenericWizard({
       autoFrom
     ).map((f) => ({ key: f.key, label: f.label }));
 
+    const listColumns = editViaWizard
+      ? [
+          ...columns,
+          {
+            key: "aksi",
+            label: "Aksi",
+            render: (r) => (
+              <div style={{ display: "inline-flex", gap: 4 }}>
+                <button
+                  type="button"
+                  aria-label={`Edit ${title}`}
+                  title={`Edit ${title}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    startEdit(r);
+                  }}
+                  style={rowIconBtn(T.blue)}
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Hapus ${title}`}
+                  title={`Hapus ${title}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteRecord(r);
+                  }}
+                  style={rowIconBtn(T.danger)}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ),
+          },
+        ]
+      : columns;
+
     return (
       <div>
         <PageHeader
           eyebrow={eyebrow}
           title={title}
-          description={`${description} Klik salah satu baris untuk melihat detail atau mengubah data.`}
+          description={`${description} Klik salah satu baris untuk ${editViaWizard ? "mengubah" : "melihat detail atau mengubah"} data.`}
           right={
             <Button icon={Plus} onClick={start}>
               Tambah {title}
@@ -270,25 +333,28 @@ export default function GenericWizard({
         <Card padded={false}>
           <DataTable
             rows={list}
-            columns={columns}
+            columns={listColumns}
             emptyLabel={`Belum ada data ${title.toLowerCase()}.`}
-            onRowClick={setDetailRow}
+            searchPlaceholder="Cari berdasarkan ID atau judul…"
+            onRowClick={editViaWizard ? startEdit : setDetailRow}
           />
         </Card>
-        <DetailModal
-          open={!!detailRow}
-          onClose={() => setDetailRow(null)}
-          data={detailRow}
-          columns={detailColumns}
-          onSave={(draft) => {
-            setList((prev) =>
-              prev.map((r) => (r === detailRow ? { ...r, ...draft } : r))
-            );
-            notify(`Data ${title} berhasil diperbarui!`);
-          }}
-          onDownloadPdf={pdfEnabled && !docxTemplate ? downloadPdf : undefined}
-          onDownloadDocx={docxTemplate ? openPreview : undefined}
-        />
+        {!editViaWizard && (
+          <DetailModal
+            open={!!detailRow}
+            onClose={() => setDetailRow(null)}
+            data={detailRow}
+            columns={detailColumns}
+            onSave={(draft) => {
+              setList((prev) =>
+                prev.map((r) => (r === detailRow ? { ...r, ...draft } : r))
+              );
+              notify(`Data ${title} berhasil diperbarui!`);
+            }}
+            onDownloadPdf={pdfEnabled && !docxTemplate ? downloadPdf : undefined}
+            onDownloadDocx={docxTemplate ? openPreview : undefined}
+          />
+        )}
         {renderDocxPreview()}
       </div>
     );
@@ -456,3 +522,15 @@ export default function GenericWizard({
     </div>
   );
 }
+
+const rowIconBtn = (color) => ({
+  border: "none",
+  background: "transparent",
+  color,
+  cursor: "pointer",
+  width: 26,
+  height: 26,
+  borderRadius: 6,
+  display: "inline-grid",
+  placeItems: "center",
+});

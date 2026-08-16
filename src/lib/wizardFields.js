@@ -101,13 +101,6 @@ export const torFields = (rabIdOptions) => (_opsi, _values, _autoFrom) => [
     section: "Identitas",
   },
   {
-    key: "judulProgramRKA",
-    label: "Judul Program RKA",
-    type: "select",
-    options: OPT.judulProgramRKA,
-    full: true,
-  },
-  {
     key: "judulKegiatan",
     label: "Judul Kegiatan",
     disabled: true,
