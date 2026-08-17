@@ -5,7 +5,6 @@ import GandengSidebar from "../components/GandengSidebar";
 import GandengDashboard from "./GandengDashboard";
 import GandengTracking from "./GandengTracking";
 import GandengBantuan from "./GandengBantuan";
-import PengajuanGandengPage from "./PengajuanGandeng";
 import GandengAccountManagement from "./GandengAccountManagement";
 import "../styles/gandeng-responsive.css";
 
@@ -23,18 +22,15 @@ export default function GandengApp({ mitraList, setMitraList, notify, onBackToPo
   const renderContent = () => {
     switch (active) {
       case "account-management":
-        return user?.isAdmin ? <GandengAccountManagement notify={notify} /> : <GandengDashboard mitraList={accountList} user={user} onGoto={setActive} />;
-      case "dashboard": return <GandengDashboard mitraList={accountList} user={user} onGoto={setActive} />;
-      case "pengajuan-baru":
-      case "riwayat":
-        return <div style={{ padding: "clamp(18px,3vw,28px) clamp(16px,4vw,32px)" }}><PengajuanGandengPage mitraList={accountList} setMitraList={setMitraList} user={user} notify={notify} onBackToPortal={null} /></div>;
+        return user?.isAdmin ? <GandengAccountManagement notify={notify} /> : <GandengDashboard mitraList={accountList} user={user} setMitraList={setMitraList} notify={notify} onGoto={setActive} />;
+      case "dashboard": return <GandengDashboard mitraList={accountList} user={user} setMitraList={setMitraList} notify={notify} onGoto={setActive} />;
       case "tracking": return <GandengTracking mitraList={accountList} />;
       case "bantuan": return <GandengBantuan />;
-      default: return <GandengDashboard mitraList={accountList} user={user} onGoto={setActive} />;
+      default: return <GandengDashboard mitraList={accountList} user={user} setMitraList={setMitraList} notify={notify} onGoto={setActive} />;
     }
   };
 
-  const activeLabel = { dashboard:"Dashboard", "pengajuan-baru":"Pengajuan Baru", riwayat:"Riwayat Pengajuan", tracking:"Tracking Status", bantuan:"Bantuan", "account-management":"Manajemen Akun" }[active] || "Dashboard";
+  const activeLabel = { dashboard:"Dashboard", tracking:"Tracking Status Proposal", bantuan:"Bantuan", "account-management":"Manajemen Akun" }[active] || "Dashboard";
   const identityTitle = user?.isAdmin ? "Administrator GANDENG" : (user?.organization || user?.username || "Pengguna GANDENG");
 
   return (

@@ -1,11 +1,9 @@
-import { ClipboardList, FilePlus, HelpCircle, LayoutDashboard, LogOut, Search, UserRoundCog } from "lucide-react";
+import { HelpCircle, LayoutDashboard, LogOut, Search, UserRoundCog } from "lucide-react";
 import { T, font } from "../../lib/theme";
 
 const BASE_MENU = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "pengajuan-baru", label: "Pengajuan Baru", icon: FilePlus },
-  { key: "riwayat", label: "Riwayat Pengajuan", icon: ClipboardList },
-  { key: "tracking", label: "Tracking Status", icon: Search },
+  { key: "tracking", label: "Tracking Status Proposal", icon: Search },
   { key: "bantuan", label: "Bantuan", icon: HelpCircle },
 ];
 

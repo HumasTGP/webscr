@@ -1,49 +1,45 @@
 import { useState, useMemo } from "react";
 import { T, font } from "../../lib/theme";
-import { MITRA_STATUS_META } from "../../lib/data";
 import { CheckCircle2, XCircle, Search, ChevronDown, ChevronUp } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 
-const STEPS = [
-  { label: "Humas", key: "humas" },
-  { label: "Asman", key: "asman" },
-  { label: "MADM", key: "madm" },
-  { label: "Final", key: "final" },
-];
+const STEPS = ["Proposal Masuk", "Proposal Diproses", "Proposal Disetujui/Ditolak"];
 
 const TABS = [
   { key: "semua", label: "Semua" },
-  { key: "humas", label: "Humas" },
-  { key: "asman", label: "Asman" },
-  { key: "madm", label: "MADM" },
-  { key: "selesai", label: "Selesai" },
+  { key: "menunggu", label: "Menunggu Proses" },
+  { key: "diterima", label: "Diterima" },
   { key: "ditolak", label: "Ditolak" },
 ];
-
-function stepFromStatus(status) {
-  const meta = MITRA_STATUS_META[status];
-  return meta ? meta.step : 0;
-}
 
 function isRejected(status) {
   return status && status.startsWith("ditolak");
 }
+function isApproved(status) {
+  return status === "disetujui";
+}
+
+// Tahap sederhana buat sisi user: 1=Masuk, 2=Diproses, 3=Disetujui/Ditolak.
+function simpleStep(status) {
+  if (isApproved(status) || isRejected(status)) return 3;
+  if (!status) return 1;
+  return 2;
+}
 
 function getTabKey(status) {
-  if (!status) return "semua";
-  if (status.startsWith("ditolak")) return "ditolak";
-  if (status === "disetujui" || status === "selesai") return "selesai";
-  const meta = MITRA_STATUS_META[status];
-  if (!meta) return "semua";
-  if (meta.step === 1) return "humas";
-  if (meta.step === 2) return "asman";
-  if (meta.step === 3) return "madm";
-  if (meta.step === 4) return "selesai";
-  return "semua";
+  if (isRejected(status)) return "ditolak";
+  if (isApproved(status)) return "diterima";
+  return "menunggu";
+}
+
+function simpleStatusMeta(status) {
+  if (isRejected(status)) return { label: "Ditolak", color: "#B01818", bg: "#FCE1E1" };
+  if (isApproved(status)) return { label: "Diterima", color: "#1E7F3E", bg: "#DEF6E5" };
+  return { label: "Menunggu Proses", color: "#8A6D00", bg: "#FFF4D0" };
 }
 
 function StatusBadge({ status }) {
-  const meta = MITRA_STATUS_META[status] || { label: status, color: "#94A3B8", bg: "#F1F5F9" };
+  const meta = simpleStatusMeta(status);
   return (
     <span style={{
       display: "inline-flex", alignItems: "center", gap: 4,
@@ -58,24 +54,24 @@ function StatusBadge({ status }) {
 }
 
 function StepProgress({ status }) {
-  const currentStep = stepFromStatus(status);
+  const currentStep = simpleStep(status);
   const rejected = isRejected(status);
 
   return (
     <div style={{ display: "flex", alignItems: "center", margin: "4px 0 8px" }}>
-      {STEPS.map((s, i) => {
-        const done = currentStep > i + 1 || (currentStep === 4 && i === 3);
+      {STEPS.map((label, i) => {
+        const done = currentStep > i + 1;
         const active = currentStep === i + 1;
         const fail = rejected && active;
         let bg = T.border;
         let fg = T.muted;
-        if (done) { bg = "#1E7F3E"; fg = "#fff"; }
+        if (done && !(rejected && i + 1 === 3)) { bg = "#1E7F3E"; fg = "#fff"; }
         else if (fail) { bg = "#B01818"; fg = "#fff"; }
         else if (active && !fail) { bg = "#0E4C92"; fg = "#fff"; }
 
         return (
-          <div key={s.key} style={{ display: "flex", alignItems: "center", flex: i < STEPS.length - 1 ? 1 : "none" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, minWidth: 52 }}>
+          <div key={label} style={{ display: "flex", alignItems: "center", flex: i < STEPS.length - 1 ? 1 : "none" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, minWidth: 68 }}>
               <div style={{
                 width: 28, height: 28, borderRadius: "50%",
                 background: bg, color: fg,
@@ -85,7 +81,7 @@ function StepProgress({ status }) {
                 {done ? <CheckCircle2 size={14} /> : fail ? <XCircle size={14} /> : i + 1}
               </div>
               <span style={{ fontSize: 10, color: active ? T.heading : T.muted, fontWeight: active ? 700 : 500, textAlign: "center" }}>
-                {s.label}
+                {label}
               </span>
             </div>
             {i < STEPS.length - 1 && (
@@ -100,6 +96,24 @@ function StepProgress({ status }) {
       })}
     </div>
   );
+}
+
+function FinalDescription({ status }) {
+  if (isApproved(status)) {
+    return (
+      <div style={{ padding: "10px 12px", borderRadius: 8, background: "#DEF6E5", color: "#1E7F3E", fontSize: 12.5, marginTop: 12 }}>
+        Proposal Anda telah <b>disetujui</b>. Tim kami akan menghubungi Anda untuk tindak lanjut kerja sama.
+      </div>
+    );
+  }
+  if (isRejected(status)) {
+    return (
+      <div style={{ padding: "10px 12px", borderRadius: 8, background: "#FCE1E1", color: "#B01818", fontSize: 12.5, marginTop: 12 }}>
+        Proposal Anda <b>ditolak</b>. Silakan periksa catatan pada riwayat status di bawah untuk detail alasannya.
+      </div>
+    );
+  }
+  return null;
 }
 
 function TrackingCard({ item }) {
@@ -151,6 +165,7 @@ function TrackingCard({ item }) {
               Progres Tahapan
             </div>
             <StepProgress status={item.status} />
+            <FinalDescription status={item.status} />
 
             {item.timeline && item.timeline.length > 0 && (
               <div style={{ marginTop: 16 }}>
@@ -159,7 +174,7 @@ function TrackingCard({ item }) {
                 </div>
                 <div style={{ borderLeft: `2px solid ${T.border}`, marginLeft: 10, paddingLeft: 14 }}>
                   {item.timeline.map((t, i) => {
-                    const meta = MITRA_STATUS_META[t.status] || {};
+                    const meta = simpleStatusMeta(t.status);
                     return (
                       <div key={i} style={{ marginBottom: 13, position: "relative" }}>
                         <div style={{
@@ -206,7 +221,7 @@ export default function GandengTracking({ mitraList }) {
     const q = query.trim().toLowerCase();
     return sorted.filter((item) => {
       if (tab !== "semua" && getTabKey(item.status) !== tab) return false;
-      if (q && !item.judulPengajuan?.toLowerCase().includes(q) && !item.namaLembaga?.toLowerCase().includes(q)) return false;
+      if (q && !item.judulPengajuan?.toLowerCase().includes(q)) return false;
       return true;
     });
   }, [sorted, query, tab]);
@@ -223,8 +238,8 @@ export default function GandengTracking({ mitraList }) {
   return (
     <div style={{ fontFamily: font.body, padding: "clamp(18px,3vw,28px) clamp(16px,4vw,32px)", maxWidth: 900, width: "100%", boxSizing: "border-box" }}>
       <PageHeader
-        title="Tracking Status Pengajuan"
-        description="Pantau perkembangan setiap pengajuan mitra secara real-time."
+        title="Tracking Status Proposal"
+        description="Pantau perkembangan setiap pengajuan proposal secara real-time."
       />
 
       {/* Search */}
@@ -233,7 +248,7 @@ export default function GandengTracking({ mitraList }) {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cari berdasarkan judul atau nama lembaga..."
+          placeholder="Cari berdasarkan judul proposal..."
           style={{
             width: "100%", boxSizing: "border-box",
             height: 40, padding: "0 14px 0 38px",
