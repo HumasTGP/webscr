@@ -8,7 +8,6 @@ import Card from "../../components/Card";
 
 const EMPTY_FORM = {
   subSection: "",
-  submissionId: "",
   tanggal: "",
   namaPengadaan: "",
   procost: "",
@@ -28,6 +27,13 @@ const EMPTY_FORM = {
   ketSrmMum: "",
   approvalSrmMum: "",
 };
+
+function formatSavedAt(iso) {
+  const d = new Date(iso);
+  const tgl = d.toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  const jam = d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  return `${tgl} jam ${jam}`;
+}
 
 function newItem() {
   return { id: uid("LP1"), uraian: "", jumlah: "", satuan: "", hargaVendor1: "", hargaVendor2: "", hargaVendor3: "" };
@@ -76,7 +82,7 @@ export default function Lampiran1Page({ rab, notify }) {
 
   const save = () => {
     if (!activeRab) return;
-    setSaved((prev) => ({ ...prev, [activeRab.idNumber]: { form, items } }));
+    setSaved((prev) => ({ ...prev, [activeRab.idNumber]: { form, items, savedAt: new Date().toISOString() } }));
     notify?.("Lampiran 1 disimpan.", "success", "Lampiran 1 disimpan");
   };
 
@@ -93,7 +99,6 @@ export default function Lampiran1Page({ rab, notify }) {
         "/templates/Template_Lampiran_1.docx",
         {
           subSection: form.subSection,
-          submissionId: form.submissionId,
           tanggal: formatTanggalPanjang(form.tanggal),
           namaPengadaan: form.namaPengadaan || activeRab.judulKegiatan || "",
           procost: form.procost,
@@ -142,7 +147,9 @@ export default function Lampiran1Page({ rab, notify }) {
           <div style={{ fontSize: 12, fontWeight: 700, color: T.heading, marginBottom: 10 }}>Pilih RAB / Pekerjaan</div>
           {!rab?.length ? <div style={{ color: T.muted, fontSize: 12.5 }}>Belum ada RAB.</div> : (
             <div style={{ display: "grid", gap: 6 }}>
-              {rab.map((r) => (
+              {rab.map((r) => {
+                const savedInfo = saved[r.idNumber];
+                return (
                 <button key={r.idNumber} onClick={() => chooseRab(r)} style={{
                   padding: "10px 12px", borderRadius: 8, textAlign: "left",
                   border: `1px solid ${activeRab?.idNumber === r.idNumber ? T.blue : T.border}`,
@@ -151,8 +158,14 @@ export default function Lampiran1Page({ rab, notify }) {
                 }}>
                   <div style={{ fontFamily: font.mono, fontWeight: 700, color: T.blue, fontSize: 12 }}>{r.idNumber}</div>
                   <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3, lineHeight: 1.45, overflowWrap: "anywhere" }}>{r.judulKegiatan}</div>
+                  {savedInfo?.savedAt && (
+                    <div style={{ fontSize: 10.5, color: "#1E7F3E", marginTop: 4, fontWeight: 600 }}>
+                      Tersimpan, terakhir update {formatSavedAt(savedInfo.savedAt)}
+                    </div>
+                  )}
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </Card>
@@ -164,7 +177,6 @@ export default function Lampiran1Page({ rab, notify }) {
             <div>
               <Section title="Identitas Pengadaan">
                 <Field label="Sub Section"><input style={inputStyle} value={form.subSection} onChange={(e) => set("subSection", e.target.value)} /></Field>
-                <Field label="Submission ID"><input style={inputStyle} value={form.submissionId} onChange={(e) => set("submissionId", e.target.value)} /></Field>
                 <Field label="Tanggal"><input style={inputStyle} type="date" value={form.tanggal} onChange={(e) => set("tanggal", e.target.value)} /></Field>
                 <Field label="Nama Pengadaan" full><input style={inputStyle} value={form.namaPengadaan} onChange={(e) => set("namaPengadaan", e.target.value)} /></Field>
                 <Field label="Procost"><input style={inputStyle} value={form.procost} onChange={(e) => set("procost", e.target.value)} /></Field>

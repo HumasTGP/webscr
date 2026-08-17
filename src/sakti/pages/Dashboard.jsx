@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DOC_STATUS } from "../../lib/data";
 import {
   ArrowRight,
   ClipboardList,
@@ -395,7 +396,11 @@ function LiveClock() {
   );
 }
 
-export default function Dashboard({ data, goto, user }) {
+export default function Dashboard({ data, packages = [], goto, user }) {
+  const fullyApprovedRab = data.rab
+    .map((r) => ({ ...r, pkg: packages.find((p) => p.idRab === r.idNumber) }))
+    .filter((r) => r.pkg?.status === DOC_STATUS.PROCESSED)
+    .sort((a, b) => new Date(b.pkg.processedAt || 0) - new Date(a.pkg.processedAt || 0));
   const now = new Date();
   const greeting = greetingFor(now.getHours());
 
@@ -537,7 +542,7 @@ export default function Dashboard({ data, goto, user }) {
               color: T.heading,
             }}
           >
-            RAB Terbaru
+            RAB Disetujui (Asman &amp; MADM)
           </h3>
           <button
             onClick={() => goto("rab")}
@@ -554,10 +559,10 @@ export default function Dashboard({ data, goto, user }) {
             Semua RAB →
           </button>
         </div>
-        {!data.rab.length ? (
+        {!fullyApprovedRab.length ? (
           <div style={{ fontSize: 13, color: T.muted, padding: "12px 0" }}>
-            Belum ada RAB diajukan. Buka menu RAB → “Add New RAB” untuk membuat
-            pengajuan pertama.
+            Belum ada RAB yang sudah disetujui penuh oleh Asman dan MADM.
+            Kirim paket RAB lewat menu Paket Kas untuk memulai proses persetujuan.
           </div>
         ) : (
           <div
@@ -567,9 +572,8 @@ export default function Dashboard({ data, goto, user }) {
               gap: 10,
             }}
           >
-            {data.rab
-              .slice(-4)
-              .reverse()
+            {fullyApprovedRab
+              .slice(0, 4)
               .map((r) => (
                 <div
                   key={r.idNumber}

@@ -30,7 +30,6 @@ import FormGrid, { ReviewList } from "../../components/FormGrid";
 import MiniField, { miniInputStyle } from "../../components/MiniField";
 
 const STEPS = [
-  "Checklist Dokumen",
   "Uraian RAB",
   "Konfirmasi Uraian",
   "Data RAB",
@@ -86,33 +85,37 @@ const LIST_COLUMNS = [
   },
 ];
 
-const buildHeaderFields = (vendors) => [
+const MANUAL_OPT_KEYS = ["bidang", "jenisKegiatanCsr", "jenisProgram", "subprogram", "kategoriProgram", "procost", "task", "expOrg"];
+
+const buildHeaderFields = (vendors, customOptions = {}) => [
   {
     key: "idNumber",
     label: "ID Number",
     hint: "otomatis (lanjut dari ID terakhir) - bisa diubah manual",
     placeholder: "cth. RAB-2026-001",
   },
-  { key: "bidang", label: "Bidang", type: "select", options: OPT.bidang },
+  { key: "bidang", label: "Bidang", type: "select", options: [...OPT.bidang, ...(customOptions.bidang || [])], allowManual: true },
   {
     key: "jenisKegiatanCsr",
     label: "Jenis Kegiatan CSR",
     type: "select",
-    options: OPT.jenisKegiatanCsr,
+    options: [...OPT.jenisKegiatanCsr, ...(customOptions.jenisKegiatanCsr || [])],
+    allowManual: true,
     hint: "dipakai untuk pengelompokan di Rekap Anggaran",
   },
-  { key: "jenisProgram", label: "Jenis Program", type: "select", options: OPT.jenisProgram },
-  { key: "subprogram", label: "Subprogram", type: "select", options: OPT.subprogram },
+  { key: "jenisProgram", label: "Jenis Program", type: "select", options: [...OPT.jenisProgram, ...(customOptions.jenisProgram || [])], allowManual: true },
+  { key: "subprogram", label: "Subprogram", type: "select", options: [...OPT.subprogram, ...(customOptions.subprogram || [])], allowManual: true },
   {
     key: "kategoriProgram",
     label: "Kategori Program",
     type: "select",
-    options: OPT.kategoriProgram,
+    options: [...OPT.kategoriProgram, ...(customOptions.kategoriProgram || [])],
+    allowManual: true,
   },
-  { key: "procost", label: "Procost", type: "select", options: OPT.procost },
-  { key: "task", label: "Task", type: "select", options: OPT.task },
+  { key: "procost", label: "Procost", type: "select", options: [...OPT.procost, ...(customOptions.procost || [])], allowManual: true },
+  { key: "task", label: "Task", type: "select", options: [...OPT.task, ...(customOptions.task || [])], allowManual: true },
   { key: "expType", label: "Exp. Type", type: "select", options: OPT.expType },
-  { key: "expOrg", label: "Exp. Org", type: "select", options: OPT.expOrg },
+  { key: "expOrg", label: "Exp. Org", type: "select", options: [...OPT.expOrg, ...(customOptions.expOrg || [])], allowManual: true },
   { key: "tanggalRab", label: "Tanggal RAB", type: "date" },
   { key: "judulKegiatan", label: "Judul Kegiatan", full: true },
   {
@@ -150,9 +153,28 @@ export default function RABPage({ rab, setRab, vendors, notify, defaultKategori 
   const [editingId, setEditingId] = useState(null);
   const [rabPreview, setRabPreview] = useState(null);
   const [selectedId, setSelectedId] = useState("");
+  const [customOptions, setCustomOptions] = useState({});
 
-  const headerFields = buildHeaderFields(vendors);
+  const headerFields = buildHeaderFields(vendors, customOptions);
   const totalEvaluasi = items.reduce((s, r) => s + (r.totalEvaluasi || 0), 0);
+
+  // Nilai yang diketik manual di field "Isi manual…" langsung disimpan jadi
+  // opsi baru begitu user lanjut dari step Data RAB, biar next time muncul
+  // di dropdown (gak perlu ketik ulang).
+  const commitManualOptions = () => {
+    setCustomOptions((prev) => {
+      const next = { ...prev };
+      MANUAL_OPT_KEYS.forEach((key) => {
+        const val = (header[key] || "").trim();
+        if (!val || val === "__manual__") return;
+        const known = [...(OPT[key] || []), ...(prev[key] || [])];
+        if (!known.includes(val)) {
+          next[key] = [...(prev[key] || []), val];
+        }
+      });
+      return next;
+    });
+  };
 
   const startWizard = () => {
     setItems([]);
@@ -207,7 +229,7 @@ export default function RABPage({ rab, setRab, vendors, notify, defaultKategori 
   };
 
   const saveAll = () => {
-    setRab((prev) => [...prev, { ...header, checklist, items, totalEvaluasi, tanggalInput: new Date().toISOString() }]);
+    setRab((prev) => [...prev, { ...header, checklist, items, totalEvaluasi, tanggalInput: new Date().toISOString(), pelaksanaanSelesai: false }]);
     setShowSaveModal(false);
     setShowSuccessModal(true);
   };
@@ -374,17 +396,9 @@ export default function RABPage({ rab, setRab, vendors, notify, defaultKategori 
           </Button>
         }
       />
-      <FlowSteps steps={STEPS} current={savingNow ? 5 : step} />
+      <FlowSteps steps={STEPS} current={savingNow ? 4 : step} />
 
       {step === 0 && (
-        <StepChecklist
-          checklist={checklist}
-          setChecklist={setChecklist}
-          onNext={() => setStep(1)}
-        />
-      )}
-
-      {step === 1 && (
         <StepUraian
           rowDraft={rowDraft}
           setRowDraft={setRowDraft}
@@ -394,20 +408,19 @@ export default function RABPage({ rab, setRab, vendors, notify, defaultKategori 
           onEditRow={startEditRow}
           onCancelEdit={cancelEdit}
           onDeleteRow={deleteRow}
+          onNext={() => setStep(1)}
+        />
+      )}
+
+      {step === 1 && (
+        <StepKonfirmasiUraian
+          items={items}
           onBack={() => setStep(0)}
           onNext={() => setStep(2)}
         />
       )}
 
       {step === 2 && (
-        <StepKonfirmasiUraian
-          items={items}
-          onBack={() => setStep(1)}
-          onNext={() => setStep(3)}
-        />
-      )}
-
-      {step === 3 && (
         <Card>
           <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 14 }}>
             Isi Data RAB
@@ -418,14 +431,14 @@ export default function RABPage({ rab, setRab, vendors, notify, defaultKategori 
             onChange={(k, v) => setHeader({ ...header, [k]: v })}
           />
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
-            <Button onClick={() => setStep(4)}>
+            <Button onClick={() => { commitManualOptions(); setStep(3); }}>
               Lanjutkan <ArrowRight size={15} />
             </Button>
           </div>
         </Card>
       )}
 
-      {step === 4 && (
+      {step === 3 && (
         <Card>
           <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 4 }}>
             Datanya udah bener?
@@ -435,7 +448,7 @@ export default function RABPage({ rab, setRab, vendors, notify, defaultKategori 
           </p>
           <ReviewList fields={headerFields} values={header} />
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
-            <Button variant="ghost" icon={ArrowLeft} onClick={() => setStep(3)}>
+            <Button variant="ghost" icon={ArrowLeft} onClick={() => setStep(2)}>
               Tidak, edit lagi
             </Button>
             <Button onClick={() => setShowSaveModal(true)}>

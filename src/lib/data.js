@@ -21,6 +21,7 @@ import {
   Paperclip,
   Tags,
   BarChart3,
+  Wallet,
 } from "lucide-react";
 
 export const OPT = {
@@ -40,9 +41,29 @@ export const OPT = {
     "Lingkungan Hidup",
   ],
   kategoriProgram: ["Rutin", "Non Rutin", "Prioritas"],
-  procost: ["PC-1001", "PC-1002", "PC-1003"],
+  procost: ["26-1501-PPA-OP-LUO-8C-01", "26-1501-PPA-OP-ADM-7Q-01"],
   task: ["Task-A", "Task-B", "Task-C"],
-  expType: ["Operasional", "Non Operasional"],
+  // TPB = Tujuan Pembangunan Berkelanjutan (SDG), dipakai di Form Verifikasi
+  // buat nentuin item pekerjaan itu masuk TPB yang mana.
+  expType: [
+    "72-LOTJSL-TPB1-TanpaKemiskinan",
+    "72-LOTJSL-TPB2-TanpaKelaparan",
+    "72-LOTJSL-TPB3-Khidupn&Sejhtra",
+    "72-LOTJSL-TPB4-PndidknBrkualts",
+    "72-LOTJSL-TPB5-KsetaraanGender",
+    "72-LOTJSL-TPB6-AirBersih&Layak",
+    "72-LOTJSL-TPB7-EnrgBrshTrjgkau",
+    "72-LOTJSL-TPB8-PekLykPertmbEko",
+    "72-LOTJSL-TPB9-IndustInovInfra",
+    "72-LOTJSL-TPB10-BerkrgKsnjangn",
+    "72-LOTJSL-TPB11-Kota&KomLanjut",
+    "72-LOTJSL-TPB12-KonsProdTjgjwb",
+    "72-LOTJSL-TPB13-PenPrubhnIklim",
+    "72-LOTJSL-TPB14-EkosistemLaut",
+    "72-LOTJSL-TPB15-EkosistmDaratn",
+    "72-LOTJSL-TPB16-PrdamaiAdilLmbg",
+    "72-LOTJSL-TPB17-KmitraanTujuan",
+  ],
   expOrg: ["Kantor Pusat", "Unit Induk", "Unit Pelaksana"],
   satuan: ["Unit", "Paket", "Buah", "Set", "Lembar"],
   ppn: ["0%", "11%"],
@@ -262,6 +283,8 @@ export const MENU_TREE = [
   { key: "madm-dashboard",  label: "Dashboard", icon: LayoutDashboard, roles: ["madm"] },
   { key: "inbox",           label: "Inbox Paket Kas",     icon: Inbox,      roles: ["asman", "madm"] },
   { key: "inbox-evaluasi",  label: "Inbox Form Evaluasi", icon: FileSearch, roles: ["asman", "madm"] },
+  { key: "inbox-proposal",  label: "Inbox Proposal",      icon: Handshake,  roles: ["asman", "madm"] },
+  { key: "inbox-pembayaran", label: "Inbox Pembayaran",   icon: Wallet,     roles: ["asman", "madm"] },
 
   {
     key: "grp-proposal", label: "Proposal & Publikasi", icon: Handshake, roles: ["humas"],
@@ -277,6 +300,7 @@ export const MENU_TREE = [
     children: [
       { key: "rab", label: "RAB", icon: FileSpreadsheet },
       { key: "tor", label: "TOR", icon: FileText },
+      { key: "kategori", label: "Kategori", icon: Tags },
     ],
   },
 
