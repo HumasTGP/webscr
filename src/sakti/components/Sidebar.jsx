@@ -32,7 +32,7 @@ export default function Sidebar({ active, onSelect, user, onLogout, onBackToPort
       <button onClick={()=>setCollapsed(false)} title="Buka sidebar" style={railButton}><ChevronLeft size={15} style={{transform:"rotate(180deg)"}}/></button>
       <div style={{width:42,height:42,borderRadius:10,background:"#fff",border:`1px solid ${T.border}`,display:"grid",placeItems:"center",marginBottom:12}}><img src="/logo-sakti.png" alt="SAKTI" style={{width:34,height:34,objectFit:"contain"}}/></div>
       <div style={{flex:1,width:"100%",display:"flex",flexDirection:"column",alignItems:"center",gap:5,overflowY:"auto",padding:"0 10px"}}>{flatLeaves.map((m)=>{const Icon=m.icon;const isActive=active===m.key;return <div key={m.key} style={{position:"relative",width:"100%"}}><button onClick={()=>onSelect(m.key)} onMouseEnter={()=>setHoveredKey(m.key)} onMouseLeave={()=>setHoveredKey(null)} style={{width:"100%",aspectRatio:"1",borderRadius:13,border:"none",cursor:"pointer",display:"grid",placeItems:"center",background:isActive?T.navy:"transparent",color:isActive?"#fff":T.muted}}><Icon size={17}/></button><RailTooltip label={m.label} visible={hoveredKey===m.key}/></div>})}</div>
-      <button onClick={handleExit} title="Keluar" style={{...railButton,marginBottom:0,marginTop:10,border:"1px solid #F2B8B8",background:"#FFF1F1",color:"#C62828"}}><LogOut size={16}/></button>
+      <button onClick={handleExit} title="Keluar" style={{...railButton,marginBottom:0,marginTop:10,border:"1px solid #CF0000",background:"#CF0000",color:"#fff",boxShadow:"0 8px 18px rgba(207,0,0,.18)"}}><LogOut size={16}/></button>
     </div> : <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
       <div className="system-brand">
         <button onClick={()=>setCollapsed(true)} title="Tutup sidebar" style={{...railButton,width:28,height:28,marginBottom:0}}><ChevronLeft size={13}/></button>
@@ -41,7 +41,7 @@ export default function Sidebar({ active, onSelect, user, onLogout, onBackToPort
       </div>
       <div style={{flex:1,overflowY:"auto",overflowX:"hidden",display:"flex",flexDirection:"column",gap:6,padding:"12px 14px"}}>{tree.map((node)=><NavNode key={node.key} node={node} depth={0} active={active} onSelect={onSelect} openMap={openMap} toggleOpen={toggleOpen}/>)}</div>
       <div style={{padding:"12px 14px 14px",borderTop:`1px solid ${T.border}`}}>
-        <button onClick={handleExit} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"10px 12px",borderRadius:10,border:"1px solid #F2B8B8",background:"#FFF1F1",color:"#C62828",cursor:"pointer",fontSize:12.5,fontWeight:800,fontFamily:font.body}}><LogOut size={15}/>Keluar</button>
+        <button onClick={handleExit} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"10px 12px",borderRadius:10,border:"1px solid #CF0000",background:"#CF0000",color:"#fff",cursor:"pointer",fontSize:12.5,fontWeight:800,fontFamily:font.body,boxShadow:"0 8px 18px rgba(207,0,0,.18)"}}><LogOut size={15}/>Keluar</button>
       </div>
     </div>}
   </div></div>;
