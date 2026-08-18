@@ -15,7 +15,6 @@ import {
   bastFields,
   laporanFields,
   paktaFields,
-  torFields,
 } from "./lib/wizardFields";
 
 import Sidebar from "./sakti/components/Sidebar";
@@ -29,11 +28,12 @@ import SiLapakApp from "./si-lapak-priok/pages/SiLapakApp";
 import LoginScreen from "./sakti/pages/Login";
 import Dashboard from "./sakti/pages/Dashboard";
 import RABPage from "./sakti/pages/RAB";
+import TORPage from "./sakti/pages/TOR";
 import VendorPage from "./sakti/pages/Vendor";
 import HistoryPage from "./sakti/pages/History";
 import Panduan from "./sakti/pages/Panduan";
 import GenericWizard from "./sakti/pages/GenericWizard";
-import { TorDocPreview, BastDocPreview, PaktaDocPreview } from "./components/DocTemplatePreview";
+import { BastDocPreview, PaktaDocPreview } from "./components/DocTemplatePreview";
 import ProposalRekapPage from "./sakti/pages/ProposalRekap";
 import ProposalEvaluasiPage from "./sakti/pages/ProposalEvaluasi";
 import PengelolaanKomunikasi from "./sakti/pages/PengelolaanKomunikasi";
@@ -298,38 +298,7 @@ export default function App() {
       "kategori-npo": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="NON PO" />,
       "kategori-po":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="PO" />,
       "kategori-cc":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="Cash Card" />,
-      tor: (
-        <GenericWizard
-          title="TOR"
-          eyebrow="Modul TOR"
-          description="Term of Reference kegiatan, dirujuk dari ID RAB."
-          buildFields={torFields(rabIdOptions)}
-          idPrefix="TOR"
-          autoFrom={{ key: "id", source: rab, map: autoFromRab.tor }}
-          list={tor}
-          setList={setTor}
-          notify={notify}
-          pdfEnabled
-          docxTemplate={DOCX_TEMPLATES.tor}
-          buildDocPreview={(v) => <TorDocPreview values={v} />}
-          hideIdSelector
-          columns={[
-            { key: "id", label: "ID TOR" },
-            {
-              key: "tanggalInput",
-              label: "Tanggal Input",
-              render: (r) =>
-                r.tanggalInput
-                  ? new Date(r.tanggalInput).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
-                  : "-",
-            },
-            { key: "kategori", label: "Kategori" },
-            { key: "judulKegiatan", label: "Judul Kegiatan" },
-            { key: "tempat", label: "Tempat" },
-            { key: "hariTanggal", label: "Tanggal" },
-          ]}
-        />
-      ),
+      tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
       "laporan-nonpo": (
         <GenericWizard
           title="Laporan - NON PO"

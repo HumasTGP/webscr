@@ -47,7 +47,6 @@ export function TorDocPreview({ values }) {
   return (
     <div style={pageStyle}>
       <CtrBold size={13}>RINGKASAN KEGIATAN</CtrBold>
-      <CtrBold size={11}>{values.judulProgramRKA || "-"}</CtrBold>
       <CtrBold size={11}>{values.judulKegiatan || "-"}</CtrBold>
 
       <SecTitle>Latar Belakang</SecTitle>
