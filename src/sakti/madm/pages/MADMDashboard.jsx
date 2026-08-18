@@ -3,31 +3,198 @@ import { CheckCircle2, Clock, FolderCheck, Inbox as InboxIcon, ThumbsDown } from
 import { T, font } from "../../../lib/theme";
 import { DOC_STATUS, STATUS_META } from "../../../lib/data";
 import PageHeader from "../../../components/PageHeader";
-import { DashboardMetricCard, DashboardRecentList, DashboardTrendCard } from "../../../components/DashboardVisuals";
+import Card from "../../../components/Card";
+import DataTable from "../../../components/DataTable";
 
 function LiveClock() {
   const [now, setNow] = useState(new Date());
-  useEffect(() => { const timer=setInterval(()=>setNow(new Date()),1000); return()=>clearInterval(timer); },[]);
-  return <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 11px",borderRadius:9,background:T.blueSoft,border:`1px solid ${T.border}`,fontSize:12,color:T.blue,fontWeight:700,fontFamily:font.mono}}><Clock size={13}/>{now.toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})} · {now.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})} WIB</div>;
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const dateStr = now.toLocaleDateString("id-ID", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
+  const timeStr = now.toLocaleTimeString("id-ID", {
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+  });
+  return (
+    <div style={{
+      display: "inline-flex", alignItems: "center", gap: 6,
+      padding: "4px 12px", borderRadius: 8,
+      background: "#EBE2FF", border: "1px solid #C4A9FF",
+      fontSize: 12.5, color: "#3F1D9B", fontWeight: 600,
+      fontFamily: font.mono,
+    }}>
+      <Clock size={13} />
+      {dateStr} • {timeStr} WIB
+    </div>
+  );
 }
 
-export default function MADMDashboard({ packages, evaluasiList = [], goto }) {
-  const counts = useMemo(()=>{ const c={approved:0,rejected:0,processed:0,total:0}; for(const p of packages){c.total++; if(p.status===DOC_STATUS.APPROVED)c.approved++; else if(p.status===DOC_STATUS.REJECTED)c.rejected++; else if(p.status===DOC_STATUS.PROCESSED)c.processed++;} return c; },[packages]);
-  const pending = useMemo(()=>packages.filter((p)=>p.status===DOC_STATUS.APPROVED).sort((a,b)=>(b.reviewedAt||"").localeCompare(a.reviewedAt||"")).slice(0,6),[packages]);
-  const evalApproved=evaluasiList.filter((e)=>e.status===DOC_STATUS.APPROVED).length;
-  const trend=[{label:"Menunggu",value:counts.approved},{label:"Diproses",value:counts.processed},{label:"Ditolak",value:counts.rejected},{label:"Evaluasi",value:evalApproved}];
+function Tile({ icon: Icon, label, value, meta, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: 10,
+        padding: "18px 18px 16px",
+        borderRadius: 14,
+        border: `1px solid ${meta.color}40`,
+        background: `linear-gradient(140deg, ${meta.bg} 0%, #fff 130%)`,
+        cursor: "pointer",
+        textAlign: "left",
+        overflow: "hidden",
+        transition: "transform .12s ease, box-shadow .15s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = "0 12px 28px rgba(10,42,80,0.10)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "none";
+      }}
+    >
+      <div style={{
+        width: 38, height: 38, borderRadius: 10,
+        display: "grid", placeItems: "center",
+        background: meta.color, color: "#fff",
+      }}>
+        <Icon size={19} />
+      </div>
+      <div style={{
+        fontSize: 10.5, letterSpacing: 1.4, textTransform: "uppercase",
+        fontFamily: font.mono, color: meta.color, fontWeight: 700,
+      }}>{label}</div>
+      <div style={{ fontFamily: font.display, fontSize: 32, lineHeight: 1, color: T.heading }}>
+        {value}
+      </div>
+      <span aria-hidden style={{
+        position: "absolute", right: -18, bottom: -18,
+        width: 90, height: 90, borderRadius: "50%",
+        background: meta.color, opacity: 0.05,
+      }}/>
+    </button>
+  );
+}
 
-  return <div>
-    <PageHeader eyebrow="Panel MADM" title="Dashboard MADM" description="Paket kas yang telah disetujui Asman dan menunggu diproses oleh MADM." right={<LiveClock/>}/>
-    <div className="responsive-card-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:12,marginBottom:16}}>
-      <DashboardMetricCard icon={InboxIcon} label="Menunggu Diproses" value={counts.approved} note="Sudah disetujui Asman" color={STATUS_META.approved.color} soft={STATUS_META.approved.bg} onClick={()=>goto("inbox")}/>
-      <DashboardMetricCard icon={CheckCircle2} label="Telah Diproses" value={counts.processed} note="Proses akhir selesai" color={STATUS_META.processed.color} soft={STATUS_META.processed.bg} onClick={()=>goto("inbox")}/>
-      <DashboardMetricCard icon={ThumbsDown} label="Ditolak" value={counts.rejected} note="Perlu tindak lanjut" color={STATUS_META.rejected.color} soft={STATUS_META.rejected.bg} onClick={()=>goto("inbox")}/>
-      <DashboardMetricCard icon={FolderCheck} label="Total Paket" value={counts.total} note="Seluruh paket tercatat" color="#036D9A" soft="#E5F4FA" onClick={()=>goto("inbox")}/>
+export default function MADMDashboard({ user, packages, evaluasiList = [], goto }) {
+  const counts = useMemo(() => {
+    const c = { approved: 0, rejected: 0, processed: 0, total: 0 };
+    for (const p of packages) {
+      c.total++;
+      if (p.status === DOC_STATUS.APPROVED) c.approved++;
+      else if (p.status === DOC_STATUS.REJECTED) c.rejected++;
+      else if (p.status === DOC_STATUS.PROCESSED) c.processed++;
+    }
+    return c;
+  }, [packages]);
+
+  const evalCounts = useMemo(() => {
+    const c = { approved: 0, rejected: 0, processed: 0, total: 0 };
+    for (const e of evaluasiList) {
+      c.total++;
+      if (e.status === DOC_STATUS.APPROVED) c.approved++;
+      else if (e.status === DOC_STATUS.REJECTED) c.rejected++;
+      else if (e.status === DOC_STATUS.PROCESSED) c.processed++;
+    }
+    return c;
+  }, [evaluasiList]);
+
+  const pending = useMemo(() =>
+    packages
+      .filter((p) => p.status === DOC_STATUS.APPROVED)
+      .sort((a, b) => (b.reviewedAt || "").localeCompare(a.reviewedAt || ""))
+  , [packages]);
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow="Panel MADM"
+        title="Dashboard MADM"
+        description="Paket kas yang telah disetujui Asman dan menunggu diproses oleh MADM."
+      />
+
+      <div style={{ marginBottom: 14 }}>
+        <LiveClock />
+      </div>
+
+      <div style={{
+        fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2,
+        textTransform: "uppercase", color: T.muted, marginBottom: 8,
+      }}>
+        Inbox RAB
+      </div>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: 14, marginBottom: 18,
+      }}>
+        <Tile icon={InboxIcon}    label="Menunggu Diproses" value={counts.approved}  meta={STATUS_META.approved}  onClick={() => goto("inbox")} />
+        <Tile icon={CheckCircle2} label="Telah Diproses"    value={counts.processed} meta={STATUS_META.processed} onClick={() => goto("inbox")} />
+        <Tile icon={ThumbsDown}   label="Ditolak"           value={counts.rejected}  meta={STATUS_META.rejected}  onClick={() => goto("inbox")} />
+        <Tile icon={FolderCheck}  label="Total Paket"       value={counts.total}     meta={STATUS_META.in_review} onClick={() => goto("inbox")} />
+      </div>
+
+      <div style={{
+        fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2,
+        textTransform: "uppercase", color: T.muted, marginBottom: 8,
+      }}>
+        Inbox Form Evaluasi
+      </div>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: 14, marginBottom: 18,
+      }}>
+        <Tile icon={InboxIcon}    label="Menunggu Diproses" value={evalCounts.approved}  meta={STATUS_META.approved}  onClick={() => goto("inbox-evaluasi")} />
+        <Tile icon={CheckCircle2} label="Telah Diproses"    value={evalCounts.processed} meta={STATUS_META.processed} onClick={() => goto("inbox-evaluasi")} />
+        <Tile icon={ThumbsDown}   label="Ditolak"           value={evalCounts.rejected}  meta={STATUS_META.rejected}  onClick={() => goto("inbox-evaluasi")} />
+        <Tile icon={FolderCheck}  label="Total Evaluasi"    value={evalCounts.total}     meta={STATUS_META.in_review} onClick={() => goto("inbox-evaluasi")} />
+      </div>
+
+      <Card padded={false}>
+        <div style={{
+          padding: "14px 18px",
+          borderBottom: `1px solid ${T.border}`,
+          fontFamily: font.display, fontSize: 14, fontWeight: 600,
+          color: T.heading,
+        }}>
+          Paket Menunggu Diproses MADM
+        </div>
+        <DataTable
+          rows={pending}
+          columns={[
+            {
+              key: "idRab", label: "ID RAB",
+              render: (r) => (
+                <span style={{ fontFamily: font.mono, fontWeight: 700, fontSize: 12.5, color: T.navy }}>
+                  {r.idRab}
+                </span>
+              ),
+            },
+            { key: "judul", label: "Judul Kegiatan" },
+            { key: "kategori", label: "Kategori" },
+            {
+              key: "reviewedAt", label: "Disetujui Asman",
+              render: (r) => r.reviewedAt
+                ? new Date(r.reviewedAt).toLocaleString("id-ID", {
+                    day: "2-digit", month: "short", year: "numeric",
+                    hour: "2-digit", minute: "2-digit",
+                  })
+                : "-",
+            },
+          ]}
+          emptyLabel="Tidak ada paket yang menunggu diproses."
+          onRowClick={() => goto("inbox")}
+        />
+      </Card>
     </div>
-    <div className="dashboard-main-grid" style={{display:"grid",gridTemplateColumns:"minmax(0,1.4fr) minmax(300px,.8fr)",gap:16,alignItems:"start"}}>
-      <DashboardTrendCard title="Distribusi Proses MADM" subtitle="Status dokumen dan evaluasi yang berada pada tahap MADM" data={trend} color="#036D9A" />
-      <DashboardRecentList title="Menunggu Diproses" items={pending} emptyLabel="Tidak ada paket yang menunggu diproses." renderItem={(r)=><div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}><div style={{width:34,height:34,borderRadius:10,background:STATUS_META.approved.bg,color:STATUS_META.approved.color,display:"grid",placeItems:"center",fontSize:10,fontWeight:800,flexShrink:0}}>{String(r.kategori||"RAB").slice(0,2).toUpperCase()}</div><div style={{flex:1,minWidth:0}}><div style={{fontSize:12.5,fontWeight:800,color:T.heading,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.judul||r.idRab}</div><div style={{fontSize:10.5,color:T.muted,marginTop:2}}>{r.idRab} · {r.kategori||"-"}</div></div></div>} />
-    </div>
-  </div>;
+  );
 }
