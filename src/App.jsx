@@ -54,6 +54,7 @@ import ChecklistDokumenPage from "./sakti/pages/ChecklistDokumen";
 import FormVerifikasiPage from "./sakti/pages/FormVerifikasi";
 import Lampiran1Page from "./sakti/pages/Lampiran1";
 import Lampiran2Page from "./sakti/pages/Lampiran2";
+import NonPoPage from "./sakti/pages/NonPoPage";
 import RKAPage from "./sakti/pages/RKAPage";
 import RekapAnggaranPage from "./sakti/pages/RekapAnggaranPage";
 import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
@@ -161,6 +162,8 @@ export default function App() {
   const [bast, setBast] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [bapp, setBapp] = useState([]);
+  const [lmp1List, setLmp1List] = useState([]);
+  const [lmp2List, setLmp2List] = useState([]);
   const [laporan, setLaporan] = useState([]);
   const [rka, setRka] = useState([]);
 
@@ -299,6 +302,19 @@ export default function App() {
       "kategori-po":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="PO" />,
       "kategori-cc":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="Cash Card" />,
       tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
+      "grp-pembayaran-nonpo": (
+        <NonPoPage
+          rab={rabByKategori["NON PO"]}
+          lmp1={lmp1List}
+          lmp2={lmp2List}
+          bast={bast.filter((b) => b.kategori === "NON PO")}
+          pakta={pakta.filter((p) => p.kategori === "NON PO")}
+          bapp={bapp.filter((b) => b.kategori === "NON PO")}
+          formVerif={[]}
+          notify={notify}
+          onNavigate={setActive}
+        />
+      ),
       "laporan-nonpo": (
         <GenericWizard
           title="Laporan - NON PO"
@@ -488,7 +504,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       user,
-      rab, tor, bast, pakta, bapp, laporan, vendors, history,
+      rab, tor, bast, pakta, bapp, lmp1List, lmp2List, laporan, vendors, history,
       proposals, konten, evaluasi, rabIdOptions, packages, users, rka,
       rabByKategori, rabIdOptionsByKategori,
     ]
