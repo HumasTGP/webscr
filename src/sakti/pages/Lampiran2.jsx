@@ -18,9 +18,8 @@ const EMPTY = {
   terbilang: "",
 };
 
-export default function Lampiran2Page({ rab, notify }) {
+export default function Lampiran2Page({ rab, notify, list = [], setList }) {
   const [activeRab, setActiveRab] = useState(null);
-  const [forms, setForms] = useState({});
   const [form, setForm] = useState(EMPTY);
 
   const inputStyle = {
@@ -34,15 +33,19 @@ export default function Lampiran2Page({ rab, notify }) {
 
   const selectRab = (r) => {
     setActiveRab(r);
-    setForm(forms[r.idNumber] || {
-      ...EMPTY,
-      hargaSeluruhnya: r.totalEvaluasi || "",
-    });
+    const existing = list.find((x) => x.submissionId === r.idNumber);
+    setForm(existing ? (existing.form || EMPTY) : { ...EMPTY, hargaSeluruhnya: r.totalEvaluasi || "" });
   };
 
   const save = () => {
     if (!activeRab) return;
-    setForms((prev) => ({ ...prev, [activeRab.idNumber]: form }));
+    const record = { submissionId: activeRab.idNumber, form, savedAt: new Date().toISOString() };
+    if (setList) {
+      setList((prev) => {
+        const idx = prev.findIndex((x) => x.submissionId === activeRab.idNumber);
+        return idx >= 0 ? prev.map((x, i) => i === idx ? record : x) : [...prev, record];
+      });
+    }
     notify?.("Data Lampiran 2 disimpan.", "success", "Lampiran 2 disimpan");
   };
 

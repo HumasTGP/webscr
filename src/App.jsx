@@ -478,10 +478,10 @@ export default function App() {
             <FormVerifikasiPage rab={rabByKategori[kategori]} notify={notify} />
           );
           routes[`lmp1-${suffix}`] = (
-            <Lampiran1Page rab={rabByKategori[kategori]} notify={notify} />
+            <Lampiran1Page rab={rabByKategori[kategori]} notify={notify} list={lmp1List} setList={setLmp1List} />
           );
           routes[`lmp2-${suffix}`] = (
-            <Lampiran2Page rab={rabByKategori[kategori]} notify={notify} />
+            <Lampiran2Page rab={rabByKategori[kategori]} notify={notify} list={lmp2List} setList={setLmp2List} />
           );
         });
         return routes;
