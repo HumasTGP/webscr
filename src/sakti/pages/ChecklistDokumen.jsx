@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { CheckSquare, Plus, Printer, Trash2 } from "lucide-react";
+import { CheckSquare, Plus, Printer, Send, Trash2 } from "lucide-react";
 import { T, font } from "../../lib/theme";
+import { DOC_STATUS } from "../../lib/data";
 import { printChecklist } from "../../lib/utils";
 import { uid } from "../../lib/utils";
 import PageHeader from "../../components/PageHeader";
@@ -18,11 +19,40 @@ const STANDAR_CHECKLIST_DOCS = [
   "Kontrak (PJ/SPK)",
   "Laporan",
   "Bank Garansi",
+  "Daftar Hadir",
+  "Form Verifikasi",
+  "Lampiran 1 (Rincian Pekerjaan)",
+  "Lampiran 2",
 ];
 
-export default function ChecklistDokumenPage({ rab, notify }) {
+export default function ChecklistDokumenPage({ rab, notify, paymentPackages = [], setPaymentPackages }) {
   const [checked, setChecked] = useState({});
   const [lainnya, setLainnya] = useState({}); // { [rabId]: [{ id, nama, ada }] }
+
+  const packageFor = (idRab) => paymentPackages.find((p) => p.idRab === idRab);
+
+  const kirimKeAsman = (r) => {
+    const existing = packageFor(r.idNumber);
+    const now = new Date().toISOString();
+    const checklistSnapshot = {
+      standar: STANDAR_CHECKLIST_DOCS.map((item) => ({ nama: item, ada: !!checked[`${r.idNumber}::${item}`] })),
+      lainnya: (lainnya[r.idNumber] || []).filter((it) => it.nama.trim()),
+    };
+    if (existing) {
+      setPaymentPackages((prev) => prev.map((p) => p.idRab === r.idNumber ? {
+        ...p, status: DOC_STATUS.SUBMITTED, submittedAt: now, checklist: checklistSnapshot,
+        reviewedBy: "", reviewedAt: "", reviewNote: "",
+        processedBy: "", processedAt: "", processNote: "", rejectedBy: "",
+      } : p));
+    } else {
+      setPaymentPackages((prev) => [...prev, {
+        id: uid("PAY"), idRab: r.idNumber, judulKegiatan: r.judulKegiatan,
+        kategori: r.kategori || "-", status: DOC_STATUS.SUBMITTED, submittedAt: now,
+        checklist: checklistSnapshot,
+      }]);
+    }
+    notify?.(`Paket pembayaran ${r.idNumber} dikirim ke Asman.`, "success", "Kirim ke Asman");
+  };
 
   const toggleStandar = (rabId, item) => {
     setChecked((prev) => {
@@ -90,7 +120,6 @@ export default function ChecklistDokumenPage({ rab, notify }) {
         <div style={{ display: "grid", gap: 14 }}>
           {rab.map((r) => {
             const progress = getProgress(r.idNumber);
-            const complete = progress.done === progress.total;
             const extra = lainnya[r.idNumber] || [];
             return (
               <Card key={r.idNumber}>
@@ -100,29 +129,32 @@ export default function ChecklistDokumenPage({ rab, notify }) {
                     <div style={{ fontSize: 14, fontWeight: 600, color: T.heading, marginTop: 2 }}>{r.judulKegiatan}</div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{
-                      padding: "4px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700,
-                      background: complete ? "#DEF6E5" : "#FFF4D0",
-                      color: complete ? "#1E7F3E" : "#8A6D00",
-                    }}>
-                      {progress.done}/{progress.total} ({progress.pct}%)
-                    </div>
                     <button onClick={() => handlePrint(r)} style={{
                       display: "flex", alignItems: "center", gap: 6,
                       padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`,
                       background: T.card, color: T.heading, cursor: "pointer", fontSize: 12, fontWeight: 600,
                     }}><Printer size={14} /> Cetak</button>
+                    {(() => {
+                      const pkg = packageFor(r.idNumber);
+                      const already = pkg && pkg.status !== DOC_STATUS.REJECTED;
+                      const noneChecked = progress.done === 0;
+                      return (
+                        <button
+                          onClick={() => kirimKeAsman(r)}
+                          disabled={noneChecked || already}
+                          title={noneChecked ? "Centang minimal 1 dokumen dulu" : already ? "Sudah dikirim, menunggu diproses" : "Kirim dokumen yang sudah ada ke Asman"}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            padding: "8px 14px", borderRadius: 8, border: "none",
+                            background: (noneChecked || already) ? T.border : T.blue,
+                            color: (noneChecked || already) ? T.muted : "#fff",
+                            cursor: (noneChecked || already) ? "not-allowed" : "pointer",
+                            fontSize: 12, fontWeight: 600,
+                          }}
+                        ><Send size={14} /> {already ? "Terkirim" : "Kirim ke Asman"}</button>
+                      );
+                    })()}
                   </div>
-                </div>
-
-                <div style={{
-                  height: 4, borderRadius: 2, background: T.border, marginBottom: 14, overflow: "hidden",
-                }}>
-                  <div style={{
-                    height: "100%", borderRadius: 2, width: `${progress.pct}%`,
-                    background: complete ? "#1E7F3E" : T.blue,
-                    transition: "width .3s ease",
-                  }} />
                 </div>
 
                 <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>

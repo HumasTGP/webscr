@@ -29,6 +29,7 @@ import LoginScreen from "./sakti/pages/Login";
 import Dashboard from "./sakti/pages/Dashboard";
 import RABPage from "./sakti/pages/RAB";
 import TORPage from "./sakti/pages/TOR";
+import KategoriPage from "./sakti/pages/KategoriPage";
 import VendorPage from "./sakti/pages/Vendor";
 import HistoryPage from "./sakti/pages/History";
 import Panduan from "./sakti/pages/Panduan";
@@ -39,6 +40,8 @@ import ProposalEvaluasiPage from "./sakti/pages/ProposalEvaluasi";
 import PengelolaanKomunikasi from "./sakti/pages/PengelolaanKomunikasi";
 import InboxPage from "./sakti/pages/Inbox";
 import InboxEvaluasiPage from "./sakti/pages/InboxEvaluasi";
+import InboxProposalPage from "./sakti/pages/InboxProposal";
+import InboxPembayaranPage from "./sakti/pages/InboxPembayaran";
 import AsmanDashboard from "./sakti/asman/pages/AsmanDashboard";
 import MADMDashboard from "./sakti/madm/pages/MADMDashboard";
 import PaketKasPage from "./sakti/pages/PaketKas";
@@ -55,6 +58,7 @@ import FormVerifikasiPage from "./sakti/pages/FormVerifikasi";
 import Lampiran1Page from "./sakti/pages/Lampiran1";
 import Lampiran2Page from "./sakti/pages/Lampiran2";
 import NonPoPage from "./sakti/pages/NonPoPage";
+import PoErpDataPage from "./sakti/pages/PoErpData";
 import RKAPage from "./sakti/pages/RKAPage";
 import RekapAnggaranPage from "./sakti/pages/RekapAnggaranPage";
 import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
@@ -238,6 +242,13 @@ export default function App() {
   const updateEvaluasi = (id, patch) => {
     setEvaluasi((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
   };
+  const updateProposal = (id, patch) => {
+    setProposals((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  };
+  const [paymentPackages, setPaymentPackages] = useState([]);
+  const updatePaymentPackage = (id, patch) => {
+    setPaymentPackages((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  };
   const upsertPackage = (idRab, patch) => {
     setPackages((prev) => {
       const found = prev.some((p) => p.idRab === idRab);
@@ -251,9 +262,9 @@ export default function App() {
   // Data per kategori — dipakai buat 3 varian menu Pembayaran & Laporan
   // (NON PO / PO / Cash Card) yang masing-masing berdiri sendiri di sidebar.
   const rabByKategori = useMemo(() => ({
-    "NON PO": rab.filter((r) => r.kategori === "NON PO"),
-    "PO": rab.filter((r) => r.kategori === "PO"),
-    "Cash Card": rab.filter((r) => r.kategori === "Cash Card"),
+    "NON PO": rab.filter((r) => r.kategori === "NON PO" && r.pelaksanaanSelesai),
+    "PO": rab.filter((r) => r.kategori === "PO" && r.pelaksanaanSelesai),
+    "Cash Card": rab.filter((r) => r.kategori === "Cash Card" && r.pelaksanaanSelesai),
   }), [rab]);
   const rabIdOptionsByKategori = useMemo(() => ({
     "NON PO": rabByKategori["NON PO"].map((r) => r.idNumber),
@@ -272,6 +283,7 @@ export default function App() {
         <Dashboard
           user={user}
           data={{ rab, tor, bast, pakta, laporan, proposals, konten }}
+          packages={packages}
           goto={setActive}
         />
       ),
@@ -315,6 +327,7 @@ export default function App() {
           onNavigate={setActive}
         />
       ),
+      kategori: <KategoriPage rab={rab} setRab={setRab} notify={notify} />,
       "laporan-nonpo": (
         <GenericWizard
           title="Laporan - NON PO"
@@ -391,6 +404,22 @@ export default function App() {
           user={user}
           evaluasiList={evaluasi}
           onUpdateEvaluasi={updateEvaluasi}
+          notify={notify}
+        />
+      ),
+      "inbox-proposal": (
+        <InboxProposalPage
+          user={user}
+          proposals={proposals}
+          onUpdateProposal={updateProposal}
+          notify={notify}
+        />
+      ),
+      "inbox-pembayaran": (
+        <InboxPembayaranPage
+          user={user}
+          paymentPackages={paymentPackages}
+          onUpdatePackage={updatePaymentPackage}
           notify={notify}
         />
       ),
@@ -486,10 +515,14 @@ export default function App() {
         });
         return routes;
       })(),
-      dokumentasi: <DokumentasiPage rab={rab} notify={notify} />,
+      // PO punya alur beda (lewat ERP) — BAST & BAPB-nya cukup dicatat ID-nya aja,
+      // bukan dokumen lengkap kayak NON PO/CC.
+      "bast-po": <PoErpDataPage rab={rabByKategori["PO"]} notify={notify} />,
+      "bapp-po": <PoErpDataPage rab={rabByKategori["PO"]} notify={notify} />,
+      dokumentasi: <DokumentasiPage rab={rab} setRab={setRab} notify={notify} />,
       "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
       eviden: <EvidenPage rab={rab} notify={notify} />,
-      "checklist-dokumen": <ChecklistDokumenPage rab={rab} tor={tor} bast={bast} pakta={pakta} notify={notify} />,
+      "checklist-dokumen": <ChecklistDokumenPage rab={rab} tor={tor} bast={bast} pakta={pakta} notify={notify} paymentPackages={paymentPackages} setPaymentPackages={setPaymentPackages} />,
       "proposal-evaluasi-pembayaran": (
         <ProposalEvaluasiPage
           proposals={proposals}

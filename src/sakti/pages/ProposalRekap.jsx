@@ -12,7 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { OPT } from "../../lib/data";
+import { OPT, DOC_STATUS, STATUS_META } from "../../lib/data";
 import { nextIdFor, printDocument, rupiah, uid } from "../../lib/utils";
 import {
   bastStepFields,
@@ -159,6 +159,10 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
         // Status selalu mulai "Ditinjau" — baru berubah kalau Asman/MADM
         // sudah memproses, bukan diisi manual oleh Humas.
         statusProposal: "Ditinjau",
+        status: DOC_STATUS.SUBMITTED,
+        reviewedBy: "", reviewedAt: "", reviewNote: "",
+        processedBy: "", processedAt: "", processNote: "",
+        rejectedBy: "",
         bast: { ...bastDraft },
         pakta: { ...paktaDraft },
       },
@@ -393,6 +397,20 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
         >
           {overviewRow && (
             <>
+              {overviewRow.status === DOC_STATUS.REJECTED && (
+                <div style={{
+                  display: "flex", gap: 10, padding: "12px 14px", borderRadius: 8, marginBottom: 16,
+                  background: STATUS_META.rejected.bg, border: `1px solid ${STATUS_META.rejected.color}30`,
+                  color: STATUS_META.rejected.color, fontSize: 13,
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 700, marginBottom: 2 }}>
+                      Ditolak oleh {overviewRow.rejectedBy === "madm" ? "MADM" : "Asman"} - perlu direvisi
+                    </div>
+                    <div>{(overviewRow.rejectedBy === "madm" ? overviewRow.processNote : overviewRow.reviewNote) || "Tidak ada catatan."}</div>
+                  </div>
+                </div>
+              )}
               <OverviewRows fields={[...FIELDS, ...ADMIN_FIELDS]} values={overviewRow} />
               <OverviewSectionHeading>BAST - Preview Dokumen</OverviewSectionHeading>
               <BastDocPreview

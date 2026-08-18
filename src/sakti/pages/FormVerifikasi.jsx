@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Download, Save } from "lucide-react";
+import { Download, Plus, Save } from "lucide-react";
 import { T, font } from "../../lib/theme";
+import { OPT } from "../../lib/data";
 import { uid, rupiah } from "../../lib/utils";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import PageHeader from "../../components/PageHeader";
@@ -13,12 +14,17 @@ const EMPTY = {
   jumlahBiaya: "",
   terbilang: "",
   kepada: "",
+  tpb: "",
+  procost: "",
 };
 
 export default function FormVerifikasiPage({ rab, notify }) {
   const [forms, setForms] = useState([]);
   const [activeRab, setActiveRab] = useState(null);
   const [formData, setFormData] = useState(EMPTY);
+  const [procostOptions, setProcostOptions] = useState(OPT.procost);
+  const [newProcost, setNewProcost] = useState("");
+  const [addingProcost, setAddingProcost] = useState(false);
 
   const set = (k, v) => setFormData((p) => ({ ...p, [k]: v }));
 
@@ -40,6 +46,8 @@ export default function FormVerifikasiPage({ rab, notify }) {
         jumlahBiaya: existing.jumlahBiaya || r.totalEvaluasi || "",
         terbilang: existing.terbilang || "",
         kepada: existing.kepada || "",
+        tpb: existing.tpb || "",
+        procost: existing.procost || "",
       });
       return;
     }
@@ -76,6 +84,8 @@ export default function FormVerifikasiPage({ rab, notify }) {
           jumlahBiaya: formData.jumlahBiaya ? rupiah(Number(formData.jumlahBiaya)) : "",
           terbilang: formData.terbilang || "",
           kepada: formData.kepada || "",
+          tpb: formData.tpb || "",
+          procost: formData.procost || "",
         },
         `Form-Verifikasi-${activeRab.idNumber}.docx`
       );
@@ -149,6 +159,66 @@ export default function FormVerifikasiPage({ rab, notify }) {
                 <div>
                   <label style={labelStyle}>Jumlah Biaya</label>
                   <input style={inputStyle} type="number" value={formData.jumlahBiaya} onChange={(e) => set("jumlahBiaya", e.target.value)} />
+                </div>
+                <div>
+                  <label style={labelStyle}>TPB (Tujuan Pembangunan Berkelanjutan)</label>
+                  <select style={inputStyle} value={formData.tpb} onChange={(e) => set("tpb", e.target.value)}>
+                    <option value="">-- Pilih TPB --</option>
+                    {OPT.expType.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Procost</label>
+                  {!addingProcost ? (
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <select style={{ ...inputStyle, flex: 1 }} value={formData.procost} onChange={(e) => set("procost", e.target.value)}>
+                        <option value="">-- Pilih Procost --</option>
+                        {procostOptions.map((p) => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setAddingProcost(true)}
+                        title="Tambah procost baru"
+                        style={{
+                          flexShrink: 0, width: 38, borderRadius: 8, border: `1px solid ${T.border}`,
+                          background: T.bg, color: T.blue, cursor: "pointer", display: "grid", placeItems: "center",
+                        }}
+                      ><Plus size={15} /></button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <input
+                        style={{ ...inputStyle, flex: 1 }}
+                        value={newProcost}
+                        onChange={(e) => setNewProcost(e.target.value)}
+                        placeholder="Kode procost baru…"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const val = newProcost.trim();
+                          if (!val) return;
+                          if (!procostOptions.includes(val)) setProcostOptions((prev) => [...prev, val]);
+                          set("procost", val);
+                          setNewProcost("");
+                          setAddingProcost(false);
+                        }}
+                        style={{
+                          flexShrink: 0, padding: "0 12px", borderRadius: 8, border: "none",
+                          background: T.blue, color: "#fff", cursor: "pointer", fontSize: 12.5, fontWeight: 700,
+                        }}
+                      >Simpan</button>
+                      <button
+                        type="button"
+                        onClick={() => { setAddingProcost(false); setNewProcost(""); }}
+                        style={{
+                          flexShrink: 0, padding: "0 10px", borderRadius: 8, border: `1px solid ${T.border}`,
+                          background: T.card, color: T.muted, cursor: "pointer", fontSize: 12.5,
+                        }}
+                      >Batal</button>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label style={labelStyle}>Terbilang</label>

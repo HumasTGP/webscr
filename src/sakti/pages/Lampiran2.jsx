@@ -11,11 +11,6 @@ const EMPTY = {
   tanggalNegosiasi: "",
   pelaksanaPekerjaan: "",
   keterangan: "",
-  tanggalSpk: "",
-  waktuMulai: "",
-  waktuSelesai: "",
-  hargaSeluruhnya: "",
-  terbilang: "",
 };
 
 export default function Lampiran2Page({ rab, notify, list = [], setList }) {
@@ -34,7 +29,7 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
   const selectRab = (r) => {
     setActiveRab(r);
     const existing = list.find((x) => x.submissionId === r.idNumber);
-    setForm(existing ? (existing.form || EMPTY) : { ...EMPTY, hargaSeluruhnya: r.totalEvaluasi || "" });
+    setForm(existing ? (existing.form || EMPTY) : { ...EMPTY });
   };
 
   const save = () => {
@@ -61,11 +56,6 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
           tanggalNegosiasi: formatTanggalPanjang(form.tanggalNegosiasi),
           pelaksanaPekerjaan: form.pelaksanaPekerjaan || activeRab.vendor || "",
           keterangan: form.keterangan || "",
-          tanggalSpk: formatTanggalPanjang(form.tanggalSpk),
-          waktuMulai: form.waktuMulai || "",
-          waktuSelesai: form.waktuSelesai || "",
-          hargaSeluruhnya: form.hargaSeluruhnya || "",
-          terbilang: form.terbilang || "",
         },
         `Lampiran-2-${activeRab.idNumber}.docx`
       );
@@ -90,7 +80,9 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
             <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.55 }}>Belum ada RAB.</div>
           ) : (
             <div style={{ display: "grid", gap: 6 }}>
-              {rab.map((r) => (
+              {rab.map((r) => {
+                const savedAt = list.find((x) => x.submissionId === r.idNumber)?.savedAt;
+                return (
                 <button key={r.idNumber} onClick={() => selectRab(r)} style={{
                   padding: "10px 12px", borderRadius: 8, textAlign: "left",
                   border: `1px solid ${activeRab?.idNumber === r.idNumber ? T.blue : T.border}`,
@@ -99,8 +91,14 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
                 }}>
                   <div style={{ fontFamily: font.mono, fontWeight: 700, fontSize: 12, color: T.blue }}>{r.idNumber}</div>
                   <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3, lineHeight: 1.45, overflowWrap: "anywhere" }}>{r.judulKegiatan}</div>
+                  {savedAt && (
+                    <div style={{ fontSize: 10.5, color: "#1E7F3E", marginTop: 4, fontWeight: 600 }}>
+                      Tersimpan, terakhir update {formatSavedAt(savedAt)}
+                    </div>
+                  )}
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </Card>
@@ -125,14 +123,6 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
                 <Field label="Keterangan" full><textarea style={{ ...inputStyle, minHeight: 72, resize: "vertical" }} value={form.keterangan} onChange={(e) => set("keterangan", e.target.value)} /></Field>
               </Section>
 
-              <Section title="Surat Perintah Kerja (SPK) / Surat Pesanan Barang (SPB)">
-                <Field label="Tanggal SPK"><input style={inputStyle} type="date" value={form.tanggalSpk} onChange={(e) => set("tanggalSpk", e.target.value)} /></Field>
-                <Field label="Waktu Mulai Pelaksanaan"><input style={inputStyle} value={form.waktuMulai} onChange={(e) => set("waktuMulai", e.target.value)} placeholder="Contoh: 12 Agustus 2026" /></Field>
-                <Field label="Waktu Selesai Pelaksanaan"><input style={inputStyle} value={form.waktuSelesai} onChange={(e) => set("waktuSelesai", e.target.value)} placeholder="Contoh: 20 Agustus 2026" /></Field>
-                <Field label="Harga Seluruhnya"><input style={inputStyle} type="number" value={form.hargaSeluruhnya} onChange={(e) => set("hargaSeluruhnya", e.target.value)} /></Field>
-                <Field label="Terbilang" full><input style={inputStyle} value={form.terbilang} onChange={(e) => set("terbilang", e.target.value)} /></Field>
-              </Section>
-
               <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 18 }}>
                 <button onClick={save} style={actionStyle(T.blue, "#fff", "transparent")}><Save size={14} /> Simpan</button>
                 <button onClick={downloadDocx} style={actionStyle(T.card, T.heading, T.border)}><Download size={14} /> Download Word</button>
@@ -143,6 +133,13 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
       </div>
     </div>
   );
+}
+
+function formatSavedAt(iso) {
+  const d = new Date(iso);
+  const tgl = d.toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  const jam = d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  return `${tgl} jam ${jam}`;
 }
 
 function Section({ title, children }) {

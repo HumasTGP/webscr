@@ -1,7 +1,7 @@
 .gl-page--silapak .gl-visual-panel--light {
   background:
     radial-gradient(circle at 72% 24%, rgba(255,255,255,.28), transparent 30%),
-    linear-gradient(145deg, #c7aa28 0%, #d6bd43 52%, #b89c1d 115%);
+    linear-gradient(145deg, #FDEA6F 0%, #E8D15E 58%, #C9AD36 115%);
   color: #102f60;
 }
 
@@ -11,20 +11,21 @@
 }
 
 .gl-page--silapak .gl-submit {
-  background: #c9a91e;
+  background: #FDEA6F;
   color: #102f60;
-  box-shadow: 0 9px 20px rgba(201,169,30,.24);
+  box-shadow: 0 9px 20px rgba(180,148,28,.22);
 }
 
 .gl-page--silapak .gl-submit:hover:not(:disabled) {
-  box-shadow: 0 12px 26px rgba(201,169,30,.3);
+  background: #F5DD62;
+  box-shadow: 0 12px 26px rgba(180,148,28,.28);
 }
 
 .gl-page--silapak .gl-forgot a {
-  color: #8b7110;
+  color: #6F5800;
 }
 
 .gl-page--silapak .gl-input:focus {
-  border-color: #b99b1c;
-  box-shadow: 0 0 0 3px rgba(201,169,30,.16);
+  border-color: #B79A00;
+  box-shadow: 0 0 0 3px rgba(253,234,111,.34);
 }
