@@ -43,9 +43,9 @@ export default function Sidebar({ active, onSelect, user, onLogout, onBackToPort
         <div className="system-brand-copy"><div className="system-brand-title">SAKTI</div><div className="system-brand-subtitle">Sistem Aplikasi Keuangan Terintegrasi</div></div>
       </div>
       <div style={{flex:1,overflowY:"auto",overflowX:"hidden",display:"flex",flexDirection:"column",gap:6,padding:"12px 14px"}}>{tree.map((node)=><NavNode key={node.key} node={node} depth={0} active={active} onSelect={onSelect} openMap={openMap} toggleOpen={toggleOpen}/>)}</div>
-      <div style={{padding:"0 14px 14px"}}>
-        {onBackToPortal&&<button onClick={onBackToPortal} className="mobile-hide-sidebar" style={{width:"100%",padding:"9px 12px",borderRadius:10,border:`1px solid ${T.border}`,background:T.bg,color:T.muted,cursor:"pointer",fontSize:12,fontWeight:700}}>Kembali ke Portal</button>}
-        <div style={{display:"flex",alignItems:"center",gap:9,marginTop:12,paddingTop:12,borderTop:`1px solid ${T.border}`}}><div style={{width:30,height:30,borderRadius:"50%",background:T.navy,color:"#fff",display:"grid",placeItems:"center",fontFamily:font.display,fontWeight:800,fontSize:11,flexShrink:0}}>{roleInitials(user.role)}</div><div className="mobile-hide-sidebar" style={{minWidth:0,flex:1}}><div style={{fontSize:12,fontWeight:800,color:T.heading,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{user.username||"User"}</div><div style={{fontSize:10,color:T.muted}}>{roleName}</div></div><button onClick={onLogout} title="Keluar" style={{width:26,height:26,display:"grid",placeItems:"center",border:0,background:"transparent",color:T.muted,cursor:"pointer"}}><LogOut size={13}/></button></div>
+      <div style={{padding:"12px 14px 14px",borderTop:`1px solid ${T.border}`}}>
+        {onBackToPortal&&<button onClick={onBackToPortal} className="mobile-hide-sidebar" style={{width:"100%",padding:"9px 12px",borderRadius:10,border:`1px solid ${T.border}`,background:T.bg,color:T.muted,cursor:"pointer",fontSize:12,fontWeight:700,marginBottom:8}}>Kembali ke Portal</button>}
+        <button onClick={onLogout} className="mobile-hide-sidebar" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:9,padding:"9px 12px",borderRadius:10,border:"1px solid #F2B8B8",background:"#FFF5F5",color:"#CF0000",cursor:"pointer",fontSize:12,fontWeight:700}}><LogOut size={14}/><span>Keluar</span></button>
       </div>
     </div>}
   </div></div>;
