@@ -1,5 +1,6 @@
-import { BookUser, HelpCircle, History, LayoutDashboard, ListChecks, LogOut, Package, PackageCheck } from "lucide-react";
+import { BookUser, HelpCircle, History, LayoutDashboard, ListChecks, Package, PackageCheck } from "lucide-react";
 import { T, font } from "../../lib/theme";
+import SidebarExitButton from "../../components/SidebarExitButton";
 
 const ACCENT = "#FDEA6F";
 const ACCENT_TEXT = "#5B4B00";
@@ -20,6 +21,6 @@ export default function SiLapakSidebar({ active, onSelect, onLogout }) {
       <div className="system-brand-copy"><div className="system-brand-title">Si Lapak Priok</div><div className="system-brand-subtitle">Tamu & Paket</div></div>
     </div>
     <nav style={{flex:1,padding:"12px 14px",overflowY:"auto",display:"flex",flexDirection:"column",gap:4}}>{ITEMS.map((m)=>{const Icon=m.icon,isActive=active===m.key;return <button key={m.key} onClick={()=>onSelect(m.key)} style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:"9px 10px",borderRadius:10,border:0,cursor:"pointer",background:isActive?ACCENT:"transparent",color:isActive?ACCENT_TEXT:T.text,fontWeight:isActive?800:500,fontSize:13,fontFamily:font.body,textAlign:"left"}}><Icon size={16} style={{flexShrink:0}}/><span>{m.label}</span></button>})}</nav>
-    <div style={{padding:"12px 14px 14px",borderTop:`1px solid ${T.border}`}}><button onClick={onLogout} className="mobile-hide-sidebar" style={{width:"100%",display:"flex",alignItems:"center",gap:9,justifyContent:"center",padding:"9px 12px",borderRadius:10,border:"1px solid #FFCDD2",background:"#FFF5F5",color:"#C62828",cursor:"pointer",fontSize:12,fontWeight:700}}><LogOut size={14}/>Keluar</button></div>
+    <SidebarExitButton onClick={onLogout} />
   </aside></div>;
 }
