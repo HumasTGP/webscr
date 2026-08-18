@@ -5,6 +5,15 @@ import { uid, rupiah } from "../../lib/utils";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
+import ComboManaged from "../../components/ComboManaged";
+
+const DEFAULT_COMBO = {
+  procost: ["Belanja Modal", "Belanja Operasional", "Belanja Pegawai"],
+  expType: ["Direct", "Indirect", "Capital"],
+  task: ["KAS", "UMB", "PRIOK"],
+  expOrg: ["1010", "1020", "2010"],
+  vendor: [],
+};
 
 const EMPTY_FORM = {
   subSection: "",
@@ -39,19 +48,20 @@ function newItem() {
   return { id: uid("LP1"), uraian: "", jumlah: "", satuan: "", hargaVendor1: "", hargaVendor2: "", hargaVendor3: "" };
 }
 
-export default function Lampiran1Page({ rab, notify }) {
+export default function Lampiran1Page({ rab, notify, list = [], setList }) {
   const [activeRab, setActiveRab] = useState(null);
-  const [saved, setSaved] = useState({});
   const [form, setForm] = useState(EMPTY_FORM);
   const [items, setItems] = useState([]);
+  const [combo, setCombo] = useState(DEFAULT_COMBO);
 
   const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const setComboOpts = (key, opts) => setCombo((p) => ({ ...p, [key]: opts }));
 
   const chooseRab = (r) => {
     setActiveRab(r);
-    const existing = saved[r.idNumber];
+    const existing = list.find((x) => x.submissionId === r.idNumber);
     if (existing) {
-      setForm(existing.form);
+      setForm(existing.form || EMPTY_FORM);
       setItems(existing.items || []);
       return;
     }
@@ -82,7 +92,13 @@ export default function Lampiran1Page({ rab, notify }) {
 
   const save = () => {
     if (!activeRab) return;
-    setSaved((prev) => ({ ...prev, [activeRab.idNumber]: { form, items, savedAt: new Date().toISOString() } }));
+    const record = { submissionId: activeRab.idNumber, form, items, savedAt: new Date().toISOString() };
+    if (setList) {
+      setList((prev) => {
+        const idx = prev.findIndex((x) => x.submissionId === activeRab.idNumber);
+        return idx >= 0 ? prev.map((x, i) => i === idx ? record : x) : [...prev, record];
+      });
+    }
     notify?.("Lampiran 1 disimpan.", "success", "Lampiran 1 disimpan");
   };
 
@@ -148,7 +164,7 @@ export default function Lampiran1Page({ rab, notify }) {
           {!rab?.length ? <div style={{ color: T.muted, fontSize: 12.5 }}>Belum ada RAB.</div> : (
             <div style={{ display: "grid", gap: 6 }}>
               {rab.map((r) => {
-                const savedInfo = saved[r.idNumber];
+                const savedInfo = list.find((x) => x.submissionId === r.idNumber);
                 return (
                 <button key={r.idNumber} onClick={() => chooseRab(r)} style={{
                   padding: "10px 12px", borderRadius: 8, textAlign: "left",
@@ -179,10 +195,10 @@ export default function Lampiran1Page({ rab, notify }) {
                 <Field label="Sub Section"><input style={inputStyle} value={form.subSection} onChange={(e) => set("subSection", e.target.value)} /></Field>
                 <Field label="Tanggal"><input style={inputStyle} type="date" value={form.tanggal} onChange={(e) => set("tanggal", e.target.value)} /></Field>
                 <Field label="Nama Pengadaan" full><input style={inputStyle} value={form.namaPengadaan} onChange={(e) => set("namaPengadaan", e.target.value)} /></Field>
-                <Field label="Procost"><input style={inputStyle} value={form.procost} onChange={(e) => set("procost", e.target.value)} /></Field>
-                <Field label="Exp. Type"><input style={inputStyle} value={form.expType} onChange={(e) => set("expType", e.target.value)} /></Field>
-                <Field label="Task"><input style={inputStyle} value={form.task} onChange={(e) => set("task", e.target.value)} /></Field>
-                <Field label="Exp. Org"><input style={inputStyle} value={form.expOrg} onChange={(e) => set("expOrg", e.target.value)} /></Field>
+                <Field label="Procost"><ComboManaged value={form.procost} options={combo.procost} onChange={(v) => set("procost", v)} onOptions={(o) => setComboOpts("procost", o)} placeholder="Pilih procost…" /></Field>
+                <Field label="Exp. Type"><ComboManaged value={form.expType} options={combo.expType} onChange={(v) => set("expType", v)} onOptions={(o) => setComboOpts("expType", o)} placeholder="Pilih exp type…" /></Field>
+                <Field label="Task"><ComboManaged value={form.task} options={combo.task} onChange={(v) => set("task", v)} onOptions={(o) => setComboOpts("task", o)} placeholder="Pilih task…" /></Field>
+                <Field label="Exp. Org"><ComboManaged value={form.expOrg} options={combo.expOrg} onChange={(v) => set("expOrg", v)} onOptions={(o) => setComboOpts("expOrg", o)} placeholder="Pilih exp org…" /></Field>
               </Section>
 
               <div style={{ marginBottom: 18 }}>
@@ -210,9 +226,9 @@ export default function Lampiran1Page({ rab, notify }) {
               </div>
 
               <Section title="Vendor dan Preferred Vendor">
-                <Field label="Vendor 1"><input style={inputStyle} value={form.vendor1} onChange={(e) => set("vendor1", e.target.value)} /></Field>
-                <Field label="Vendor 2"><input style={inputStyle} value={form.vendor2} onChange={(e) => set("vendor2", e.target.value)} /></Field>
-                <Field label="Vendor 3"><input style={inputStyle} value={form.vendor3} onChange={(e) => set("vendor3", e.target.value)} /></Field>
+                <Field label="Vendor 1"><ComboManaged value={form.vendor1} options={combo.vendor} onChange={(v) => set("vendor1", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih vendor 1…" /></Field>
+                <Field label="Vendor 2"><ComboManaged value={form.vendor2} options={combo.vendor} onChange={(v) => set("vendor2", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih vendor 2…" /></Field>
+                <Field label="Vendor 3"><ComboManaged value={form.vendor3} options={combo.vendor} onChange={(v) => set("vendor3", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih vendor 3…" /></Field>
                 <Field label="Preferred Vendor"><input style={inputStyle} value={form.preferredVendor} onChange={(e) => set("preferredVendor", e.target.value)} /></Field>
               </Section>
 

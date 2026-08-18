@@ -15,7 +15,6 @@ import {
   bastFields,
   laporanFields,
   paktaFields,
-  torFields,
 } from "./lib/wizardFields";
 
 import Sidebar from "./sakti/components/Sidebar";
@@ -29,12 +28,13 @@ import SiLapakApp from "./si-lapak-priok/pages/SiLapakApp";
 import LoginScreen from "./sakti/pages/Login";
 import Dashboard from "./sakti/pages/Dashboard";
 import RABPage from "./sakti/pages/RAB";
+import TORPage from "./sakti/pages/TOR";
 import KategoriPage from "./sakti/pages/KategoriPage";
 import VendorPage from "./sakti/pages/Vendor";
 import HistoryPage from "./sakti/pages/History";
 import Panduan from "./sakti/pages/Panduan";
 import GenericWizard from "./sakti/pages/GenericWizard";
-import { TorDocPreview, BastDocPreview, PaktaDocPreview } from "./components/DocTemplatePreview";
+import { BastDocPreview, PaktaDocPreview } from "./components/DocTemplatePreview";
 import ProposalRekapPage from "./sakti/pages/ProposalRekap";
 import ProposalEvaluasiPage from "./sakti/pages/ProposalEvaluasi";
 import PengelolaanKomunikasi from "./sakti/pages/PengelolaanKomunikasi";
@@ -57,6 +57,7 @@ import ChecklistDokumenPage from "./sakti/pages/ChecklistDokumen";
 import FormVerifikasiPage from "./sakti/pages/FormVerifikasi";
 import Lampiran1Page from "./sakti/pages/Lampiran1";
 import Lampiran2Page from "./sakti/pages/Lampiran2";
+import NonPoPage from "./sakti/pages/NonPoPage";
 import PoErpDataPage from "./sakti/pages/PoErpData";
 import RKAPage from "./sakti/pages/RKAPage";
 import RekapAnggaranPage from "./sakti/pages/RekapAnggaranPage";
@@ -165,6 +166,8 @@ export default function App() {
   const [bast, setBast] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [bapp, setBapp] = useState([]);
+  const [lmp1List, setLmp1List] = useState([]);
+  const [lmp2List, setLmp2List] = useState([]);
   const [laporan, setLaporan] = useState([]);
   const [rka, setRka] = useState([]);
 
@@ -310,36 +313,18 @@ export default function App() {
       "kategori-npo": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="NON PO" />,
       "kategori-po":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="PO" />,
       "kategori-cc":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="Cash Card" />,
-      tor: (
-        <GenericWizard
-          title="TOR"
-          eyebrow="Modul TOR"
-          description="Term of Reference kegiatan, dirujuk dari ID RAB."
-          buildFields={torFields(rabIdOptions)}
-          idPrefix="TOR"
-          autoFrom={{ key: "id", source: rab, map: autoFromRab.tor }}
-          list={tor}
-          setList={setTor}
+      tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
+      "grp-pembayaran-nonpo": (
+        <NonPoPage
+          rab={rabByKategori["NON PO"]}
+          lmp1={lmp1List}
+          lmp2={lmp2List}
+          bast={bast.filter((b) => b.kategori === "NON PO")}
+          pakta={pakta.filter((p) => p.kategori === "NON PO")}
+          bapp={bapp.filter((b) => b.kategori === "NON PO")}
+          formVerif={[]}
           notify={notify}
-          pdfEnabled
-          docxTemplate={DOCX_TEMPLATES.tor}
-          buildDocPreview={(v) => <TorDocPreview values={v} />}
-          hideIdSelector
-          columns={[
-            { key: "id", label: "ID TOR" },
-            {
-              key: "tanggalInput",
-              label: "Tanggal Input",
-              render: (r) =>
-                r.tanggalInput
-                  ? new Date(r.tanggalInput).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
-                  : "-",
-            },
-            { key: "kategori", label: "Kategori" },
-            { key: "judulKegiatan", label: "Judul Kegiatan" },
-            { key: "tempat", label: "Tempat" },
-            { key: "hariTanggal", label: "Tanggal" },
-          ]}
+          onNavigate={setActive}
         />
       ),
       kategori: <KategoriPage rab={rab} setRab={setRab} notify={notify} />,
@@ -522,10 +507,10 @@ export default function App() {
             <FormVerifikasiPage rab={rabByKategori[kategori]} notify={notify} />
           );
           routes[`lmp1-${suffix}`] = (
-            <Lampiran1Page rab={rabByKategori[kategori]} notify={notify} />
+            <Lampiran1Page rab={rabByKategori[kategori]} notify={notify} list={lmp1List} setList={setLmp1List} />
           );
           routes[`lmp2-${suffix}`] = (
-            <Lampiran2Page rab={rabByKategori[kategori]} notify={notify} />
+            <Lampiran2Page rab={rabByKategori[kategori]} notify={notify} list={lmp2List} setList={setLmp2List} />
           );
         });
         return routes;
@@ -552,7 +537,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       user,
-      rab, tor, bast, pakta, bapp, laporan, vendors, history,
+      rab, tor, bast, pakta, bapp, lmp1List, lmp2List, laporan, vendors, history,
       proposals, konten, evaluasi, rabIdOptions, packages, users, rka,
       rabByKategori, rabIdOptionsByKategori,
     ]

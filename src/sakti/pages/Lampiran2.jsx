@@ -13,9 +13,8 @@ const EMPTY = {
   keterangan: "",
 };
 
-export default function Lampiran2Page({ rab, notify }) {
+export default function Lampiran2Page({ rab, notify, list = [], setList }) {
   const [activeRab, setActiveRab] = useState(null);
-  const [forms, setForms] = useState({});
   const [form, setForm] = useState(EMPTY);
 
   const inputStyle = {
@@ -29,12 +28,19 @@ export default function Lampiran2Page({ rab, notify }) {
 
   const selectRab = (r) => {
     setActiveRab(r);
-    setForm(forms[r.idNumber]?.form || { ...EMPTY });
+    const existing = list.find((x) => x.submissionId === r.idNumber);
+    setForm(existing ? (existing.form || EMPTY) : { ...EMPTY });
   };
 
   const save = () => {
     if (!activeRab) return;
-    setForms((prev) => ({ ...prev, [activeRab.idNumber]: { form, savedAt: new Date().toISOString() } }));
+    const record = { submissionId: activeRab.idNumber, form, savedAt: new Date().toISOString() };
+    if (setList) {
+      setList((prev) => {
+        const idx = prev.findIndex((x) => x.submissionId === activeRab.idNumber);
+        return idx >= 0 ? prev.map((x, i) => i === idx ? record : x) : [...prev, record];
+      });
+    }
     notify?.("Data Lampiran 2 disimpan.", "success", "Lampiran 2 disimpan");
   };
 
@@ -75,7 +81,7 @@ export default function Lampiran2Page({ rab, notify }) {
           ) : (
             <div style={{ display: "grid", gap: 6 }}>
               {rab.map((r) => {
-                const savedAt = forms[r.idNumber]?.savedAt;
+                const savedAt = list.find((x) => x.submissionId === r.idNumber)?.savedAt;
                 return (
                 <button key={r.idNumber} onClick={() => selectRab(r)} style={{
                   padding: "10px 12px", borderRadius: 8, textAlign: "left",
