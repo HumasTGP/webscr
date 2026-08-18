@@ -1,1 +1,0 @@
-.dashboard-main-grid{min-width:0}.dashboard-main-grid>*{min-width:0}@media(max-width:960px){.dashboard-main-grid{grid-template-columns:1fr!important}}@media(max-width:640px){.dashboard-main-grid{gap:12px!important}}
