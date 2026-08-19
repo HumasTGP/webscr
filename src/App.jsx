@@ -309,10 +309,10 @@ export default function App() {
           notify={notify}
         />
       ),
-      rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} />,
-      "kategori-npo": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="NON PO" />,
-      "kategori-po":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="PO" />,
-      "kategori-cc":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} defaultKategori="Cash Card" />,
+      rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} />,
+      "kategori-npo": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} defaultKategori="NON PO" />,
+      "kategori-po":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} defaultKategori="PO" />,
+      "kategori-cc":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} defaultKategori="Cash Card" />,
       tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
       "grp-pembayaran-nonpo": (
         <NonPoPage

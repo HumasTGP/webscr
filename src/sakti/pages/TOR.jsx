@@ -17,6 +17,7 @@ import { nextIdFor } from "../../lib/utils";
 import { generateSikasPdf } from "../../lib/pdf";
 import { generateDocxFromTemplate } from "../../lib/docxGenerate";
 import { TorDocPreview } from "../../components/DocTemplatePreview";
+import DatePicker from "../../components/DatePicker";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
@@ -151,6 +152,7 @@ export default function TORPage({ tor, setTor, rab, notify }) {
   const [step, setStep] = useState(0);
   const [values, setValues] = useState({});
   const [filterBulan, setFilterBulan] = useState("");
+  const [previewId, setPreviewId] = useState("");
   const [filterKategori, setFilterKategori] = useState("Semua");
   const [reviewRow, setReviewRow] = useState(null);
   const [editingTor, setEditingTor] = useState(null);
@@ -180,6 +182,7 @@ export default function TORPage({ tor, setTor, rab, notify }) {
     () => (filterBulan ? baseTor.filter((t) => monthKey(t.hariTanggal || t.tanggalInput) === filterBulan) : baseTor),
     [baseTor, filterBulan]
   );
+  const previewRecord = tor.find((t) => t.id === previewId);
 
   const setField = (key, val) => {
     if (key === "id") {
@@ -333,6 +336,31 @@ export default function TORPage({ tor, setTor, rab, notify }) {
             </button>
           ))}
         </div>
+
+        {/* Preview & Download berdasarkan ID */}
+        <Card style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: T.blue, marginBottom: 10 }}>
+            Preview &amp; Download berdasarkan ID
+          </div>
+          <select
+            value={previewId}
+            onChange={(e) => setPreviewId(e.target.value)}
+            style={{ width: "100%", boxSizing: "border-box", padding: "9px 11px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.inputBg, color: T.text, fontSize: 13, marginBottom: previewRecord ? 14 : 0 }}
+          >
+            <option value="">- Pilih ID TOR -</option>
+            {displayTor.map((t) => <option key={t.id} value={t.id}>{t.id} - {t.judulKegiatan}</option>)}
+          </select>
+          {previewRecord && (
+            <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 16, background: T.bg }}>
+              <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{previewRecord.id}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: T.heading, margin: "3px 0 12px" }}>{previewRecord.judulKegiatan}</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <Button icon={Download} onClick={() => doDownloadTorDocx(previewRecord)}>Unduh Word (.docx)</Button>
+                <Button variant="ghost" icon={Download} onClick={() => doDownloadTorPdf(previewRecord)}>Unduh PDF</Button>
+              </div>
+            </div>
+          )}
+        </Card>
 
         {/* Filter Bulan */}
         <Card style={{ marginBottom: 14, padding: "12px 16px" }}>
@@ -553,11 +581,9 @@ export default function TORPage({ tor, setTor, rab, notify }) {
           <div style={fieldFlexStyle}>
             <div style={fieldStyle}>
               <label style={labelStyle}>a. Hari/Tanggal</label>
-              <input
-                type="date"
+              <DatePicker
                 value={values.hariTanggal || ""}
-                onChange={(e) => setField("hariTanggal", e.target.value)}
-                style={inputStyle}
+                onChange={(v) => setField("hariTanggal", v)}
               />
             </div>
             <div style={fieldStyle}>
