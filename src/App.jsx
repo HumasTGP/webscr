@@ -57,7 +57,7 @@ import ChecklistDokumenPage from "./sakti/pages/ChecklistDokumen";
 import FormVerifikasiPage from "./sakti/pages/FormVerifikasi";
 import Lampiran1Page from "./sakti/pages/Lampiran1";
 import Lampiran2Page from "./sakti/pages/Lampiran2";
-import NonPoPage from "./sakti/pages/NonPoPage";
+import NonPoPage, { DEFAULT_COMBO } from "./sakti/pages/NonPoPage";
 import PoErpDataPage from "./sakti/pages/PoErpData";
 import RKAPage from "./sakti/pages/RKAPage";
 import RekapAnggaranPage from "./sakti/pages/RekapAnggaranPage";
@@ -168,6 +168,8 @@ export default function App() {
   const [bapp, setBapp] = useState([]);
   const [lmp1List, setLmp1List] = useState([]);
   const [lmp2List, setLmp2List] = useState([]);
+  const [nonpoSubmissions, setNonpoSubmissions] = useState([]);
+  const [nonpoCombo, setNonpoCombo] = useState(DEFAULT_COMBO);
   const [laporan, setLaporan] = useState([]);
   const [rka, setRka] = useState([]);
 
@@ -314,7 +316,7 @@ export default function App() {
       "kategori-po":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} defaultKategori="PO" />,
       "kategori-cc":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} defaultKategori="Cash Card" />,
       tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
-      "grp-pembayaran-nonpo": (
+      "nonpo-overview": (
         <NonPoPage
           rab={rabByKategori["NON PO"]}
           lmp1={lmp1List}
@@ -325,6 +327,47 @@ export default function App() {
           formVerif={[]}
           notify={notify}
           onNavigate={setActive}
+          kategori="NON PO"
+          submissions={nonpoSubmissions}
+          setSubmissions={setNonpoSubmissions}
+          combo={nonpoCombo}
+          setCombo={setNonpoCombo}
+        />
+      ),
+      "po-overview": (
+        <NonPoPage
+          rab={rabByKategori["PO"]}
+          lmp1={lmp1List}
+          lmp2={lmp2List}
+          bast={bast.filter((b) => b.kategori === "PO")}
+          pakta={pakta.filter((p) => p.kategori === "PO")}
+          bapp={bapp.filter((b) => b.kategori === "PO")}
+          formVerif={[]}
+          notify={notify}
+          onNavigate={setActive}
+          kategori="PO"
+          submissions={nonpoSubmissions}
+          setSubmissions={setNonpoSubmissions}
+          combo={nonpoCombo}
+          setCombo={setNonpoCombo}
+        />
+      ),
+      "cc-overview": (
+        <NonPoPage
+          rab={rabByKategori["Cash Card"]}
+          lmp1={lmp1List}
+          lmp2={lmp2List}
+          bast={bast.filter((b) => b.kategori === "Cash Card")}
+          pakta={pakta.filter((p) => p.kategori === "Cash Card")}
+          bapp={bapp.filter((b) => b.kategori === "Cash Card")}
+          formVerif={[]}
+          notify={notify}
+          onNavigate={setActive}
+          kategori="Cash Card"
+          submissions={nonpoSubmissions}
+          setSubmissions={setNonpoSubmissions}
+          combo={nonpoCombo}
+          setCombo={setNonpoCombo}
         />
       ),
       kategori: <KategoriPage rab={rab} setRab={setRab} notify={notify} />,

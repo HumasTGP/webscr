@@ -316,34 +316,34 @@ export const MENU_TREE = [
     key: "grp-pembayaran", label: "Pembayaran", icon: ClipboardList, roles: ["humas"],
     children: [
       {
-        key: "grp-pembayaran-nonpo", label: "NON PO", icon: FileText,
+        key: "nonpo-overview", hasOwnPage: true, label: "NON PO", icon: FileText,
         children: [
           { key: "lmp1-nonpo",            label: "LMP 1",           icon: FileText },
           { key: "lmp2-nonpo",            label: "LMP 2",           icon: FileText },
-          { key: "bast-nonpo",            label: "BAST",            icon: ClipboardList },
           { key: "form-verifikasi-nonpo", label: "Form Verifikasi", icon: FilePlus },
+          { key: "bast-nonpo",            label: "BAST",            icon: ClipboardList },
           { key: "pakta-nonpo",           label: "PI",              icon: ShieldCheck },
           { key: "bapp-nonpo",            label: "BAPP",            icon: FileCheck },
         ],
       },
       {
-        key: "grp-pembayaran-po", label: "PO", icon: FileText,
+        key: "po-overview", hasOwnPage: true, label: "PO", icon: FileText,
         children: [
           { key: "lmp1-po",            label: "LMP 1",           icon: FileText },
           { key: "lmp2-po",            label: "LMP 2",           icon: FileText },
-          { key: "bast-po",            label: "BAST",            icon: ClipboardList },
           { key: "form-verifikasi-po", label: "Form Verifikasi", icon: FilePlus },
+          { key: "bast-po",            label: "BAST",            icon: ClipboardList },
           { key: "pakta-po",           label: "PI",              icon: ShieldCheck },
           { key: "bapp-po",            label: "BAPP",            icon: FileCheck },
         ],
       },
       {
-        key: "grp-pembayaran-cc", label: "CC", icon: FileText,
+        key: "cc-overview", hasOwnPage: true, label: "CC", icon: FileText,
         children: [
           { key: "lmp1-cc",            label: "LMP 1",           icon: FileText },
           { key: "lmp2-cc",            label: "LMP 2",           icon: FileText },
-          { key: "bast-cc",            label: "BAST",            icon: ClipboardList },
           { key: "form-verifikasi-cc", label: "Form Verifikasi", icon: FilePlus },
+          { key: "bast-cc",            label: "BAST",            icon: ClipboardList },
           { key: "pakta-cc",           label: "PI",              icon: ShieldCheck },
           { key: "bapp-cc",            label: "BAPP",            icon: FileCheck },
         ],
@@ -390,9 +390,10 @@ export const MENU_TREE = [
 // Cukup ubah MENU_TREE di atas; MENU akan selalu ikut sinkron.
 function flattenMenuTree(nodes, acc = []) {
   for (const node of nodes) {
+    if (node.hasOwnPage) acc.push(node);
     if (node.children) {
       flattenMenuTree(node.children, acc);
-    } else {
+    } else if (!node.hasOwnPage) {
       acc.push(node);
     }
   }

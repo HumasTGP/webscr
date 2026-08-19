@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings, Trash2, Plus, X } from "lucide-react";
+import { Settings, Trash2, Plus, Pencil, Check, X } from "lucide-react";
 import { T } from "../lib/theme";
 
 /**
@@ -20,6 +20,8 @@ export default function ComboManaged({ id, label, hint, value, options = [], onC
   const [panelOpen, setPanelOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [addText, setAddText] = useState("");
+  const [editingItem, setEditingItem] = useState(null);
+  const [editText, setEditText] = useState("");
 
   const filtered = search ? options.filter((o) => o.toLowerCase().includes(search.toLowerCase())) : options;
 
@@ -36,6 +38,16 @@ export default function ComboManaged({ id, label, hint, value, options = [], onC
     const next = options.filter((o) => o !== item);
     onOptions?.(next);
     if (value === item) onChange?.("");
+  };
+
+  const startEdit = (item) => { setEditingItem(item); setEditText(item); };
+  const saveEdit = () => {
+    const v = editText.trim();
+    if (!v) return;
+    const next = options.map((o) => (o === editingItem ? v : o));
+    onOptions?.(next);
+    if (value === editingItem) onChange?.(v);
+    setEditingItem(null);
   };
 
   const selectStyle = {
@@ -149,17 +161,45 @@ export default function ComboManaged({ id, label, hint, value, options = [], onC
                 key={o}
                 style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 8px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 11.5 }}
               >
-                <span style={{ flex: 1, cursor: "pointer", color: value === o ? T.blue : T.text }} onClick={() => { onChange?.(o); setPanelOpen(false); }}>
-                  {o}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeItem(o)}
-                  style={{ border: "none", background: "transparent", cursor: "pointer", color: T.muted, padding: 2, display: "flex", alignItems: "center" }}
-                  title="Hapus"
-                >
-                  <Trash2 size={11} />
-                </button>
+                {editingItem === o ? (
+                  <>
+                    <input
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && saveEdit()}
+                      autoFocus
+                      style={{ flex: 1, padding: "4px 6px", borderRadius: 5, border: `1px solid ${T.blue}`, fontSize: 11.5 }}
+                    />
+                    <button type="button" onClick={saveEdit} title="Simpan" style={{ border: "none", background: "transparent", cursor: "pointer", color: T.blue, padding: 2, display: "flex", alignItems: "center" }}>
+                      <Check size={12} />
+                    </button>
+                    <button type="button" onClick={() => setEditingItem(null)} title="Batal" style={{ border: "none", background: "transparent", cursor: "pointer", color: T.muted, padding: 2, display: "flex", alignItems: "center" }}>
+                      <X size={11} />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ flex: 1, cursor: "pointer", color: value === o ? T.blue : T.text }} onClick={() => { onChange?.(o); setPanelOpen(false); }}>
+                      {o}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(o)}
+                      style={{ border: "none", background: "transparent", cursor: "pointer", color: T.muted, padding: 2, display: "flex", alignItems: "center" }}
+                      title="Edit"
+                    >
+                      <Pencil size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(o)}
+                      style={{ border: "none", background: "transparent", cursor: "pointer", color: T.muted, padding: 2, display: "flex", alignItems: "center" }}
+                      title="Hapus"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </>
+                )}
               </div>
             ))}
           </div>

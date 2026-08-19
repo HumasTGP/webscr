@@ -41,23 +41,44 @@ function docStatus(list, rabId, idKey = "id") {
   return "done";
 }
 
-const DEFAULT_COMBO = {
-  bidang: ["Keamanan & Humas", "Umum", "Teknik", "SDM & Keuangan"],
-  program: ["Pemberdayaan Masyarakat", "Pelayanan Masyarakat", "Infrastruktur", "Pendidikan"],
-  subprogram: ["Bantuan Sosial", "Pembangunan Fasilitas", "Pelatihan", "Kesehatan"],
-  kategori: ["CSR", "Hibah", "Sponsorship"],
+export const DEFAULT_COMBO = {
+  bidang: ["Keamanan & Humas", "Umum", "SDM"],
+  program: [
+    "Pelayanan Masyarakat", "Pemberdayaan Masyarakat", "Pembinaan Hubungan Masyarakat",
+    "Keamanan PLTGU Blok 1-2", "Keamanan PLTD Senayan", "Keamanan PLTGU Blok 3", "Keamanan PLTGU Blok 4",
+  ],
+  subprogram: [
+    "Karitatif", "Charity", "Pengembangan Kapasitas", "Infrastruktur",
+    "Fasilitasi Kegiatan Corporate", "Ekonomi", "Keamanan",
+  ],
+  kategori: [
+    "Covid19", "Keamanan", "Mitigasi Bencana", "Tanggap Darurat Bencana", "Pemulihan Bencana",
+    "Peresmian", "Kesehatan", "Pendidikan", "Ekonomi", "Pemberdayaan", "Lingkungan", "Forum Warga",
+    "Bencana Alam", "Pemasaran Produk", "Keagamaan / Komunikasi Sosial", "Kemitraan",
+    "Hari Besar Nasional", "Publikasi", "Pelatihan", "Riset dan Pengembangan", "Awarding", "Kesenian",
+  ],
 };
 
 const EMPTY_FORM = { rabId: "", bidang: "", tanggalKegiatan: "", judulKegiatan: "", program: "", subprogram: "", kategoriProgram: "" };
 
-export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVerif, notify, onNavigate }) {
+export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVerif, notify, onNavigate, kategori, submissions, setSubmissions, combo, setCombo }) {
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
-  const [combo, setCombo] = useState(DEFAULT_COMBO);
   const [search, setSearch] = useState("");
   const [filterBulan, setFilterBulan] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [nonpoList, setNonpoList] = useState([]);
+  const nonpoList = useMemo(
+    () => (submissions || []).filter((r) => !kategori || r.kategori === kategori),
+    [submissions, kategori]
+  );
+  const setNonpoList = (updater) => {
+    setSubmissions((prev) => {
+      const prevFiltered = prev.filter((r) => !kategori || r.kategori === kategori);
+      const others = prev.filter((r) => kategori && r.kategori !== kategori);
+      const nextFiltered = typeof updater === "function" ? updater(prevFiltered) : updater;
+      return [...others, ...nextFiltered];
+    });
+  };
 
   const set = (key, val) => setForm((p) => ({ ...p, [key]: val }));
   const setComboOpts = (key, opts) => setCombo((p) => ({ ...p, [key]: opts }));
@@ -78,13 +99,14 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
     return list;
   }, [nonpoList, filterBulan, search]);
 
+  const kategoriSuffix = kategori === "PO" ? "po" : kategori === "Cash Card" ? "cc" : "nonpo";
   const saveAdd = () => {
     if (!form.rabId) return notify("Pilih ID RAB terlebih dahulu.", "error");
-    setNonpoList((prev) => [...prev, { ...form, createdAt: new Date().toISOString() }]);
+    setNonpoList((prev) => [...prev, { ...form, kategori: kategori || "NON PO", createdAt: new Date().toISOString() }]);
     setAddOpen(false);
     setForm(EMPTY_FORM);
     notify("NON PO berhasil ditambahkan.", "success");
-    if (onNavigate) onNavigate("lmp1-nonpo");
+    if (onNavigate) onNavigate(`lmp1-${kategoriSuffix}`);
   };
 
   const doDelete = (row) => {
@@ -103,9 +125,9 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
     <div>
       <PageHeader
         eyebrow="Pembayaran"
-        title="NON PO"
-        description="Daftar semua pengajuan NON PO. Klik '+ Tambah NON PO' untuk mulai pengajuan baru, lalu lanjut ke LMP 1 dst dari submenu di sidebar."
-        right={<Button icon={Plus} onClick={() => setAddOpen(true)}>+ Tambah NON PO</Button>}
+        title={kategori || "NON PO"}
+        description={`Daftar semua pengajuan ${kategori || "NON PO"}. Klik '+ Tambah ${kategori || "NON PO"}' untuk mulai pengajuan baru, lalu lanjut ke LMP 1 dst dari submenu di sidebar.`}
+        right={<Button icon={Plus} onClick={() => setAddOpen(true)}>+ Tambah {kategori || "NON PO"}</Button>}
       />
 
       {/* Filter + search bar */}
