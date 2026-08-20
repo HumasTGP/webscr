@@ -1,5 +1,4 @@
 import GenericWizard from "./GenericWizard";
-import { BastDocPreview } from "../../components/DocTemplatePreview";
 
 const bappFields = (rabIdOptions) => () => [
   { key: "id", label: "ID RAB", type: "select", options: rabIdOptions, required: true },

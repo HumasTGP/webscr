@@ -6,6 +6,7 @@ import Card from "../../components/Card";
 import Modal from "../../components/Modal";
 import PageHeader from "../../components/PageHeader";
 import ComboManaged from "../../components/ComboManaged";
+import DatePicker from "../../components/DatePicker";
 
 const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
@@ -20,18 +21,29 @@ function monthLabel(key) {
   return `${MONTHS_ID[parseInt(month, 10) - 1]} ${year}`;
 }
 
-function StatusDot({ status, title }) {
+function StatusDot({ status, title, onClick }) {
   const styles = {
-    done:  { color: "#166E49", title: "Sudah" },
-    draft: { color: "#C98A0A", title: "Draft" },
-    none:  { color: "#A9B3B6", title: "Belum dibuat" },
+    done:  { color: "#166E49", title: "Sudah dibuat - klik untuk buka" },
+    draft: { color: "#C98A0A", title: "Draft - klik untuk lanjutkan" },
+    none:  { color: "#A9B3B6", title: "Belum dibuat - klik untuk mulai" },
   };
   const s = styles[status] || styles.none;
   const sym = status === "done" ? "✓" : status === "draft" ? "•" : "—";
   return (
-    <span title={title || s.title} style={{ color: s.color, fontWeight: 700, fontSize: 15 }}>
+    <button
+      type="button"
+      onClick={onClick}
+      title={title || s.title}
+      style={{
+        color: s.color, fontWeight: 700, fontSize: 15,
+        border: "none", background: "transparent", cursor: onClick ? "pointer" : "default",
+        padding: "2px 6px", borderRadius: 6,
+      }}
+      onMouseEnter={(e) => { if (onClick) e.currentTarget.style.background = "rgba(0,0,0,0.06)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+    >
       {sym}
-    </span>
+    </button>
   );
 }
 
@@ -199,12 +211,12 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
                     <td style={tdStyle}>{row.judulKegiatan}</td>
                     <td style={tdStyle}>{row.bidang}</td>
                     <td style={tdStyle}>{row.program}</td>
-                    <td style={tdCenterStyle}><StatusDot status={lmp1Status} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={lmp2Status} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={verifStatus} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={bastStatus} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={piStatus} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={bappStatus} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={lmp1Status} onClick={() => onNavigate?.(`lmp1-${kategoriSuffix}`)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={lmp2Status} onClick={() => onNavigate?.(`lmp2-${kategoriSuffix}`)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={verifStatus} onClick={() => onNavigate?.(`form-verifikasi-${kategoriSuffix}`)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={bastStatus} onClick={() => onNavigate?.(`bast-${kategoriSuffix}`)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={piStatus} onClick={() => onNavigate?.(`pakta-${kategoriSuffix}`)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={bappStatus} onClick={() => onNavigate?.(`bapp-${kategoriSuffix}`)} /></td>
                     <td style={tdCenterStyle}>
                       <button type="button" title="Hapus" onClick={() => setDeleteConfirm(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.danger, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                         <Trash2 size={12} />
@@ -259,7 +271,7 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
 
           <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
             <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 6 }}>Tanggal kegiatan</label>
-            <input type="date" value={form.tanggalKegiatan} onChange={(e) => set("tanggalKegiatan", e.target.value)} style={{ width: "100%", padding: "9px 11px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.inputBg, color: T.text, fontSize: 13, fontFamily: "inherit", boxSizing: "border-box" }} />
+            <DatePicker value={form.tanggalKegiatan} onChange={(v) => set("tanggalKegiatan", v)} />
           </div>
 
           <div style={{ flex: "1 1 100%", maxWidth: "100%" }}>

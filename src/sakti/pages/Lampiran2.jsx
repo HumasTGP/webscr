@@ -4,6 +4,7 @@ import { T, font } from "../../lib/theme";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
+import DatePicker from "../../components/DatePicker";
 
 const EMPTY = {
   nilaiPenawaran: "",
@@ -118,7 +119,7 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
               <Section title="Berita Acara Negosiasi">
                 <Field label="Nilai Penawaran"><input style={inputStyle} type="number" value={form.nilaiPenawaran} onChange={(e) => set("nilaiPenawaran", e.target.value)} /></Field>
                 <Field label="Nilai Negosiasi"><input style={inputStyle} type="number" value={form.nilaiNegosiasi} onChange={(e) => set("nilaiNegosiasi", e.target.value)} /></Field>
-                <Field label="Tanggal Negosiasi"><input style={inputStyle} type="date" value={form.tanggalNegosiasi} onChange={(e) => set("tanggalNegosiasi", e.target.value)} /></Field>
+                <Field label="Tanggal Negosiasi"><DatePicker value={form.tanggalNegosiasi} onChange={(v) => set("tanggalNegosiasi", v)} /></Field>
                 <Field label="Pelaksana Pekerjaan"><input style={inputStyle} value={form.pelaksanaPekerjaan} onChange={(e) => set("pelaksanaPekerjaan", e.target.value)} placeholder={activeRab.vendor || "Nama vendor/pelaksana"} /></Field>
                 <Field label="Keterangan" full><textarea style={{ ...inputStyle, minHeight: 72, resize: "vertical" }} value={form.keterangan} onChange={(e) => set("keterangan", e.target.value)} /></Field>
               </Section>

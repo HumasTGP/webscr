@@ -6,6 +6,7 @@ import { uid, rupiah } from "../../lib/utils";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
+import DatePicker from "../../components/DatePicker";
 
 const EMPTY = {
   nomorVerifikasi: "",
@@ -150,7 +151,7 @@ export default function FormVerifikasiPage({ rab, notify }) {
                 </div>
                 <div>
                   <label style={labelStyle}>Tanggal</label>
-                  <input style={inputStyle} type="date" value={formData.tanggal} onChange={(e) => set("tanggal", e.target.value)} />
+                  <DatePicker value={formData.tanggal} onChange={(v) => set("tanggal", v)} />
                 </div>
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={labelStyle}>Kegiatan</label>
