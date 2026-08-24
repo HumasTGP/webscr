@@ -1,5 +1,5 @@
 // Data & util khusus modul Si Lapak Priok.
-// Modul ini terpisah total dari data.js milik SIKAS (tidak menyentuhnya).
+// Modul ini terpisah total dari data.js milik SAKTI (tidak menyentuhnya).
 
 export const SHIFTS = [
   { value: "pagi", label: "Pagi", time: "06.00 - 14.00" },

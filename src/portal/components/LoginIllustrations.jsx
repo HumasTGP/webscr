@@ -4,7 +4,7 @@
  * Dibedakan hanya warna aksen per sistem.
  */
 
-/* ─── SIKAS PLN — aksen biru ─── */
+/* ─── SAKTI PLN — aksen biru ─── */
 export function SikasIllustration() {
   return (
     <svg

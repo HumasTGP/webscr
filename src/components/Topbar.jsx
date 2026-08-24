@@ -37,7 +37,7 @@ export default function Topbar({
           minWidth: 0,
         }}
       >
-        <span className="hide-mobile">SIKAS</span>
+        <span className="hide-mobile">SAKTI</span>
         <ChevronRight size={13} className="hide-mobile" />
         <span
           style={{

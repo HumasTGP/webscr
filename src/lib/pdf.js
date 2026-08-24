@@ -79,7 +79,7 @@ export async function generateSikasPdf({
   doc.text("PLN INDONESIA POWER · UBP PRIOK", MARGIN, MARGIN);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("SIKAS - Sistem Informasi Kas", MARGIN, MARGIN + 4);
+  doc.text("SAKTI - Sistem Aplikasi Keuangan Terintegrasi", MARGIN, MARGIN + 4);
 
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
@@ -217,7 +217,7 @@ export async function generateSikasPdf({
   doc.setFontSize(7.5);
   doc.setTextColor(140);
   doc.text(
-    `Dicetak: ${new Date().toLocaleString("id-ID")} - SIKAS`,
+    `Dicetak: ${new Date().toLocaleString("id-ID")} - SAKTI`,
     MARGIN,
     PAGE.h - 8
   );
@@ -358,7 +358,7 @@ export async function generateRabPdf({
 
   doc.setFontSize(7);
   doc.setTextColor(140);
-  doc.text(`Dicetak: ${new Date().toLocaleString("id-ID")} - SIKAS`, m, ph - 8);
+  doc.text(`Dicetak: ${new Date().toLocaleString("id-ID")} - SAKTI`, m, ph - 8);
 
   doc.save(`${filename}.pdf`);
 }
@@ -498,7 +498,7 @@ export async function generateEvaluasiPdf({
 
   doc.setFontSize(7);
   doc.setTextColor(140);
-  doc.text(`Dicetak: ${new Date().toLocaleString("id-ID")} - SIKAS`, m, ph - 8);
+  doc.text(`Dicetak: ${new Date().toLocaleString("id-ID")} - SAKTI`, m, ph - 8);
 
   doc.save(`${filename}.pdf`);
 }

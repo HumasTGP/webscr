@@ -1,13 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DOC_STATUS } from "../../lib/data";
 import {
-  ArrowRight,
-  ClipboardList,
   FileSpreadsheet,
-  FileText,
   Handshake,
   Megaphone,
-  Sparkles,
   Clock,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
@@ -92,92 +88,6 @@ function Tile({ icon: Icon, value, label, tone = "blue", onClick }) {
   );
 }
 
-// ---------------- pipeline (Proposal → RAB → BAST → Laporan) --------------
-function Pipeline({ counts, goto }) {
-  const nodes = [
-    { key: "proposal-rekap", label: "Proposal", value: counts.proposal, icon: Handshake },
-    { key: "rab", label: "RAB", value: counts.rab, icon: FileSpreadsheet },
-    { key: "bast", label: "BAST, PI, TOR", value: counts.bastPiTor, icon: ClipboardList },
-    { key: "laporan", label: "Laporan", value: counts.laporan, icon: FileText },
-  ];
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${nodes.length}, minmax(0, 1fr))`,
-        gap: 10,
-        alignItems: "stretch",
-      }}
-    >
-      {nodes.map((n, i) => {
-        const Icon = n.icon;
-        return (
-          <button
-            key={n.key}
-            onClick={() => goto(n.key)}
-            style={{
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 6,
-              padding: "16px 10px",
-              background: T.bg,
-              borderRadius: 10,
-              border: `1px solid ${T.border}`,
-              cursor: "pointer",
-              textAlign: "center",
-              transition: "background .15s ease, border-color .15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = T.blueSoft;
-              e.currentTarget.style.borderColor = T.blue;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = T.bg;
-              e.currentTarget.style.borderColor = T.border;
-            }}
-          >
-            <div
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: "50%",
-                background: T.card,
-                color: T.blue,
-                display: "grid",
-                placeItems: "center",
-                border: `1px solid ${T.border}`,
-              }}
-            >
-              <Icon size={15} />
-            </div>
-            <div style={{ fontSize: 11, color: T.muted, letterSpacing: 0.3 }}>
-              {n.label}
-            </div>
-            {i < nodes.length - 1 && (
-              <ArrowRight
-                size={14}
-                color={T.muted}
-                style={{
-                  position: "absolute",
-                  right: -12,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: T.card,
-                  padding: 1,
-                  borderRadius: 6,
-                  zIndex: 1,
-                }}
-                className="hide-mobile"
-              />
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 // ---------------- panels -------------------------------------------------
 function ProposalSpotlight({ items, goto }) {
@@ -396,6 +306,171 @@ function LiveClock() {
   );
 }
 
+// ---------------- grafik garis: dokumen masuk per kategori & periode -------
+const PERIODE_OPTIONS = [
+  { key: "harian", label: "Harian" },
+  { key: "mingguan", label: "Mingguan" },
+  { key: "bulanan", label: "Bulanan" },
+  { key: "tahunan", label: "Tahunan" },
+];
+
+function startOfWeek(d) {
+  const x = new Date(d);
+  const day = x.getDay() === 0 ? 7 : x.getDay(); // Senin = awal minggu
+  x.setDate(x.getDate() - (day - 1));
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+
+// Bikin N titik waktu ke belakang (dari hari ini) sesuai periode yang dipilih,
+// lalu hitung jumlah submission per kategori yang jatuh di tiap titik itu.
+function buildSeries(submissions, periode) {
+  const now = new Date();
+  const points = [];
+
+  if (periode === "harian") {
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      points.push({ key, label: d.toLocaleDateString("id-ID", { weekday: "short" }), from: new Date(key), to: new Date(new Date(key).getTime() + 86400000) });
+    }
+  } else if (periode === "mingguan") {
+    for (let i = 5; i >= 0; i--) {
+      const d = startOfWeek(now);
+      d.setDate(d.getDate() - i * 7);
+      const to = new Date(d); to.setDate(to.getDate() + 7);
+      points.push({ key: d.toISOString().slice(0, 10), label: `${d.getDate()}/${d.getMonth() + 1}`, from: d, to });
+    }
+  } else if (periode === "bulanan") {
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const to = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+      points.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleDateString("id-ID", { month: "short" }), from: d, to });
+    }
+  } else {
+    for (let i = 4; i >= 0; i--) {
+      const y = now.getFullYear() - i;
+      points.push({ key: String(y), label: String(y), from: new Date(y, 0, 1), to: new Date(y + 1, 0, 1) });
+    }
+  }
+
+  return points.map((p) => {
+    const inRange = submissions.filter((s) => {
+      const t = s.createdAt ? new Date(s.createdAt) : null;
+      return t && t >= p.from && t < p.to;
+    });
+    return {
+      label: p.label,
+      nonPo: inRange.filter((s) => s.kategori === "NON PO").length,
+      po: inRange.filter((s) => s.kategori === "PO").length,
+      cc: inRange.filter((s) => s.kategori === "Cash Card").length,
+    };
+  });
+}
+
+function KategoriLineChart({ submissions, goto }) {
+  const [periode, setPeriode] = useState("bulanan");
+  const series = useMemo(() => buildSeries(submissions || [], periode), [submissions, periode]);
+
+  const lines = [
+    { key: "nonpo-overview", field: "nonPo", label: "NON PO", color: T.blue },
+    { key: "po-overview", field: "po", label: "PO", color: T.navy },
+    { key: "cc-overview", field: "cc", label: "Cash Card", color: T.yellowText },
+  ];
+
+  const W = 900, H = 220, padL = 30, padR = 12, padT = 12, padB = 28;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const maxVal = Math.max(1, ...series.flatMap((s) => [s.nonPo, s.po, s.cc]));
+  const stepX = series.length > 1 ? innerW / (series.length - 1) : 0;
+  const yFor = (v) => padT + innerH - (v / maxVal) * innerH;
+  const xFor = (i) => padL + i * stepX;
+
+  const pathFor = (field) =>
+    series.map((s, i) => `${i === 0 ? "M" : "L"} ${xFor(i).toFixed(1)} ${yFor(s[field]).toFixed(1)}`).join(" ");
+
+  // Gridline horizontal sederhana: 0, tengah, maks
+  const gridVals = [0, Math.round(maxVal / 2), maxVal];
+
+  return (
+    <Card style={{ marginBottom: 20 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+        <div>
+          <h3 style={{ fontFamily: font.display, fontSize: 15.5, margin: 0, color: T.heading }}>
+            Dokumen Masuk per Kategori
+          </h3>
+          <div style={{ display: "flex", gap: 14, marginTop: 6 }}>
+            {lines.map((l) => (
+              <div key={l.key} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: T.muted }}>
+                <span style={{ width: 8, height: 8, borderRadius: 999, background: l.color, display: "inline-block" }} />
+                {l.label}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 4, background: T.bg, borderRadius: 8, padding: 3 }}>
+          {PERIODE_OPTIONS.map((opt) => (
+            <button
+              key={opt.key}
+              onClick={() => setPeriode(opt.key)}
+              style={{
+                border: "none",
+                borderRadius: 6,
+                padding: "6px 11px",
+                fontSize: 11.5,
+                fontWeight: 600,
+                cursor: "pointer",
+                background: periode === opt.key ? T.card : "transparent",
+                color: periode === opt.key ? T.heading : T.muted,
+                boxShadow: periode === opt.key ? "0 1px 2px rgba(16,24,40,0.08)" : "none",
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ width: "100%", overflowX: "auto" }}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", minWidth: 480, display: "block" }}>
+          {gridVals.map((v, i) => (
+            <g key={i}>
+              <line x1={padL} x2={W - padR} y1={yFor(v)} y2={yFor(v)} stroke={T.border} strokeWidth={1} />
+              <text x={2} y={yFor(v) + 3} fontSize={9.5} fill={T.muted}>{v}</text>
+            </g>
+          ))}
+
+          {lines.map((l) => (
+            <path key={l.key} d={pathFor(l.field)} fill="none" stroke={l.color} strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
+          ))}
+
+          {lines.map((l) =>
+            series.map((s, i) => (
+              <circle
+                key={`${l.key}-${i}`}
+                cx={xFor(i)}
+                cy={yFor(s[l.field])}
+                r={3}
+                fill={l.color}
+                style={{ cursor: "pointer" }}
+                onClick={() => goto(l.key)}
+              >
+                <title>{`${l.label} · ${series[i].label}: ${s[l.field]}`}</title>
+              </circle>
+            ))
+          )}
+
+          {series.map((s, i) => (
+            <text key={i} x={xFor(i)} y={H - 8} fontSize={9.5} fill={T.muted} textAnchor="middle">
+              {s.label}
+            </text>
+          ))}
+        </svg>
+      </div>
+    </Card>
+  );
+}
+
 export default function Dashboard({ data, packages = [], goto, user }) {
   const fullyApprovedRab = data.rab
     .map((r) => ({ ...r, pkg: packages.find((p) => p.idRab === r.idNumber) }))
@@ -443,6 +518,9 @@ export default function Dashboard({ data, packages = [], goto, user }) {
         </div>
       </div>
 
+      {/* Grafik dokumen masuk per kategori (NON PO / PO / Cash Card) */}
+      <KategoriLineChart submissions={data.nonpoSubmissions} goto={goto} />
+
       {/* Stakeholder + Konten tiles */}
       <div
         className="stat-grid"
@@ -473,43 +551,6 @@ export default function Dashboard({ data, packages = [], goto, user }) {
           onClick={() => goto("rab")}
         />
       </div>
-
-      {/* Pipeline visual */}
-      <Card style={{ marginBottom: 20 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: font.display,
-              fontSize: 15.5,
-              margin: 0,
-              color: T.heading,
-            }}
-          >
-            Alur Kerja SIKAS
-          </h3>
-          <span style={{ fontSize: 11.5, color: T.muted }}>
-          </span>
-        </div>
-        <Pipeline
-          counts={{
-            proposal: data.proposals.length,
-            rab: data.rab.length,
-            bastPiTor:
-              (data.bast?.length || 0) +
-              (data.pakta?.length || 0) +
-              (data.tor?.length || 0),
-            laporan: data.laporan.length,
-          }}
-          goto={goto}
-        />
-      </Card>
 
       {/* Panels: proposal terbaru + antrean publikasi konten */}
       <div

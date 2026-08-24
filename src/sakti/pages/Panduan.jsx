@@ -1,6 +1,94 @@
+import { ArrowRight, ClipboardList, FileSpreadsheet, FileText, Handshake } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import Card from "../../components/Card";
 import PageHeader from "../../components/PageHeader";
+
+// ---------------- pipeline (Proposal → RAB → BAST → Laporan) --------------
+function Pipeline({ counts, goto }) {
+  const nodes = [
+    { key: "proposal-rekap", label: "Proposal", value: counts.proposal, icon: Handshake },
+    { key: "rab", label: "RAB", value: counts.rab, icon: FileSpreadsheet },
+    { key: "bast", label: "BAST, PI, TOR", value: counts.bastPiTor, icon: ClipboardList },
+    { key: "laporan", label: "Laporan", value: counts.laporan, icon: FileText },
+  ];
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${nodes.length}, minmax(0, 1fr))`,
+        gap: 10,
+        alignItems: "stretch",
+      }}
+    >
+      {nodes.map((n, i) => {
+        const Icon = n.icon;
+        return (
+          <button
+            key={n.key}
+            onClick={() => goto?.(n.key)}
+            style={{
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 6,
+              padding: "16px 10px",
+              background: T.bg,
+              borderRadius: 10,
+              border: `1px solid ${T.border}`,
+              cursor: goto ? "pointer" : "default",
+              textAlign: "center",
+              transition: "background .15s ease, border-color .15s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = T.blueSoft;
+              e.currentTarget.style.borderColor = T.blue;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = T.bg;
+              e.currentTarget.style.borderColor = T.border;
+            }}
+          >
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: "50%",
+                background: T.card,
+                color: T.blue,
+                display: "grid",
+                placeItems: "center",
+                border: `1px solid ${T.border}`,
+              }}
+            >
+              <Icon size={15} />
+            </div>
+            <div style={{ fontSize: 11, color: T.muted, letterSpacing: 0.3 }}>
+              {n.label}
+            </div>
+            {i < nodes.length - 1 && (
+              <ArrowRight
+                size={14}
+                color={T.muted}
+                style={{
+                  position: "absolute",
+                  right: -12,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: T.card,
+                  padding: 1,
+                  borderRadius: 6,
+                  zIndex: 1,
+                }}
+                className="hide-mobile"
+              />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 const SECTIONS = [
   {
@@ -126,14 +214,46 @@ function StepRow({ n, title, description, last }) {
   );
 }
 
-export default function Panduan() {
+export default function Panduan({ data, goto }) {
+  const counts = data
+    ? {
+        proposal: data.proposals?.length || 0,
+        rab: data.rab?.length || 0,
+        bastPiTor: (data.bast?.length || 0) + (data.pakta?.length || 0) + (data.tor?.length || 0),
+        laporan: data.laporan?.length || 0,
+      }
+    : { proposal: 0, rab: 0, bastPiTor: 0, laporan: 0 };
+
   return (
     <div>
       <PageHeader
         eyebrow="Bantuan"
         title="Panduan Penggunaan"
-        description="Ringkasan alur kerja SIKAS, dari proposal masuk sampai realisasi bantuan tercatat."
+        description="Ringkasan alur kerja SAKTI, dari proposal masuk sampai realisasi bantuan tercatat."
       />
+
+      <Card style={{ marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            marginBottom: 12,
+          }}
+        >
+          <h3
+            style={{
+              fontFamily: font.display,
+              fontSize: 15.5,
+              margin: 0,
+              color: T.heading,
+            }}
+          >
+            Alur Kerja SAKTI
+          </h3>
+        </div>
+        <Pipeline counts={counts} goto={goto} />
+      </Card>
 
       <div
         style={{

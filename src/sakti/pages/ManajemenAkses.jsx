@@ -317,7 +317,6 @@ export default function ManajemenAksesPage({ users, setUsers, notify }) {
       <PageHeader
         eyebrow="Administrator SAKTI & Si Lapak Priok"
         title="Manajemen Akses"
-        description="Kelola akun SAKTI (Humas, Asman, MADM) dan Si Lapak Priok. Akun GANDENG dikelola terpisah di dalam GANDENG."
         right={
           <Button icon={UserPlus} onClick={() => { setEditTarget(null); setFormOpen(true); }}>
             Tambah Akun

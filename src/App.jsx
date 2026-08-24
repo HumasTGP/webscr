@@ -293,7 +293,7 @@ export default function App() {
       dashboard: (
         <Dashboard
           user={user}
-          data={{ rab, tor, bast, pakta, laporan, proposals, konten }}
+          data={{ rab, tor, bast, pakta, laporan, proposals, konten, nonpoSubmissions }}
           packages={packages}
           goto={setActive}
         />
@@ -583,7 +583,7 @@ export default function App() {
         />
       ),
       history: <HistoryPage history={history} />,
-      panduan: <Panduan />,
+      panduan: <Panduan data={{ rab, tor, bast, pakta, laporan, proposals }} goto={setActive} />,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
