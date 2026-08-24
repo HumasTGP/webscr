@@ -156,8 +156,8 @@ export async function generateSikasPdf({
     doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(120);
-    const cols = ["Uraian", "Qty", "Harga", "Total", "Total Evaluasi"];
-    const xs = [MARGIN, 100, 118, 140, 168];
+    const cols = ["Uraian", "Qty", "Harga Satuan", "Total Pengajuan", "Total Evaluasi"];
+    const xs = [MARGIN, 100, 118, 145, 172];
     cols.forEach((c, i) => doc.text(c, xs[i], y));
     y += 4;
     doc.setDrawColor(220);
@@ -174,8 +174,8 @@ export async function generateSikasPdf({
       const uraian = doc.splitTextToSize(String(item.uraian || "-"), 75);
       doc.text(uraian, xs[0], y);
       doc.text(String(item.qty || 0), xs[1], y);
-      doc.text(rupiah(item.harga || 0), xs[2], y);
-      doc.text(rupiah(item.total || 0), xs[3], y);
+      doc.text(rupiah(item.hargaSatuan || 0), xs[2], y);
+      doc.text(rupiah(item.totalPengajuan || 0), xs[3], y);
       doc.text(rupiah(item.totalEvaluasi || 0), xs[4], y);
       y += Math.max(5, uraian.length * 4);
     }
@@ -221,6 +221,144 @@ export async function generateSikasPdf({
     MARGIN,
     PAGE.h - 8
   );
+
+  doc.save(`${filename}.pdf`);
+}
+
+// PDF khusus RAB, layoutnya niru Template_RAB.docx: header ID/Tanggal RAB +
+// judul kegiatan, tabel item dengan kolom Usulan & Evaluasi bersebelahan,
+// baris ringkasan Jumlah/PPN/Jumlah+PPN per sisi, lalu TTD Menyetujui & Dibuat Oleh.
+export async function generateRabPdf({
+  idNumber, tanggalRab, judulKegiatan, items = [],
+  jumlahPengajuan, ppnPengajuan, totalPengajuan,
+  jumlahEvaluasi, ppnEvaluasi, totalEvaluasi,
+  namaAsman, namaPembuat, filename,
+}) {
+  const doc = new jsPDF({ format: "a4", unit: "mm", orientation: "landscape" });
+  const pw = 297, ph = 210, m = 14;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  doc.setTextColor(20);
+  doc.text("RENCANA ANGGARAN BIAYA", pw / 2, m + 4, { align: "center" });
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(90);
+  doc.text(judulKegiatan || "-", pw / 2, m + 11, { align: "center" });
+  doc.setDrawColor(200);
+  doc.line(m, m + 16, pw - m, m + 16);
+
+  let y = m + 24;
+  doc.setFontSize(9);
+  doc.setTextColor(60);
+  doc.setFont("helvetica", "bold");
+  doc.text("ID Number:", m, y);
+  doc.setFont("helvetica", "normal");
+  doc.text(String(idNumber || "-"), m + 24, y);
+  doc.setFont("helvetica", "bold");
+  doc.text("Tanggal RAB:", m + 90, y);
+  doc.setFont("helvetica", "normal");
+  doc.text(String(tanggalRab || "-"), m + 118, y);
+  y += 8;
+
+  // --- Tabel header (2 baris seperti template: grup Usulan/Evaluasi, lalu sub-kolom)
+  const colUraian = m, wUraian = 60;
+  const colSatuan = colUraian + wUraian, wSatuan = 18;
+  const wQty = 18, wHarga = 32, wJumlah = 32;
+  const colUQty = colSatuan + wSatuan;
+  const colUHarga = colUQty + wQty;
+  const colUJumlah = colUHarga + wHarga;
+  const colEQty = colUJumlah + wJumlah;
+  const colEHarga = colEQty + wQty;
+  const colEJumlah = colEHarga + wHarga;
+  const tableRight = colEJumlah + wJumlah;
+  const rowH = 7;
+
+  const drawTableHeader = () => {
+    doc.setFillColor(230, 236, 245);
+    doc.rect(m, y, tableRight - m, rowH * 2, "F");
+    doc.setDrawColor(180);
+    doc.rect(m, y, tableRight - m, rowH * 2);
+    doc.setFontSize(7.5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30);
+    doc.text("URAIAN", colUraian + 2, y + rowH + 4.5);
+    doc.text("SATUAN", colSatuan + 2, y + rowH + 4.5);
+    doc.text("USULAN", colUQty + (wQty + wHarga + wJumlah) / 2, y + 4.5, { align: "center" });
+    doc.text("EVALUASI", colEQty + (wQty + wHarga + wJumlah) / 2, y + 4.5, { align: "center" });
+    doc.text("Qty.", colUQty + wQty / 2, y + rowH + 4.5, { align: "center" });
+    doc.text("Harga Satuan", colUHarga + wHarga / 2, y + rowH + 4.5, { align: "center" });
+    doc.text("Jumlah", colUJumlah + wJumlah / 2, y + rowH + 4.5, { align: "center" });
+    doc.text("Qty.", colEQty + wQty / 2, y + rowH + 4.5, { align: "center" });
+    doc.text("Harga Satuan", colEHarga + wHarga / 2, y + rowH + 4.5, { align: "center" });
+    doc.text("Jumlah", colEJumlah + wJumlah / 2, y + rowH + 4.5, { align: "center" });
+    [colSatuan, colUQty, colUHarga, colUJumlah, colEQty, colEHarga, colEJumlah].forEach((x) => doc.line(x, y, x, y + rowH * 2));
+    doc.line(m, y + rowH, tableRight, y + rowH);
+    y += rowH * 2;
+  };
+  drawTableHeader();
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(30);
+  for (const it of items) {
+    if (y > ph - 55) { doc.addPage("a4", "landscape"); y = m; drawTableHeader(); }
+    const uraianLines = doc.splitTextToSize(String(it.uraian || "-"), wUraian - 4);
+    const lineH = Math.max(rowH, uraianLines.length * 3.6 + 2);
+    doc.setDrawColor(210);
+    doc.rect(m, y, tableRight - m, lineH);
+    [colSatuan, colUQty, colUHarga, colUJumlah, colEQty, colEHarga, colEJumlah].forEach((x) => doc.line(x, y, x, y + lineH));
+    doc.text(uraianLines, colUraian + 2, y + 4.5);
+    doc.text(String(it.satuan || "-"), colSatuan + 2, y + 4.5);
+    doc.text(String(it.qty || "-"), colUQty + wQty / 2, y + 4.5, { align: "center" });
+    doc.text(rupiah(it.hargaSatuan || 0), colUHarga + wHarga - 2, y + 4.5, { align: "right" });
+    doc.text(rupiah(it.basePengajuan || 0), colUJumlah + wJumlah - 2, y + 4.5, { align: "right" });
+    doc.text(String(it.qtyEvaluasi || "-"), colEQty + wQty / 2, y + 4.5, { align: "center" });
+    doc.text(rupiah(it.hargaSatuanEvaluasi || 0), colEHarga + wHarga - 2, y + 4.5, { align: "right" });
+    doc.text(rupiah(it.baseEvaluasi || 0), colEJumlah + wJumlah - 2, y + 4.5, { align: "right" });
+    y += lineH;
+  }
+
+  // --- Baris ringkasan: Jumlah / PPN / Jumlah + PPN, per sisi Usulan & Evaluasi
+  const summaryRow = (label, valPengajuan, valEvaluasi, bold) => {
+    if (y > ph - 45) { doc.addPage("a4", "landscape"); y = m; drawTableHeader(); }
+    doc.setDrawColor(210);
+    doc.rect(m, y, tableRight - m, rowH);
+    [colSatuan, colUQty, colUHarga, colUJumlah, colEQty, colEHarga, colEJumlah].forEach((x) => doc.line(x, y, x, y + rowH));
+    doc.setFont("helvetica", bold ? "bold" : "normal");
+    doc.setFontSize(8);
+    doc.text(label, colUHarga + wHarga / 2, y + 4.7, { align: "center" });
+    doc.text(rupiah(valPengajuan || 0), colUJumlah + wJumlah - 2, y + 4.7, { align: "right" });
+    doc.text(label, colEHarga + wHarga / 2, y + 4.7, { align: "center" });
+    doc.text(rupiah(valEvaluasi || 0), colEJumlah + wJumlah - 2, y + 4.7, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    y += rowH;
+  };
+  summaryRow("Jumlah", jumlahPengajuan, jumlahEvaluasi, false);
+  summaryRow("PPN", ppnPengajuan, ppnEvaluasi, false);
+  summaryRow("Jumlah + PPN", totalPengajuan, totalEvaluasi, true);
+
+  // --- TTD: Menyetujui (kiri, namaAsman) / Dibuat Oleh (kanan, namaPembuat) — samain sama Template_RAB.docx
+  const sigY = Math.max(y + 24, ph - 42);
+  const boxW = (pw - m * 2 - 20) / 2;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(50);
+  doc.text("Menyetujui,", m, sigY);
+  doc.text("Dibuat Oleh,", m + boxW + 20, sigY);
+  doc.setDrawColor(180);
+  doc.line(m, sigY + 22, m + boxW, sigY + 22);
+  doc.line(m + boxW + 20, sigY + 22, m + boxW + 20 + boxW, sigY + 22);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(80);
+  doc.text(namaAsman || "-", m, sigY + 27);
+  doc.text(namaPembuat || "-", m + boxW + 20, sigY + 27);
+
+  doc.setFontSize(7);
+  doc.setTextColor(140);
+  doc.text(`Dicetak: ${new Date().toLocaleString("id-ID")} - SIKAS`, m, ph - 8);
 
   doc.save(`${filename}.pdf`);
 }

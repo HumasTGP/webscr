@@ -193,10 +193,19 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
     task: record.form?.task || "-", expOrg: record.form?.expOrg || "-",
     grandTotal: rupiah((record.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.hargaVendor1) || 0), 0)),
     vendor1: record.form?.vendor1 || "-", vendor2: record.form?.vendor2 || "-", vendor3: record.form?.vendor3 || "-",
-    items: (record.items || []).map((it) => ({
-      uraian: it.uraian || "", qty: String(it.qty || ""), satuan: it.satuan || "",
-      hargaVendor1: rupiah(it.hargaVendor1 || 0), total: rupiah((Number(it.qty) || 0) * (Number(it.hargaVendor1) || 0)),
-    })),
+    // "baris" = 1 baris tabel siap-cetak per item, dipisah tab antar kolom dan
+    // diakhiri \n biar docxtemplater (linebreaks:true) render jadi baris baru di Word.
+    items: (record.items || []).map((it) => {
+      const uraian = it.uraian || "";
+      const qty = String(it.qty || "");
+      const satuan = it.satuan || "";
+      const hargaVendor1 = rupiah(it.hargaVendor1 || 0);
+      const total = rupiah((Number(it.qty) || 0) * (Number(it.hargaVendor1) || 0));
+      return {
+        uraian, qty, satuan, hargaVendor1, total,
+        baris: `${uraian}\t${qty}\t${satuan}\t${hargaVendor1}\t${total}\n`,
+      };
+    }),
   });
   const downloadDocx = async (record) => {
     try {

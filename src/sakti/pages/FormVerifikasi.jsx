@@ -85,8 +85,6 @@ export default function FormVerifikasiPage({ rab, notify }) {
           jumlahBiaya: formData.jumlahBiaya ? rupiah(Number(formData.jumlahBiaya)) : "",
           terbilang: formData.terbilang || "",
           kepada: formData.kepada || "",
-          tpb: formData.tpb || "",
-          procost: formData.procost || "",
         },
         `Form-Verifikasi-${activeRab.idNumber}.docx`
       );

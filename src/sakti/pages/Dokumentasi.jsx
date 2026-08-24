@@ -12,8 +12,7 @@ function rabNumber(id = "") {
   return match ? Number(match[1]) : -1;
 }
 
-export default function DokumentasiPage({ rab, setRab, notify }) {
-  const [docs, setDocs] = useState([]);
+export default function DokumentasiPage({ rab, setRab, notify, docs = [], setDocs }) {
   const [showUpload, setShowUpload] = useState(null);
   const [preview, setPreview] = useState(null);
   const [query, setQuery] = useState("");
@@ -23,7 +22,7 @@ export default function DokumentasiPage({ rab, setRab, notify }) {
     setRab((prev) => prev.map((row) => (row.idNumber === r.idNumber ? { ...row, pelaksanaanSelesai: next } : row)));
     notify?.(
       next
-        ? `Pelaksanaan ${r.idNumber} ditandai selesai — sekarang bisa dilanjutkan ke Non PO/PO/CC.`
+        ? `Pelaksanaan ${r.idNumber} ditandai selesai.`
         : `Pelaksanaan ${r.idNumber} ditandai belum selesai.`,
       "success"
     );

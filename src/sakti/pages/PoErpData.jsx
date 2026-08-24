@@ -49,7 +49,7 @@ export default function PoErpDataPage({ rab, notify }) {
           <div style={{ fontSize: 12, fontWeight: 700, color: T.heading, marginBottom: 10 }}>Pilih RAB (PO)</div>
           {!rab?.length ? (
             <div style={{ fontSize: 12.5, color: T.muted, lineHeight: 1.55 }}>
-              Belum ada RAB kategori PO yang pelaksanaannya sudah selesai.
+              Belum ada RAB kategori PO.
             </div>
           ) : (
             <div style={{ display: "grid", gap: 6 }}>

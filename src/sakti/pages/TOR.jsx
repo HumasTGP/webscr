@@ -13,7 +13,6 @@ import {
   X,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { nextIdFor } from "../../lib/utils";
 import { generateSikasPdf } from "../../lib/pdf";
 import { generateDocxFromTemplate } from "../../lib/docxGenerate";
 import { TorDocPreview } from "../../components/DocTemplatePreview";
@@ -26,7 +25,6 @@ import FlowSteps from "../../components/FlowSteps";
 import DataTable from "../../components/DataTable";
 
 const STEPS = ["Isi Formulir", "Konfirmasi", "Simpan"];
-const KATEGORI_TABS = ["Semua", "PO", "NON PO", "Cash Card"];
 const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
 function monthKey(dateStr) {
@@ -153,7 +151,6 @@ export default function TORPage({ tor, setTor, rab, notify }) {
   const [values, setValues] = useState({});
   const [filterBulan, setFilterBulan] = useState("");
   const [previewId, setPreviewId] = useState("");
-  const [filterKategori, setFilterKategori] = useState("Semua");
   const [reviewRow, setReviewRow] = useState(null);
   const [editingTor, setEditingTor] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -164,10 +161,7 @@ export default function TORPage({ tor, setTor, rab, notify }) {
     [rab]
   );
 
-  const baseTor = useMemo(
-    () => (filterKategori === "Semua" ? tor : tor.filter((t) => t.kategori === filterKategori)),
-    [tor, filterKategori]
-  );
+  const baseTor = tor;
 
   const bulanOptions = useMemo(() => {
     const months = new Set();
@@ -194,7 +188,7 @@ export default function TORPage({ tor, setTor, rab, notify }) {
   };
 
   const startWizard = () => {
-    setValues({ id: nextIdFor("TOR", tor, "id") });
+    setValues({});
     setEditingTor(null);
     setStep(0);
     setMode("wizard");
@@ -229,17 +223,24 @@ export default function TORPage({ tor, setTor, rab, notify }) {
 
   const doDownloadTorDocx = async (record) => {
     const idText = record.id || "tor";
+    // Tujuan Khusus & Sasaran diisi user "satu poin per baris" di textarea,
+    // jadi di-split per baris dulu supaya {#tujuanKhususList}/{#sasaranList}
+    // di template render sebagai daftar poin, bukan looping per-karakter.
+    const toList = (text) =>
+      String(text || "")
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean);
     try {
       await generateDocxFromTemplate(
         "/templates/Template_TOR.docx",
         {
           id: record.id || "",
           judulKegiatan: record.judulKegiatan || "",
-          kategori: record.kategori || "",
           latarBelakang: record.latarBelakang || "",
           tujuanUmum: record.tujuanUmum || "",
-          tujuanKhusus: record.tujuanKhusus || "",
-          sasaran: record.sasaran || "",
+          tujuanKhususList: toList(record.tujuanKhusus),
+          sasaranList: toList(record.sasaran),
           hariTanggal: record.hariTanggal || "",
           tempat: record.tempat || "",
           narasumber: record.narasumber || "",
@@ -259,7 +260,6 @@ export default function TORPage({ tor, setTor, rab, notify }) {
       rows: [
         { label: "ID TOR", value: record.id || "-" },
         { label: "Judul Kegiatan", value: record.judulKegiatan || "-" },
-        { label: "Kategori", value: record.kategori || "-" },
         { label: "Latar Belakang", value: record.latarBelakang || "-" },
         { label: "Tujuan Umum", value: record.tujuanUmum || "-" },
         { label: "Tujuan Khusus", value: record.tujuanKhusus || "-" },
@@ -277,7 +277,6 @@ export default function TORPage({ tor, setTor, rab, notify }) {
   if (mode === "list") {
     const LIST_COLUMNS = [
       { key: "id", label: "ID TOR" },
-      { key: "kategori", label: "Kategori" },
       { key: "judulKegiatan", label: "Judul Kegiatan" },
       { key: "tempat", label: "Tempat" },
       {
@@ -310,32 +309,8 @@ export default function TORPage({ tor, setTor, rab, notify }) {
           eyebrow="Modul TOR"
           title="TOR"
           description="Term of Reference kegiatan, dirujuk dari ID RAB. Klik salah satu baris untuk melihat detail atau mengubah data."
-          right={<Button icon={Plus} onClick={startWizard}>+ Tambah TOR</Button>}
+          right={<Button icon={Plus} onClick={startWizard}>Tambah TOR</Button>}
         />
-
-        {/* Kategori tabs */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 6, background: T.card, border: `1px solid ${T.border}`, borderRadius: 10, padding: 5 }}>
-          {KATEGORI_TABS.map((k) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => { setFilterKategori(k); setFilterBulan(""); }}
-              style={{
-                flex: 1,
-                border: "none",
-                background: filterKategori === k ? T.navy : "transparent",
-                color: filterKategori === k ? "#fff" : T.muted,
-                padding: "9px 13px",
-                borderRadius: 7,
-                fontSize: 12.5,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              {k}
-            </button>
-          ))}
-        </div>
 
         {/* Preview & Download berdasarkan ID */}
         <Card style={{ marginBottom: 14 }}>
@@ -407,7 +382,6 @@ export default function TORPage({ tor, setTor, rab, notify }) {
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px 24px", marginBottom: 16 }}>
               <ReviewItem label="ID TOR" value={reviewRow.id} />
-              <ReviewItem label="Kategori" value={reviewRow.kategori} />
               <ReviewItem label="Judul Kegiatan" value={reviewRow.judulKegiatan} full />
               <ReviewItem label="Hari/Tanggal" value={reviewRow.hariTanggal ? formatTanggalDisplay(reviewRow.hariTanggal) : "-"} />
               <ReviewItem label="Tempat" value={reviewRow.tempat} />
@@ -466,7 +440,7 @@ export default function TORPage({ tor, setTor, rab, notify }) {
 
   // Step 0: Isi Formulir
   if (step === 0) {
-    const canNext = values.id && values.judulKegiatan && values.kategori && values.latarBelakang && values.hariTanggal && values.tempat;
+    const canNext = values.id && values.judulKegiatan && values.latarBelakang && values.hariTanggal && values.tempat;
 
     return (
       <div>
@@ -505,19 +479,6 @@ export default function TORPage({ tor, setTor, rab, notify }) {
                 disabled
                 style={inputDisabledStyle}
               />
-            </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Kategori</label>
-              <select
-                value={values.kategori || ""}
-                onChange={(e) => setField("kategori", e.target.value)}
-                style={inputStyle}
-              >
-                <option value="">Pilih kategori…</option>
-                <option>PO</option>
-                <option>NON PO</option>
-                <option>Cash Card</option>
-              </select>
             </div>
           </div>
 
@@ -638,7 +599,6 @@ export default function TORPage({ tor, setTor, rab, notify }) {
 
           <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px 24px", marginBottom: 16 }}>
             <ReviewItem label="ID TOR" value={values.id} />
-            <ReviewItem label="Kategori" value={values.kategori} />
             <ReviewItem label="Judul Kegiatan" value={values.judulKegiatan} full />
             <ReviewItem label="Latar Belakang" value={values.latarBelakang} full />
             <ReviewItem label="Tujuan Umum" value={values.tujuanUmum} full />

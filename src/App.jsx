@@ -29,7 +29,6 @@ import LoginScreen from "./sakti/pages/Login";
 import Dashboard from "./sakti/pages/Dashboard";
 import RABPage from "./sakti/pages/RAB";
 import TORPage from "./sakti/pages/TOR";
-import KategoriPage from "./sakti/pages/KategoriPage";
 import VendorPage from "./sakti/pages/Vendor";
 import HistoryPage from "./sakti/pages/History";
 import Panduan from "./sakti/pages/Panduan";
@@ -146,9 +145,9 @@ export default function App() {
   }, []);
 
   const PACKAGE_SEED = [
-    { idRab: "RAB-2026-001", judul: "Bantuan Perbaikan Jalan Metro Marina Ancol", kategori: "NON PO",    status: DOC_STATUS.SUBMITTED },
-    { idRab: "RAB-2026-002", judul: "Fasilitasi Kegiatan Sinergi Kota Hijau",     kategori: "Cash Card", status: DOC_STATUS.APPROVED,  submittedAt: "2026-04-20T09:00:00Z", reviewedAt: "2026-04-21T10:00:00Z", reviewedBy: "asman" },
-    { idRab: "RAB-2026-003", judul: "Bantuan Rehabilitasi Mangrove Cilincing",    kategori: "NON PO",    status: DOC_STATUS.PROCESSED, submittedAt: "2026-03-15T09:00:00Z", reviewedAt: "2026-03-16T09:00:00Z", reviewedBy: "asman", processedAt: "2026-03-17T14:00:00Z", processedBy: "madm" },
+    { idRab: "001", judul: "Bantuan Perbaikan Jalan Metro Marina Ancol", kategori: "NON PO",    status: DOC_STATUS.SUBMITTED },
+    { idRab: "002", judul: "Fasilitasi Kegiatan Sinergi Kota Hijau",     kategori: "Cash Card", status: DOC_STATUS.APPROVED,  submittedAt: "2026-04-20T09:00:00Z", reviewedAt: "2026-04-21T10:00:00Z", reviewedBy: "asman" },
+    { idRab: "003", judul: "Bantuan Rehabilitasi Mangrove Cilincing",    kategori: "NON PO",    status: DOC_STATUS.PROCESSED, submittedAt: "2026-03-15T09:00:00Z", reviewedAt: "2026-03-16T09:00:00Z", reviewedBy: "asman", processedAt: "2026-03-17T14:00:00Z", processedBy: "madm" },
   ];
   const seedSubDoc = (idField, judulField) =>
     PACKAGE_SEED.map((p) => ({
@@ -168,6 +167,7 @@ export default function App() {
   const [bapp, setBapp] = useState([]);
   const [lmp1List, setLmp1List] = useState([]);
   const [lmp2List, setLmp2List] = useState([]);
+  const [dokumentasiDocs, setDokumentasiDocs] = useState([]);
   const [nonpoSubmissions, setNonpoSubmissions] = useState([]);
   const [nonpoCombo, setNonpoCombo] = useState(DEFAULT_COMBO);
   const [laporan, setLaporan] = useState([]);
@@ -260,13 +260,22 @@ export default function App() {
   };
 
   const rabIdOptions = useMemo(() => rab.map((r) => r.idNumber), [rab]);
+  // ID RAB yang sudah punya minimal 1 file dokumentasi terupload — dipakai
+  // buat reminder "dokumentasi belum lengkap" di NON PO/PO/CC, bukan syarat wajib.
+  const rabIdsWithDokumentasi = useMemo(
+    () => new Set(dokumentasiDocs.map((d) => d.rabId)),
+    [dokumentasiDocs]
+  );
 
   // Data per kategori — dipakai buat 3 varian menu Pembayaran & Laporan
   // (NON PO / PO / Cash Card) yang masing-masing berdiri sendiri di sidebar.
+  // RAB langsung masuk begitu disimpan (gak perlu nunggu ditandai "pelaksanaan
+  // selesai" dulu di halaman Dokumentasi) — status dokumentasi cukup jadi
+  // pengingat (lihat docByRabId / dokumentasiBelumLengkap), bukan syarat wajib.
   const rabByKategori = useMemo(() => ({
-    "NON PO": rab.filter((r) => r.kategori === "NON PO" && r.pelaksanaanSelesai),
-    "PO": rab.filter((r) => r.kategori === "PO" && r.pelaksanaanSelesai),
-    "Cash Card": rab.filter((r) => r.kategori === "Cash Card" && r.pelaksanaanSelesai),
+    "NON PO": rab.filter((r) => r.kategori === "NON PO"),
+    "PO": rab.filter((r) => r.kategori === "PO"),
+    "Cash Card": rab.filter((r) => r.kategori === "Cash Card"),
   }), [rab]);
   const rabIdOptionsByKategori = useMemo(() => ({
     "NON PO": rabByKategori["NON PO"].map((r) => r.idNumber),
@@ -312,9 +321,6 @@ export default function App() {
         />
       ),
       rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} />,
-      "kategori-npo": <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} defaultKategori="NON PO" />,
-      "kategori-po":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} defaultKategori="PO" />,
-      "kategori-cc":  <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} defaultKategori="Cash Card" />,
       tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
       "nonpo-overview": (
         <NonPoPage
@@ -332,6 +338,7 @@ export default function App() {
           setSubmissions={setNonpoSubmissions}
           combo={nonpoCombo}
           setCombo={setNonpoCombo}
+          rabIdsWithDokumentasi={rabIdsWithDokumentasi}
         />
       ),
       "po-overview": (
@@ -350,6 +357,7 @@ export default function App() {
           setSubmissions={setNonpoSubmissions}
           combo={nonpoCombo}
           setCombo={setNonpoCombo}
+          rabIdsWithDokumentasi={rabIdsWithDokumentasi}
         />
       ),
       "cc-overview": (
@@ -368,9 +376,9 @@ export default function App() {
           setSubmissions={setNonpoSubmissions}
           combo={nonpoCombo}
           setCombo={setNonpoCombo}
+          rabIdsWithDokumentasi={rabIdsWithDokumentasi}
         />
       ),
-      kategori: <KategoriPage rab={rab} setRab={setRab} notify={notify} />,
       "laporan-nonpo": (
         <GenericWizard
           title="Laporan - NON PO"
@@ -562,7 +570,7 @@ export default function App() {
       // bukan dokumen lengkap kayak NON PO/CC.
       "bast-po": <PoErpDataPage rab={rabByKategori["PO"]} notify={notify} />,
       "bapp-po": <PoErpDataPage rab={rabByKategori["PO"]} notify={notify} />,
-      dokumentasi: <DokumentasiPage rab={rab} setRab={setRab} notify={notify} />,
+      dokumentasi: <DokumentasiPage rab={rab} setRab={setRab} notify={notify} docs={dokumentasiDocs} setDocs={setDokumentasiDocs} />,
       "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
       eviden: <EvidenPage rab={rab} notify={notify} />,
       "checklist-dokumen": <ChecklistDokumenPage rab={rab} tor={tor} bast={bast} pakta={pakta} notify={notify} paymentPackages={paymentPackages} setPaymentPackages={setPaymentPackages} />,

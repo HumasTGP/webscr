@@ -300,7 +300,6 @@ export const MENU_TREE = [
     children: [
       { key: "rab", label: "RAB", icon: FileSpreadsheet },
       { key: "tor", label: "TOR", icon: FileText },
-      { key: "kategori", label: "Kategori", icon: Tags },
     ],
   },
 

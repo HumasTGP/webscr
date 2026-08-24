@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Check, Download, Eye, FileText, Pencil, Plus,
-  Printer, Trash2, Upload, X,
+  Printer, Settings, Trash2, Upload, X,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { nextIdFor, printChecklist, rupiah, uid } from "../../lib/utils";
-import { generateSikasPdf, rowsFromFields } from "../../lib/pdf";
+import { printChecklist, rupiah, uid } from "../../lib/utils";
+import { generateRabPdf } from "../../lib/pdf";
 import { generateDocxFromTemplate } from "../../lib/docxGenerate";
 import Card from "../../components/Card";
 import Button from "../../components/Button";
@@ -18,6 +18,19 @@ const STEPS = ["Data RAB", "Uraian RAB", "Konfirmasi RAB", "Simpan"];
 const PPN_OPTIONS = ["Non PPN", "11%"];
 const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
+// Satuan bawaan. "faktor" = pengali qty ke jumlah fisik barang
+// (mis. 1 lusin = 12 pcs), dipakai buat hitung total baris.
+const DEFAULT_SATUAN = [
+  { nama: "Pcs", faktor: 1 },
+  { nama: "Unit", faktor: 1 },
+  { nama: "Lot", faktor: 1 },
+  { nama: "Set", faktor: 1 },
+  { nama: "Paket", faktor: 1 },
+  { nama: "Lusin", faktor: 12 },
+  { nama: "Kodi", faktor: 20 },
+  { nama: "Gross", faktor: 144 },
+];
+
 function emptyItemDraft() {
   return {
     uraian: "", satuan: "", qty: "", hargaSatuan: "", ppn: "11%",
@@ -26,10 +39,22 @@ function emptyItemDraft() {
   };
 }
 
-function itemTotals(row) {
-  const totalPengajuan = (Number(row.qty) || 0) * (Number(row.hargaSatuan) || 0);
-  const totalEvaluasi = (Number(row.qtyEvaluasi) || 0) * (Number(row.hargaSatuanEvaluasi) || 0);
-  return { totalPengajuan, totalEvaluasi };
+// PPN dihitung dari base (qty x faktor satuan x harga satuan), baru
+// ditambahkan ke base itu buat dapet total baris. "11%" -> base * 1.11.
+function itemTotals(row, satuanList) {
+  const faktor = satuanList.find((s) => s.nama === row.satuan)?.faktor || 1;
+  const basePengajuan = (Number(row.qty) || 0) * faktor * (Number(row.hargaSatuan) || 0);
+  const baseEvaluasi = (Number(row.qtyEvaluasi) || 0) * faktor * (Number(row.hargaSatuanEvaluasi) || 0);
+  const ppnRatePengajuan = row.ppn === "11%" ? 0.11 : 0;
+  const ppnRateEvaluasi = row.ppnEvaluasi === "11%" ? 0.11 : 0;
+  const totalPengajuan = basePengajuan * (1 + ppnRatePengajuan);
+  const totalEvaluasi = baseEvaluasi * (1 + ppnRateEvaluasi);
+  return {
+    basePengajuan, baseEvaluasi,
+    ppnNilaiPengajuan: basePengajuan * ppnRatePengajuan,
+    ppnNilaiEvaluasi: baseEvaluasi * ppnRateEvaluasi,
+    totalPengajuan, totalEvaluasi,
+  };
 }
 
 function monthKeyOf(dateStr) {
@@ -43,6 +68,18 @@ function monthLabelOf(key) {
   return `${MONTHS_ID[Number(m) - 1]} ${y}`;
 }
 
+// ID RAB murni angka 3 digit (001, 002, ...), gak ada huruf/prefix.
+// Ambil angka di EKOR string aja (misal dari data lama "RAB-2026-001" -> 001),
+// biar prefix tahun/huruf peninggalan data lama gak ikut kebawa jadi nomor urut.
+function nextRabIdNumber(rab) {
+  const maxNum = (rab || []).reduce((max, r) => {
+    const m = String(r.idNumber || "").match(/(\d{1,3})$/);
+    const n = m ? parseInt(m[1], 10) : NaN;
+    return Number.isFinite(n) && n > max ? n : max;
+  }, 0);
+  return String(maxNum + 1).padStart(3, "0");
+}
+
 export default function RABPage({ rab, setRab, vendors, notify, user, packages = [], defaultKategori }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(0);
@@ -52,6 +89,9 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   const [editingItemId, setEditingItemId] = useState(null);
   const [editingRabId, setEditingRabId] = useState(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [satuanList, setSatuanList] = useState(DEFAULT_SATUAN);
+  const [showSatuanModal, setShowSatuanModal] = useState(false);
+  const [savingRow, setSavingRow] = useState(false);
 
   const [reviewRow, setReviewRow] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -92,7 +132,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   const startWizard = () => {
     setEditingRabId(null);
     setHeader({
-      idNumber: nextIdFor("RAB", rab, "idNumber"),
+      idNumber: nextRabIdNumber(rab),
       tanggalRab: "",
       judulKegiatan: "",
       dokumenTor: null,
@@ -124,13 +164,18 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
     setH("dokumenTor", { fileName: f.name, fileSize: f.size, url: URL.createObjectURL(f) });
   };
 
-  const saveItemRow = () => {
+  // savingRow = kunci sesaat biar klik ganda / event dobel gak nambahin baris 2x.
+  const saveItemRow = (e) => {
+    e?.preventDefault?.();
+    if (savingRow) return;
     if (!itemDraft.uraian.trim()) return notify("Isi Uraian terlebih dahulu.", "error");
-    const totals = itemTotals(itemDraft);
+    setSavingRow(true);
+    const totals = itemTotals(itemDraft, satuanList);
     const row = { ...itemDraft, ...totals, id: editingItemId || uid("ITM") };
     setItems((prev) => editingItemId ? prev.map((r) => (r.id === editingItemId ? row : r)) : [...prev, row]);
     setItemDraft(emptyItemDraft());
     setEditingItemId(null);
+    setTimeout(() => setSavingRow(false), 250);
   };
   const editItemRow = (row) => { setItemDraft(row); setEditingItemId(row.id); };
   const cancelEditItem = () => { setItemDraft(emptyItemDraft()); setEditingItemId(null); };
@@ -139,6 +184,10 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   const finalizeSave = () => {
     const record = {
       ...header,
+      // Kategori RAB udah gak dipakai lagi di web (fitur pemilihan kategori dihapus),
+      // tapi field ini masih dipakai downstream (menu NON PO/PO/CC, laporan, dashboard)
+      // buat filter data — jadi tiap RAB baru otomatis dianggap masuk ke NON PO.
+      kategori: header.kategori || "NON PO",
       items,
       totalPengajuan,
       totalEvaluasi,
@@ -164,25 +213,40 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   };
 
   // ---------- docx / pdf ----------
-  const buildDocxData = (record) => ({
-    idNumber: record.idNumber || "",
-    tanggalRab: record.tanggalRab ? formatTanggal(record.tanggalRab) : "",
-    judulKegiatan: record.judulKegiatan || "",
-    dokumenTorNama: record.dokumenTor?.fileName || "-",
-    totalPengajuan: rupiah(record.totalPengajuan || 0),
-    totalEvaluasi: rupiah(record.totalEvaluasi || 0),
-    namaPembuat: record.idNumber === header.idNumber && mode === "wizard" ? namaPembuat : (record.namaPembuat || namaPembuat),
-    namaAsman: namaAsmanFor(record.idNumber),
-    items: (record.items || []).map((it) => ({
-      uraian: it.uraian || "",
-      satuan: it.satuan || "",
-      qty: String(it.qty || it.qtyEvaluasi || ""),
-      totalPengajuan: rupiah(it.totalPengajuan || 0),
-      ppn: it.ppn || "-",
-      totalEvaluasi: rupiah(it.totalEvaluasi || 0),
-      ketPemakaian: it.keteranganPemakaian || "-",
-    })),
-  });
+  // Cocok dengan tag di Template_RAB.docx: header ID/Tanggal/Judul, baris item
+  // (loop {#items}), lalu 3 baris ringkasan (Jumlah / PPN / Jumlah+PPN) yang
+  // dipisah antara kolom Usulan (pengajuan) dan Evaluasi.
+  const buildDocxData = (record) => {
+    const items = record.items || [];
+    const jumlahPengajuan = items.reduce((s, it) => s + (it.basePengajuan || 0), 0);
+    const ppnPengajuan = items.reduce((s, it) => s + (it.ppnNilaiPengajuan || 0), 0);
+    const jumlahEvaluasiTotal = items.reduce((s, it) => s + (it.baseEvaluasi || 0), 0);
+    const ppnEvaluasi = items.reduce((s, it) => s + (it.ppnNilaiEvaluasi || 0), 0);
+
+    return {
+      idNumber: record.idNumber || "",
+      tanggalRab: record.tanggalRab ? formatTanggal(record.tanggalRab) : "",
+      judulKegiatan: record.judulKegiatan || "",
+      namaPembuat: record.idNumber === header.idNumber && mode === "wizard" ? namaPembuat : (record.namaPembuat || namaPembuat),
+      namaAsman: namaAsmanFor(record.idNumber) || "-",
+      jumlahPengajuan: rupiah(jumlahPengajuan),
+      ppnPengajuan: rupiah(ppnPengajuan),
+      totalPengajuan: rupiah(record.totalPengajuan || 0),
+      jumlahEvaluasiTotal: rupiah(jumlahEvaluasiTotal),
+      ppnEvaluasi: rupiah(ppnEvaluasi),
+      totalEvaluasi: rupiah(record.totalEvaluasi || 0),
+      items: items.map((it) => ({
+        uraian: it.uraian || "",
+        satuan: it.satuan || "",
+        qty: String(it.qty || ""),
+        hargaSatuan: rupiah(it.hargaSatuan || 0),
+        jumlah: rupiah(it.basePengajuan || 0),
+        qtyEvaluasi: String(it.qtyEvaluasi || ""),
+        hargaSatuanEvaluasi: rupiah(it.hargaSatuanEvaluasi || 0),
+        jumlahEvaluasi: rupiah(it.baseEvaluasi || 0),
+      })),
+    };
+  };
 
   const downloadDocx = async (record) => {
     try {
@@ -194,15 +258,20 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   };
   const downloadPdf = async (record) => {
     try {
-      await generateSikasPdf({
-        title: "Rencana Anggaran Biaya (RAB)",
-        subtitle: `${record.idNumber || "-"} · Total Evaluasi ${rupiah(record.totalEvaluasi || 0)}`,
-        rows: rowsFromFields([
-          { key: "idNumber", label: "ID Number" },
-          { key: "tanggalRab", label: "Tanggal RAB" },
-          { key: "judulKegiatan", label: "Judul Program" },
-        ], record),
-        table: record.items || [],
+      const data = buildDocxData(record);
+      await generateRabPdf({
+        idNumber: data.idNumber,
+        tanggalRab: data.tanggalRab,
+        judulKegiatan: data.judulKegiatan,
+        items: record.items || [],
+        jumlahPengajuan: (record.items || []).reduce((s, it) => s + (it.basePengajuan || 0), 0),
+        ppnPengajuan: (record.items || []).reduce((s, it) => s + (it.ppnNilaiPengajuan || 0), 0),
+        totalPengajuan: record.totalPengajuan || 0,
+        jumlahEvaluasi: (record.items || []).reduce((s, it) => s + (it.baseEvaluasi || 0), 0),
+        ppnEvaluasi: (record.items || []).reduce((s, it) => s + (it.ppnNilaiEvaluasi || 0), 0),
+        totalEvaluasi: record.totalEvaluasi || 0,
+        namaAsman: data.namaAsman,
+        namaPembuat: data.namaPembuat,
         filename: `RAB-${record.idNumber || "record"}`,
       });
       notify("RAB (.pdf) berhasil diunduh.", "success");
@@ -218,7 +287,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   const pageDesc = defaultKategori
     ? `Daftar RAB dengan kategori ${defaultKategori}. Klik baris untuk melihat detail.`
     : "Kelola seluruh data Rencana Anggaran Biaya. Klik salah satu baris untuk melihat detail atau mengubah data.";
-  const addLabel = defaultKategori ? `Buat RAB ${defaultKategori}` : "+ Add New RAB";
+  const addLabel = defaultKategori ? `Buat RAB ${defaultKategori}` : "Tambah RAB Baru";
 
   // ================= LIST MODE =================
   if (mode === "list") {
@@ -357,8 +426,15 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             Isian dasar untuk RAB ini. Detail biaya diisi di step Uraian RAB.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px" }} className="responsive-form-grid">
-            <Field label="ID number" hint="(otomatis, bisa diubah manual)">
-              <input value={header.idNumber || ""} onChange={(e) => setH("idNumber", e.target.value)} style={inputStyle} />
+            <Field label="ID number" hint="(otomatis, 3 angka — cth. 001)">
+              <input
+                value={header.idNumber || ""}
+                onChange={(e) => setH("idNumber", e.target.value.replace(/\D/g, "").slice(0, 3))}
+                inputMode="numeric"
+                maxLength={3}
+                placeholder="001"
+                style={inputStyle}
+              />
             </Field>
             <Field label="Tanggal RAB">
               <DatePicker value={header.tanggalRab || ""} onChange={(v) => setH("tanggalRab", v)} />
@@ -394,7 +470,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             </Field>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
-            <Button onClick={() => setStep(1)}>Lanjutkan <ArrowRight size={15} /></Button>
+            <Button onClick={() => { setH("idNumber", (header.idNumber || "").padStart(3, "0") || nextRabIdNumber(rab)); setStep(1); }}>Lanjutkan <ArrowRight size={15} /></Button>
           </div>
         </Card>
       )}
@@ -412,7 +488,15 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             <Field label="Uraian" full>
               <input value={itemDraft.uraian} onChange={(e) => setItemDraft({ ...itemDraft, uraian: e.target.value })} placeholder="Nama barang/jasa" style={inputStyle} />
             </Field>
-            <Field label="Satuan"><input value={itemDraft.satuan} onChange={(e) => setItemDraft({ ...itemDraft, satuan: e.target.value })} style={inputStyle} /></Field>
+            <Field label="Satuan">
+              <SatuanSelect
+                value={itemDraft.satuan}
+                satuanList={satuanList}
+                setSatuanList={setSatuanList}
+                onChange={(v) => setItemDraft({ ...itemDraft, satuan: v })}
+                onOpenSettings={() => setShowSatuanModal(true)}
+              />
+            </Field>
             <Field label="Qty"><input type="number" value={itemDraft.qty} onChange={(e) => setItemDraft({ ...itemDraft, qty: e.target.value })} style={inputStyle} /></Field>
             <Field label="Harga satuan"><input type="number" value={itemDraft.hargaSatuan} onChange={(e) => setItemDraft({ ...itemDraft, hargaSatuan: e.target.value })} style={inputStyle} /></Field>
             <Field label="PPN" hint="(baru)">
@@ -439,8 +523,8 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
 
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6, marginBottom: 6 }}>
             {editingItemId && <Button variant="ghost" icon={X} onClick={cancelEditItem}>Batal Edit</Button>}
-            <Button variant={editingItemId ? "accent" : "ghost"} icon={editingItemId ? Check : Plus} onClick={saveItemRow}>
-              {editingItemId ? "Simpan Perubahan" : "+ Tambah baris"}
+            <Button variant={editingItemId ? "accent" : "ghost"} icon={editingItemId ? Check : Plus} onClick={saveItemRow} disabled={savingRow}>
+              {editingItemId ? "Simpan Perubahan" : "Tambah baris"}
             </Button>
           </div>
 
@@ -448,22 +532,23 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
               <thead>
                 <tr>
-                  {["Uraian", "Satuan", "Qty", "Total pengajuan", "PPN", "Total evaluasi", "Ket. Pemakaian", ""].map((h) => (
+                  {["Uraian", "Satuan", "Qty", "Subtotal", "PPN (nominal)", "Total pengajuan", "Total evaluasi", "Ket. Pemakaian", ""].map((h) => (
                     <th key={h} style={th}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {items.length === 0 ? (
-                  <tr><td colSpan={8} style={{ textAlign: "center", color: T.muted, padding: "20px 12px" }}>Belum ada baris. Isi form di atas lalu klik &quot;+ Tambah baris&quot;.</td></tr>
+                  <tr><td colSpan={9} style={{ textAlign: "center", color: T.muted, padding: "20px 12px" }}>Belum ada baris. Isi form di atas lalu klik &quot;+ Tambah baris&quot;.</td></tr>
                 ) : items.map((r, i) => (
                   <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
                     <td style={td}>{r.uraian}</td>
                     <td style={td}>{r.satuan}</td>
                     <td style={{ ...td, textAlign: "right" }}>{r.qty}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalPengajuan || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{r.ppn}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalEvaluasi || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.basePengajuan || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{r.ppn === "11%" ? rupiah(r.ppnNilaiPengajuan || 0) : "-"}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalPengajuan || 0)}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalEvaluasi || 0)}</td>
                     <td style={td}>{r.keteranganPemakaian || "-"}</td>
                     <td style={{ ...td, textAlign: "center" }}>
                       <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
@@ -501,16 +586,17 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden", overflowX: "auto", marginBottom: 16 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
               <thead>
-                <tr>{["Uraian", "Satuan", "Qty", "Total pengajuan", "PPN", "Total evaluasi", "Ket. Pemakaian"].map((h) => <th key={h} style={th}>{h}</th>)}</tr>
+                <tr>{["Uraian", "Satuan", "Qty", "Subtotal", "PPN (nominal)", "Total pengajuan", "Total evaluasi", "Ket. Pemakaian"].map((h) => <th key={h} style={th}>{h}</th>)}</tr>
               </thead>
               <tbody>
                 {items.map((r, i) => (
                   <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
                     <td style={td}>{r.uraian}</td><td style={td}>{r.satuan}</td>
                     <td style={{ ...td, textAlign: "right" }}>{r.qty}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalPengajuan || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{r.ppn}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalEvaluasi || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.basePengajuan || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{r.ppn === "11%" ? rupiah(r.ppnNilaiPengajuan || 0) : "-"}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalPengajuan || 0)}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalEvaluasi || 0)}</td>
                     <td style={td}>{r.keteranganPemakaian || "-"}</td>
                   </tr>
                 ))}
@@ -563,6 +649,14 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
         </Card>
       )}
 
+      <SatuanSettingsModal
+        key={showSatuanModal ? `open-${satuanList.length}` : "closed"}
+        open={showSatuanModal}
+        onClose={() => setShowSatuanModal(false)}
+        satuanList={satuanList}
+        setSatuanList={setSatuanList}
+      />
+
       <Modal open={showSaveModal} onClose={() => setShowSaveModal(false)} title="Simpan Data RAB?" icon={Check}>
         <p style={{ color: T.muted, fontSize: 13.5, marginBottom: 20, lineHeight: 1.6 }}>
           Pastikan seluruh data RAB dan Uraian RAB sudah benar sebelum disimpan.
@@ -610,6 +704,109 @@ function SectionLabel({ children, dashed }) {
     }}>{children}</div>
   );
 }
+// Dropdown satuan + tombol "add new" inline + tombol buka pengaturan konversi.
+function SatuanSelect({ value, satuanList, setSatuanList, onChange, onOpenSettings }) {
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState("");
+
+  if (adding) {
+    return (
+      <div style={{ display: "flex", gap: 6 }}>
+        <input
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Nama satuan baru…"
+          style={{ ...inputStyle, flex: 1 }}
+        />
+        <button
+          type="button"
+          onClick={() => {
+            const nama = draft.trim();
+            if (!nama) return;
+            setSatuanList((prev) => (prev.some((s) => s.nama.toLowerCase() === nama.toLowerCase()) ? prev : [...prev, { nama, faktor: 1 }]));
+            onChange(nama);
+            setDraft("");
+            setAdding(false);
+          }}
+          style={{ flexShrink: 0, padding: "0 12px", borderRadius: 8, border: "none", background: T.blue, color: "#fff", cursor: "pointer", fontSize: 12.5, fontWeight: 700 }}
+        >Simpan</button>
+        <button type="button" onClick={() => { setAdding(false); setDraft(""); }} style={{ flexShrink: 0, width: 34, borderRadius: 8, border: `1px solid ${T.border}`, background: "#fff", color: T.muted, cursor: "pointer" }}>
+          <X size={14} style={{ margin: "0 auto" }} />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", gap: 6 }}>
+      <select value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inputStyle, flex: 1 }}>
+        <option value="">- Pilih satuan -</option>
+        {satuanList.map((s) => <option key={s.nama} value={s.nama}>{s.nama}{s.faktor !== 1 ? ` (x${s.faktor})` : ""}</option>)}
+      </select>
+      <button type="button" title="Tambah satuan baru" onClick={() => setAdding(true)} style={{ flexShrink: 0, width: 34, borderRadius: 8, border: `1px solid ${T.border}`, background: T.bg, color: T.blue, cursor: "pointer", display: "grid", placeItems: "center" }}>
+        <Plus size={15} />
+      </button>
+      <button type="button" title="Atur satuan & konversi" onClick={onOpenSettings} style={{ flexShrink: 0, width: 34, borderRadius: 8, border: `1px solid ${T.border}`, background: T.bg, color: T.muted, cursor: "pointer", display: "grid", placeItems: "center" }}>
+        <Settings size={14} />
+      </button>
+    </div>
+  );
+}
+
+// Modal kelola daftar satuan: ubah nama & faktor konversi, hapus, atau tambah baru.
+// key={satuanList.length + "-" + open} di titik pemanggilan bikin state rows
+// selalu mulai fresh dari satuanList terbaru tiap kali modal dibuka.
+function SatuanSettingsModal({ open, onClose, satuanList, setSatuanList }) {
+  const [rows, setRows] = useState(satuanList);
+  const [newNama, setNewNama] = useState("");
+  const [newFaktor, setNewFaktor] = useState("1");
+
+  const updateRow = (i, key, val) => setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, [key]: val } : r)));
+  const removeRow = (i) => setRows((prev) => prev.filter((_, idx) => idx !== i));
+  const addRow = () => {
+    const nama = newNama.trim();
+    if (!nama) return;
+    if (rows.some((r) => r.nama.toLowerCase() === nama.toLowerCase())) return;
+    setRows((prev) => [...prev, { nama, faktor: Number(newFaktor) || 1 }]);
+    setNewNama("");
+    setNewFaktor("1");
+  };
+  const save = () => {
+    const cleaned = rows
+      .map((r) => ({ nama: r.nama.trim(), faktor: Number(r.faktor) || 1 }))
+      .filter((r) => r.nama);
+    setSatuanList(cleaned.length ? cleaned : DEFAULT_SATUAN);
+    onClose();
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title="Atur Satuan & Konversi" icon={Settings} width={520}>
+      <p style={{ color: T.muted, fontSize: 12.5, marginBottom: 14, lineHeight: 1.6 }}>
+        Faktor konversi dipakai buat ngitung total baris RAB. Cth: 1 Lusin = 12, jadi qty 5 Lusin dihitung 5 x 12 x harga satuan. Satuan biasa (Pcs, Unit, dst) faktornya 1.
+      </p>
+      <div style={{ display: "grid", gap: 8, maxHeight: 260, overflowY: "auto", marginBottom: 14 }}>
+        {rows.map((r, i) => (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 90px 30px", gap: 8, alignItems: "center" }}>
+            <input value={r.nama} onChange={(e) => updateRow(i, "nama", e.target.value)} style={inputStyle} />
+            <input type="number" min="1" value={r.faktor} onChange={(e) => updateRow(i, "faktor", e.target.value)} style={inputStyle} />
+            <button type="button" onClick={() => removeRow(i)} title="Hapus" style={{ border: "none", background: "transparent", color: T.danger, cursor: "pointer" }}><Trash2 size={15} /></button>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 90px auto", gap: 8, alignItems: "center", marginBottom: 20, borderTop: `1px dashed ${T.border}`, paddingTop: 14 }}>
+        <input value={newNama} onChange={(e) => setNewNama(e.target.value)} placeholder="Satuan baru…" style={inputStyle} />
+        <input type="number" min="1" value={newFaktor} onChange={(e) => setNewFaktor(e.target.value)} style={inputStyle} />
+        <Button variant="ghost" icon={Plus} onClick={addRow}>Tambah</Button>
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+        <Button variant="ghost" onClick={onClose}>Batal</Button>
+        <Button onClick={save}>Simpan Perubahan</Button>
+      </div>
+    </Modal>
+  );
+}
+
 function Field({ label, hint, full, children }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, gridColumn: full ? "1 / -1" : "auto" }}>

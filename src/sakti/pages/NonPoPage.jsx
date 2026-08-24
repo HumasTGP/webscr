@@ -73,7 +73,7 @@ export const DEFAULT_COMBO = {
 
 const EMPTY_FORM = { rabId: "", bidang: "", tanggalKegiatan: "", judulKegiatan: "", program: "", subprogram: "", kategoriProgram: "" };
 
-export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVerif, notify, onNavigate, kategori, submissions, setSubmissions, combo, setCombo }) {
+export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVerif, notify, onNavigate, kategori, submissions, setSubmissions, combo, setCombo, rabIdsWithDokumentasi }) {
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [search, setSearch] = useState("");
@@ -207,7 +207,15 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
                 const bappStatus = docStatus(bapp || [], rabId, "id");
                 return (
                   <tr key={i} style={{ background: i % 2 === 1 ? T.rowAlt : undefined }}>
-                    <td style={tdStyle}>{rabId}</td>
+                    <td style={tdStyle}>
+                      {rabId}
+                      {rabIdsWithDokumentasi && !rabIdsWithDokumentasi.has(rabId) && (
+                        <span
+                          title="Dokumentasi pelaksanaan untuk RAB ini belum diunggah — lengkapi di menu Dokumentasi"
+                          style={{ marginLeft: 6, fontSize: 11, color: "#8A6D00" }}
+                        >⚠</span>
+                      )}
+                    </td>
                     <td style={tdStyle}>{row.judulKegiatan}</td>
                     <td style={tdStyle}>{row.bidang}</td>
                     <td style={tdStyle}>{row.program}</td>
@@ -253,9 +261,23 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
               <option value="">— Pilih ID RAB —</option>
               {rabOptions.map((id) => {
                 const r = rab.find((r) => r.idNumber === id);
-                return <option key={id} value={id}>{id}{r?.judulKegiatan ? ` - ${r.judulKegiatan}` : ""}</option>;
+                const belumAdaDok = rabIdsWithDokumentasi && !rabIdsWithDokumentasi.has(id);
+                return (
+                  <option key={id} value={id}>
+                    {id}{r?.judulKegiatan ? ` - ${r.judulKegiatan}` : ""}{belumAdaDok ? " (⚠ dokumentasi belum lengkap)" : ""}
+                  </option>
+                );
               })}
             </select>
+            {form.rabId && rabIdsWithDokumentasi && !rabIdsWithDokumentasi.has(form.rabId) && (
+              <div style={{
+                marginTop: 8, display: "flex", gap: 8, alignItems: "flex-start",
+                background: "#FFF6E0", border: "1px solid #F0D48A", color: "#7A5900",
+                padding: "8px 12px", borderRadius: 8, fontSize: 12,
+              }}>
+                ⚠ Dokumentasi pelaksanaan untuk RAB {form.rabId} belum diunggah. Bisa dilanjutkan dulu, tapi jangan lupa lengkapi di menu Dokumentasi.
+              </div>
+            )}
           </div>
 
           <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
