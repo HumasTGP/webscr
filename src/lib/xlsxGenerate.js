@@ -1,5 +1,6 @@
-import ExcelJS from "exceljs/dist/exceljs.min.js";
-import { saveAs } from "file-saver";
+import ExcelJS from "exceljs";
+import FileSaver from "file-saver";
+const saveAs = FileSaver.saveAs || FileSaver;
 import { EVALUASI_NILAI_OPTIONS, evaluasiKategoriFields } from "./wizardFields";
 
 const KATEGORI = evaluasiKategoriFields();

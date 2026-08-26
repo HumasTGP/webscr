@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
+import { parseLocalDate } from "../../lib/utils";
 import { generateSikasPdf } from "../../lib/pdf";
 import { generateDocxFromTemplate } from "../../lib/docxGenerate";
 import { TorDocPreview } from "../../components/DocTemplatePreview";
@@ -28,9 +29,8 @@ const STEPS = ["Isi Formulir", "Konfirmasi", "Simpan"];
 const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
 function monthKey(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d)) return null;
+  const d = parseLocalDate(dateStr);
+  if (!d) return null;
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
 }
 
@@ -40,9 +40,8 @@ function monthLabel(key) {
 }
 
 function formatTanggalDisplay(iso) {
-  if (!iso) return "-";
-  const d = new Date(iso);
-  if (isNaN(d)) return iso;
+  const d = parseLocalDate(iso);
+  if (!d) return iso || "-";
   return `${d.getDate()} ${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
 }
 

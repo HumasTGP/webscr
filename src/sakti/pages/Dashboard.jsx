@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DOC_STATUS } from "../../lib/data";
 import {
+  ChevronRight,
   FileSpreadsheet,
   Handshake,
   Megaphone,
@@ -308,10 +309,16 @@ function LiveClock() {
 
 // ---------------- grafik garis: dokumen masuk per kategori & periode -------
 const PERIODE_OPTIONS = [
-  { key: "harian", label: "Harian" },
   { key: "mingguan", label: "Mingguan" },
   { key: "bulanan", label: "Bulanan" },
   { key: "tahunan", label: "Tahunan" },
+];
+
+const CHART_LINES = [
+  { key: "proposal-rekap", field: "proposal", label: "Proposal", color: "#7C4DBF" },
+  { key: "nonpo-overview", field: "nonPo", label: "NON PO", color: T.blue },
+  { key: "po-overview", field: "po", label: "PO", color: T.navy },
+  { key: "cc-overview", field: "cc", label: "Cash Card", color: T.yellowText },
 ];
 
 function startOfWeek(d) {
@@ -322,149 +329,219 @@ function startOfWeek(d) {
   return x;
 }
 
-// Bikin N titik waktu ke belakang (dari hari ini) sesuai periode yang dipilih,
-// lalu hitung jumlah submission per kategori yang jatuh di tiap titik itu.
-function buildSeries(submissions, periode) {
-  const now = new Date();
+const MONTH_SHORT = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+
+function pad2(n) { return String(n).padStart(2, "0"); }
+function ddmmyy(d) { return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${String(d.getFullYear()).slice(-2)}`; }
+
+// Titik-titik waktu per periode:
+// - mingguan: beberapa minggu kalender terakhir (Senin s.d. Minggu), label
+//   rentang tanggal "dd/mm/yy - dd/mm/yy"
+// - bulanan: 12 bulan tahun berjalan penuh, scrollable — bukan di-squeeze
+// - tahunan: 2025 s.d. tahun berjalan + 1 (otomatis nambah tiap tahun baru),
+//   minimal tetap menampilkan sampai 2027
+function buildPoints(periode, now) {
   const points = [];
 
-  if (periode === "harian") {
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
-      points.push({ key, label: d.toLocaleDateString("id-ID", { weekday: "short" }), from: new Date(key), to: new Date(new Date(key).getTime() + 86400000) });
-    }
-  } else if (periode === "mingguan") {
+  if (periode === "mingguan") {
+    const thisWeekStart = startOfWeek(now);
     for (let i = 5; i >= 0; i--) {
-      const d = startOfWeek(now);
-      d.setDate(d.getDate() - i * 7);
-      const to = new Date(d); to.setDate(to.getDate() + 7);
-      points.push({ key: d.toISOString().slice(0, 10), label: `${d.getDate()}/${d.getMonth() + 1}`, from: d, to });
+      const from = new Date(thisWeekStart);
+      from.setDate(from.getDate() - i * 7);
+      const to = new Date(from);
+      to.setDate(to.getDate() + 7);
+      const to_inclusive = new Date(to.getTime() - 86400000); // Minggu (hari terakhir minggu itu)
+      points.push({ label: `${ddmmyy(from)} - ${ddmmyy(to_inclusive)}`, from, to });
     }
   } else if (periode === "bulanan") {
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const to = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
-      points.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleDateString("id-ID", { month: "short" }), from: d, to });
+    const y = now.getFullYear();
+    for (let m = 0; m < 12; m++) {
+      points.push({ label: MONTH_SHORT[m], from: new Date(y, m, 1), to: new Date(y, m + 1, 1) });
     }
   } else {
-    for (let i = 4; i >= 0; i--) {
-      const y = now.getFullYear() - i;
-      points.push({ key: String(y), label: String(y), from: new Date(y, 0, 1), to: new Date(y + 1, 0, 1) });
+    const startYear = 2025;
+    const endYear = Math.max(2027, now.getFullYear() + 1);
+    for (let y = startYear; y <= endYear; y++) {
+      points.push({ label: String(y), from: new Date(y, 0, 1), to: new Date(y + 1, 0, 1) });
     }
   }
+  return points;
+}
 
+function buildSeries(submissions, proposals, periode, now) {
+  const points = buildPoints(periode, now);
   return points.map((p) => {
-    const inRange = submissions.filter((s) => {
+    const subsInRange = submissions.filter((s) => {
       const t = s.createdAt ? new Date(s.createdAt) : null;
+      return t && t >= p.from && t < p.to;
+    });
+    const proposalsInRange = proposals.filter((pr) => {
+      const t = pr.createdAt ? new Date(pr.createdAt) : null;
       return t && t >= p.from && t < p.to;
     });
     return {
       label: p.label,
-      nonPo: inRange.filter((s) => s.kategori === "NON PO").length,
-      po: inRange.filter((s) => s.kategori === "PO").length,
-      cc: inRange.filter((s) => s.kategori === "Cash Card").length,
+      proposal: proposalsInRange.length,
+      nonPo: subsInRange.filter((s) => s.kategori === "NON PO").length,
+      po: subsInRange.filter((s) => s.kategori === "PO").length,
+      cc: subsInRange.filter((s) => s.kategori === "Cash Card").length,
     };
   });
 }
 
-function KategoriLineChart({ submissions, goto }) {
-  const [periode, setPeriode] = useState("bulanan");
-  const series = useMemo(() => buildSeries(submissions || [], periode), [submissions, periode]);
+function KategoriLineChart({ submissions, proposals, goto }) {
+  const [periode, setPeriode] = useState("mingguan");
+  // "now" disimpan sebagai state (bukan langsung new Date() di dalam useMemo)
+  // dan di-refresh tiap beberapa menit, supaya begitu jam berganti ke minggu
+  // (atau bulan/tahun) baru, titik grafik ikut otomatis geser tanpa perlu
+  // reload halaman.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 5 * 60 * 1000); // tiap 5 menit
+    return () => clearInterval(id);
+  }, []);
 
-  const lines = [
-    { key: "nonpo-overview", field: "nonPo", label: "NON PO", color: T.blue },
-    { key: "po-overview", field: "po", label: "PO", color: T.navy },
-    { key: "cc-overview", field: "cc", label: "Cash Card", color: T.yellowText },
-  ];
+  const series = useMemo(
+    () => buildSeries(submissions || [], proposals || [], periode, now),
+    [submissions, proposals, periode, now]
+  );
 
-  const W = 900, H = 220, padL = 30, padR = 12, padT = 12, padB = 28;
-  const innerW = W - padL - padR, innerH = H - padT - padB;
-  const maxVal = Math.max(1, ...series.flatMap((s) => [s.nonPo, s.po, s.cc]));
-  const stepX = series.length > 1 ? innerW / (series.length - 1) : 0;
-  const yFor = (v) => padT + innerH - (v / maxVal) * innerH;
+  // Bulanan di-scroll horizontal: container dibatasi max-width supaya cuma
+  // ~6 titik (bulan) yang keliatan di awal, sisanya discroll (drag/geser
+  // biasa, atau klik tombol panah kecil di kanan judul).
+  const scrollable = periode === "bulanan";
+  const H = 200, padL = 34, padR = 16, padT = 14, padB = 26;
+  const pointGap = scrollable ? 62 : null;
+  const innerW = scrollable ? pointGap * (series.length - 1) : undefined;
+  const W = scrollable ? innerW + padL + padR : 760;
+  const plotW = scrollable ? innerW : W - padL - padR;
+  const innerH = H - padT - padB;
+  const scrollBoxRef = useRef(null);
+  const scrollByPoint = (dir) => {
+    scrollBoxRef.current?.scrollBy({ left: dir * pointGap, behavior: "smooth" });
+  };
+
+  const maxVal = Math.max(1, ...series.flatMap((s) => CHART_LINES.map((l) => s[l.field])));
+  const niceMax = Math.ceil(maxVal / 4) * 4 || 4;
+  const stepX = series.length > 1 ? plotW / (series.length - 1) : 0;
+  const yFor = (v) => padT + innerH - (v / niceMax) * innerH;
   const xFor = (i) => padL + i * stepX;
 
   const pathFor = (field) =>
     series.map((s, i) => `${i === 0 ? "M" : "L"} ${xFor(i).toFixed(1)} ${yFor(s[field]).toFixed(1)}`).join(" ");
 
-  // Gridline horizontal sederhana: 0, tengah, maks
-  const gridVals = [0, Math.round(maxVal / 2), maxVal];
+  const gridVals = [0, niceMax / 2, niceMax];
 
   return (
     <Card style={{ marginBottom: 20 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
         <div>
-          <h3 style={{ fontFamily: font.display, fontSize: 15.5, margin: 0, color: T.heading }}>
-            Dokumen Masuk per Kategori
+          <h3 style={{ fontFamily: font.display, fontSize: 15, margin: 0, color: T.heading, fontWeight: 700 }}>
+            Dokumen Masuk
           </h3>
-          <div style={{ display: "flex", gap: 14, marginTop: 6 }}>
-            {lines.map((l) => (
+          <div style={{ display: "flex", gap: 12, marginTop: 7, flexWrap: "wrap" }}>
+            {CHART_LINES.map((l) => (
               <div key={l.key} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: T.muted }}>
-                <span style={{ width: 8, height: 8, borderRadius: 999, background: l.color, display: "inline-block" }} />
+                <span style={{ width: 7, height: 7, borderRadius: 999, background: l.color, display: "inline-block" }} />
                 {l.label}
               </div>
             ))}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 4, background: T.bg, borderRadius: 8, padding: 3 }}>
-          {PERIODE_OPTIONS.map((opt) => (
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", gap: 3, background: T.bg, borderRadius: 8, padding: 3 }}>
+            {PERIODE_OPTIONS.map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => setPeriode(opt.key)}
+                style={{
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "6px 12px",
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  background: periode === opt.key ? T.card : "transparent",
+                  color: periode === opt.key ? T.heading : T.muted,
+                  boxShadow: periode === opt.key ? "0 1px 2px rgba(16,24,40,0.08)" : "none",
+                  transition: "background .15s ease",
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          {scrollable && (
             <button
-              key={opt.key}
-              onClick={() => setPeriode(opt.key)}
+              type="button"
+              onClick={() => scrollByPoint(1)}
+              title="Geser ke bulan berikutnya"
               style={{
-                border: "none",
-                borderRadius: 6,
-                padding: "6px 11px",
-                fontSize: 11.5,
-                fontWeight: 600,
-                cursor: "pointer",
-                background: periode === opt.key ? T.card : "transparent",
-                color: periode === opt.key ? T.heading : T.muted,
-                boxShadow: periode === opt.key ? "0 1px 2px rgba(16,24,40,0.08)" : "none",
+                width: 26, height: 26, borderRadius: 999, border: `1px solid ${T.border}`,
+                background: T.card, color: T.muted, cursor: "pointer",
+                display: "grid", placeItems: "center", flexShrink: 0,
               }}
             >
-              {opt.label}
+              <ChevronRight size={14} />
             </button>
-          ))}
+          )}
         </div>
       </div>
 
-      <div style={{ width: "100%", overflowX: "auto" }}>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", minWidth: 480, display: "block" }}>
+      <div
+        ref={scrollBoxRef}
+        style={{
+          width: "100%",
+          overflowX: scrollable ? "auto" : "hidden",
+        }}
+      >
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          style={{ width: scrollable ? W : "100%", height: "auto", minWidth: scrollable ? W : 280, display: "block" }}
+        >
           {gridVals.map((v, i) => (
             <g key={i}>
-              <line x1={padL} x2={W - padR} y1={yFor(v)} y2={yFor(v)} stroke={T.border} strokeWidth={1} />
-              <text x={2} y={yFor(v) + 3} fontSize={9.5} fill={T.muted}>{v}</text>
+              <line x1={padL} x2={W - padR} y1={yFor(v)} y2={yFor(v)} stroke={T.border} strokeWidth={1} strokeDasharray={v === 0 ? "0" : "3 4"} />
+              <text x={2} y={yFor(v) + 3} fontSize={9.5} fill={T.muted}>{Math.round(v)}</text>
             </g>
           ))}
 
-          {lines.map((l) => (
-            <path key={l.key} d={pathFor(l.field)} fill="none" stroke={l.color} strokeWidth={2.2} strokeLinejoin="round" strokeLinecap="round" />
+          {CHART_LINES.map((l) => (
+            <path key={l.key} d={pathFor(l.field)} fill="none" stroke={l.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
           ))}
 
-          {lines.map((l) =>
+          {CHART_LINES.map((l) =>
             series.map((s, i) => (
               <circle
                 key={`${l.key}-${i}`}
                 cx={xFor(i)}
                 cy={yFor(s[l.field])}
-                r={3}
+                r={2.6}
                 fill={l.color}
                 style={{ cursor: "pointer" }}
                 onClick={() => goto(l.key)}
               >
-                <title>{`${l.label} · ${series[i].label}: ${s[l.field]}`}</title>
+                <title>{`${l.label} · ${s.label}: ${s[l.field]}`}</title>
               </circle>
             ))
           )}
 
-          {series.map((s, i) => (
-            <text key={i} x={xFor(i)} y={H - 8} fontSize={9.5} fill={T.muted} textAnchor="middle">
-              {s.label}
-            </text>
-          ))}
+          {series.map((s, i) =>
+            periode === "mingguan" ? (
+              <g key={i}>
+                <text x={xFor(i)} y={H - 12} fontSize={8} fill={T.muted} textAnchor="middle">
+                  {s.label.split(" - ")[0]}
+                </text>
+                <text x={xFor(i)} y={H - 4} fontSize={8} fill={T.muted} textAnchor="middle">
+                  s/d {s.label.split(" - ")[1]}
+                </text>
+              </g>
+            ) : (
+              <text key={i} x={xFor(i)} y={H - 7} fontSize={9.5} fill={T.muted} textAnchor="middle">
+                {s.label}
+              </text>
+            )
+          )}
         </svg>
       </div>
     </Card>
@@ -519,7 +596,7 @@ export default function Dashboard({ data, packages = [], goto, user }) {
       </div>
 
       {/* Grafik dokumen masuk per kategori (NON PO / PO / Cash Card) */}
-      <KategoriLineChart submissions={data.nonpoSubmissions} goto={goto} />
+      <KategoriLineChart submissions={data.nonpoSubmissions} proposals={data.proposals} goto={goto} />
 
       {/* Stakeholder + Konten tiles */}
       <div

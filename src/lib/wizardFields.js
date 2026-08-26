@@ -5,7 +5,6 @@ export const proposalFields = () => () => [
   {
     key: "id",
     label: "ID Pengajuan Proposal",
-    placeholder: "cth. PRP-2026-001",
     section: "Identitas Pengajuan",
   },
   { key: "tanggalMasuk", label: "Tanggal Masuk", type: "date" },
@@ -19,13 +18,6 @@ export const proposalFields = () => () => [
     section: "Detail Kegiatan",
   },
   { key: "lokasiKegiatan", label: "Alamat Lokasi Kegiatan" },
-  {
-    key: "program",
-    label: "Program",
-    type: "select",
-    options: OPT.programHumas,
-    full: true,
-  },
   {
     key: "penerimaLakiLaki",
     label: "Jumlah Penerima Manfaat/Bantuan (Laki-laki)",
@@ -45,7 +37,8 @@ export const proposalFields = () => () => [
     section: "Anggaran & Item",
   },
   { key: "approvedBudget", label: "Nominal yang Disetujui (Rp)", type: "number" },
-  { key: "itemDiminta", label: "Jumlah Barang yang Diajukan", type: "textarea", full: true },
+  { key: "itemDiminta", label: "Jumlah Barang yang Diajukan", type: "number" },
+  { key: "nominalItemDiajukan", label: "Nominal yang Diajukan (Rp)", type: "number" },
 
   { key: "jabatanKontak", label: "Contact Person yang Dapat Dihubungi", section: "Kontak" },
   { key: "kontakPIC", label: "Nama Contact Person yang Dapat Dihubungi" },

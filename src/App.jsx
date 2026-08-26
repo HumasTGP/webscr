@@ -303,6 +303,8 @@ export default function App() {
           proposals={proposals}
           setProposals={setProposals}
           notify={notify}
+          comboProgram={nonpoCombo.program}
+          setComboProgram={(opts) => setNonpoCombo((prev) => ({ ...prev, program: opts }))}
         />
       ),
       "proposal-evaluasi": (

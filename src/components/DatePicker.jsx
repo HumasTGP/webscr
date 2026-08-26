@@ -7,7 +7,7 @@ const MONTHS_ID = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
   "Juli", "Agustus", "September", "Oktober", "November", "Desember",
 ];
-const DOW = ["M", "S", "S", "R", "K", "J", "S"];
+const DOW = ["S", "S", "R", "K", "J", "S", "M"]; // Senin s.d. Minggu, sesuai offset grid di bawah
 
 function toDateStr(d) {
   const y = d.getFullYear();

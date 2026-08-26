@@ -371,134 +371,248 @@ export function rowsFromFields(fields, values) {
 
 const EVAL_NILAI_OPTIONS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
 
+// PDF Lembar Evaluasi Bantuan TJSL — layoutnya niru persis Template_Form_Eval.xlsx:
+// 12 kolom nilai (0.25 s.d. 3) dikelompokkan 3 grup header (Tidak Signifikan /
+// Netral / Signifikan) x 4 kolom masing-masing, tiap kategori 2 baris (baris 1:
+// deskripsi anchor tiap grup + kolom N/Bobot/Total Skor, baris 2: baris kosong
+// tempat tanda "x" ditaruh persis di kolom nilai yang dipilih), lalu skor akhir,
+// keputusan, catatan, dan 3 kolom tanda tangan di bagian bawah — sama seperti
+// susunan sheet "Form Eval New" di file Excel aslinya.
 export async function generateEvaluasiPdf({
   id, pemohon, perihal, penilai, tanggal,
   perKategori, skorAkhir, keputusan, catatan, filename,
 }) {
   const doc = new jsPDF({ format: "a4", unit: "mm", orientation: "landscape" });
-  const pw = 297, ph = 210, m = 14;
+  const pw = 297, ph = 210, m = 10;
 
   const logo = await resolveLogoData();
   if (logo) {
-    const maxW = 26, maxH = 16;
+    const maxW = 20, maxH = 12;
     let w = maxW, h = maxW / logo.aspect;
     if (h > maxH) { h = maxH; w = maxH * logo.aspect; }
-    doc.addImage(logo.dataUrl, "PNG", m, m - 4, w, h);
+    doc.addImage(logo.dataUrl, "PNG", m, m - 2, w, h);
   }
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(12.5);
   doc.setTextColor(20);
-  doc.text("LEMBAR EVALUASI BANTUAN TJSL", pw / 2, m + 4, { align: "center" });
-  doc.setDrawColor(200);
-  doc.line(m, m + 10, pw - m, m + 10);
+  doc.text("LEMBAR EVALUASI BANTUAN TJSL", pw / 2, m + 3, { align: "center" });
+  doc.setFontSize(8.5);
+  doc.setFont("helvetica", "normal");
+  doc.text(`ID Pengajuan: ${id || "-"}`, pw / 2, m + 8, { align: "center" });
 
-  let y = m + 18;
-  const headerRow = (label, value, x, w) => {
-    doc.setFontSize(7.5);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(120);
-    doc.text(label.toUpperCase(), x, y);
-    doc.setFontSize(9.5);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(20);
-    doc.text(String(value || "-"), x, y + 4.5, { maxWidth: w });
-  };
-  headerRow("ID Pengajuan", id, m, 90);
-  headerRow("Penilai", penilai, m + 150, 90);
-  y += 10;
-  headerRow("Pemohon", pemohon, m, 90);
-  headerRow("Tanggal", tanggal, m + 150, 90);
-  y += 10;
-  headerRow("Perihal", perihal, m, pw - m * 2);
-  y += 12;
-
-  const colNo = m, wNo = 8;
-  const colKategori = colNo + wNo, wKategori = 62;
-  const colNilaiStart = colKategori + wKategori, wNilai = 13.5;
-  const colBobot = colNilaiStart + wNilai * EVAL_NILAI_OPTIONS.length, wBobot = 14;
-  const colTotal = colBobot + wBobot, wTotal = 16;
-  const tableRight = colTotal + wTotal;
-  const rowH = 9;
-
-  const drawHeader = () => {
-    doc.setFillColor(230, 236, 245);
-    doc.rect(m, y, tableRight - m, rowH, "F");
-    doc.setFontSize(7);
+  let y = m + 14;
+  doc.setFontSize(8);
+  const infoRow = (label, value, x) => {
     doc.setFont("helvetica", "bold");
     doc.setTextColor(40);
-    doc.text("NO", colNo + 2, y + 6);
-    doc.text("KATEGORI PENILAIAN", colKategori + 2, y + 6);
-    EVAL_NILAI_OPTIONS.forEach((n, i) => {
-      doc.text(String(n), colNilaiStart + i * wNilai + wNilai / 2, y + 6, { align: "center" });
+    doc.text(label, x, y);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(20);
+    doc.text(String(value || "-"), x + 22, y, { maxWidth: 110 });
+  };
+  infoRow("PEMOHON", pemohon, m);
+  infoRow("PENILAI", penilai, pw / 2 + 10);
+  y += 4.5;
+  infoRow("PERIHAL", perihal, m);
+  infoRow("TANGGAL", tanggal, pw / 2 + 10);
+  y += 5.5;
+
+  // --- Tabel penilaian, kolom persis susunan Excel ---
+  const colNo = m, wNo = 7;
+  const colKategori = colNo + wNo, wKategori = 42;
+  const wGroup = 4 * 9.2; // 4 kolom nilai per grup signifikansi
+  const colTS = colKategori + wKategori;      // Tidak Signifikan
+  const colNetral = colTS + wGroup;
+  const colSig = colNetral + wGroup;
+  const colN = colSig + wGroup, wN = 8;
+  const colBobot = colN + wN, wBobot = 10;
+  const colTotal = colBobot + wBobot, wTotal = 14;
+  const tableRight = colTotal + wTotal;
+  const wNilai = wGroup / 4;
+  const headH = 4.6, descH = 9.2, tickH = 3.2;
+
+  const groupCols = [colTS, colNetral, colSig];
+  const groupLabels = ["TIDAK SIGNIFIKAN", "NETRAL", "SIGNIFIKAN"];
+  const anchorKeys = ["tidakSignifikan", "netral", "signifikan"];
+
+  const drawHeader = () => {
+    doc.setFillColor(224, 231, 242);
+    doc.rect(m, y, tableRight - m, headH * 2, "F");
+    doc.setDrawColor(170);
+    doc.setFontSize(6.3);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30);
+    doc.text("NO", colNo + wNo / 2, y + headH + 3.2, { align: "center" });
+    doc.text("KATEGORI PENILAIAN", colKategori + 2, y + headH + 3.2);
+    groupCols.forEach((gx, gi) => {
+      doc.text(groupLabels[gi], gx + wGroup / 2, y + 3.2, { align: "center" });
+      for (let c = 0; c < 4; c++) {
+        const val = EVAL_NILAI_OPTIONS[gi * 4 + c];
+        doc.text(String(val), gx + c * wNilai + wNilai / 2, y + headH + 3.2, { align: "center" });
+      }
     });
-    doc.text("BOBOT", colBobot + wBobot / 2, y + 6, { align: "center" });
-    doc.text("TOTAL", colTotal + wTotal / 2, y + 6, { align: "center" });
-    doc.setDrawColor(180);
-    doc.rect(m, y, tableRight - m, rowH);
-    y += rowH;
+    doc.text("N", colN + wN / 2, y + headH + 3.2, { align: "center" });
+    doc.text("BOBOT", colBobot + wBobot / 2, y + headH + 3.2, { align: "center" });
+    doc.text("TOTAL SKOR", colTotal + wTotal / 2, y + 3.2, { align: "center" });
+    doc.setFontSize(5);
+    doc.setFont("helvetica", "normal");
+    doc.text("(NILAIxBOBOT)/3", colTotal + wTotal / 2, y + headH + 3.2, { align: "center" });
+
+    doc.rect(m, y, tableRight - m, headH * 2);
+    doc.line(colKategori, y, colKategori, y + headH * 2);
+    doc.line(colN, y, colN, y + headH * 2);
+    doc.line(colBobot, y, colBobot, y + headH * 2);
+    doc.line(colTotal, y, colTotal, y + headH * 2);
+    groupCols.forEach((gx) => {
+      doc.line(gx, y, gx, y + headH * 2);
+      for (let c = 1; c < 4; c++) doc.line(gx + c * wNilai, y + headH, gx + c * wNilai, y + headH * 2);
+    });
+    doc.line(m, y + headH, colKategori, y + headH);
+    y += headH * 2;
   };
   drawHeader();
 
   doc.setFont("helvetica", "normal");
   (perKategori || []).forEach((k, i) => {
-    if (y > ph - 55) { doc.addPage("a4", "landscape"); y = m; drawHeader(); }
-    doc.setDrawColor(210);
-    doc.rect(colNo, y, tableRight - colNo, rowH);
-    for (let c = 0; c <= EVAL_NILAI_OPTIONS.length; c++) {
-      doc.line(colNilaiStart + c * wNilai, y, colNilaiStart + c * wNilai, y + rowH);
-    }
-    doc.line(colKategori, y, colKategori, y + rowH);
-    doc.line(colBobot, y, colBobot, y + rowH);
-    doc.line(colTotal, y, colTotal, y + rowH);
+    const rowH = descH + tickH;
+    if (y + rowH > ph - 40) { doc.addPage("a4", "landscape"); y = m; drawHeader(); }
 
-    doc.setFontSize(8);
+    const rowTop = y;
+    doc.setDrawColor(190);
+    // Baris deskripsi (anchor teks tiap grup) — digabung 4 kolom per grup
+    doc.rect(colNo, rowTop, tableRight - colNo, descH);
+    doc.line(colKategori, rowTop, colKategori, rowTop + descH);
+    groupCols.forEach((gx) => doc.line(gx, rowTop, gx, rowTop + descH));
+    doc.line(colN, rowTop, colN, rowTop + descH);
+    doc.line(colBobot, rowTop, colBobot, rowTop + descH);
+    doc.line(colTotal, rowTop, colTotal, rowTop + descH);
+
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(30);
+    doc.text(String(i + 1), colNo + wNo / 2, rowTop + 5, { align: "center" });
+    const labelLines = doc.splitTextToSize(k.label, wKategori - 3);
+    doc.text(labelLines.slice(0, 4), colKategori + 1.5, rowTop + 5);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(5.6);
     doc.setTextColor(60);
-    doc.text(String(i + 1), colNo + 2, y + 6);
-    const wrapped = doc.splitTextToSize(k.label, wKategori - 4);
-    doc.text(wrapped[0], colKategori + 2, y + 6);
-
-    EVAL_NILAI_OPTIONS.forEach((n, ci) => {
-      if (k.nilai === n) {
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(9);
-        doc.text("X", colNilaiStart + ci * wNilai + wNilai / 2, y + 6, { align: "center" });
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(8);
-      }
+    anchorKeys.forEach((ak, gi) => {
+      const gx = groupCols[gi];
+      const text = k.anchors?.[ak] || "";
+      const lines = doc.splitTextToSize(text, wGroup - 3);
+      doc.text(lines.slice(0, 6), gx + wGroup / 2, rowTop + 4.5, { align: "center" });
     });
 
-    doc.text(String(k.bobot), colBobot + wBobot / 2, y + 6, { align: "center" });
+    doc.setFontSize(7);
+    doc.setTextColor(30);
+    doc.text(k.nilai ? String(k.nilai) : "0", colN + wN / 2, rowTop + descH / 2 + 1.5, { align: "center" });
+    doc.text(String(k.bobot), colBobot + wBobot / 2, rowTop + descH / 2 + 1.5, { align: "center" });
     doc.setFont("helvetica", "bold");
-    doc.text(k.nilai ? k.totalSkor.toFixed(2) : "-", colTotal + wTotal / 2, y + 6, { align: "center" });
+    doc.text(k.nilai ? k.totalSkor.toFixed(2) : "0", colTotal + wTotal / 2, rowTop + descH / 2 + 1.5, { align: "center" });
     doc.setFont("helvetica", "normal");
-    y += rowH;
+
+    // Baris tanda "x" — kotak kosong di semua 12 kolom nilai, kecuali kolom yang
+    // dipilih user, sama seperti checkbox grid di Excel.
+    const tickTop = rowTop + descH;
+    doc.rect(colNo, tickTop, tableRight - colNo, tickH);
+    doc.line(colKategori, tickTop, colKategori, tickTop + tickH);
+    groupCols.forEach((gx) => {
+      doc.line(gx, tickTop, gx, tickTop + tickH);
+      for (let c = 1; c < 4; c++) doc.line(gx + c * wNilai, tickTop, gx + c * wNilai, tickTop + tickH);
+    });
+    doc.line(colN, tickTop, colN, tickTop + tickH);
+    doc.line(colBobot, tickTop, colBobot, tickTop + tickH);
+    doc.line(colTotal, tickTop, colTotal, tickTop + tickH);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    groupCols.forEach((gx, gi) => {
+      for (let c = 0; c < 4; c++) {
+        const val = EVAL_NILAI_OPTIONS[gi * 4 + c];
+        if (k.nilai === val) {
+          doc.text("x", gx + c * wNilai + wNilai / 2, tickTop + tickH - 1, { align: "center" });
+        }
+      }
+    });
+    doc.setFont("helvetica", "normal");
+
+    y = tickTop + tickH;
   });
 
-  y += 5;
-  doc.setFontSize(10.5);
+  // --- Skor Akhir (baris terakhir tabel, sama seperti Excel) ---
+  if (y + 6 > ph - 40) { doc.addPage("a4", "landscape"); y = m; }
+  doc.setDrawColor(170);
+  doc.setFillColor(240, 242, 247);
+  doc.rect(m, y, tableRight - m, 6, "F");
+  doc.rect(m, y, tableRight - m, 6);
+  doc.line(colBobot, y, colBobot, y + 6);
   doc.setFont("helvetica", "bold");
+  doc.setFontSize(8.5);
   doc.setTextColor(20);
-  doc.text(`Skor Akhir: ${(skorAkhir || 0).toFixed(2)}`, m, y);
-  doc.text(`Keputusan: ${keputusan || "-"}`, m + 70, y);
-  y += 9;
+  doc.text("Skor Akhir", colSig + wGroup - 4, y + 4.2, { align: "right" });
+  doc.text((skorAkhir || 0).toFixed(2), colTotal + wTotal / 2, y + 4.2, { align: "center" });
+  y += 10;
+
+  // --- Keterangan ambang skor (sama seperti footnote di Excel) ---
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(6.5);
+  doc.setTextColor(90);
+  doc.text(
+    "ket : 0 - 50 = tidak direkomendasikan, 51 - 75 = Cukup untuk direkomendasikan dengan pertimbangan, 76 - 100 = Direkomendasikan",
+    m, y
+  );
+  y += 6;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(20);
+  doc.text(`Keputusan: ${keputusan || "-"}`, m, y);
+  y += 7;
 
   if (catatan) {
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
+    doc.setTextColor(40);
+    doc.text("Catatan Penting / Rekomendasi:", m, y);
+    y += 4;
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(120);
-    doc.text("CATATAN", m, y);
-    y += 4.5;
-    doc.setFontSize(9);
+    doc.setFontSize(8);
     doc.setTextColor(30);
     const wrapped = doc.splitTextToSize(catatan, pw - m * 2);
     doc.text(wrapped, m, y);
-    y += wrapped.length * 4.5 + 5;
+    y += wrapped.length * 4 + 4;
   }
 
-  doc.setFontSize(7);
-  doc.setTextColor(140);
-  doc.text(`Dicetak: ${new Date().toLocaleString("id-ID")} - SAKTI`, m, ph - 8);
+  // --- Kolom tanda tangan 3 kolom, sama seperti Excel: Dievaluasi Oleh /
+  // Diperiksa/verifikasi oleh / Diputuskan oleh — dengan role & nama baku. ---
+  const sigY = Math.max(y + 8, ph - 40);
+  const colW = (pw - m * 2) / 3;
+  const sigCols = [
+    { label: "Dievaluasi Oleh :", role: "Officer Community Development", nama: "Wahyu Andrias" },
+    { label: "Diperiksa/verifikasi oleh:", role: "Assistant Manager KAS", nama: "Astri Oktavina" },
+    { label: "Diputuskan oleh:", role: "Administration Manager", nama: "Donny Ureansyah" },
+  ];
+  sigCols.forEach((c, i) => {
+    const x = m + i * colW;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(30);
+    doc.text(c.label, x, sigY);
+    doc.setDrawColor(180);
+    doc.line(x, sigY + 16, x + colW - 8, sigY + 16);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text(c.role, x, sigY + 20);
+    doc.setFont("helvetica", "bold");
+    doc.text(c.nama, x, sigY + 24);
+    doc.setFont("helvetica", "normal");
+  });
+
+  doc.setFontSize(6.5);
+  doc.setTextColor(150);
+  doc.text(`Dicetak: ${new Date().toLocaleString("id-ID")} - SAKTI`, pw - m, ph - 4, { align: "right" });
 
   doc.save(`${filename}.pdf`);
 }

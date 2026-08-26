@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Plus, Search, Trash2, X } from "lucide-react";
 import { T, font } from "../../lib/theme";
+import { parseLocalDate } from "../../lib/utils";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
@@ -11,9 +12,8 @@ import DatePicker from "../../components/DatePicker";
 const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
 function monthKey(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d)) return null;
+  const d = parseLocalDate(dateStr);
+  if (!d) return null;
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
 }
 function monthLabel(key) {
@@ -138,8 +138,7 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
       <PageHeader
         eyebrow="Pembayaran"
         title={kategori || "NON PO"}
-        description={`Daftar semua pengajuan ${kategori || "NON PO"}. Klik '+ Tambah ${kategori || "NON PO"}' untuk mulai pengajuan baru, lalu lanjut ke LMP 1 dst dari submenu di sidebar.`}
-        right={<Button icon={Plus} onClick={() => setAddOpen(true)}>+ Tambah {kategori || "NON PO"}</Button>}
+        right={<Button icon={Plus} onClick={() => setAddOpen(true)}>Tambah {kategori || "NON PO"}</Button>}
       />
 
       {/* Filter + search bar */}

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { OPT, DOC_STATUS, STATUS_META } from "../../lib/data";
-import { nextIdFor, printDocument, rupiah, uid } from "../../lib/utils";
+import { nextNumericId, printDocument, rupiah, uid } from "../../lib/utils";
 import {
   bastStepFields,
   paktaStepFields,
@@ -30,9 +30,16 @@ import PageHeader from "../../components/PageHeader";
 import FlowSteps from "../../components/FlowSteps";
 import DataTable from "../../components/DataTable";
 import FormGrid, { ReviewList } from "../../components/FormGrid";
+import ComboManaged from "../../components/ComboManaged";
 import { SuccessModal } from "./RAB";
 
 const FIELDS = proposalFields()();
+// Field "Program" dirender terpisah lewat ComboManaged (share master list yang
+// sama dengan NON PO), jadi FIELDS di-split di titik itu supaya posisinya di
+// form tetap sama seperti urutan semula (setelah Alamat Lokasi Kegiatan).
+const PROGRAM_FIELD_INDEX = FIELDS.findIndex((f) => f.key === "lokasiKegiatan") + 1;
+const FIELDS_BEFORE_PROGRAM = FIELDS.slice(0, PROGRAM_FIELD_INDEX);
+const FIELDS_AFTER_PROGRAM = FIELDS.slice(PROGRAM_FIELD_INDEX);
 const ADMIN_FIELDS = proposalAdminFields();
 const BAST_FIELDS = bastStepFields();
 const PAKTA_FIELDS = paktaStepFields();
@@ -90,7 +97,7 @@ function OverviewSectionHeading({ children }) {
   );
 }
 
-export default function ProposalRekapPage({ proposals, setProposals, notify }) {
+export default function ProposalRekapPage({ proposals, setProposals, notify, comboProgram = [], setComboProgram }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(0);
   const [values, setValues] = useState({});
@@ -123,7 +130,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
   );
 
   const start = () => {
-    setValues({ id: nextIdFor("PRP", proposals) });
+    setValues({ id: nextNumericId(proposals) });
     setBastDraft({});
     setPaktaDraft({});
     setStep(0);
@@ -156,6 +163,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
       {
         ...values,
         id: values.id || uid("PRP"),
+        createdAt: new Date().toISOString(),
         // Status selalu mulai "Ditinjau" — baru berubah kalau Asman/MADM
         // sudah memproses, bukan diisi manual oleh Humas.
         statusProposal: "Ditinjau",
@@ -235,6 +243,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
           { label: "Nominal Diajukan", value: row.nilaiDiajukan ? rupiah(row.nilaiDiajukan) : null },
           { label: "Nominal Disetujui", value: row.approvedBudget ? rupiah(row.approvedBudget) : null },
           { label: "Jumlah Barang yang Diajukan", value: row.itemDiminta },
+          { label: "Nominal yang Diajukan (Item)", value: row.nominalItemDiajukan ? rupiah(row.nominalItemDiajukan) : null },
         ],
       },
       {
@@ -372,7 +381,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
           </select>
           <select value={filterProgram} onChange={(e) => setFilterProgram(e.target.value)} style={filterSelectStyle}>
             <option value="">Semua Program</option>
-            {OPT.programHumas.map((p) => (
+            {comboProgram.map((p) => (
               <option key={p} value={p}>{p}</option>
             ))}
           </select>
@@ -606,7 +615,20 @@ export default function ProposalRekapPage({ proposals, setProposals, notify }) {
 
       {step === 0 && (
         <Card>
-          <FormGrid fields={FIELDS} values={values} onChange={onChange} align="left" />
+          <FormGrid fields={FIELDS_BEFORE_PROGRAM} values={values} onChange={onChange} align="left" />
+          <div style={{ marginTop: 18, maxWidth: 340 }}>
+            <ComboManaged
+              label="Program"
+              value={values.program}
+              options={comboProgram}
+              onChange={(v) => onChange("program", v)}
+              onOptions={(opts) => setComboProgram?.(opts)}
+              placeholder="Pilih program…"
+            />
+          </div>
+          <div style={{ marginTop: 18 }}>
+            <FormGrid fields={FIELDS_AFTER_PROGRAM} values={values} onChange={onChange} align="left" />
+          </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18 }}>
             <Button variant="ghost" onClick={() => setMode("list")}>Batal</Button>
             <Button onClick={goToBastStep}>

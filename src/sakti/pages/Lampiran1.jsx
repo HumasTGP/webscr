@@ -14,9 +14,11 @@ import PageHeader from "../../components/PageHeader";
 import DatePicker from "../../components/DatePicker";
 import ComboManaged from "../../components/ComboManaged";
 import ReviewModal from "../../components/ReviewModal";
+import { DEFAULT_SATUAN, SatuanSelect, SatuanSettingsModal, hitungTotalDenganSatuan } from "../../components/SatuanPicker";
 
 const STEPS = ["Isi Formulir", "RAB & Ruang Lingkup", "Konfirmasi", "Simpan"];
 const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const PPN_OPTIONS = ["Non PPN", "11%"];
 
 const DEFAULT_COMBO = {
   procost: [
@@ -63,7 +65,7 @@ const EMPTY_FORM = {
   procost: "", expType: "", task: "", expOrg: "", ppn: "",
   vendor1: "", vendor2: "", vendor3: "",
 };
-const emptyItemDraft = () => ({ uraian: "", qty: "", satuan: "", hargaVendor1: "" });
+const emptyItemDraft = () => ({ uraian: "", qty: "", satuan: "", hargaVendor1: "", ppn: "11%" });
 
 function monthKey(dateStr) {
   if (!dateStr) return null;
@@ -94,6 +96,8 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
   const [showItemModal, setShowItemModal] = useState(false);
   const [editingItemId, setEditingItemId] = useState(null);
   const [combo, setCombo] = useState(DEFAULT_COMBO);
+  const [satuanList, setSatuanList] = useState(DEFAULT_SATUAN);
+  const [showSatuanModal, setShowSatuanModal] = useState(false);
 
   const [reviewRow, setReviewRow] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -102,7 +106,7 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
   const setComboOpts = (k, opts) => setCombo((p) => ({ ...p, [k]: opts }));
-  const grandTotal = items.reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.hargaVendor1) || 0), 0);
+  const grandTotal = items.reduce((s, it) => s + hitungTotalDenganSatuan({ qty: it.qty, satuan: it.satuan, harga: it.hargaVendor1, ppn: it.ppn }, satuanList).total, 0);
 
   const monthOptions = useMemo(() => {
     const set2 = new Set();
@@ -117,7 +121,8 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
       const q = search.trim().toLowerCase();
       l = l.filter((r) => (r.submissionId || "").toLowerCase().includes(q) || (r.form?.namaPengadaan || "").toLowerCase().includes(q));
     }
-    return l;
+    // Terbaru di atas (newest-oldest), berdasarkan waktu terakhir disimpan.
+    return [...l].sort((a, b) => new Date(b.savedAt || 0) - new Date(a.savedAt || 0));
   }, [list, filterBulan, search]);
 
   // ---------- wizard ----------
@@ -151,6 +156,7 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
         setItems(r.items.map((it) => ({
           id: uid("LP1I"), uraian: it.uraian || "", qty: it.qtyEvaluasi || it.qty || "",
           satuan: it.satuan || "", hargaVendor1: it.hargaSatuanEvaluasi || it.hargaSatuan || "",
+          ppn: it.ppnEvaluasi || it.ppn || "11%",
         })));
       }
     }
@@ -168,7 +174,18 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
 
   const finalizeSave = () => {
     if (!activeRab) return notify("Pilih Submission ID (RAB) dulu.", "error");
-    const record = { submissionId: activeRab.idNumber, pengajuanId, form, items, savedAt: new Date().toISOString() };
+    // Simpan hasil hitungan (base/ppn/total) langsung di tiap item, bukan cuma
+    // raw qty/harga/satuan — supaya nilai tercatat tetap akurat & konsisten
+    // walau daftar satuan (faktor konversi) berubah di sesi berikutnya.
+    const itemsWithTotals = items.map((it) => {
+      const t = hitungTotalDenganSatuan({ qty: it.qty, satuan: it.satuan, harga: it.hargaVendor1, ppn: it.ppn }, satuanList);
+      return { ...it, base: t.base, ppnNilai: t.ppnNilai, total: t.total, faktor: t.faktor };
+    });
+    const grandTotalFinal = itemsWithTotals.reduce((s, it) => s + it.total, 0);
+    const record = {
+      submissionId: activeRab.idNumber, pengajuanId, form, items: itemsWithTotals,
+      grandTotal: grandTotalFinal, savedAt: new Date().toISOString(),
+    };
     setList((prev) => {
       const idx = prev.findIndex((x) => x.submissionId === activeRab.idNumber);
       return idx >= 0 ? prev.map((x, i) => (i === idx ? record : x)) : [...prev, record];
@@ -185,13 +202,18 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
   };
 
   // ---------- docx / pdf ----------
+  // record.items sudah punya total/ppnNilai/base tersimpan (dihitung saat
+  // finalizeSave), fallback ke hitung ulang kalau data lama belum punya itu.
+  const itemTotal = (it) => (typeof it.total === "number" ? it.total : hitungTotalDenganSatuan({ qty: it.qty, satuan: it.satuan, harga: it.hargaVendor1, ppn: it.ppn }, satuanList).total);
+  const recordGrandTotal = (record) => (typeof record.grandTotal === "number" ? record.grandTotal : (record.items || []).reduce((s, it) => s + itemTotal(it), 0));
+
   const buildDocxData = (record) => ({
     submissionId: record.submissionId,
     tanggal: formatTanggal(record.form?.tanggal),
     namaPengadaan: record.form?.namaPengadaan || "",
     procost: record.form?.procost || "-", expType: record.form?.expType || "-",
     task: record.form?.task || "-", expOrg: record.form?.expOrg || "-",
-    grandTotal: rupiah((record.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.hargaVendor1) || 0), 0)),
+    grandTotal: rupiah(recordGrandTotal(record)),
     vendor1: record.form?.vendor1 || "-", vendor2: record.form?.vendor2 || "-", vendor3: record.form?.vendor3 || "-",
     // "baris" = 1 baris tabel siap-cetak per item, dipisah tab antar kolom dan
     // diakhiri \n biar docxtemplater (linebreaks:true) render jadi baris baru di Word.
@@ -200,10 +222,11 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
       const qty = String(it.qty || "");
       const satuan = it.satuan || "";
       const hargaVendor1 = rupiah(it.hargaVendor1 || 0);
-      const total = rupiah((Number(it.qty) || 0) * (Number(it.hargaVendor1) || 0));
+      const ppn = it.ppn || "-";
+      const total = rupiah(itemTotal(it));
       return {
-        uraian, qty, satuan, hargaVendor1, total,
-        baris: `${uraian}\t${qty}\t${satuan}\t${hargaVendor1}\t${total}\n`,
+        uraian, qty, satuan, hargaVendor1, ppn, total,
+        baris: `${uraian}\t${qty}\t${satuan}\t${hargaVendor1}\t${ppn}\t${total}\n`,
       };
     }),
   });
@@ -217,13 +240,13 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
     try {
       await generateSikasPdf({
         title: "Lampiran 1 - Rincian Pekerjaan & Perbandingan Vendor",
-        subtitle: `${record.submissionId} · Grand Total ${rupiah((record.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.hargaVendor1) || 0), 0))}`,
+        subtitle: `${record.submissionId} · Grand Total ${rupiah(recordGrandTotal(record))}`,
         rows: [
           ["Submission ID", record.submissionId],
           ["Nama Pengadaan", record.form?.namaPengadaan || "-"],
           ["Tanggal", formatTanggal(record.form?.tanggal)],
         ],
-        table: record.items || [],
+        table: (record.items || []).map((it) => ({ ...it, total: itemTotal(it) })),
         filename: `LMP1-${record.submissionId}`,
       });
       notify("Lampiran 1 (.pdf) berhasil diunduh.", "success");
@@ -237,8 +260,7 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
         <PageHeader
           eyebrow="Pembayaran"
           title="LMP 1"
-          description="Lampiran 1 - rincian pekerjaan dan perbandingan vendor, dirujuk dari RAB yang sudah selesai pelaksanaannya."
-          right={<Button icon={Plus} onClick={startWizard}>+ Tambah LMP 1</Button>}
+          right={<Button icon={Plus} onClick={startWizard}>Tambah Lampiran 1</Button>}
         />
 
         <Card style={{ marginBottom: 14, padding: "12px 16px" }}>
@@ -263,21 +285,28 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
 
         <Card padded={false}>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, tableLayout: "fixed" }}>
+              <colgroup>
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "34%" }} />
+                <col style={{ width: "14%" }} />
+                <col style={{ width: "16%" }} />
+                <col style={{ width: "22%" }} />
+              </colgroup>
               <thead><tr>{["Submission ID", "Nama Pengadaan", "Tanggal", "Grand Total", "Aksi"].map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
               <tbody>
                 {displayList.length === 0 ? (
                   <tr><td colSpan={5} style={{ textAlign: "center", color: T.muted, padding: "28px 12px" }}>Belum ada data LMP 1. Klik &quot;+ Tambah LMP 1&quot; untuk mulai.</td></tr>
                 ) : displayList.map((r, i) => {
-                  const total = (r.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.hargaVendor1) || 0), 0);
+                  const total = recordGrandTotal(r);
                   return (
                     <tr key={r.submissionId} style={{ background: i % 2 ? T.rowAlt : T.card }}>
-                      <td style={td}>{r.submissionId}</td>
-                      <td style={td}>{r.form?.namaPengadaan || "-"}</td>
-                      <td style={td}>{formatTanggal(r.form?.tanggal)}</td>
-                      <td style={{ ...td, textAlign: "right" }}>{rupiah(total)}</td>
+                      <td style={{ ...td, whiteSpace: "normal" }}>{r.submissionId}</td>
+                      <td style={{ ...td, whiteSpace: "normal" }}>{r.form?.namaPengadaan || "-"}</td>
+                      <td style={{ ...td, whiteSpace: "normal" }}>{formatTanggal(r.form?.tanggal)}</td>
+                      <td style={{ ...td, textAlign: "right", whiteSpace: "normal" }}>{rupiah(total)}</td>
                       <td style={{ ...td, textAlign: "center" }}>
-                        <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
+                        <div style={{ display: "flex", gap: 5, justifyContent: "center", flexWrap: "wrap" }}>
                           <IconBtn title="Lihat" onClick={() => setReviewRow(r)}><Eye size={13} /></IconBtn>
                           <IconBtn title="Edit" onClick={() => startEdit(r)}><Pencil size={13} /></IconBtn>
                           <IconBtn title="Hapus" danger onClick={() => setDeleteTarget(r)}><Trash2 size={13} /></IconBtn>
@@ -310,11 +339,12 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
             title: `RAB & Ruang Lingkup (${(reviewRow.items || []).length} baris)`,
             columns: [
               { key: "uraian", label: "Uraian" }, { key: "qty", label: "Qty" }, { key: "satuan", label: "Satuan" },
-              { key: "total", label: "Total", render: (r) => rupiah((Number(r.qty) || 0) * (Number(r.hargaVendor1) || 0)) },
+              { key: "ppn", label: "PPN" },
+              { key: "total", label: "Total", render: (r) => rupiah(itemTotal(r)) },
             ],
             data: reviewRow.items || [],
           } : null}
-          totals={reviewRow ? [{ label: "Grand Total", value: rupiah((reviewRow.items || []).reduce((s, it) => s + (Number(it.qty) || 0) * (Number(it.hargaVendor1) || 0), 0)) }] : []}
+          totals={reviewRow ? [{ label: "Grand Total", value: rupiah(recordGrandTotal(reviewRow)) }] : []}
           onEdit={() => startEdit(reviewRow)}
           editLabel="Edit LMP 1 ini"
         />
@@ -366,9 +396,9 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
 
           <SectionLabel dashed>Vendor</SectionLabel>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px 20px" }} className="responsive-form-grid">
-            <FieldBlock label="Vendor 1"><ComboManaged value={form.vendor1} options={combo.vendor} onChange={(v) => set("vendor1", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih vendor 1…" /></FieldBlock>
-            <FieldBlock label="Vendor 2" hint="(opsional)"><ComboManaged value={form.vendor2} options={combo.vendor} onChange={(v) => set("vendor2", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="- Kosong -" /></FieldBlock>
-            <FieldBlock label="Vendor 3" hint="(opsional)"><ComboManaged value={form.vendor3} options={combo.vendor} onChange={(v) => set("vendor3", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="- Kosong -" /></FieldBlock>
+            <FieldBlock label="Vendor 1"><ComboManaged value={form.vendor1} options={combo.vendor} onChange={(v) => set("vendor1", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih Vendor 1…" /></FieldBlock>
+            <FieldBlock label="Vendor 2" hint="(opsional)"><ComboManaged value={form.vendor2} options={combo.vendor} onChange={(v) => set("vendor2", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih Vendor 2..." /></FieldBlock>
+            <FieldBlock label="Vendor 3" hint="(opsional)"><ComboManaged value={form.vendor3} options={combo.vendor} onChange={(v) => set("vendor3", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih Vendor 3..." /></FieldBlock>
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
@@ -384,22 +414,23 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
               <h3 style={{ fontFamily: font.display, fontSize: 16, margin: 0 }}>RAB & Ruang Lingkup</h3>
               <p style={{ color: T.muted, fontSize: 12.5, margin: "4px 0 0" }}>Baris awal diisi otomatis dari Uraian RAB terkait - tambah/ubah sesuai kebutuhan.</p>
             </div>
-            <Button icon={Plus} onClick={openAddItem}>+ Tambah baris</Button>
+            <Button icon={Plus} onClick={openAddItem}>Tambah baris</Button>
           </div>
 
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden", overflowX: "auto", marginTop: 14 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
-              <thead><tr>{["Uraian", "Qty", "Satuan", "Harga vendor 1", "Total", ""].map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
+              <thead><tr>{["Uraian", "Qty", "Satuan", "Harga vendor 1", "PPN", "Total", ""].map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
               <tbody>
                 {items.length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: "center", color: T.muted, padding: "20px 12px" }}>Belum ada baris.</td></tr>
+                  <tr><td colSpan={7} style={{ textAlign: "center", color: T.muted, padding: "20px 12px" }}>Belum ada baris.</td></tr>
                 ) : items.map((r, i) => (
                   <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
                     <td style={td}>{r.uraian}</td>
                     <td style={{ ...td, textAlign: "right" }}>{r.qty}</td>
                     <td style={td}>{r.satuan}</td>
                     <td style={{ ...td, textAlign: "right" }}>{rupiah(r.hargaVendor1 || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah((Number(r.qty) || 0) * (Number(r.hargaVendor1) || 0))}</td>
+                    <td style={td}>{r.ppn || "-"}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(hitungTotalDenganSatuan({ qty: r.qty, satuan: r.satuan, harga: r.hargaVendor1, ppn: r.ppn }, satuanList).total)}</td>
                     <td style={{ ...td, textAlign: "center" }}>
                       <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
                         <IconBtn title="Edit" onClick={() => openEditItem(r)}><Pencil size={12} /></IconBtn>
@@ -422,14 +453,40 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
             <div style={{ display: "grid", gap: 12 }}>
               <FieldBlock label="Uraian"><input value={itemDraft.uraian} onChange={(e) => setItemDraft({ ...itemDraft, uraian: e.target.value })} style={inputStyle} /></FieldBlock>
               <FieldBlock label="Qty"><input type="number" value={itemDraft.qty} onChange={(e) => setItemDraft({ ...itemDraft, qty: e.target.value })} style={inputStyle} /></FieldBlock>
-              <FieldBlock label="Satuan"><input value={itemDraft.satuan} onChange={(e) => setItemDraft({ ...itemDraft, satuan: e.target.value })} style={inputStyle} /></FieldBlock>
+              <FieldBlock label="Satuan">
+                <SatuanSelect
+                  value={itemDraft.satuan}
+                  satuanList={satuanList}
+                  setSatuanList={setSatuanList}
+                  onChange={(v) => setItemDraft({ ...itemDraft, satuan: v })}
+                  onOpenSettings={() => setShowSatuanModal(true)}
+                  inputStyle={inputStyle}
+                />
+              </FieldBlock>
               <FieldBlock label="Harga vendor 1"><input type="number" value={itemDraft.hargaVendor1} onChange={(e) => setItemDraft({ ...itemDraft, hargaVendor1: e.target.value })} style={inputStyle} /></FieldBlock>
+              <FieldBlock label="PPN">
+                <select value={itemDraft.ppn} onChange={(e) => setItemDraft({ ...itemDraft, ppn: e.target.value })} style={inputStyle}>
+                  {PPN_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </FieldBlock>
+              <div style={{ fontSize: 12.5, color: T.muted, textAlign: "right", paddingTop: 4, borderTop: `1px dashed ${T.border}` }}>
+                Total baris ini: <b style={{ color: T.heading }}>{rupiah(hitungTotalDenganSatuan({ qty: itemDraft.qty, satuan: itemDraft.satuan, harga: itemDraft.hargaVendor1, ppn: itemDraft.ppn }, satuanList).total)}</b>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 18 }}>
               <Button variant="ghost" onClick={() => setShowItemModal(false)}>Batal</Button>
               <Button icon={Check} onClick={saveItemModal}>Simpan</Button>
             </div>
           </Modal>
+
+          <SatuanSettingsModal
+            key={showSatuanModal ? `open-${satuanList.length}` : "closed"}
+            open={showSatuanModal}
+            onClose={() => setShowSatuanModal(false)}
+            satuanList={satuanList}
+            setSatuanList={setSatuanList}
+            inputStyle={inputStyle}
+          />
         </Card>
       )}
 
@@ -438,14 +495,39 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
           <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 4 }}>Konfirmasi</h3>
           <p style={{ color: T.muted, fontSize: 12.5, marginBottom: 18 }}>Cek dulu datanya, bisa langsung diunduh dari sini sebelum disimpan final.</p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 16px", marginBottom: 18, borderBottom: `1px solid ${T.border}`, paddingBottom: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 24px", marginBottom: 18, borderBottom: `1px solid ${T.border}`, paddingBottom: 16 }} className="responsive-form-grid">
             <ReviewRow label="Submission ID" value={activeRab?.idNumber} />
             <ReviewRow label="Tanggal" value={formatTanggal(form.tanggal)} />
             <ReviewRow label="Nama Pengadaan" value={form.namaPengadaan} full />
-            <ReviewRow label="Vendor 1 / 2 / 3" value={[form.vendor1, form.vendor2, form.vendor3].filter(Boolean).join(" / ") || "-"} full />
+            <ReviewRow label="Procost" value={form.procost} />
+            <ReviewRow label="Exp. Type" value={form.expType} />
+            <ReviewRow label="Task" value={form.task} />
+            <ReviewRow label="Exp. Org" value={form.expOrg} />
+            <ReviewRow label="Vendor 1" value={form.vendor1} />
+            <ReviewRow label="Vendor 2" value={form.vendor2 || "-"} />
+            <ReviewRow label="Vendor 3" value={form.vendor3 || "-"} />
           </div>
 
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 6 }}>
+          <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden", overflowX: "auto", marginBottom: 6 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+              <thead><tr>{["Uraian", "Qty", "Satuan", "Harga vendor 1", "PPN", "Total"].map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
+              <tbody>
+                {items.map((r, i) => (
+                  <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
+                    <td style={{ ...td, whiteSpace: "normal" }}>{r.uraian}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{r.qty}</td>
+                    <td style={td}>{r.satuan}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.hargaVendor1 || 0)}</td>
+                    <td style={td}>{r.ppn || "-"}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(hitungTotalDenganSatuan({ qty: r.qty, satuan: r.satuan, harga: r.hargaVendor1, ppn: r.ppn }, satuanList).total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ textAlign: "right", marginBottom: 18, fontSize: 16, fontWeight: 700, color: T.heading }}>Grand Total: {rupiah(grandTotal)}</div>
+
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 6, flexWrap: "wrap" }}>
             <Button icon={Download} onClick={() => downloadDocx({ submissionId: activeRab?.idNumber, form, items })}>Unduh Word (.docx)</Button>
             <Button variant="ghost" icon={FileText} onClick={() => downloadPdf({ submissionId: activeRab?.idNumber, form, items })}>Unduh PDF</Button>
           </div>
@@ -507,8 +589,9 @@ function FieldBlock({ label, hint, full, children }) {
 }
 function ReviewRow({ label, value, full }) {
   return (
-    <div style={{ gridColumn: full ? "1 / -1" : "auto", display: "grid", gridTemplateColumns: "160px 1fr", gap: 12, fontSize: 13, padding: "6px 0" }}>
-      <div style={{ color: T.muted }}>{label}</div><div style={{ fontWeight: 600, color: T.text }}>{value || "-"}</div>
+    <div style={{ gridColumn: full ? "1 / -1" : "auto", display: "grid", gridTemplateColumns: "140px 1fr", gap: 12, fontSize: 13, padding: "6px 0", alignItems: "start" }}>
+      <div style={{ color: T.muted }}>{label}</div>
+      <div style={{ fontWeight: 600, color: T.text, wordBreak: "break-word", overflowWrap: "anywhere" }}>{value || "-"}</div>
     </div>
   );
 }

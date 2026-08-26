@@ -210,7 +210,6 @@ export default function ProposalEvaluasiPage({ proposals, evaluasiList, setEvalu
       <PageHeader
         eyebrow="Humas & Publikasi"
         title="Cetak Form Evaluasi"
-        description="Pilih Proposal ID - ID/Pemohon/Perihal otomatis terisi. Isi Nilai tiap kategori seperti mengisi Excel, lalu unduh sebagai Excel atau PDF sesuai template resmi. Hasilnya juga tersimpan di aplikasi supaya bisa dilihat lagi kapan saja."
       />
 
       <Card padded={false} style={{ marginBottom: 20 }}>
