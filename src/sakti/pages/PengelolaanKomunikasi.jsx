@@ -223,7 +223,6 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
   const [detailId, setDetailId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [monthlyOpen, setMonthlyOpen] = useState(false);
-  const [monthlyBulan, setMonthlyBulan] = useState("Semua");
 
   const [filters, setFilters] = useState({
     bulan: "Semua",
@@ -305,14 +304,8 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
     [list, filters]
   );
 
-  const terbitCount = list.filter((r) => r.status === "Terbit").length;
-  const draftCount = list.filter((r) => r.status === "Draft").length;
-  const totalPublikasi = list.reduce((n, r) => n + (r.publikasi || []).length, 0);
-
   const monthlyStats = useMemo(() => {
-    const rows = list.filter(
-      (r) => monthlyBulan === "Semua" || bulanFromTanggal(r.tanggal) === monthlyBulan
-    );
+    const rows = list;
     const totalKonten = rows.length;
     const pubAll = rows.flatMap((r) => r.publikasi || []);
     const totalPub = pubAll.length;
@@ -329,7 +322,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
     const kategoriTerbanyak = tally(rows.map((r) => r.kategori));
 
     return { totalKonten, totalPub, totalScore, platformTerbanyak, kategoriTerbanyak };
-  }, [list, monthlyBulan]);
+  }, [list]);
 
   const detailRecord = list.find((r) => r.id === detailId);
 
@@ -618,11 +611,6 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
         right={<Button icon={Plus} onClick={startAdd}>Tambah Data</Button>}
       />
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-        <KpiCard value={`${terbitCount} terbit`} sub={`${draftCount} draft`} />
-        <KpiCard value={totalPublikasi} sub="total publikasi" />
-      </div>
-
       <Card style={{ marginBottom: 14 }}>
         <div
           style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
@@ -632,23 +620,31 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
           <ChevronDown size={16} color={T.muted} style={{ transform: monthlyOpen ? "rotate(180deg)" : "none" }} />
         </div>
         {monthlyOpen && (
-          <div style={{ marginTop: 12 }}>
-            <FilterSelect
-              value={monthlyBulan}
-              onChange={setMonthlyBulan}
-              options={bulanOptions}
-              allLabel="Semua bulan"
-            />
-            <div style={{ display: "flex", gap: 10, margin: "12px 0" }}>
-              <KpiCard value={monthlyStats.totalKonten} sub="total konten" />
-              <KpiCard value={monthlyStats.totalPub} sub="total publikasi" />
-              <KpiCard value={monthlyStats.totalScore} sub="total score" />
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 14 }}>
+              {[
+                { value: monthlyStats.totalKonten, label: "Total Konten", color: T.blue },
+                { value: monthlyStats.totalPub, label: "Total Publikasi", color: "#0A7A5A" },
+                { value: monthlyStats.totalScore, label: "Total Score", color: "#8B5CF6" },
+              ].map((kpi) => (
+                <div key={kpi.label} style={{
+                  background: T.bg, border: `1px solid ${T.border}`, borderRadius: 10,
+                  padding: "16px 18px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6,
+                }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: kpi.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{kpi.label}</div>
+                  <div style={{ fontFamily: font.display, fontSize: 28, fontWeight: 700, color: T.heading, lineHeight: 1 }}>{kpi.value}</div>
+                </div>
+              ))}
             </div>
-            <div style={{ fontSize: 12.5, color: T.text, marginBottom: 4 }}>
-              <b>Platform terbanyak:</b> {monthlyStats.platformTerbanyak.join(", ") || "-"}
-            </div>
-            <div style={{ fontSize: 12.5, color: T.text }}>
-              <b>Kategori terbanyak:</b> {monthlyStats.kategoriTerbanyak.join(", ") || "-"}
+            <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 200px", background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 14px" }}>
+                <div style={{ fontSize: 11, color: T.muted, fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Platform terbanyak</div>
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: T.heading }}>{monthlyStats.platformTerbanyak.join(", ") || "-"}</div>
+              </div>
+              <div style={{ flex: "1 1 200px", background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 14px" }}>
+                <div style={{ fontSize: 11, color: T.muted, fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>Kategori terbanyak</div>
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: T.heading }}>{monthlyStats.kategoriTerbanyak.join(", ") || "-"}</div>
+              </div>
             </div>
           </div>
         )}

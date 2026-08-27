@@ -117,6 +117,37 @@ export function nextNumericId(items, idKey = "id") {
   return String(maxNum + 1).padStart(3, "0");
 }
 
+const SATUAN_TERBILANG = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan",
+  "sepuluh", "sebelas", "dua belas", "tiga belas", "empat belas", "lima belas",
+  "enam belas", "tujuh belas", "delapan belas", "sembilan belas"];
+
+function _terbilangAngka(n) {
+  if (n === 0) return "";
+  if (n < 20) return SATUAN_TERBILANG[n];
+  if (n < 100) {
+    const d = Math.floor(n / 10), s = n % 10;
+    return SATUAN_TERBILANG[d] + " puluh" + (s > 0 ? " " + SATUAN_TERBILANG[s] : "");
+  }
+  if (n < 200) return "seratus" + (n > 100 ? " " + _terbilangAngka(n - 100) : "");
+  if (n < 1000) {
+    const d = Math.floor(n / 100), r = n % 100;
+    return SATUAN_TERBILANG[d] + " ratus" + (r > 0 ? " " + _terbilangAngka(r) : "");
+  }
+  if (n < 2000) return "seribu" + (n > 1000 ? " " + _terbilangAngka(n - 1000) : "");
+  if (n < 1e6) { const d = Math.floor(n / 1000), r = n % 1000; return _terbilangAngka(d) + " ribu" + (r > 0 ? " " + _terbilangAngka(r) : ""); }
+  if (n < 1e9) { const d = Math.floor(n / 1e6), r = n % 1e6; return _terbilangAngka(d) + " juta" + (r > 0 ? " " + _terbilangAngka(r) : ""); }
+  if (n < 1e12) { const d = Math.floor(n / 1e9), r = n % 1e9; return _terbilangAngka(d) + " miliar" + (r > 0 ? " " + _terbilangAngka(r) : ""); }
+  const d = Math.floor(n / 1e12), r = n % 1e12;
+  return _terbilangAngka(d) + " triliun" + (r > 0 ? " " + _terbilangAngka(r) : "");
+}
+
+export function terbilangRupiah(amount) {
+  const n = Math.floor(Number(amount) || 0);
+  if (n === 0) return "Nol Rupiah";
+  const words = _terbilangAngka(n).trim();
+  return words.charAt(0).toUpperCase() + words.slice(1) + " Rupiah";
+}
+
 export function hitungSkorEvaluasi(kategoriList, nilaiMap) {
   const perKategori = kategoriList.map((k) => {
     const nilai = nilaiMap[k.key];

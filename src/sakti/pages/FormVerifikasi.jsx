@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Download, Plus, Save } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { OPT } from "../../lib/data";
-import { uid, rupiah } from "../../lib/utils";
+import { uid, rupiah, terbilangRupiah } from "../../lib/utils";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
@@ -19,8 +19,9 @@ const EMPTY = {
   procost: "",
 };
 
-export default function FormVerifikasiPage({ rab, notify }) {
-  const [forms, setForms] = useState([]);
+export default function FormVerifikasiPage({ rab, notify, formVerifList = [], setFormVerifList }) {
+  const forms = formVerifList;
+  const setForms = setFormVerifList || (() => {});
   const [activeRab, setActiveRab] = useState(null);
   const [formData, setFormData] = useState(EMPTY);
   const [procostOptions, setProcostOptions] = useState(OPT.procost);
@@ -36,26 +37,34 @@ export default function FormVerifikasiPage({ rab, notify }) {
   };
   const labelStyle = { fontSize: 12, fontWeight: 600, color: T.heading, marginBottom: 5, display: "block" };
 
+  const buildAutoNomor = (r) => {
+    const year = new Date().getFullYear();
+    return `${r.idNumber}/VER/KAS/PRIOK/${year}`;
+  };
+
   const loadForm = (r) => {
     setActiveRab(r);
     const existing = forms.find((f) => f.rabId === r.idNumber);
     if (existing) {
       setFormData({
-        nomorVerifikasi: existing.nomorVerifikasi || "",
+        nomorVerifikasi: existing.nomorVerifikasi || buildAutoNomor(r),
         tanggal: existing.tanggal || "",
         kegiatan: existing.kegiatan || r.judulKegiatan || "",
         jumlahBiaya: existing.jumlahBiaya || r.totalEvaluasi || "",
-        terbilang: existing.terbilang || "",
+        terbilang: existing.terbilang || terbilangRupiah(existing.jumlahBiaya || r.totalEvaluasi),
         kepada: existing.kepada || "",
         tpb: existing.tpb || "",
         procost: existing.procost || "",
       });
       return;
     }
+    const jumlahBiaya = r.totalEvaluasi || "";
     setFormData({
       ...EMPTY,
+      nomorVerifikasi: buildAutoNomor(r),
       kegiatan: r.judulKegiatan || "",
-      jumlahBiaya: r.totalEvaluasi || "",
+      jumlahBiaya,
+      terbilang: terbilangRupiah(jumlahBiaya),
       kepada: "Manager Administrasi UBP Priok",
     });
   };
@@ -66,9 +75,10 @@ export default function FormVerifikasiPage({ rab, notify }) {
     if (existing) {
       setForms((prev) => prev.map((f) => f.rabId === activeRab.idNumber ? { ...f, ...formData, updatedAt: new Date().toISOString() } : f));
     } else {
-      setForms((prev) => [...prev, {
-        id: uid("VRF"), rabId: activeRab.idNumber, ...formData, createdAt: new Date().toISOString(),
-      }]);
+      setForms((prev) => [
+        { id: uid("VRF"), rabId: activeRab.idNumber, submissionId: activeRab.idNumber, ...formData, createdAt: new Date().toISOString() },
+        ...prev,
+      ]);
     }
     notify?.("Form verifikasi disimpan.", "success", "Form Verifikasi disimpan");
   };
@@ -157,7 +167,10 @@ export default function FormVerifikasiPage({ rab, notify }) {
                 </div>
                 <div>
                   <label style={labelStyle}>Jumlah Biaya</label>
-                  <input style={inputStyle} type="number" value={formData.jumlahBiaya} onChange={(e) => set("jumlahBiaya", e.target.value)} />
+                  <input style={inputStyle} type="number" value={formData.jumlahBiaya} onChange={(e) => {
+                    const v = e.target.value;
+                    setFormData((p) => ({ ...p, jumlahBiaya: v, terbilang: terbilangRupiah(v) }));
+                  }} />
                 </div>
                 <div>
                   <label style={labelStyle}>TPB (Tujuan Pembangunan Berkelanjutan)</label>
@@ -220,8 +233,8 @@ export default function FormVerifikasiPage({ rab, notify }) {
                   )}
                 </div>
                 <div>
-                  <label style={labelStyle}>Terbilang</label>
-                  <input style={inputStyle} value={formData.terbilang} onChange={(e) => set("terbilang", e.target.value)} placeholder="Contoh: lima belas juta rupiah" />
+                  <label style={labelStyle}>Terbilang <span style={{ fontWeight: 400, color: "#888", fontSize: 11 }}>(otomatis)</span></label>
+                  <input style={{ ...inputStyle, background: "#f5f7fa", color: "#555" }} value={formData.terbilang} readOnly />
                 </div>
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={labelStyle}>Kepada</label>

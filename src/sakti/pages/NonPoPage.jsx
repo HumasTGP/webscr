@@ -47,9 +47,13 @@ function StatusDot({ status, title, onClick }) {
   );
 }
 
-function docStatus(list, rabId, idKey = "id") {
+function docStatus(list, rabId, idKey = "id", requiredFields = []) {
   const match = list.find((r) => (r[idKey] || r.submissionId || r.id) === rabId);
   if (!match) return "none";
+  if (requiredFields.length > 0) {
+    const allFilled = requiredFields.every((f) => match[f] && String(match[f]).trim() !== "");
+    return allFilled ? "done" : "draft";
+  }
   return "done";
 }
 
@@ -200,8 +204,8 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
                 const rabId = row.rabId;
                 const lmp1Status = docStatus(lmp1 || [], rabId, "submissionId");
                 const lmp2Status = docStatus(lmp2 || [], rabId, "submissionId");
-                const verifStatus = docStatus(formVerif || [], rabId, "submissionId");
-                const bastStatus = docStatus(bast || [], rabId, "id");
+                const verifStatus = docStatus(formVerif || [], rabId, "rabId");
+                const bastStatus = docStatus(bast || [], rabId, "id", ["tanggal", "namaPihakKedua"]);
                 const piStatus = docStatus(pakta || [], rabId, "id");
                 const bappStatus = docStatus(bapp || [], rabId, "id");
                 return (

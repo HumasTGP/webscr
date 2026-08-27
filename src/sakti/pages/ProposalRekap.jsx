@@ -159,13 +159,10 @@ export default function ProposalRekapPage({ proposals, setProposals, notify, com
 
   const save = () => {
     setProposals((prev) => [
-      ...prev,
       {
         ...values,
         id: values.id || uid("PRP"),
         createdAt: new Date().toISOString(),
-        // Status selalu mulai "Ditinjau" — baru berubah kalau Asman/MADM
-        // sudah memproses, bukan diisi manual oleh Humas.
         statusProposal: "Ditinjau",
         status: DOC_STATUS.SUBMITTED,
         reviewedBy: "", reviewedAt: "", reviewNote: "",
@@ -174,6 +171,7 @@ export default function ProposalRekapPage({ proposals, setProposals, notify, com
         bast: { ...bastDraft },
         pakta: { ...paktaDraft },
       },
+      ...prev,
     ]);
     setShowSaveModal(false);
     setShowSuccessModal(true);

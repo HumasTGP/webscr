@@ -167,6 +167,7 @@ export default function App() {
   const [bapp, setBapp] = useState([]);
   const [lmp1List, setLmp1List] = useState([]);
   const [lmp2List, setLmp2List] = useState([]);
+  const [formVerifList, setFormVerifList] = useState([]);
   const [dokumentasiDocs, setDokumentasiDocs] = useState([]);
   const [nonpoSubmissions, setNonpoSubmissions] = useState([]);
   const [nonpoCombo, setNonpoCombo] = useState(DEFAULT_COMBO);
@@ -332,7 +333,7 @@ export default function App() {
           bast={bast.filter((b) => b.kategori === "NON PO")}
           pakta={pakta.filter((p) => p.kategori === "NON PO")}
           bapp={bapp.filter((b) => b.kategori === "NON PO")}
-          formVerif={[]}
+          formVerif={formVerifList}
           notify={notify}
           onNavigate={setActive}
           kategori="NON PO"
@@ -351,7 +352,7 @@ export default function App() {
           bast={bast.filter((b) => b.kategori === "PO")}
           pakta={pakta.filter((p) => p.kategori === "PO")}
           bapp={bapp.filter((b) => b.kategori === "PO")}
-          formVerif={[]}
+          formVerif={formVerifList}
           notify={notify}
           onNavigate={setActive}
           kategori="PO"
@@ -370,7 +371,7 @@ export default function App() {
           bast={bast.filter((b) => b.kategori === "Cash Card")}
           pakta={pakta.filter((p) => p.kategori === "Cash Card")}
           bapp={bapp.filter((b) => b.kategori === "Cash Card")}
-          formVerif={[]}
+          formVerif={formVerifList}
           notify={notify}
           onNavigate={setActive}
           kategori="Cash Card"
@@ -557,7 +558,7 @@ export default function App() {
             />
           );
           routes[`form-verifikasi-${suffix}`] = (
-            <FormVerifikasiPage rab={rabByKategori[kategori]} notify={notify} />
+            <FormVerifikasiPage rab={rabByKategori[kategori]} notify={notify} formVerifList={formVerifList} setFormVerifList={setFormVerifList} />
           );
           routes[`lmp1-${suffix}`] = (
             <Lampiran1Page rab={rabByKategori[kategori]} notify={notify} list={lmp1List} setList={setLmp1List} />
@@ -590,7 +591,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       user,
-      rab, tor, bast, pakta, bapp, lmp1List, lmp2List, laporan, vendors, history,
+      rab, tor, bast, pakta, bapp, lmp1List, lmp2List, formVerifList, laporan, vendors, history,
       proposals, konten, evaluasi, rabIdOptions, packages, users, rka,
       rabByKategori, rabIdOptionsByKategori,
     ]

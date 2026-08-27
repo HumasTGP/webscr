@@ -45,10 +45,13 @@ export default function DatePicker({ value, onChange, placeholder = "Pilih tangg
   const recalcPos = () => {
     const r = fieldRef.current?.getBoundingClientRect();
     if (!r) return;
+    const calH = 290;
     const w = 250;
     let left = r.left;
     if (left + w > window.innerWidth - 8) left = Math.max(8, window.innerWidth - w - 8);
-    setPos({ top: r.bottom + 6, left, width: w });
+    const spaceBelow = window.innerHeight - r.bottom;
+    const top = spaceBelow >= calH + 10 ? r.bottom + 6 : r.top - calH - 6;
+    setPos({ top, left, width: w });
   };
 
   useLayoutEffect(() => { if (open) recalcPos(); /* eslint-disable-next-line */ }, [open]);
