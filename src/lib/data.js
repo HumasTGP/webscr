@@ -296,6 +296,15 @@ export const MENU_TREE = [
   },
 
   {
+    key: "grp-mitra", label: "Pengajuan Mitra", icon: Building2, roles: ["humas"],
+    children: [
+      { key: "mitra-overview",  label: "Dashboard Mitra",   icon: LayoutDashboard },
+      { key: "mitra-tracking",  label: "Tracking Proposal", icon: Clock },
+      { key: "mitra-akun",      label: "Manajemen Akun",    icon: UserCog, adminOnly: true },
+    ],
+  },
+
+  {
     key: "grp-perencanaan", label: "Perencanaan & Anggaran", icon: FileSpreadsheet, roles: ["humas"],
     children: [
       { key: "rab", label: "RAB", icon: FileSpreadsheet },

@@ -45,9 +45,11 @@ import AsmanDashboard from "./sakti/asman/pages/AsmanDashboard";
 import MADMDashboard from "./sakti/madm/pages/MADMDashboard";
 import PaketKasPage from "./sakti/pages/PaketKas";
 import ManajemenAksesPage from "./sakti/pages/ManajemenAkses";
-import PengajuanGandengPage from "./gandeng/pages/PengajuanGandeng";
 import GandengLogin from "./gandeng/pages/GandengLogin";
 import GandengApp from "./gandeng/pages/GandengApp";
+import GandengDashboardPage from "./gandeng/pages/GandengDashboard";
+import GandengTrackingPage from "./gandeng/pages/GandengTracking";
+import GandengAccountManagementPage from "./gandeng/pages/GandengAccountManagement";
 import DokumentasiPage from "./sakti/pages/Dokumentasi";
 import DaftarHadirPage from "./sakti/pages/DaftarHadir";
 import EvidenPage from "./sakti/pages/Eviden";
@@ -323,6 +325,17 @@ export default function App() {
           notify={notify}
         />
       ),
+      "mitra-overview": (
+        <GandengDashboardPage
+          mitraList={mitraList}
+          user={{ ...user, isAdmin: true }}
+          setMitraList={setMitraList}
+          notify={notify}
+          onGoto={(page) => { if (page === "tracking") setActive("mitra-tracking"); }}
+        />
+      ),
+      "mitra-tracking": <GandengTrackingPage mitraList={mitraList} />,
+      "mitra-akun": <GandengAccountManagementPage notify={notify} />,
       rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} />,
       tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
       "nonpo-overview": (
@@ -593,7 +606,7 @@ export default function App() {
       user,
       rab, tor, bast, pakta, bapp, lmp1List, lmp2List, laporan, vendors, history,
       proposals, konten, evaluasi, rabIdOptions, packages, users, rka,
-      rabByKategori, rabIdOptionsByKategori,
+      rabByKategori, rabIdOptionsByKategori, mitraList,
     ]
   );
 
