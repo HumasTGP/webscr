@@ -522,12 +522,12 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
           </div>
 
           {/* 2. Harga Satuan Usulan Vendor (+15% auto) */}
-          <SectionLabel dashed>2. Harga Satuan Usulan Vendor (+15% otomatis)</SectionLabel>
+          <SectionLabel dashed>2. Harga Satuan Usulan Vendor (otomatis +15%)</SectionLabel>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px", marginBottom: 18, background: "#F0F9FF", borderRadius: 8, padding: "14px 14px 6px" }} className="responsive-form-grid">
             <Field label="Qty (otomatis dari usulan)">
               <input value={itemDraft.qty || ""} readOnly disabled style={{ ...inputStyle, background: "#E8F4FB", color: T.muted, cursor: "not-allowed" }} />
             </Field>
-            <Field label="Harga Satuan Vendor (×1.15)">
+            <Field label="Harga Satuan Vendor (+15%)">
               <input
                 value={itemDraft.hargaSatuan ? rupiah(Number(itemDraft.hargaSatuan) * 1.15) : ""}
                 readOnly disabled
@@ -555,12 +555,12 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
           </div>
 
           {/* 4. Harga Satuan Evaluasi Vendor (+15% auto) */}
-          <SectionLabel dashed>4. Harga Satuan Evaluasi Vendor (+15% otomatis)</SectionLabel>
+          <SectionLabel dashed>4. Harga Satuan Evaluasi Vendor (otomatis +15%)</SectionLabel>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px", marginBottom: 16, background: "#F0F9FF", borderRadius: 8, padding: "14px 14px 6px" }} className="responsive-form-grid">
             <Field label="Qty (otomatis dari evaluasi)">
               <input value={itemDraft.qtyEvaluasi || ""} readOnly disabled style={{ ...inputStyle, background: "#E8F4FB", color: T.muted, cursor: "not-allowed" }} />
             </Field>
-            <Field label="Harga Satuan Evaluasi Vendor (×1.15)">
+            <Field label="Harga Satuan Evaluasi Vendor (+15%)">
               <input
                 value={itemDraft.hargaSatuanEvaluasi ? rupiah(Number(itemDraft.hargaSatuanEvaluasi) * 1.15) : ""}
                 readOnly disabled
