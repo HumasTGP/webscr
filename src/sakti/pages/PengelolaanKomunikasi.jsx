@@ -68,29 +68,6 @@ function KpiCard({ value, sub }) {
   );
 }
 
-function FilterSelect({ value, onChange, options, allLabel }) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{
-        padding: "7px 10px",
-        borderRadius: 999,
-        border: `1px solid ${T.border}`,
-        background: T.card,
-        color: T.text,
-        fontSize: 12.5,
-        fontFamily: font.body,
-      }}
-    >
-      <option value="Semua">{allLabel}</option>
-      {options.map((o) => (
-        <option key={o} value={o}>{o}</option>
-      ))}
-    </select>
-  );
-}
-
 function PublikasiBlock({ index, pub, onChange, onRemove, removable }) {
   const katOptions = useMemo(() => {
     const prefixes = kategoriMediaPrefixesFor(pub.mediaPemberitaan);
@@ -225,13 +202,6 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
   const [monthlyOpen, setMonthlyOpen] = useState(false);
   const [monthlyBulan, setMonthlyBulan] = useState("Semua");
 
-  const [filters, setFilters] = useState({
-    bulan: "Semua",
-    kategori: "Semua",
-    platform: "Semua",
-    status: "Semua",
-  });
-
   const bulanOptions = useMemo(() => {
     const set = new Set(list.map((r) => bulanFromTanggal(r.tanggal)).filter(Boolean));
     return Array.from(set);
@@ -289,25 +259,6 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
     notify("Data komunikasi berhasil dihapus.", "success", "Pengelolaan Komunikasi");
     setDeleteId(null);
   };
-
-  const filteredList = useMemo(
-    () =>
-      list.filter((r) => {
-        if (filters.status !== "Semua" && r.status !== filters.status) return false;
-        if (filters.kategori !== "Semua" && r.kategori !== filters.kategori) return false;
-        if (filters.bulan !== "Semua" && bulanFromTanggal(r.tanggal) !== filters.bulan) return false;
-        if (
-          filters.platform !== "Semua" &&
-          !(r.publikasi || []).some((p) => p.mediaPemberitaan === filters.platform)
-        ) return false;
-        return true;
-      }),
-    [list, filters]
-  );
-
-  const terbitCount = list.filter((r) => r.status === "Terbit").length;
-  const draftCount = list.filter((r) => r.status === "Draft").length;
-  const totalPublikasi = list.reduce((n, r) => n + (r.publikasi || []).length, 0);
 
   const monthlyStats = useMemo(() => {
     const rows = list.filter(
@@ -618,11 +569,6 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
         right={<Button icon={Plus} onClick={startAdd}>Tambah Data</Button>}
       />
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-        <KpiCard value={`${terbitCount} terbit`} sub={`${draftCount} draft`} />
-        <KpiCard value={totalPublikasi} sub="total publikasi" />
-      </div>
-
       <Card style={{ marginBottom: 14 }}>
         <div
           style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
@@ -632,38 +578,41 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
           <ChevronDown size={16} color={T.muted} style={{ transform: monthlyOpen ? "rotate(180deg)" : "none" }} />
         </div>
         {monthlyOpen && (
-          <div style={{ marginTop: 12 }}>
-            <FilterSelect
+          <div style={{ marginTop: 14 }}>
+            <select
               value={monthlyBulan}
-              onChange={setMonthlyBulan}
-              options={bulanOptions}
-              allLabel="Semua bulan"
-            />
-            <div style={{ display: "flex", gap: 10, margin: "12px 0" }}>
-              <KpiCard value={monthlyStats.totalKonten} sub="total konten" />
-              <KpiCard value={monthlyStats.totalPub} sub="total publikasi" />
-              <KpiCard value={monthlyStats.totalScore} sub="total score" />
+              onChange={(e) => setMonthlyBulan(e.target.value)}
+              style={{ padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.card, color: T.text, fontSize: 12.5, fontFamily: font.body, marginBottom: 14 }}
+            >
+              <option value="Semua">Semua bulan</option>
+              {bulanOptions.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+              {[
+                { value: monthlyStats.totalKonten, label: "Konten", icon: "📝", color: T.blue, soft: T.blueSoft },
+                { value: monthlyStats.totalPub,    label: "Publikasi", icon: "📢", color: "#7C3AED", soft: "#EDE9FE" },
+                { value: monthlyStats.totalScore,  label: "Total Score", icon: "⭐", color: "#059669", soft: "#D1FAE5" },
+              ].map(({ value, label, icon, color, soft }) => (
+                <div key={label} style={{ background: soft, border: `1px solid ${color}20`, borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ fontSize: 22, lineHeight: 1 }}>{icon}</div>
+                  <div>
+                    <div style={{ fontFamily: font.display, fontSize: 26, color, lineHeight: 1, fontWeight: 700 }}>{value}</div>
+                    <div style={{ fontSize: 11.5, color, opacity: 0.75, marginTop: 3, fontWeight: 600 }}>{label}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div style={{ fontSize: 12.5, color: T.text, marginBottom: 4 }}>
-              <b>Platform terbanyak:</b> {monthlyStats.platformTerbanyak.join(", ") || "-"}
-            </div>
-            <div style={{ fontSize: 12.5, color: T.text }}>
-              <b>Kategori terbanyak:</b> {monthlyStats.kategoriTerbanyak.join(", ") || "-"}
+            <div style={{ display: "flex", gap: 24, marginTop: 12, fontSize: 12.5, color: T.text }}>
+              <span><b>Platform terbanyak:</b> {monthlyStats.platformTerbanyak.join(", ") || "-"}</span>
+              <span><b>Kategori terbanyak:</b> {monthlyStats.kategoriTerbanyak.join(", ") || "-"}</span>
             </div>
           </div>
         )}
       </Card>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-        <FilterSelect value={filters.bulan} onChange={(v) => setFilters({ ...filters, bulan: v })} options={bulanOptions} allLabel="Bulan: semua" />
-        <FilterSelect value={filters.kategori} onChange={(v) => setFilters({ ...filters, kategori: v })} options={OPT.komunikasiKategori} allLabel="Kategori: semua" />
-        <FilterSelect value={filters.platform} onChange={(v) => setFilters({ ...filters, platform: v })} options={OPT.komunikasiMediaPemberitaan} allLabel="Platform: semua" />
-        <FilterSelect value={filters.status} onChange={(v) => setFilters({ ...filters, status: v })} options={OPT.komunikasiStatus} allLabel="Status: semua" />
-      </div>
-
       <Card padded={false}>
-        {!filteredList.length ? (
-          <EmptyState label="Belum ada data yang cocok." />
+        {!list.length ? (
+          <EmptyState label="Belum ada data." />
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
@@ -684,7 +633,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
                 </tr>
               </thead>
               <tbody>
-                {filteredList.map((r, i) => (
+                {list.map((r, i) => (
                   <tr
                     key={r.id}
                     onClick={() => { setDetailId(r.id); setMode("detail"); }}

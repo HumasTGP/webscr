@@ -30,7 +30,11 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
   const selectRab = (r) => {
     setActiveRab(r);
     const existing = list.find((x) => x.submissionId === r.idNumber);
-    setForm(existing ? (existing.form || EMPTY) : { ...EMPTY });
+    if (existing) {
+      setForm(existing.form || EMPTY);
+    } else {
+      setForm({ ...EMPTY, pelaksanaPekerjaan: r.vendor || "" });
+    }
   };
 
   const save = () => {

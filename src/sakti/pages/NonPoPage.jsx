@@ -47,11 +47,18 @@ function StatusDot({ status, title, onClick }) {
   );
 }
 
-function docStatus(list, rabId, idKey = "id") {
+function docStatus(list, rabId, idKey = "id", isComplete = null) {
   const match = list.find((r) => (r[idKey] || r.submissionId || r.id) === rabId);
   if (!match) return "none";
+  if (isComplete && !isComplete(match)) return "draft";
   return "done";
 }
+
+const bastComplete = (r) => !!(r.tanggal && r.namaPihakKedua);
+const piComplete = (r) => !!(r.tanggalPi && r.namaPenerima);
+const lmp1Complete = (r) => !!(r.form?.tanggal && r.form?.vendor1);
+const lmp2Complete = (r) => !!(r.form?.nilaiNegosiasi && r.form?.tanggalNegosiasi);
+const verifComplete = (r) => !!(r.nomorVerifikasi && r.tanggal && r.jumlahBiaya);
 
 export const DEFAULT_COMBO = {
   bidang: ["Keamanan & Humas", "Umum", "SDM"],
@@ -198,11 +205,11 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
               )}
               {displayList.map((row, i) => {
                 const rabId = row.rabId;
-                const lmp1Status = docStatus(lmp1 || [], rabId, "submissionId");
-                const lmp2Status = docStatus(lmp2 || [], rabId, "submissionId");
-                const verifStatus = docStatus(formVerif || [], rabId, "submissionId");
-                const bastStatus = docStatus(bast || [], rabId, "id");
-                const piStatus = docStatus(pakta || [], rabId, "id");
+                const lmp1Status = docStatus(lmp1 || [], rabId, "submissionId", lmp1Complete);
+                const lmp2Status = docStatus(lmp2 || [], rabId, "submissionId", lmp2Complete);
+                const verifStatus = docStatus(formVerif || [], rabId, "submissionId", verifComplete);
+                const bastStatus = docStatus(bast || [], rabId, "id", bastComplete);
+                const piStatus = docStatus(pakta || [], rabId, "id", piComplete);
                 const bappStatus = docStatus(bapp || [], rabId, "id");
                 return (
                   <tr key={i} style={{ background: i % 2 === 1 ? T.rowAlt : undefined }}>

@@ -117,6 +117,36 @@ export function nextNumericId(items, idKey = "id") {
   return String(maxNum + 1).padStart(3, "0");
 }
 
+const _SATUAN_TB = [
+  "", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan",
+  "Sepuluh", "Sebelas", "Dua Belas", "Tiga Belas", "Empat Belas", "Lima Belas",
+  "Enam Belas", "Tujuh Belas", "Delapan Belas", "Sembilan Belas",
+];
+function _ratusan(n) {
+  if (n < 20) return _SATUAN_TB[n];
+  if (n < 100) {
+    const t = Math.floor(n / 10), r = n % 10;
+    return _SATUAN_TB[t] + " Puluh" + (r ? " " + _SATUAN_TB[r] : "");
+  }
+  const h = Math.floor(n / 100), r = n % 100;
+  const prefix = h === 1 ? "Seratus" : _SATUAN_TB[h] + " Ratus";
+  return r ? prefix + " " + _ratusan(r) : prefix;
+}
+export function terbilang(num) {
+  const n = Math.floor(Math.abs(Number(num) || 0));
+  if (n === 0) return "Nol Rupiah";
+  const parts = [[1e12,"Triliun"],[1e9,"Miliar"],[1e6,"Juta"],[1e3,"Ribu"],[1,""]];
+  let result = "", rem = n;
+  for (const [base, suffix] of parts) {
+    const q = Math.floor(rem / base);
+    rem %= base;
+    if (!q) continue;
+    if (base === 1000 && q === 1) result += "Seribu ";
+    else result += _ratusan(q) + (suffix ? " " + suffix : "") + " ";
+  }
+  return result.trim() + " Rupiah";
+}
+
 export function hitungSkorEvaluasi(kategoriList, nilaiMap) {
   const perKategori = kategoriList.map((k) => {
     const nilai = nilaiMap[k.key];

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Download, Plus, Save } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { OPT } from "../../lib/data";
-import { uid, rupiah } from "../../lib/utils";
+import { uid, rupiah, terbilang as toTerbilang } from "../../lib/utils";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
@@ -19,15 +19,18 @@ const EMPTY = {
   procost: "",
 };
 
-export default function FormVerifikasiPage({ rab, notify }) {
-  const [forms, setForms] = useState([]);
+export default function FormVerifikasiPage({ rab, notify, forms = [], setForms }) {
   const [activeRab, setActiveRab] = useState(null);
   const [formData, setFormData] = useState(EMPTY);
   const [procostOptions, setProcostOptions] = useState(OPT.procost);
   const [newProcost, setNewProcost] = useState("");
   const [addingProcost, setAddingProcost] = useState(false);
 
-  const set = (k, v) => setFormData((p) => ({ ...p, [k]: v }));
+  const set = (k, v) => setFormData((p) => {
+    const next = { ...p, [k]: v };
+    if (k === "jumlahBiaya") next.terbilang = v ? toTerbilang(v) : "";
+    return next;
+  });
 
   const inputStyle = {
     width: "100%", padding: "10px 12px", borderRadius: 8,
@@ -52,23 +55,29 @@ export default function FormVerifikasiPage({ rab, notify }) {
       });
       return;
     }
+    const year = new Date().getFullYear();
+    const jumlahBiaya = r.totalEvaluasi || "";
     setFormData({
       ...EMPTY,
+      nomorVerifikasi: `${r.idNumber}/VER/KAS/PRIOK/${year}`,
       kegiatan: r.judulKegiatan || "",
-      jumlahBiaya: r.totalEvaluasi || "",
+      jumlahBiaya,
+      terbilang: jumlahBiaya ? toTerbilang(jumlahBiaya) : "",
       kepada: "Manager Administrasi UBP Priok",
     });
   };
 
   const handleSave = () => {
-    if (!activeRab) return;
+    if (!activeRab || !setForms) return;
     const existing = forms.find((f) => f.rabId === activeRab.idNumber);
     if (existing) {
-      setForms((prev) => prev.map((f) => f.rabId === activeRab.idNumber ? { ...f, ...formData, updatedAt: new Date().toISOString() } : f));
+      setForms((prev) => prev.map((f) => f.rabId === activeRab.idNumber
+        ? { ...f, ...formData, submissionId: activeRab.idNumber, updatedAt: new Date().toISOString() } : f));
     } else {
-      setForms((prev) => [...prev, {
-        id: uid("VRF"), rabId: activeRab.idNumber, ...formData, createdAt: new Date().toISOString(),
-      }]);
+      setForms((prev) => [
+        { id: uid("VRF"), rabId: activeRab.idNumber, submissionId: activeRab.idNumber, ...formData, createdAt: new Date().toISOString() },
+        ...prev,
+      ]);
     }
     notify?.("Form verifikasi disimpan.", "success", "Form Verifikasi disimpan");
   };

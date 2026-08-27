@@ -46,9 +46,14 @@ export default function DatePicker({ value, onChange, placeholder = "Pilih tangg
     const r = fieldRef.current?.getBoundingClientRect();
     if (!r) return;
     const w = 250;
+    const popH = 220; // estimated popup height
     let left = r.left;
     if (left + w > window.innerWidth - 8) left = Math.max(8, window.innerWidth - w - 8);
-    setPos({ top: r.bottom + 6, left, width: w });
+    const spaceBelow = window.innerHeight - r.bottom;
+    const top = spaceBelow >= popH + 10
+      ? r.bottom + 6
+      : Math.max(8, r.top - popH - 6);
+    setPos({ top, left, width: w });
   };
 
   useLayoutEffect(() => { if (open) recalcPos(); /* eslint-disable-next-line */ }, [open]);

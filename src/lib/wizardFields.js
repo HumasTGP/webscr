@@ -50,7 +50,6 @@ export const proposalFields = () => () => [
     section: "Lampiran",
   },
   { key: "dokumentasiKegiatan", label: "Dokumentasi Kegiatan", type: "file-upload" },
-  { key: "laporanKegiatan", label: "Laporan Kegiatan", type: "file-upload" },
 ];
 
 export const proposalAdminFields = () => [
