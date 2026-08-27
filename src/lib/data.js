@@ -288,19 +288,19 @@ export const MENU_TREE = [
   { key: "inbox-pembayaran", label: "Inbox Pembayaran",   icon: Wallet,     roles: ["asman", "madm"] },
 
   {
-    key: "grp-proposal", label: "Proposal & Publikasi", icon: Handshake, roles: ["humas"],
+    key: "grp-proposal", label: "Publikasi Konten", icon: Megaphone, roles: ["humas"],
     children: [
-      { key: "proposal-rekap",    label: "Rekap Pengajuan Proposal", icon: Handshake },
-      { key: "proposal-evaluasi", label: "Form Evaluasi",            icon: FileText },
-      { key: "konten",            label: "Pengelolaan Komunikasi",   icon: Megaphone },
+      { key: "konten", label: "Pengelolaan Komunikasi", icon: Megaphone },
     ],
   },
 
   {
     key: "grp-mitra", label: "Pengajuan Mitra", icon: Building2, roles: ["humas"],
     children: [
-      { key: "mitra-overview",  label: "Dashboard Mitra",   icon: LayoutDashboard },
-      { key: "mitra-tracking",  label: "Tracking Proposal", icon: Clock },
+      { key: "proposal-rekap",    label: "Rekap Pengajuan Proposal", icon: Handshake },
+      { key: "proposal-evaluasi", label: "Form Evaluasi",            icon: FileText },
+      { key: "mitra-overview",    label: "Dashboard Mitra",          icon: LayoutDashboard },
+      { key: "mitra-tracking",    label: "Tracking Proposal",        icon: Clock },
     ],
   },
 
