@@ -276,7 +276,8 @@ export const HELP_CONTACT = {
 // Setiap node TANPA `children` = halaman yang bisa diklik (leaf).
 // Setiap node DENGAN `children` = grup yang bisa dibuka/ditutup (gak punya halaman sendiri).
 export const MENU_TREE = [
-  { key: "user-mgmt", label: "Manajemen Akses", icon: UserCog, roles: ["humas"], adminOnly: true },
+  { key: "user-mgmt",      label: "Manajemen Akses",  icon: UserCog,      roles: ["humas"], adminOnly: true },
+  { key: "log-aktivitas", label: "Log Aktivitas",    icon: ClipboardList, roles: ["humas"], adminOnly: true },
 
   { key: "dashboard",       label: "Dashboard", icon: LayoutDashboard, roles: ["humas"] },
   { key: "asman-dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["asman"] },
@@ -300,7 +301,6 @@ export const MENU_TREE = [
     children: [
       { key: "mitra-overview",  label: "Dashboard Mitra",   icon: LayoutDashboard },
       { key: "mitra-tracking",  label: "Tracking Proposal", icon: Clock },
-      { key: "mitra-akun",      label: "Manajemen Akun",    icon: UserCog, adminOnly: true },
     ],
   },
 

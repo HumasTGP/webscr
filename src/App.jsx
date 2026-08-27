@@ -45,11 +45,11 @@ import AsmanDashboard from "./sakti/asman/pages/AsmanDashboard";
 import MADMDashboard from "./sakti/madm/pages/MADMDashboard";
 import PaketKasPage from "./sakti/pages/PaketKas";
 import ManajemenAksesPage from "./sakti/pages/ManajemenAkses";
+import LogAktivitasPage from "./sakti/pages/LogAktivitas";
 import GandengLogin from "./gandeng/pages/GandengLogin";
 import GandengApp from "./gandeng/pages/GandengApp";
 import GandengDashboardPage from "./gandeng/pages/GandengDashboard";
 import GandengTrackingPage from "./gandeng/pages/GandengTracking";
-import GandengAccountManagementPage from "./gandeng/pages/GandengAccountManagement";
 import DokumentasiPage from "./sakti/pages/Dokumentasi";
 import DaftarHadirPage from "./sakti/pages/DaftarHadir";
 import EvidenPage from "./sakti/pages/Eviden";
@@ -230,6 +230,9 @@ export default function App() {
           minute: "2-digit",
           second: "2-digit",
         }),
+        timestamp: now.toISOString(),
+        username: user?.username || "-",
+        role: user?.role || "-",
       },
       ...prev,
     ]);
@@ -335,7 +338,6 @@ export default function App() {
         />
       ),
       "mitra-tracking": <GandengTrackingPage mitraList={mitraList} />,
-      "mitra-akun": <GandengAccountManagementPage notify={notify} />,
       rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} />,
       tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
       "nonpo-overview": (
@@ -512,6 +514,7 @@ export default function App() {
           notify={notify}
         />
       ),
+      "log-aktivitas": <LogAktivitasPage history={history} />,
       ...(() => {
         const kategoriList = [
           { suffix: "nonpo", kategori: "NON PO" },
