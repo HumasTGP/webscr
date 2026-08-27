@@ -29,21 +29,38 @@ function emptyItemDraft() {
   };
 }
 
-// PPN dihitung dari base (qty x faktor satuan x harga satuan), baru
-// ditambahkan ke base itu buat dapet total baris. "11%" -> base * 1.11.
+// PPN dihitung dari base (qty x faktor satuan x harga satuan).
+// Vendor = harga satuan × 1.15 (auto). "11%" -> base * 1.11.
 function itemTotals(row, satuanList) {
   const faktor = satuanList.find((s) => s.nama === row.satuan)?.faktor || 1;
-  const basePengajuan = (Number(row.qty) || 0) * faktor * (Number(row.hargaSatuan) || 0);
-  const baseEvaluasi = (Number(row.qtyEvaluasi) || 0) * faktor * (Number(row.hargaSatuanEvaluasi) || 0);
+  const qty = Number(row.qty) || 0;
+  const qtyEvaluasi = Number(row.qtyEvaluasi) || 0;
+  const hargaSatuan = Number(row.hargaSatuan) || 0;
+  const hargaSatuanEvaluasi = Number(row.hargaSatuanEvaluasi) || 0;
+  const hargaSatuanVendor = hargaSatuan * 1.15;
+  const hargaSatuanEvaluasiVendor = hargaSatuanEvaluasi * 1.15;
+
+  const basePengajuan = qty * faktor * hargaSatuan;
+  const baseVendor = qty * faktor * hargaSatuanVendor;
+  const baseEvaluasi = qtyEvaluasi * faktor * hargaSatuanEvaluasi;
+  const baseEvaluasiVendor = qtyEvaluasi * faktor * hargaSatuanEvaluasiVendor;
+
   const ppnRatePengajuan = row.ppn === "11%" ? 0.11 : 0;
   const ppnRateEvaluasi = row.ppnEvaluasi === "11%" ? 0.11 : 0;
-  const totalPengajuan = basePengajuan * (1 + ppnRatePengajuan);
-  const totalEvaluasi = baseEvaluasi * (1 + ppnRateEvaluasi);
+
+  const ppnNilaiPengajuan = basePengajuan * ppnRatePengajuan;
+  const ppnNilaiVendor = baseVendor * ppnRatePengajuan;
+  const ppnNilaiEvaluasi = baseEvaluasi * ppnRateEvaluasi;
+  const ppnNilaiEvaluasiVendor = baseEvaluasiVendor * ppnRateEvaluasi;
+
   return {
-    basePengajuan, baseEvaluasi,
-    ppnNilaiPengajuan: basePengajuan * ppnRatePengajuan,
-    ppnNilaiEvaluasi: baseEvaluasi * ppnRateEvaluasi,
-    totalPengajuan, totalEvaluasi,
+    basePengajuan, baseVendor, baseEvaluasi, baseEvaluasiVendor,
+    hargaSatuanVendor, hargaSatuanEvaluasiVendor,
+    ppnNilaiPengajuan, ppnNilaiVendor, ppnNilaiEvaluasi, ppnNilaiEvaluasiVendor,
+    totalPengajuan: basePengajuan + ppnNilaiPengajuan,
+    totalVendor: baseVendor + ppnNilaiVendor,
+    totalEvaluasi: baseEvaluasi + ppnNilaiEvaluasi,
+    totalEvaluasiVendor: baseEvaluasiVendor + ppnNilaiEvaluasiVendor,
   };
 }
 
@@ -90,7 +107,9 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   const [query, setQuery] = useState("");
 
   const totalPengajuan = items.reduce((s, r) => s + (r.totalPengajuan || 0), 0);
+  const totalVendor = items.reduce((s, r) => s + (r.totalVendor || 0), 0);
   const totalEvaluasi = items.reduce((s, r) => s + (r.totalEvaluasi || 0), 0);
+  const totalEvaluasiVendor = items.reduce((s, r) => s + (r.totalEvaluasiVendor || 0), 0);
 
   // ---------- helpers ----------
   const namaAsmanFor = (idNumber) => {
@@ -180,7 +199,9 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
       kategori: header.kategori || "NON PO",
       items,
       totalPengajuan,
+      totalVendor,
       totalEvaluasi,
+      totalEvaluasiVendor,
       tanggalInput: header.tanggalInput || new Date().toISOString(),
       pelaksanaanSelesai: header.pelaksanaanSelesai ?? false,
     };
@@ -208,10 +229,10 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   // dipisah antara kolom Usulan (pengajuan) dan Evaluasi.
   const buildDocxData = (record) => {
     const items = record.items || [];
-    const jumlahPengajuan = items.reduce((s, it) => s + (it.basePengajuan || 0), 0);
-    const ppnPengajuan = items.reduce((s, it) => s + (it.ppnNilaiPengajuan || 0), 0);
-    const jumlahEvaluasiTotal = items.reduce((s, it) => s + (it.baseEvaluasi || 0), 0);
-    const ppnEvaluasi = items.reduce((s, it) => s + (it.ppnNilaiEvaluasi || 0), 0);
+    const jumlahVendorTotal = items.reduce((s, it) => s + (it.baseVendor || 0), 0);
+    const ppnVendorTotal = items.reduce((s, it) => s + (it.ppnNilaiVendor || 0), 0);
+    const jumlahEvaluasiVendorTotal = items.reduce((s, it) => s + (it.baseEvaluasiVendor || 0), 0);
+    const ppnEvaluasiVendorTotal = items.reduce((s, it) => s + (it.ppnNilaiEvaluasiVendor || 0), 0);
 
     return {
       idNumber: record.idNumber || "",
@@ -219,21 +240,25 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
       judulKegiatan: record.judulKegiatan || "",
       namaPembuat: record.idNumber === header.idNumber && mode === "wizard" ? namaPembuat : (record.namaPembuat || namaPembuat),
       namaAsman: namaAsmanFor(record.idNumber) || "-",
-      jumlahPengajuan: rupiah(jumlahPengajuan),
-      ppnPengajuan: rupiah(ppnPengajuan),
-      totalPengajuan: rupiah(record.totalPengajuan || 0),
-      jumlahEvaluasiTotal: rupiah(jumlahEvaluasiTotal),
-      ppnEvaluasi: rupiah(ppnEvaluasi),
-      totalEvaluasi: rupiah(record.totalEvaluasi || 0),
+      jumlahVendor: rupiah(jumlahVendorTotal),
+      ppnVendor: rupiah(ppnVendorTotal),
+      totalVendor: rupiah(record.totalVendor || 0),
+      jumlahEvaluasiVendor: rupiah(jumlahEvaluasiVendorTotal),
+      ppnEvaluasiVendor: rupiah(ppnEvaluasiVendorTotal),
+      totalEvaluasiVendor: rupiah(record.totalEvaluasiVendor || 0),
       items: items.map((it) => ({
         uraian: it.uraian || "",
         satuan: it.satuan || "",
         qty: String(it.qty || ""),
-        hargaSatuan: rupiah(it.hargaSatuan || 0),
-        jumlah: rupiah(it.basePengajuan || 0),
+        hargaSatuanVendor: rupiah(it.hargaSatuanVendor || 0),
+        jumlahVendor: rupiah(it.baseVendor || 0),
+        ppnVendor: rupiah(it.ppnNilaiVendor || 0),
+        totalVendor: rupiah(it.totalVendor || 0),
         qtyEvaluasi: String(it.qtyEvaluasi || ""),
-        hargaSatuanEvaluasi: rupiah(it.hargaSatuanEvaluasi || 0),
-        jumlahEvaluasi: rupiah(it.baseEvaluasi || 0),
+        hargaSatuanEvaluasiVendor: rupiah(it.hargaSatuanEvaluasiVendor || 0),
+        jumlahEvaluasiVendor: rupiah(it.baseEvaluasiVendor || 0),
+        ppnEvaluasiVendor: rupiah(it.ppnNilaiEvaluasiVendor || 0),
+        totalEvaluasiVendor: rupiah(it.totalEvaluasiVendor || 0),
       })),
     };
   };
@@ -249,17 +274,18 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   const downloadPdf = async (record) => {
     try {
       const data = buildDocxData(record);
+      const its = record.items || [];
       await generateRabPdf({
         idNumber: data.idNumber,
         tanggalRab: data.tanggalRab,
         judulKegiatan: data.judulKegiatan,
-        items: record.items || [],
-        jumlahPengajuan: (record.items || []).reduce((s, it) => s + (it.basePengajuan || 0), 0),
-        ppnPengajuan: (record.items || []).reduce((s, it) => s + (it.ppnNilaiPengajuan || 0), 0),
-        totalPengajuan: record.totalPengajuan || 0,
-        jumlahEvaluasi: (record.items || []).reduce((s, it) => s + (it.baseEvaluasi || 0), 0),
-        ppnEvaluasi: (record.items || []).reduce((s, it) => s + (it.ppnNilaiEvaluasi || 0), 0),
-        totalEvaluasi: record.totalEvaluasi || 0,
+        items: its,
+        jumlahVendor: its.reduce((s, it) => s + (it.baseVendor || 0), 0),
+        ppnVendor: its.reduce((s, it) => s + (it.ppnNilaiVendor || 0), 0),
+        totalVendor: record.totalVendor || 0,
+        jumlahEvaluasiVendor: its.reduce((s, it) => s + (it.baseEvaluasiVendor || 0), 0),
+        ppnEvaluasiVendor: its.reduce((s, it) => s + (it.ppnNilaiEvaluasiVendor || 0), 0),
+        totalEvaluasiVendor: record.totalEvaluasiVendor || 0,
         namaAsman: data.namaAsman,
         namaPembuat: data.namaPembuat,
         filename: `RAB-${record.idNumber || "record"}`,
@@ -307,7 +333,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
               <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{previewRecord.idNumber}</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: T.heading, margin: "3px 0 10px" }}>{previewRecord.judulKegiatan}</div>
               <div style={{ fontSize: 12.5, color: T.muted, marginBottom: 12 }}>
-                Tanggal RAB: {formatTanggal(previewRecord.tanggalRab)} · Total Evaluasi: {rupiah(previewRecord.totalEvaluasi || 0)}
+                Tanggal RAB: {formatTanggal(previewRecord.tanggalRab)} · Total Evaluasi Vendor: {rupiah(previewRecord.totalEvaluasiVendor || previewRecord.totalEvaluasi || 0)}
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <Button icon={Download} onClick={() => downloadDocx(previewRecord)}>Unduh Word (.docx)</Button>
@@ -332,7 +358,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr>
-                  {["ID Number", "Judul Kegiatan", "Kategori", "Bidang", "Vendor", "Total Evaluasi", "Aksi"].map((h) => (
+                  {["ID Number", "Judul Kegiatan", "Kategori", "Bidang", "Vendor", "Total Eval. Vendor", "Aksi"].map((h) => (
                     <th key={h} style={th}>{h}</th>
                   ))}
                 </tr>
@@ -349,7 +375,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
                     <td style={td}>{r.kategori || "-"}</td>
                     <td style={td}>{r.bidang || "-"}</td>
                     <td style={td}>{r.vendor || "-"}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalEvaluasi || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalEvaluasiVendor || r.totalEvaluasi || 0)}</td>
                     <td style={{ ...td, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
                       <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
                         <IconBtn title="Edit" onClick={() => startEdit(r)}><Pencil size={13} /></IconBtn>
@@ -382,11 +408,11 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
               { key: "uraian", label: "Uraian" },
               { key: "qty", label: "Qty" },
               { key: "ppn", label: "PPN" },
-              { key: "totalEvaluasi", label: "Total Evaluasi", render: (r) => rupiah(r.totalEvaluasi || 0) },
+              { key: "totalEvaluasiVendor", label: "Total Eval. Vendor", render: (r) => rupiah(r.totalEvaluasiVendor || r.totalEvaluasi || 0) },
             ],
             data: reviewRow.items || [],
           } : null}
-          totals={reviewRow ? [{ label: "Total realisasi evaluasi", value: rupiah(reviewRow.totalEvaluasi || 0) }] : []}
+          totals={reviewRow ? [{ label: "Total Evaluasi Vendor", value: rupiah(reviewRow.totalEvaluasiVendor || reviewRow.totalEvaluasi || 0) }] : []}
           onEdit={() => startEdit(reviewRow)}
           editLabel="Edit RAB ini"
         />
@@ -473,7 +499,8 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
           <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 4 }}>Input uraian RAB (per item)</h3>
           <p style={{ color: T.muted, fontSize: 12.5, marginBottom: 18 }}>Isi satu baris untuk tiap barang/jasa, lalu tekan &quot;Tambah baris&quot;.</p>
 
-          <SectionLabel>Harga pengajuan</SectionLabel>
+          {/* 1. Harga Satuan Usulan */}
+          <SectionLabel>1. Harga Satuan Usulan</SectionLabel>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px", marginBottom: 18 }} className="responsive-form-grid">
             <Field label="Uraian" full>
               <input value={itemDraft.uraian} onChange={(e) => setItemDraft({ ...itemDraft, uraian: e.target.value })} placeholder="Nama barang/jasa" style={inputStyle} />
@@ -488,26 +515,84 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
                 inputStyle={inputStyle}
               />
             </Field>
-            <Field label="Qty"><input type="number" value={itemDraft.qty} onChange={(e) => setItemDraft({ ...itemDraft, qty: e.target.value })} style={inputStyle} /></Field>
-            <Field label="Harga satuan"><input type="number" value={itemDraft.hargaSatuan} onChange={(e) => setItemDraft({ ...itemDraft, hargaSatuan: e.target.value })} style={inputStyle} /></Field>
-            <Field label="PPN" hint="(baru)">
+            <Field label="Qty">
+              <input type="number" value={itemDraft.qty} onChange={(e) => setItemDraft({ ...itemDraft, qty: e.target.value })} style={inputStyle} />
+            </Field>
+            <Field label="Harga Satuan Usulan">
+              <input type="number" value={itemDraft.hargaSatuan} onChange={(e) => setItemDraft({ ...itemDraft, hargaSatuan: e.target.value })} style={inputStyle} />
+            </Field>
+            <Field label="PPN">
               <select value={itemDraft.ppn} onChange={(e) => setItemDraft({ ...itemDraft, ppn: e.target.value })} style={inputStyle}>
                 {PPN_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
             </Field>
           </div>
 
-          <SectionLabel dashed>Harga evaluasi</SectionLabel>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px", marginBottom: 16 }} className="responsive-form-grid">
-            <Field label="Qty evaluasi"><input type="number" value={itemDraft.qtyEvaluasi} onChange={(e) => setItemDraft({ ...itemDraft, qtyEvaluasi: e.target.value })} style={inputStyle} /></Field>
-            <Field label="Harga satuan evaluasi"><input type="number" value={itemDraft.hargaSatuanEvaluasi} onChange={(e) => setItemDraft({ ...itemDraft, hargaSatuanEvaluasi: e.target.value })} style={inputStyle} /></Field>
-            <Field label="PPN evaluasi" hint="(baru)">
+          {/* 2. Harga Satuan Usulan Vendor (+15% auto) */}
+          <SectionLabel dashed>2. Harga Satuan Usulan Vendor (+15% otomatis)</SectionLabel>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px", marginBottom: 18, background: "#F0F9FF", borderRadius: 8, padding: "14px 14px 6px" }} className="responsive-form-grid">
+            <Field label="Qty (otomatis dari usulan)">
+              <input value={itemDraft.qty || ""} readOnly disabled style={{ ...inputStyle, background: "#E8F4FB", color: T.muted, cursor: "not-allowed" }} />
+            </Field>
+            <Field label="Harga Satuan Vendor (×1.15)">
+              <input
+                value={itemDraft.hargaSatuan ? rupiah(Number(itemDraft.hargaSatuan) * 1.15) : ""}
+                readOnly disabled
+                style={{ ...inputStyle, background: "#E8F4FB", color: T.blue, fontWeight: 700, cursor: "not-allowed" }}
+              />
+            </Field>
+            <Field label="Jumlah Vendor">
+              <input
+                value={itemDraft.hargaSatuan && itemDraft.qty ? rupiah((Number(itemDraft.qty) || 0) * (Number(itemDraft.hargaSatuan) * 1.15)) : ""}
+                readOnly disabled
+                style={{ ...inputStyle, background: "#E8F4FB", color: T.blue, fontWeight: 700, cursor: "not-allowed" }}
+              />
+            </Field>
+          </div>
+
+          {/* 3. Harga Satuan Evaluasi */}
+          <SectionLabel dashed>3. Harga Satuan Evaluasi</SectionLabel>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px", marginBottom: 18 }} className="responsive-form-grid">
+            <Field label="Qty Evaluasi">
+              <input type="number" value={itemDraft.qtyEvaluasi} onChange={(e) => setItemDraft({ ...itemDraft, qtyEvaluasi: e.target.value })} style={inputStyle} />
+            </Field>
+            <Field label="Harga Satuan Evaluasi">
+              <input type="number" value={itemDraft.hargaSatuanEvaluasi} onChange={(e) => setItemDraft({ ...itemDraft, hargaSatuanEvaluasi: e.target.value })} style={inputStyle} />
+            </Field>
+            <Field label="PPN Evaluasi">
               <select value={itemDraft.ppnEvaluasi} onChange={(e) => setItemDraft({ ...itemDraft, ppnEvaluasi: e.target.value })} style={inputStyle}>
                 {PPN_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
             </Field>
-            <Field label="Keterangan" hint="(opsional)"><input value={itemDraft.keterangan} onChange={(e) => setItemDraft({ ...itemDraft, keterangan: e.target.value })} placeholder="Opsional" style={inputStyle} /></Field>
-            <Field label="Keterangan Pemakaian" hint="(baru, opsional)" full>
+          </div>
+
+          {/* 4. Harga Satuan Evaluasi Vendor (+15% auto) */}
+          <SectionLabel dashed>4. Harga Satuan Evaluasi Vendor (+15% otomatis)</SectionLabel>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px", marginBottom: 16, background: "#F0F9FF", borderRadius: 8, padding: "14px 14px 6px" }} className="responsive-form-grid">
+            <Field label="Qty (otomatis dari evaluasi)">
+              <input value={itemDraft.qtyEvaluasi || ""} readOnly disabled style={{ ...inputStyle, background: "#E8F4FB", color: T.muted, cursor: "not-allowed" }} />
+            </Field>
+            <Field label="Harga Satuan Evaluasi Vendor (×1.15)">
+              <input
+                value={itemDraft.hargaSatuanEvaluasi ? rupiah(Number(itemDraft.hargaSatuanEvaluasi) * 1.15) : ""}
+                readOnly disabled
+                style={{ ...inputStyle, background: "#E8F4FB", color: T.blue, fontWeight: 700, cursor: "not-allowed" }}
+              />
+            </Field>
+            <Field label="Jumlah Evaluasi Vendor">
+              <input
+                value={itemDraft.hargaSatuanEvaluasi && itemDraft.qtyEvaluasi ? rupiah((Number(itemDraft.qtyEvaluasi) || 0) * (Number(itemDraft.hargaSatuanEvaluasi) * 1.15)) : ""}
+                readOnly disabled
+                style={{ ...inputStyle, background: "#E8F4FB", color: T.blue, fontWeight: 700, cursor: "not-allowed" }}
+              />
+            </Field>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 20px", marginBottom: 4 }} className="responsive-form-grid">
+            <Field label="Keterangan" hint="(opsional)">
+              <input value={itemDraft.keterangan} onChange={(e) => setItemDraft({ ...itemDraft, keterangan: e.target.value })} placeholder="Opsional" style={inputStyle} />
+            </Field>
+            <Field label="Keterangan Pemakaian" hint="(opsional)">
               <input value={itemDraft.keteranganPemakaian} onChange={(e) => setItemDraft({ ...itemDraft, keteranganPemakaian: e.target.value })} placeholder="cth. dipakai untuk perbaikan RT 03" style={inputStyle} />
             </Field>
           </div>
@@ -523,24 +608,27 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
               <thead>
                 <tr>
-                  {["Uraian", "Satuan", "Qty", "Subtotal", "PPN (nominal)", "Total pengajuan", "Total evaluasi", "Ket. Pemakaian", ""].map((h) => (
+                  {["Uraian", "Satuan", "Qty", "Harga Sat. Vendor", "Jumlah Vendor", "PPN Vendor", "Total Vendor", "Harga Sat. Eval. Vendor", "Jumlah Eval. Vendor", "PPN Eval. Vendor", "Total Eval. Vendor", ""].map((h) => (
                     <th key={h} style={th}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {items.length === 0 ? (
-                  <tr><td colSpan={9} style={{ textAlign: "center", color: T.muted, padding: "20px 12px" }}>Belum ada baris. Isi form di atas lalu klik &quot;+ Tambah baris&quot;.</td></tr>
+                  <tr><td colSpan={12} style={{ textAlign: "center", color: T.muted, padding: "20px 12px" }}>Belum ada baris. Isi form di atas lalu klik &quot;+ Tambah baris&quot;.</td></tr>
                 ) : items.map((r, i) => (
                   <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
                     <td style={td}>{r.uraian}</td>
                     <td style={td}>{r.satuan}</td>
                     <td style={{ ...td, textAlign: "right" }}>{r.qty}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.basePengajuan || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{r.ppn === "11%" ? rupiah(r.ppnNilaiPengajuan || 0) : "-"}</td>
-                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalPengajuan || 0)}</td>
-                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalEvaluasi || 0)}</td>
-                    <td style={td}>{r.keteranganPemakaian || "-"}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.hargaSatuanVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.baseVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{r.ppn === "11%" ? rupiah(r.ppnNilaiVendor || 0) : "-"}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700, color: T.blue }}>{rupiah(r.totalVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.hargaSatuanEvaluasiVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.baseEvaluasiVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{r.ppnEvaluasi === "11%" ? rupiah(r.ppnNilaiEvaluasiVendor || 0) : "-"}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700, color: T.blue }}>{rupiah(r.totalEvaluasiVendor || 0)}</td>
                     <td style={{ ...td, textAlign: "center" }}>
                       <div style={{ display: "flex", gap: 5, justifyContent: "center" }}>
                         <IconBtn title="Edit" onClick={() => editItemRow(r)}><Pencil size={12} /></IconBtn>
@@ -577,27 +665,31 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden", overflowX: "auto", marginBottom: 16 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
               <thead>
-                <tr>{["Uraian", "Satuan", "Qty", "Subtotal", "PPN (nominal)", "Total pengajuan", "Total evaluasi", "Ket. Pemakaian"].map((h) => <th key={h} style={th}>{h}</th>)}</tr>
+                <tr>{["Uraian", "Satuan", "Qty", "Harga Sat. Vendor", "Jumlah Vendor", "PPN Vendor", "Total Vendor", "Harga Sat. Eval. Vendor", "Jumlah Eval. Vendor", "PPN Eval. Vendor", "Total Eval. Vendor"].map((h) => <th key={h} style={th}>{h}</th>)}</tr>
               </thead>
               <tbody>
                 {items.map((r, i) => (
                   <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
-                    <td style={td}>{r.uraian}</td><td style={td}>{r.satuan}</td>
+                    <td style={td}>{r.uraian}</td>
+                    <td style={td}>{r.satuan}</td>
                     <td style={{ ...td, textAlign: "right" }}>{r.qty}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.basePengajuan || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{r.ppn === "11%" ? rupiah(r.ppnNilaiPengajuan || 0) : "-"}</td>
-                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalPengajuan || 0)}</td>
-                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalEvaluasi || 0)}</td>
-                    <td style={td}>{r.keteranganPemakaian || "-"}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.hargaSatuanVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.baseVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{r.ppn === "11%" ? rupiah(r.ppnNilaiVendor || 0) : "-"}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.hargaSatuanEvaluasiVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.baseEvaluasiVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{r.ppnEvaluasi === "11%" ? rupiah(r.ppnNilaiEvaluasiVendor || 0) : "-"}</td>
+                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalEvaluasiVendor || 0)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div style={{ display: "flex", gap: 28, flexWrap: "wrap", background: T.blueSoft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px 18px", marginBottom: 6 }}>
-            <div><div style={{ fontSize: 10.5, textTransform: "uppercase", color: T.navy, fontWeight: 700 }}>Total pengajuan</div><div style={{ fontSize: 19, fontWeight: 700, color: T.navy }}>{rupiah(totalPengajuan)}</div></div>
-            <div><div style={{ fontSize: 10.5, textTransform: "uppercase", color: T.navy, fontWeight: 700 }}>Total realisasi evaluasi</div><div style={{ fontSize: 19, fontWeight: 700, color: T.blue }}>{rupiah(totalEvaluasi)}</div></div>
+          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", background: T.blueSoft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px 18px", marginBottom: 6 }}>
+            <div><div style={{ fontSize: 10.5, textTransform: "uppercase", color: T.navy, fontWeight: 700 }}>Total Usulan Vendor</div><div style={{ fontSize: 18, fontWeight: 700, color: T.navy }}>{rupiah(totalVendor)}</div></div>
+            <div><div style={{ fontSize: 10.5, textTransform: "uppercase", color: T.navy, fontWeight: 700 }}>Total Evaluasi Vendor</div><div style={{ fontSize: 18, fontWeight: 700, color: T.blue }}>{rupiah(totalEvaluasiVendor)}</div></div>
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
@@ -622,7 +714,8 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
               <DocRow label="ID number" value={header.idNumber} />
               <DocRow label="Judul program" value={header.judulKegiatan} />
               <DocRow label="Tanggal RAB" value={formatTanggal(header.tanggalRab)} />
-              <DocRow label="Total realisasi evaluasi" value={rupiah(totalEvaluasi)} />
+              <DocRow label="Total Usulan Vendor" value={rupiah(totalVendor)} />
+              <DocRow label="Total Evaluasi Vendor" value={rupiah(totalEvaluasiVendor)} />
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 22, textAlign: "center", fontSize: 11.5 }}>
                 <TtdCol role="Pembuat" name={namaPembuat} tag="otomatis dari akun" />
                 <TtdCol role="Menyetujui" name={namaAsmanFor(header.idNumber) || "Menunggu approval Asman"} tag={namaAsmanFor(header.idNumber) ? "otomatis, sesuai bidang" : ""} />
@@ -630,8 +723,8 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             </div>
 
             <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12 }}>
-              <Button icon={Download} onClick={() => downloadDocx({ ...header, items, totalPengajuan, totalEvaluasi })}>Unduh Word (.docx)</Button>
-              <Button variant="ghost" icon={FileText} onClick={() => downloadPdf({ ...header, items, totalPengajuan, totalEvaluasi })}>Unduh PDF</Button>
+              <Button icon={Download} onClick={() => downloadDocx({ ...header, items, totalPengajuan, totalVendor, totalEvaluasi, totalEvaluasiVendor })}>Unduh Word (.docx)</Button>
+              <Button variant="ghost" icon={FileText} onClick={() => downloadPdf({ ...header, items, totalPengajuan, totalVendor, totalEvaluasi, totalEvaluasiVendor })}>Unduh PDF</Button>
             </div>
             <Button onClick={() => { setMode("list"); setStep(0); }}>
               <ArrowLeft size={15} /> Kembali ke Daftar RAB
