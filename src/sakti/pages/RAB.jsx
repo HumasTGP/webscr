@@ -229,10 +229,11 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   // dipisah antara kolom Usulan (pengajuan) dan Evaluasi.
   const buildDocxData = (record) => {
     const items = record.items || [];
-    const jumlahVendorTotal = items.reduce((s, it) => s + (it.baseVendor || 0), 0);
-    const ppnVendorTotal = items.reduce((s, it) => s + (it.ppnNilaiVendor || 0), 0);
-    const jumlahEvaluasiVendorTotal = items.reduce((s, it) => s + (it.baseEvaluasiVendor || 0), 0);
-    const ppnEvaluasiVendorTotal = items.reduce((s, it) => s + (it.ppnNilaiEvaluasiVendor || 0), 0);
+    // Template tags pakai nama lama — nilainya dari harga vendor (+15%) sudah termasuk PPN.
+    const jumlahPengajuan = items.reduce((s, it) => s + (it.baseVendor || 0), 0);
+    const ppnPengajuan = items.reduce((s, it) => s + (it.ppnNilaiVendor || 0), 0);
+    const jumlahEvaluasiTotal = items.reduce((s, it) => s + (it.baseEvaluasiVendor || 0), 0);
+    const ppnEvaluasi = items.reduce((s, it) => s + (it.ppnNilaiEvaluasiVendor || 0), 0);
 
     return {
       idNumber: record.idNumber || "",
@@ -240,25 +241,21 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
       judulKegiatan: record.judulKegiatan || "",
       namaPembuat: record.idNumber === header.idNumber && mode === "wizard" ? namaPembuat : (record.namaPembuat || namaPembuat),
       namaAsman: namaAsmanFor(record.idNumber) || "-",
-      jumlahVendor: rupiah(jumlahVendorTotal),
-      ppnVendor: rupiah(ppnVendorTotal),
-      totalVendor: rupiah(record.totalVendor || 0),
-      jumlahEvaluasiVendor: rupiah(jumlahEvaluasiVendorTotal),
-      ppnEvaluasiVendor: rupiah(ppnEvaluasiVendorTotal),
-      totalEvaluasiVendor: rupiah(record.totalEvaluasiVendor || 0),
+      jumlahPengajuan: rupiah(jumlahPengajuan),
+      ppnPengajuan: rupiah(ppnPengajuan),
+      totalPengajuan: rupiah(record.totalVendor || 0),
+      jumlahEvaluasiTotal: rupiah(jumlahEvaluasiTotal),
+      ppnEvaluasi: rupiah(ppnEvaluasi),
+      totalEvaluasi: rupiah(record.totalEvaluasiVendor || 0),
       items: items.map((it) => ({
         uraian: it.uraian || "",
         satuan: it.satuan || "",
         qty: String(it.qty || ""),
-        hargaSatuanVendor: rupiah(it.hargaSatuanVendor || 0),
-        jumlahVendor: rupiah(it.baseVendor || 0),
-        ppnVendor: rupiah(it.ppnNilaiVendor || 0),
-        totalVendor: rupiah(it.totalVendor || 0),
+        hargaSatuan: rupiah(it.hargaSatuanVendor || 0),
+        jumlah: rupiah(it.baseVendor || 0),
         qtyEvaluasi: String(it.qtyEvaluasi || ""),
-        hargaSatuanEvaluasiVendor: rupiah(it.hargaSatuanEvaluasiVendor || 0),
-        jumlahEvaluasiVendor: rupiah(it.baseEvaluasiVendor || 0),
-        ppnEvaluasiVendor: rupiah(it.ppnNilaiEvaluasiVendor || 0),
-        totalEvaluasiVendor: rupiah(it.totalEvaluasiVendor || 0),
+        hargaSatuanEvaluasi: rupiah(it.hargaSatuanEvaluasiVendor || 0),
+        jumlahEvaluasi: rupiah(it.baseEvaluasiVendor || 0),
       })),
     };
   };
@@ -280,12 +277,12 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
         tanggalRab: data.tanggalRab,
         judulKegiatan: data.judulKegiatan,
         items: its,
-        jumlahVendor: its.reduce((s, it) => s + (it.baseVendor || 0), 0),
-        ppnVendor: its.reduce((s, it) => s + (it.ppnNilaiVendor || 0), 0),
-        totalVendor: record.totalVendor || 0,
-        jumlahEvaluasiVendor: its.reduce((s, it) => s + (it.baseEvaluasiVendor || 0), 0),
-        ppnEvaluasiVendor: its.reduce((s, it) => s + (it.ppnNilaiEvaluasiVendor || 0), 0),
-        totalEvaluasiVendor: record.totalEvaluasiVendor || 0,
+        jumlahPengajuan: its.reduce((s, it) => s + (it.baseVendor || 0), 0),
+        ppnPengajuan: its.reduce((s, it) => s + (it.ppnNilaiVendor || 0), 0),
+        totalPengajuan: record.totalVendor || 0,
+        jumlahEvaluasi: its.reduce((s, it) => s + (it.baseEvaluasiVendor || 0), 0),
+        ppnEvaluasi: its.reduce((s, it) => s + (it.ppnNilaiEvaluasiVendor || 0), 0),
+        totalEvaluasi: record.totalEvaluasiVendor || 0,
         namaAsman: data.namaAsman,
         namaPembuat: data.namaPembuat,
         filename: `RAB-${record.idNumber || "record"}`,
