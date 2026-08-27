@@ -46,8 +46,6 @@ import MADMDashboard from "./sakti/madm/pages/MADMDashboard";
 import PaketKasPage from "./sakti/pages/PaketKas";
 import ManajemenAksesPage from "./sakti/pages/ManajemenAkses";
 import LogAktivitasPage from "./sakti/pages/LogAktivitas";
-import GandengLogin from "./gandeng/pages/GandengLogin";
-import GandengApp from "./gandeng/pages/GandengApp";
 import GandengDashboardPage from "./gandeng/pages/GandengDashboard";
 import GandengTrackingPage from "./gandeng/pages/GandengTracking";
 import DokumentasiPage from "./sakti/pages/Dokumentasi";
@@ -127,8 +125,6 @@ const DOCX_TEMPLATES = {
 export default function App() {
   const [portal, setPortal] = useState(null);
   const [silapakLoggedIn, setSilapakLoggedIn] = useState(false);
-  const [mitraLoggedIn, setMitraLoggedIn] = useState(false);
-  const [mitraUser, setMitraUser] = useState(null);
 
   const [user, setUser] = useState(null);
   const [active, setActive] = useState("dashboard");
@@ -637,40 +633,6 @@ export default function App() {
     );
   }
 
-  if (portal === "mitra") {
-    if (!mitraLoggedIn) {
-      return (
-        <GandengLogin
-          authenticate={authenticate}
-          onLogin={(u) => {
-            setMitraUser(u);
-            setMitraLoggedIn(true);
-          }}
-          onBack={() => setPortal(null)}
-        />
-      );
-    }
-    return (
-      <>
-        <GandengApp
-          mitraList={mitraList}
-          setMitraList={setMitraList}
-          notify={notify}
-          onBackToPortal={() => {
-            setMitraLoggedIn(false);
-            setMitraUser(null);
-            setPortal(null);
-          }}
-          user={mitraUser}
-          onLogout={() => {
-            setMitraLoggedIn(false);
-            setMitraUser(null);
-          }}
-        />
-        <Toast toast={toast} />
-      </>
-    );
-  }
 
   if (!user)
     return (
