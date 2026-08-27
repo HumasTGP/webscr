@@ -276,7 +276,8 @@ export const HELP_CONTACT = {
 // Setiap node TANPA `children` = halaman yang bisa diklik (leaf).
 // Setiap node DENGAN `children` = grup yang bisa dibuka/ditutup (gak punya halaman sendiri).
 export const MENU_TREE = [
-  { key: "user-mgmt", label: "Manajemen Akses", icon: UserCog, roles: ["humas"], adminOnly: true },
+  { key: "user-mgmt",      label: "Manajemen Akses",  icon: UserCog,      roles: ["humas"], adminOnly: true },
+  { key: "log-aktivitas", label: "Log Aktivitas",    icon: ClipboardList, roles: ["humas"], adminOnly: true },
 
   { key: "dashboard",       label: "Dashboard", icon: LayoutDashboard, roles: ["humas"] },
   { key: "asman-dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["asman"] },
@@ -287,11 +288,19 @@ export const MENU_TREE = [
   { key: "inbox-pembayaran", label: "Inbox Pembayaran",   icon: Wallet,     roles: ["asman", "madm"] },
 
   {
-    key: "grp-proposal", label: "Proposal & Publikasi", icon: Handshake, roles: ["humas"],
+    key: "grp-proposal", label: "Publikasi Konten", icon: Megaphone, roles: ["humas"],
+    children: [
+      { key: "konten", label: "Pengelolaan Komunikasi", icon: Megaphone },
+    ],
+  },
+
+  {
+    key: "grp-mitra", label: "Pengajuan Mitra", icon: Building2, roles: ["humas"],
     children: [
       { key: "proposal-rekap",    label: "Rekap Pengajuan Proposal", icon: Handshake },
       { key: "proposal-evaluasi", label: "Form Evaluasi",            icon: FileText },
-      { key: "konten",            label: "Pengelolaan Komunikasi",   icon: Megaphone },
+      { key: "mitra-overview",    label: "Dashboard Mitra",          icon: LayoutDashboard },
+      { key: "mitra-tracking",    label: "Tracking Proposal",        icon: Clock },
     ],
   },
 

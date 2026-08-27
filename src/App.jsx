@@ -45,9 +45,9 @@ import AsmanDashboard from "./sakti/asman/pages/AsmanDashboard";
 import MADMDashboard from "./sakti/madm/pages/MADMDashboard";
 import PaketKasPage from "./sakti/pages/PaketKas";
 import ManajemenAksesPage from "./sakti/pages/ManajemenAkses";
-import PengajuanGandengPage from "./gandeng/pages/PengajuanGandeng";
-import GandengLogin from "./gandeng/pages/GandengLogin";
-import GandengApp from "./gandeng/pages/GandengApp";
+import LogAktivitasPage from "./sakti/pages/LogAktivitas";
+import GandengDashboardPage from "./gandeng/pages/GandengDashboard";
+import GandengTrackingPage from "./gandeng/pages/GandengTracking";
 import DokumentasiPage from "./sakti/pages/Dokumentasi";
 import DaftarHadirPage from "./sakti/pages/DaftarHadir";
 import EvidenPage from "./sakti/pages/Eviden";
@@ -125,8 +125,6 @@ const DOCX_TEMPLATES = {
 export default function App() {
   const [portal, setPortal] = useState(null);
   const [silapakLoggedIn, setSilapakLoggedIn] = useState(false);
-  const [mitraLoggedIn, setMitraLoggedIn] = useState(false);
-  const [mitraUser, setMitraUser] = useState(null);
 
   const [user, setUser] = useState(null);
   const [active, setActive] = useState("dashboard");
@@ -228,6 +226,9 @@ export default function App() {
           minute: "2-digit",
           second: "2-digit",
         }),
+        timestamp: now.toISOString(),
+        username: user?.username || "-",
+        role: user?.role || "-",
       },
       ...prev,
     ]);
@@ -323,6 +324,16 @@ export default function App() {
           notify={notify}
         />
       ),
+      "mitra-overview": (
+        <GandengDashboardPage
+          mitraList={mitraList}
+          user={{ ...user, isAdmin: true }}
+          setMitraList={setMitraList}
+          notify={notify}
+          onGoto={(page) => { if (page === "tracking") setActive("mitra-tracking"); }}
+        />
+      ),
+      "mitra-tracking": <GandengTrackingPage mitraList={mitraList} />,
       rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} />,
       tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
       "nonpo-overview": (
@@ -499,6 +510,7 @@ export default function App() {
           notify={notify}
         />
       ),
+      "log-aktivitas": <LogAktivitasPage history={history} />,
       ...(() => {
         const kategoriList = [
           { suffix: "nonpo", kategori: "NON PO" },
@@ -593,7 +605,7 @@ export default function App() {
       user,
       rab, tor, bast, pakta, bapp, lmp1List, lmp2List, laporan, vendors, history,
       proposals, konten, evaluasi, rabIdOptions, packages, users, rka,
-      rabByKategori, rabIdOptionsByKategori,
+      rabByKategori, rabIdOptionsByKategori, mitraList,
     ]
   );
 
@@ -621,40 +633,6 @@ export default function App() {
     );
   }
 
-  if (portal === "mitra") {
-    if (!mitraLoggedIn) {
-      return (
-        <GandengLogin
-          authenticate={authenticate}
-          onLogin={(u) => {
-            setMitraUser(u);
-            setMitraLoggedIn(true);
-          }}
-          onBack={() => setPortal(null)}
-        />
-      );
-    }
-    return (
-      <>
-        <GandengApp
-          mitraList={mitraList}
-          setMitraList={setMitraList}
-          notify={notify}
-          onBackToPortal={() => {
-            setMitraLoggedIn(false);
-            setMitraUser(null);
-            setPortal(null);
-          }}
-          user={mitraUser}
-          onLogout={() => {
-            setMitraLoggedIn(false);
-            setMitraUser(null);
-          }}
-        />
-        <Toast toast={toast} />
-      </>
-    );
-  }
 
   if (!user)
     return (

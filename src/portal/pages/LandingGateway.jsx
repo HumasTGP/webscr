@@ -58,9 +58,6 @@ export default function LandingGateway({ onSelect }) {
           <button className="gateway-nav-link" type="button" onClick={() => onSelect("silapak")}>
             Si Lapak Priok <ExternalLink size={17} strokeWidth={2.1} />
           </button>
-          <button className="gateway-nav-link" type="button" onClick={() => onSelect("mitra")}>
-            Gandeng <ExternalLink size={17} strokeWidth={2.1} />
-          </button>
           <a className="gateway-nav-link" href="https://rukopriok.com/" target="_blank" rel="noopener noreferrer">
             Ruko Priok <ExternalLink size={17} strokeWidth={2.1} />
           </a>
