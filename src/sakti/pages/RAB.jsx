@@ -49,9 +49,10 @@ function itemTotals(row, satuanList) {
   const ppnRateEvaluasi = row.ppnEvaluasi === "11%" ? 0.11 : 0;
 
   const ppnNilaiPengajuan = basePengajuan * ppnRatePengajuan;
-  const ppnNilaiVendor = baseVendor * ppnRatePengajuan;
+  // Vendor selalu PPN 11% dari total vendor (bukan dari harga satuan per item)
+  const ppnNilaiVendor = baseVendor * 0.11;
   const ppnNilaiEvaluasi = baseEvaluasi * ppnRateEvaluasi;
-  const ppnNilaiEvaluasiVendor = baseEvaluasiVendor * ppnRateEvaluasi;
+  const ppnNilaiEvaluasiVendor = baseEvaluasiVendor * 0.11;
 
   return {
     basePengajuan, baseVendor, baseEvaluasi, baseEvaluasiVendor,
@@ -518,11 +519,6 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             <Field label="Harga Satuan Usulan">
               <input type="number" value={itemDraft.hargaSatuan} onChange={(e) => setItemDraft({ ...itemDraft, hargaSatuan: e.target.value })} style={inputStyle} />
             </Field>
-            <Field label="PPN">
-              <select value={itemDraft.ppn} onChange={(e) => setItemDraft({ ...itemDraft, ppn: e.target.value })} style={inputStyle}>
-                {PPN_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
-            </Field>
           </div>
 
           {/* 2. Harga Satuan Usulan Vendor (+15% auto) */}
@@ -555,11 +551,6 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             </Field>
             <Field label="Harga Satuan Evaluasi">
               <input type="number" value={itemDraft.hargaSatuanEvaluasi} onChange={(e) => setItemDraft({ ...itemDraft, hargaSatuanEvaluasi: e.target.value })} style={inputStyle} />
-            </Field>
-            <Field label="PPN Evaluasi">
-              <select value={itemDraft.ppnEvaluasi} onChange={(e) => setItemDraft({ ...itemDraft, ppnEvaluasi: e.target.value })} style={inputStyle}>
-                {PPN_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
             </Field>
           </div>
 
