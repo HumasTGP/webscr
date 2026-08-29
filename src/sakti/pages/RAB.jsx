@@ -4,6 +4,7 @@ import {
   Printer, Settings, Trash2, Upload, X,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
+import { PENANDA_TANGAN } from "../../lib/data";
 import { printChecklist, rupiah, uid } from "../../lib/utils";
 import { generateRabPdf } from "../../lib/pdf";
 import { generateDocxFromTemplate } from "../../lib/docxGenerate";
@@ -113,11 +114,6 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   const totalEvaluasiVendor = items.reduce((s, r) => s + (r.totalEvaluasiVendor || 0), 0);
 
   // ---------- helpers ----------
-  const namaAsmanFor = (idNumber) => {
-    const pkg = packages.find((p) => p.idRab === idNumber);
-    return pkg?.reviewedBy || "";
-  };
-  const namaPembuat = user?.username || user?.name || "-";
 
   const displayRab = useMemo(() => {
     let list = defaultKategori ? rab.filter((r) => r.kategori === defaultKategori) : rab;
@@ -241,8 +237,8 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
       idNumber: record.idNumber || "",
       tanggalRab: record.tanggalRab ? formatTanggal(record.tanggalRab) : "",
       judulKegiatan: record.judulKegiatan || "",
-      namaPembuat: record.idNumber === header.idNumber && mode === "wizard" ? namaPembuat : (record.namaPembuat || namaPembuat),
-      namaAsman: namaAsmanFor(record.idNumber) || "-",
+      namaPembuat: PENANDA_TANGAN.asmanKas.nama,
+      namaAsman: PENANDA_TANGAN.madm.nama,
       jumlahPengajuan: rupiah(jumlahPengajuan),
       ppnPengajuan: rupiah(ppnPengajuan),
       totalPengajuan: rupiah(record.totalVendor || 0),
@@ -285,8 +281,8 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
         jumlahEvaluasi: its.reduce((s, it) => s + (it.baseEvaluasiVendor || 0), 0),
         ppnEvaluasi: its.reduce((s, it) => s + (it.ppnNilaiEvaluasiVendor || 0), 0),
         totalEvaluasi: record.totalEvaluasiVendor || 0,
-        namaAsman: data.namaAsman,
-        namaPembuat: data.namaPembuat,
+        sigLeft: PENANDA_TANGAN.madm,
+        sigRight: PENANDA_TANGAN.asmanKas,
         filename: `RAB-${record.idNumber || "record"}`,
       });
       notify("RAB (.pdf) berhasil diunduh.", "success");
@@ -537,7 +533,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             </Field>
             <Field label="Jumlah Vendor">
               <input
-                value={itemDraft.hargaSatuan && itemDraft.qty ? rupiah((Number(itemDraft.qty) || 0) * (Number(itemDraft.hargaSatuan) * 1.15)) : ""}
+                value={itemDraft.hargaSatuan && itemDraft.qty ? rupiah(itemTotals(itemDraft, satuanList).baseVendor) : ""}
                 readOnly disabled
                 style={{ ...inputStyle, background: "#E8F4FB", color: T.blue, fontWeight: 700, cursor: "not-allowed" }}
               />
@@ -570,7 +566,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             </Field>
             <Field label="Jumlah Evaluasi Vendor">
               <input
-                value={itemDraft.hargaSatuanEvaluasi && itemDraft.qtyEvaluasi ? rupiah((Number(itemDraft.qtyEvaluasi) || 0) * (Number(itemDraft.hargaSatuanEvaluasi) * 1.15)) : ""}
+                value={itemDraft.hargaSatuanEvaluasi && itemDraft.qtyEvaluasi ? rupiah(itemTotals(itemDraft, satuanList).baseEvaluasiVendor) : ""}
                 readOnly disabled
                 style={{ ...inputStyle, background: "#E8F4FB", color: T.blue, fontWeight: 700, cursor: "not-allowed" }}
               />
@@ -711,31 +707,84 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
 
       {step === 3 && (
         <Card>
-          <div style={{ textAlign: "center", padding: "26px 10px" }}>
-            <div style={{ width: 56, height: 56, borderRadius: "50%", background: T.successSoft, display: "grid", placeItems: "center", margin: "0 auto 14px" }}>
-              <Check size={26} color={T.success} />
+          <div style={{ textAlign: "center", padding: "20px 10px 6px" }}>
+            <div style={{ width: 52, height: 52, borderRadius: "50%", background: T.successSoft, display: "grid", placeItems: "center", margin: "0 auto 12px" }}>
+              <Check size={24} color={T.success} />
             </div>
-            <h3 style={{ fontFamily: font.display, fontSize: 17, marginBottom: 4 }}>Data RAB berhasil disimpan</h3>
-            <p style={{ color: T.muted, fontSize: 13, marginBottom: 20 }}>{header.idNumber} sudah tercatat di daftar RAB.</p>
+            <h3 style={{ fontFamily: font.display, fontSize: 16.5, marginBottom: 4 }}>Data RAB berhasil disimpan</h3>
+            <p style={{ color: T.muted, fontSize: 12.5, marginBottom: 18 }}>{header.idNumber} sudah tercatat di daftar RAB. Preview di bawah ini sesuai susunan dokumen yang akan diunduh.</p>
+          </div>
 
-            <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: "20px 24px", background: "#fff", maxWidth: 480, margin: "0 auto 18px", textAlign: "left", fontSize: 12.5 }}>
-              <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13.5, color: T.heading }}>RENCANA ANGGARAN BIAYA</div>
-              <div style={{ textAlign: "center", color: T.muted, fontSize: 11, marginBottom: 16 }}>PT PLN Indonesia Power UBP Priok</div>
-              <DocRow label="ID number" value={header.idNumber} />
-              <DocRow label="Judul program" value={header.judulKegiatan} />
-              <DocRow label="Tanggal RAB" value={formatTanggal(header.tanggalRab)} />
-              <DocRow label="Total Usulan Vendor" value={rupiah(totalVendor)} />
-              <DocRow label="Total Evaluasi Vendor" value={rupiah(totalEvaluasiVendor)} />
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 22, textAlign: "center", fontSize: 11.5 }}>
-                <TtdCol role="Pembuat" name={namaPembuat} tag="otomatis dari akun" />
-                <TtdCol role="Menyetujui" name={namaAsmanFor(header.idNumber) || "Menunggu approval Asman"} tag={namaAsmanFor(header.idNumber) ? "otomatis, sesuai bidang" : ""} />
-              </div>
+          {/* Preview lengkap - persis susunan Template_RAB.docx (sama kayak step
+              Konfirmasi RAB), biar user bisa cek ulang seluruh isian sebelum
+              mengunduh file yang sebenarnya. */}
+          <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: "22px 26px", background: "#fff", maxWidth: 780, margin: "0 auto 18px" }}>
+            <div style={{ textAlign: "center", fontWeight: 700, fontSize: 14.5, color: T.heading, letterSpacing: 0.3 }}>RENCANA ANGGARAN BIAYA</div>
+            <div style={{ textAlign: "center", color: T.text, fontSize: 12.5, marginBottom: 16 }}>{header.judulKegiatan || "-"}</div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 14 }}>
+              <span><b>ID Number:</b> {header.idNumber || "-"}</span>
+              <span><b>Tanggal RAB:</b> {formatTanggal(header.tanggalRab)}</span>
             </div>
 
-            <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12 }}>
-              <Button icon={Download} onClick={() => downloadDocx({ ...header, items, totalPengajuan, totalVendor, totalEvaluasi, totalEvaluasiVendor })}>Unduh Word (.docx)</Button>
-              <Button variant="ghost" icon={FileText} onClick={() => downloadPdf({ ...header, items, totalPengajuan, totalVendor, totalEvaluasi, totalEvaluasiVendor })}>Unduh PDF</Button>
+            <div style={{ border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden", overflowX: "auto", marginBottom: 14 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
+                <thead>
+                  <tr>
+                    <th style={{ ...th, textAlign: "center" }} rowSpan={2}>Uraian</th>
+                    <th style={{ ...th, textAlign: "center" }} rowSpan={2}>Satuan</th>
+                    <th style={{ ...th, textAlign: "center" }} colSpan={3}>Usulan</th>
+                    <th style={{ ...th, textAlign: "center" }} colSpan={3}>Evaluasi</th>
+                  </tr>
+                  <tr>
+                    {["Qty", "Harga Satuan", "Jumlah", "Qty", "Harga Satuan", "Jumlah"].map((h, i) => (
+                      <th key={i} style={{ ...th, textAlign: "center" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((r, i) => (
+                    <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
+                      <td style={{ ...td, textAlign: "center" }}>{r.uraian}</td>
+                      <td style={{ ...td, textAlign: "center" }}>{r.satuan}</td>
+                      <td style={{ ...td, textAlign: "center" }}>{r.qty}</td>
+                      <td style={{ ...td, textAlign: "center" }}>{rupiah(r.hargaSatuanVendor || 0)}</td>
+                      <td style={{ ...td, textAlign: "center", fontWeight: 700 }}>{rupiah(r.totalVendor || 0)}</td>
+                      <td style={{ ...td, textAlign: "center" }}>{r.qtyEvaluasi}</td>
+                      <td style={{ ...td, textAlign: "center" }}>{rupiah(r.hargaSatuanEvaluasiVendor || 0)}</td>
+                      <td style={{ ...td, textAlign: "center", fontWeight: 700 }}>{rupiah(r.totalEvaluasiVendor || 0)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  {[
+                    { label: "Jumlah", u: items.reduce((s, r) => s + (r.baseVendor || 0), 0), e: items.reduce((s, r) => s + (r.baseEvaluasiVendor || 0), 0) },
+                    { label: "PPN", u: items.reduce((s, r) => s + (r.ppnNilaiVendor || 0), 0), e: items.reduce((s, r) => s + (r.ppnNilaiEvaluasiVendor || 0), 0) },
+                    { label: "Jumlah + PPN", u: totalVendor, e: totalEvaluasiVendor, bold: true },
+                  ].map((row) => (
+                    <tr key={row.label} style={{ background: T.blueSoft }}>
+                      <td style={{ ...td, borderBottom: "none" }} colSpan={3}></td>
+                      <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: 700 }}>{row.label}</td>
+                      <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: row.bold ? 700 : 600 }}>{rupiah(row.u)}</td>
+                      <td style={{ ...td, borderBottom: "none" }} colSpan={2}></td>
+                      <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: row.bold ? 700 : 600 }}>{rupiah(row.e)}</td>
+                    </tr>
+                  ))}
+                </tfoot>
+              </table>
             </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 26, textAlign: "center", fontSize: 12 }}>
+              <TtdCol role="Menyetujui" sub={PENANDA_TANGAN.madm.role} name={PENANDA_TANGAN.madm.nama} />
+              <TtdCol role="Dibuat Oleh" sub={PENANDA_TANGAN.asmanKas.role} name={PENANDA_TANGAN.asmanKas.nama} />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12 }}>
+            <Button icon={Download} onClick={() => downloadDocx({ ...header, items, totalPengajuan, totalVendor, totalEvaluasi, totalEvaluasiVendor })}>Unduh Word (.docx)</Button>
+            <Button variant="ghost" icon={FileText} onClick={() => downloadPdf({ ...header, items, totalPengajuan, totalVendor, totalEvaluasi, totalEvaluasiVendor })}>Unduh PDF</Button>
+          </div>
+          <div style={{ textAlign: "center" }}>
             <Button onClick={() => { setMode("list"); setStep(0); }}>
               <ArrowLeft size={15} /> Kembali ke Daftar RAB
             </Button>
@@ -818,20 +867,15 @@ function ReviewRow({ label, value, full }) {
     </div>
   );
 }
-function DocRow({ label, value }) {
-  return (
-    <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: `1px dotted ${T.border}` }}>
-      <span style={{ color: T.muted }}>{label}</span><span>{value || "-"}</span>
-    </div>
-  );
-}
-function TtdCol({ role, name, tag }) {
+// TTD baku, susunan persis kayak Template_RAB.docx: "Menyetujui,"/"Dibuat Oleh,"
+// lalu spasi tanda tangan, lalu jabatan (MADM/ASMAN KAS) dan nama tetap di bawahnya.
+function TtdCol({ role, sub, name }) {
   return (
     <div style={{ flex: 1 }}>
-      <div style={{ color: T.muted, fontSize: 10.5 }}>{role}</div>
-      <div style={{ borderTop: `1px solid ${T.text}`, width: 110, margin: "38px auto 4px" }} />
-      <div style={{ fontWeight: 700, marginTop: 2 }}>{name}</div>
-      {tag && <div style={{ display: "inline-block", marginTop: 4, fontSize: 9.5, background: T.successSoft, color: T.success, padding: "2px 7px", borderRadius: 999, fontWeight: 700 }}>{tag}</div>}
+      <div style={{ fontWeight: 700 }}>{role},</div>
+      <div style={{ height: 34 }} />
+      <div style={{ fontWeight: 700 }}>{sub}</div>
+      <div style={{ fontWeight: 700 }}>{name}</div>
     </div>
   );
 }

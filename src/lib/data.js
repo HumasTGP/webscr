@@ -265,6 +265,14 @@ export const SUB_DOCS = [
   { key: "pakta", label: "Pakta Integritas", matchKey: "id",       required: true },
 ];
 
+// Penanda tangan baku di dokumen RAB/BAST/PI/Form Evaluasi dsb - selalu sama,
+// gak dinamis dari user login atau data review. Dipakai konsisten di semua
+// preview, docx, dan PDF biar gak ada versi yang beda-beda.
+export const PENANDA_TANGAN = {
+  madm: { role: "MADM", nama: "Donny Ureansyah" },
+  asmanKas: { role: "ASMAN KAS", nama: "Astri Oktavina" },
+};
+
 export const HELP_CONTACT = {
   phone: "+62 831-9904-4249",
   waNumber: "6283199044249",

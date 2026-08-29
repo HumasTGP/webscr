@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Plus, Search, Trash2, X } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { parseLocalDate } from "../../lib/utils";
+import { parseLocalDate, uid } from "../../lib/utils";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
@@ -121,15 +121,19 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
   const kategoriSuffix = kategori === "PO" ? "po" : kategori === "Cash Card" ? "cc" : "nonpo";
   const saveAdd = () => {
     if (!form.rabId) return notify("Pilih ID RAB terlebih dahulu.", "error");
-    setNonpoList((prev) => [...prev, { ...form, kategori: kategori || "NON PO", createdAt: new Date().toISOString() }]);
+    setNonpoList((prev) => [
+      ...prev,
+      { ...form, id: uid("NPO"), kategori: kategori || "NON PO", createdAt: new Date().toISOString() },
+    ]);
     setAddOpen(false);
     setForm(EMPTY_FORM);
     notify("NON PO berhasil ditambahkan.", "success");
-    if (onNavigate) onNavigate(`lmp1-${kategoriSuffix}`);
+    // Sengaja gak langsung pindah halaman - biar data yang baru disimpan
+    // kelihatan dulu di daftar NON PO, baru user lanjut isi LMP 1 dst dari sini.
   };
 
   const doDelete = (row) => {
-    setNonpoList((prev) => prev.filter((r) => r !== row));
+    setNonpoList((prev) => prev.filter((r) => (r.id ? r.id !== row.id : r !== row)));
     setDeleteConfirm(null);
     notify("NON PO berhasil dihapus.", "success");
   };
@@ -261,6 +265,7 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
                 const r = rab.find((r) => r.idNumber === id);
                 set("rabId", id);
                 set("judulKegiatan", r ? (r.judulKegiatan || "") : "");
+                set("tanggalKegiatan", r ? (r.tanggalRab || "") : "");
               }}
               style={{ width: "100%", padding: "9px 11px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.inputBg, color: T.text, fontSize: 13, fontFamily: "inherit" }}
             >
@@ -298,8 +303,10 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
           </div>
 
           <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
-            <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 6 }}>Tanggal kegiatan</label>
-            <DatePicker value={form.tanggalKegiatan} onChange={(v) => set("tanggalKegiatan", v)} />
+            <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 6 }}>
+              Tanggal kegiatan <span style={{ fontWeight: 400, color: T.muted }}>(otomatis dari RAB)</span>
+            </label>
+            <DatePicker value={form.tanggalKegiatan} onChange={(v) => set("tanggalKegiatan", v)} disabled />
           </div>
 
           <div style={{ flex: "1 1 100%", maxWidth: "100%" }}>

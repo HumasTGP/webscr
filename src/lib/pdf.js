@@ -232,7 +232,7 @@ export async function generateRabPdf({
   idNumber, tanggalRab, judulKegiatan, items = [],
   jumlahPengajuan, ppnPengajuan, totalPengajuan,
   jumlahEvaluasi, ppnEvaluasi, totalEvaluasi,
-  namaAsman, namaPembuat, filename,
+  sigLeft, sigRight, filename,
 }) {
   const doc = new jsPDF({ format: "a4", unit: "mm", orientation: "landscape" });
   const pw = 297, ph = 210, m = 14;
@@ -339,22 +339,21 @@ export async function generateRabPdf({
   summaryRow("PPN", ppnPengajuan, ppnEvaluasi, false);
   summaryRow("Jumlah + PPN", totalPengajuan, totalEvaluasi, true);
 
-  // --- TTD: Menyetujui (kiri, namaAsman) / Dibuat Oleh (kanan, namaPembuat) — samain sama Template_RAB.docx
+  // --- TTD: Menyetujui (kiri, MADM) / Dibuat Oleh (kanan, ASMAN KAS) — susunan
+  // persis Template_RAB.docx: label besar, spasi tanda tangan, jabatan, nama.
+  // Gak ada garis tanda tangan di template aslinya, jadi di sini juga gak digambar.
   const sigY = Math.max(y + 24, ph - 42);
   const boxW = (pw - m * 2 - 20) / 2;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9.5);
-  doc.setTextColor(50);
+  doc.setTextColor(20);
   doc.text("Menyetujui,", m, sigY);
   doc.text("Dibuat Oleh,", m + boxW + 20, sigY);
-  doc.setDrawColor(180);
-  doc.line(m, sigY + 22, m + boxW, sigY + 22);
-  doc.line(m + boxW + 20, sigY + 22, m + boxW + 20 + boxW, sigY + 22);
-  doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.setTextColor(80);
-  doc.text(namaAsman || "-", m, sigY + 27);
-  doc.text(namaPembuat || "-", m + boxW + 20, sigY + 27);
+  doc.text(sigLeft?.role || "-", m, sigY + 24);
+  doc.text(sigRight?.role || "-", m + boxW + 20, sigY + 24);
+  doc.text(sigLeft?.nama || "-", m, sigY + 29);
+  doc.text(sigRight?.nama || "-", m + boxW + 20, sigY + 29);
 
   doc.setFontSize(7);
   doc.setTextColor(140);

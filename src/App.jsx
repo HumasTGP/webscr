@@ -611,6 +611,8 @@ export default function App() {
       rab, tor, bast, pakta, bapp, lmp1List, lmp2List, laporan, vendors, history,
       proposals, konten, evaluasi, rabIdOptions, packages, users, rka,
       rabByKategori, rabIdOptionsByKategori, mitraList,
+      nonpoSubmissions, formVerifList, nonpoCombo, dokumentasiDocs, rabIdsWithDokumentasi,
+      paymentPackages,
     ]
   );
 
