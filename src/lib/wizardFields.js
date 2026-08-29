@@ -38,7 +38,6 @@ export const proposalFields = () => () => [
   },
   { key: "approvedBudget", label: "Nominal yang Disetujui (Rp)", type: "number" },
   { key: "itemDiminta", label: "Jumlah Barang yang Diajukan", type: "number" },
-  { key: "nominalItemDiajukan", label: "Nominal yang Diajukan (Rp)", type: "number" },
 
   { key: "jabatanKontak", label: "Contact Person yang Dapat Dihubungi", section: "Kontak" },
   { key: "kontakPIC", label: "Nama Contact Person yang Dapat Dihubungi" },
@@ -49,7 +48,6 @@ export const proposalFields = () => () => [
     type: "file-upload",
     section: "Lampiran",
   },
-  { key: "dokumentasiKegiatan", label: "Dokumentasi Kegiatan", type: "file-upload" },
 ];
 
 export const proposalAdminFields = () => [
@@ -141,7 +139,6 @@ export const bastFields = (rabIdOptions) => () => [
     label: "ID",
     type: "select",
     options: rabIdOptions,
-    allowManual: true,
     section: "Identitas",
   },
   {
@@ -150,7 +147,7 @@ export const bastFields = (rabIdOptions) => () => [
     disabled: true,
     hint: "otomatis dari ID RAB - NON PO / Cash Card",
   },
-  { key: "nomor", label: "Nomor" },
+  { key: "nomor", label: "Nomor", disabled: true, hint: "otomatis, format ID/BAST/KAS/PRIOK/tahun" },
   { key: "judulBantuan", label: "Judul Bantuan", disabled: true, hint: "otomatis dari ID RAB" },
   { key: "tanggal", label: "Tanggal", type: "date" },
   { key: "namaPihakKedua", label: "Nama Pihak Kedua", section: "Pihak Kedua" },
@@ -275,6 +272,7 @@ export const autoFromRab = {
     judulBantuan: r.judulKegiatan,
     jumlahBantuan: rupiah(r.totalEvaluasi),
     kategori: r.kategori,
+    nomor: `${r.idNumber}/BAST/KAS/PRIOK/${new Date().getFullYear()}`,
   }),
   pakta: (r) => ({
     judulBantuan: r.judulKegiatan,

@@ -47,6 +47,7 @@ export default function GenericWizard({
   const [step, setStep] = useState(opsiOptions ? 0 : 1);
   const [opsi, setOpsi] = useState(null);
   const [values, setValues] = useState({});
+  const [editingRecord, setEditingRecord] = useState(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [detailRow, setDetailRow] = useState(null);
@@ -59,11 +60,27 @@ export default function GenericWizard({
   );
 
   const start = () => {
+    setEditingRecord(null);
     setOpsi(null);
     const isReferenceId = autoFrom?.key === "id";
+    // Kalau ID diambil dari referensi (misal ID RAB, pola BAST/Pakta), gak perlu
+    // di-generate acak dulu — biar kosong sampai user pilih ID sumbernya, biar
+    // gak nampilin string placeholder yang salah/aneh sebelum benar-benar dipilih.
     setValues({
-      id: isReferenceId ? uid(idPrefix) : nextIdFor(idPrefix, list),
+      id: isReferenceId ? "" : nextIdFor(idPrefix, list),
     });
+    setStep(opsiOptions ? 0 : 1);
+    setMode("wizard");
+  };
+
+  // Klik "Edit" balik ke halaman input yang sama kayak waktu isi pertama kali
+  // (bukan modal kecil terpisah) — data lama di-preload, Simpan nanti nge-update
+  // record ini, bukan nambah baris baru.
+  const startEdit = (record) => {
+    setDetailRow(null);
+    setEditingRecord(record);
+    setOpsi(record.opsi ?? null);
+    setValues({ ...record });
     setStep(opsiOptions ? 0 : 1);
     setMode("wizard");
   };
@@ -78,10 +95,14 @@ export default function GenericWizard({
   };
 
   const save = () => {
-    setList((prev) => [
-      ...prev,
-      { ...values, opsi, id: values.id || uid(idPrefix), tanggalInput: new Date().toISOString() },
-    ]);
+    if (editingRecord) {
+      setList((prev) => prev.map((r) => (r === editingRecord ? { ...r, ...values, opsi } : r)));
+    } else {
+      setList((prev) => [
+        { ...values, opsi, id: values.id || uid(idPrefix), tanggalInput: new Date().toISOString() },
+        ...prev,
+      ]);
+    }
     setShowSaveModal(false);
     setShowSuccessModal(true);
   };
@@ -89,7 +110,8 @@ export default function GenericWizard({
   const finish = () => {
     setShowSuccessModal(false);
     setMode("list");
-    notify(`Data ${title} berhasil disimpan!`, "success", title);
+    setEditingRecord(null);
+    notify(`Data ${title} berhasil ${editingRecord ? "diperbarui" : "disimpan"}!`, "success", title);
   };
 
   const downloadPdf = async (record) => {
@@ -281,12 +303,7 @@ export default function GenericWizard({
           onClose={() => setDetailRow(null)}
           data={detailRow}
           columns={detailColumns}
-          onSave={(draft) => {
-            setList((prev) =>
-              prev.map((r) => (r === detailRow ? { ...r, ...draft } : r))
-            );
-            notify(`Data ${title} berhasil diperbarui!`);
-          }}
+          onEdit={startEdit}
           onDownloadPdf={pdfEnabled && !docxTemplate ? downloadPdf : undefined}
           onDownloadDocx={docxTemplate ? openPreview : undefined}
         />
@@ -310,10 +327,10 @@ export default function GenericWizard({
   return (
     <div>
       <PageHeader
-        eyebrow={`Tambah ${title}`}
+        eyebrow={editingRecord ? `Edit ${title}` : `Tambah ${title}`}
         title={title}
         right={
-          <Button variant="ghost" icon={ArrowLeft} onClick={() => setMode("list")}>
+          <Button variant="ghost" icon={ArrowLeft} onClick={() => { setMode("list"); setEditingRecord(null); }}>
             Kembali ke daftar
           </Button>
         }

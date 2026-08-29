@@ -29,7 +29,7 @@ export default function ReviewModal({
 
       {table && (
         <>
-          <div style={{ fontSize: 11, fontWeight: 700, color: T.blue, textTransform: "uppercase", letterSpacing: 0.4, margin: "0 0 8px" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.blue, textTransform: "uppercase", letterSpacing: 0.4, margin: "0 0 8px", textAlign: "center" }}>
             {table.title}
           </div>
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden", overflowX: "auto", marginBottom: 14 }}>
@@ -38,7 +38,7 @@ export default function ReviewModal({
                 <tr>
                   {table.columns.map((c) => (
                     <th key={c.key} style={{
-                      background: T.blueSoft, color: T.navy, fontWeight: 700, textAlign: "left",
+                      background: T.blueSoft, color: T.navy, fontWeight: 700, textAlign: "center",
                       padding: "8px 10px", fontSize: 10.5, textTransform: "uppercase", whiteSpace: "nowrap",
                     }}>{c.label}</th>
                   ))}
@@ -48,7 +48,7 @@ export default function ReviewModal({
                 {table.data.map((row, i) => (
                   <tr key={i} style={{ background: i % 2 ? T.rowAlt : T.card }}>
                     {table.columns.map((c) => (
-                      <td key={c.key} style={{ padding: "8px 10px", borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap" }}>
+                      <td key={c.key} style={{ padding: "8px 10px", borderBottom: `1px solid ${T.border}`, whiteSpace: "nowrap", textAlign: "center" }}>
                         {c.render ? c.render(row) : (row[c.key] ?? "-")}
                       </td>
                     ))}

@@ -38,15 +38,15 @@ export default function DatePicker({ value, onChange, placeholder = "Pilih tangg
   const [open, setOpen] = useState(false);
   const selected = parseDateStr(value);
   const [viewDate, setViewDate] = useState(() => selected || new Date());
-  const [pos, setPos] = useState({ top: 0, left: 0, width: 250 });
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 230 });
   const fieldRef = useRef(null);
   const popupRef = useRef(null);
 
   const recalcPos = () => {
     const r = fieldRef.current?.getBoundingClientRect();
     if (!r) return;
-    const w = 250;
-    const popH = 220; // estimated popup height
+    const w = 230;
+    const popH = 300; // perkiraan tinggi popup versi compact (header + 7 baris tanggal)
     let left = r.left;
     if (left + w > window.innerWidth - 8) left = Math.max(8, window.innerWidth - w - 8);
     const spaceBelow = window.innerHeight - r.bottom;
@@ -123,19 +123,20 @@ export default function DatePicker({ value, onChange, placeholder = "Pilih tangg
           ref={popupRef}
           style={{
             position: "fixed", zIndex: 1000, top: pos.top, left: pos.left, width: pos.width,
-            background: T.card, border: `1px solid ${T.border}`, borderRadius: 10,
-            boxShadow: T.shadowLg, padding: 12,
+            background: T.card, border: `1px solid ${T.border}`, borderRadius: 9,
+            boxShadow: T.shadowLg, padding: 9,
+            maxHeight: "min(320px, calc(100vh - 16px))", overflowY: "auto",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <button type="button" onClick={() => goMonth(-1)} style={navBtn} aria-label="Bulan sebelumnya"><ChevronLeft size={14} /></button>
-            <span style={{ fontFamily: font.display, fontWeight: 700, fontSize: 13, color: T.heading }}>{MONTHS_ID[month]} {year}</span>
-            <button type="button" onClick={() => goMonth(1)} style={navBtn} aria-label="Bulan berikutnya"><ChevronRight size={14} /></button>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+            <button type="button" onClick={() => goMonth(-1)} style={navBtn} aria-label="Bulan sebelumnya"><ChevronLeft size={13} /></button>
+            <span style={{ fontFamily: font.display, fontWeight: 700, fontSize: 12.5, color: T.heading }}>{MONTHS_ID[month]} {year}</span>
+            <button type="button" onClick={() => goMonth(1)} style={navBtn} aria-label="Bulan berikutnya"><ChevronRight size={13} /></button>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 3, fontSize: 11.5, textAlign: "center", marginBottom: 2 }}>
-            {DOW.map((d, i) => <div key={i} style={{ color: T.muted, fontWeight: 700, padding: "4px 0" }}>{d}</div>)}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2, fontSize: 10.5, textAlign: "center", marginBottom: 1 }}>
+            {DOW.map((d, i) => <div key={i} style={{ color: T.muted, fontWeight: 700, padding: "3px 0" }}>{d}</div>)}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 3 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2 }}>
             {cells.map((d, i) => {
               if (!d) return <div key={i} />;
               const dt = new Date(year, month, d);
@@ -148,7 +149,7 @@ export default function DatePicker({ value, onChange, placeholder = "Pilih tangg
                   style={{
                     border: "none", background: isSel ? T.blue : "transparent",
                     color: isSel ? "#fff" : T.text, fontWeight: isSel ? 700 : 400,
-                    padding: "6px 0", borderRadius: 6, cursor: "pointer", fontSize: 12,
+                    padding: "5px 0", borderRadius: 6, cursor: "pointer", fontSize: 11.5,
                   }}
                   onMouseEnter={(e) => { if (!isSel) e.currentTarget.style.background = T.blueSoft; }}
                   onMouseLeave={(e) => { if (!isSel) e.currentTarget.style.background = "transparent"; }}

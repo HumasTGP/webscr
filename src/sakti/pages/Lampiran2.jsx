@@ -14,7 +14,7 @@ const EMPTY = {
   keterangan: "",
 };
 
-export default function Lampiran2Page({ rab, notify, list = [], setList }) {
+export default function Lampiran2Page({ rab, notify, list = [], setList, lmp1List = [] }) {
   const [activeRab, setActiveRab] = useState(null);
   const [form, setForm] = useState(EMPTY);
 
@@ -23,17 +23,23 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
     border: `1px solid ${T.border}`, background: T.inputBg,
     color: T.text, fontSize: 12.5, boxSizing: "border-box",
   };
+  const inputDisabledStyle = { ...inputStyle, background: T.bg, color: T.muted, cursor: "not-allowed" };
   const labelStyle = { display: "block", marginBottom: 5, fontSize: 11.5, fontWeight: 700, color: T.heading };
 
   const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
+  // Vendor 1 dari Lampiran 1 (submission RAB yang sama) = vendor terpilih/pemenang,
+  // otomatis dipakai sebagai Pelaksana Pekerjaan di Lampiran 2 - gak perlu diisi manual.
+  const vendorTerpilihFor = (idNumber) => lmp1List.find((x) => x.submissionId === idNumber)?.form?.vendor1 || "";
+
   const selectRab = (r) => {
     setActiveRab(r);
     const existing = list.find((x) => x.submissionId === r.idNumber);
+    const vendorTerpilih = vendorTerpilihFor(r.idNumber);
     if (existing) {
-      setForm(existing.form || EMPTY);
+      setForm({ ...EMPTY, ...existing.form, pelaksanaPekerjaan: vendorTerpilih });
     } else {
-      setForm({ ...EMPTY, pelaksanaPekerjaan: r.vendor || "" });
+      setForm({ ...EMPTY, pelaksanaPekerjaan: vendorTerpilih });
     }
   };
 
@@ -59,7 +65,7 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
           nilaiPenawaran: form.nilaiPenawaran || "",
           nilaiNegosiasi: form.nilaiNegosiasi || "",
           tanggalNegosiasi: formatTanggalPanjang(form.tanggalNegosiasi),
-          pelaksanaPekerjaan: form.pelaksanaPekerjaan || activeRab.vendor || "",
+          pelaksanaPekerjaan: form.pelaksanaPekerjaan || "",
           keterangan: form.keterangan || "",
         },
         `Lampiran-2-${activeRab.idNumber}.docx`
@@ -124,7 +130,9 @@ export default function Lampiran2Page({ rab, notify, list = [], setList }) {
                 <Field label="Nilai Penawaran"><input style={inputStyle} type="number" value={form.nilaiPenawaran} onChange={(e) => set("nilaiPenawaran", e.target.value)} /></Field>
                 <Field label="Nilai Negosiasi"><input style={inputStyle} type="number" value={form.nilaiNegosiasi} onChange={(e) => set("nilaiNegosiasi", e.target.value)} /></Field>
                 <Field label="Tanggal Negosiasi"><DatePicker value={form.tanggalNegosiasi} onChange={(v) => set("tanggalNegosiasi", v)} /></Field>
-                <Field label="Pelaksana Pekerjaan"><input style={inputStyle} value={form.pelaksanaPekerjaan} onChange={(e) => set("pelaksanaPekerjaan", e.target.value)} placeholder={activeRab.vendor || "Nama vendor/pelaksana"} /></Field>
+                <Field label="Pelaksana Pekerjaan" hint="">
+                  <input style={inputDisabledStyle} value={form.pelaksanaPekerjaan || "Belum ada data Lampiran 1 untuk RAB ini"} disabled />
+                </Field>
                 <Field label="Keterangan" full><textarea style={{ ...inputStyle, minHeight: 72, resize: "vertical" }} value={form.keterangan} onChange={(e) => set("keterangan", e.target.value)} /></Field>
               </Section>
 
@@ -156,10 +164,12 @@ function Section({ title, children }) {
   );
 }
 
-function Field({ label, children, full }) {
+function Field({ label, children, full, hint }) {
   return (
     <div style={full ? { gridColumn: "1 / -1", minWidth: 0 } : { minWidth: 0 }}>
-      <label style={{ display: "block", marginBottom: 5, fontSize: 11.5, fontWeight: 700, color: T.heading }}>{label}</label>
+      <label style={{ display: "block", marginBottom: 5, fontSize: 11.5, fontWeight: 700, color: T.heading }}>
+        {label} {hint && <span style={{ fontSize: 10.5, fontWeight: 400, color: T.muted }}>{hint}</span>}
+      </label>
       {children}
     </div>
   );

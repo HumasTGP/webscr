@@ -126,7 +126,8 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
       const q = query.trim().toLowerCase();
       list = list.filter((r) => (r.idNumber || "").toLowerCase().includes(q) || (r.judulKegiatan || "").toLowerCase().includes(q));
     }
-    return list;
+    // Terbaru di atas (newest-first), berdasarkan waktu input terakhir.
+    return [...list].sort((a, b) => new Date(b.tanggalInput || 0) - new Date(a.tanggalInput || 0));
   }, [rab, defaultKategori, filterBulan, query]);
 
   const monthOptions = useMemo(() => {
@@ -638,8 +639,8 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
 
       {step === 2 && (
         <Card>
-          <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 4 }}>Konfirmasi RAB</h3>
-          <p style={{ color: T.muted, fontSize: 12.5, marginBottom: 18 }}>Tinjau data sebelum disimpan.</p>
+          <h3 style={{ fontFamily: font.display, fontSize: 16, marginBottom: 4, textAlign: "center" }}>Konfirmasi RAB</h3>
+          <p style={{ color: T.muted, fontSize: 12.5, marginBottom: 18, textAlign: "center" }}>Tinjau data sebelum disimpan - tampilan ini mengikuti susunan dokumen RAB yang akan diunduh.</p>
 
           <SectionLabel>Data RAB</SectionLabel>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 16px", marginBottom: 18, borderBottom: `1px solid ${T.border}`, paddingBottom: 16 }}>
@@ -650,34 +651,55 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
           </div>
 
           <SectionLabel>Uraian RAB ({items.length} baris)</SectionLabel>
+          {/* Tabel preview ini sengaja disusun persis kayak Template_RAB.docx: grup
+              kolom USULAN & EVALUASI berdampingan (masing-masing Qty/Harga
+              Satuan/Jumlah), lalu baris ringkasan Jumlah/PPN/Jumlah+PPN di bawah
+              per sisi - biar preview di web = isi dokumen yang bakal diunduh. */}
           <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden", overflowX: "auto", marginBottom: 16 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
               <thead>
-                <tr>{["Uraian", "Satuan", "Qty", "Harga Sat. Vendor", "Jumlah Vendor", "PPN Vendor", "Total Vendor", "Harga Sat. Eval. Vendor", "Jumlah Eval. Vendor", "PPN Eval. Vendor", "Total Eval. Vendor"].map((h) => <th key={h} style={th}>{h}</th>)}</tr>
+                <tr>
+                  <th style={{ ...th, textAlign: "center" }} rowSpan={2}>Uraian</th>
+                  <th style={{ ...th, textAlign: "center" }} rowSpan={2}>Satuan</th>
+                  <th style={{ ...th, textAlign: "center" }} colSpan={3}>Usulan</th>
+                  <th style={{ ...th, textAlign: "center" }} colSpan={3}>Evaluasi</th>
+                </tr>
+                <tr>
+                  {["Qty", "Harga Satuan", "Jumlah", "Qty", "Harga Satuan", "Jumlah"].map((h, i) => (
+                    <th key={i} style={{ ...th, textAlign: "center" }}>{h}</th>
+                  ))}
+                </tr>
               </thead>
               <tbody>
                 {items.map((r, i) => (
                   <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
-                    <td style={td}>{r.uraian}</td>
-                    <td style={td}>{r.satuan}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{r.qty}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.hargaSatuanVendor || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.baseVendor || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{r.ppn === "11%" ? rupiah(r.ppnNilaiVendor || 0) : "-"}</td>
-                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalVendor || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.hargaSatuanEvaluasiVendor || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.baseEvaluasiVendor || 0)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{r.ppnEvaluasi === "11%" ? rupiah(r.ppnNilaiEvaluasiVendor || 0) : "-"}</td>
-                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{rupiah(r.totalEvaluasiVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "center" }}>{r.uraian}</td>
+                    <td style={{ ...td, textAlign: "center" }}>{r.satuan}</td>
+                    <td style={{ ...td, textAlign: "center" }}>{r.qty}</td>
+                    <td style={{ ...td, textAlign: "center" }}>{rupiah(r.hargaSatuanVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "center", fontWeight: 700 }}>{rupiah(r.totalVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "center" }}>{r.qtyEvaluasi}</td>
+                    <td style={{ ...td, textAlign: "center" }}>{rupiah(r.hargaSatuanEvaluasiVendor || 0)}</td>
+                    <td style={{ ...td, textAlign: "center", fontWeight: 700 }}>{rupiah(r.totalEvaluasiVendor || 0)}</td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                {[
+                  { label: "Jumlah", u: items.reduce((s, r) => s + (r.baseVendor || 0), 0), e: items.reduce((s, r) => s + (r.baseEvaluasiVendor || 0), 0) },
+                  { label: "PPN", u: items.reduce((s, r) => s + (r.ppnNilaiVendor || 0), 0), e: items.reduce((s, r) => s + (r.ppnNilaiEvaluasiVendor || 0), 0) },
+                  { label: "Jumlah + PPN", u: totalVendor, e: totalEvaluasiVendor, bold: true },
+                ].map((row) => (
+                  <tr key={row.label} style={{ background: T.blueSoft }}>
+                    <td style={{ ...td, borderBottom: "none" }} colSpan={3}></td>
+                    <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: 700 }}>{row.label}</td>
+                    <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: row.bold ? 700 : 600 }}>{rupiah(row.u)}</td>
+                    <td style={{ ...td, borderBottom: "none" }} colSpan={2}></td>
+                    <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: row.bold ? 700 : 600 }}>{rupiah(row.e)}</td>
+                  </tr>
+                ))}
+              </tfoot>
             </table>
-          </div>
-
-          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", background: T.blueSoft, border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px 18px", marginBottom: 6 }}>
-            <div><div style={{ fontSize: 10.5, textTransform: "uppercase", color: T.navy, fontWeight: 700 }}>Total Usulan Vendor</div><div style={{ fontSize: 18, fontWeight: 700, color: T.navy }}>{rupiah(totalVendor)}</div></div>
-            <div><div style={{ fontSize: 10.5, textTransform: "uppercase", color: T.navy, fontWeight: 700 }}>Total Evaluasi Vendor</div><div style={{ fontSize: 18, fontWeight: 700, color: T.blue }}>{rupiah(totalEvaluasiVendor)}</div></div>
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>

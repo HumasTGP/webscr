@@ -38,6 +38,7 @@ export default function FormVerifikasiPage({ rab, notify, forms = [], setForms }
     fontSize: 13, color: T.text, boxSizing: "border-box",
   };
   const labelStyle = { fontSize: 12, fontWeight: 600, color: T.heading, marginBottom: 5, display: "block" };
+  const inputDisabledStyle = { ...inputStyle, background: T.bg, color: T.muted, cursor: "not-allowed" };
 
   const loadForm = (r) => {
     setActiveRab(r);
@@ -153,8 +154,8 @@ export default function FormVerifikasiPage({ rab, notify, forms = [], setForms }
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 13 }}>
                 <div>
-                  <label style={labelStyle}>Nomor Verifikasi</label>
-                  <input style={inputStyle} value={formData.nomorVerifikasi} onChange={(e) => set("nomorVerifikasi", e.target.value)} placeholder="Nomor verifikasi" />
+                  <label style={labelStyle}>Nomor Verifikasi <span style={{ fontWeight: 400, color: T.muted, fontSize: 10.5 }}>(otomatis)</span></label>
+                  <input style={inputDisabledStyle} value={formData.nomorVerifikasi} disabled />
                 </div>
                 <div>
                   <label style={labelStyle}>Tanggal</label>
@@ -229,8 +230,8 @@ export default function FormVerifikasiPage({ rab, notify, forms = [], setForms }
                   )}
                 </div>
                 <div>
-                  <label style={labelStyle}>Terbilang</label>
-                  <input style={inputStyle} value={formData.terbilang} onChange={(e) => set("terbilang", e.target.value)} placeholder="Contoh: lima belas juta rupiah" />
+                  <label style={labelStyle}>Terbilang <span style={{ fontWeight: 400, color: T.muted, fontSize: 10.5 }}>(otomatis)</span></label>
+                  <input style={inputDisabledStyle} value={formData.terbilang} disabled />
                 </div>
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={labelStyle}>Kepada</label>

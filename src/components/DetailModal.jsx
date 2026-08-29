@@ -10,6 +10,7 @@ export default function DetailModal({
   data,
   columns,
   onSave,
+  onEdit,
   onDownloadPdf,
   onDownloadDocx,
   startEditing = false,
@@ -108,7 +109,12 @@ export default function DetailModal({
             Unduh PDF
           </Button>
         )}
-        {onSave && !editing && (
+        {onEdit && !editing && (
+          <Button variant="ghost" onClick={() => onEdit(data)}>
+            Edit
+          </Button>
+        )}
+        {!onEdit && onSave && !editing && (
           <Button variant="ghost" onClick={() => setEditing(true)}>
             Edit
           </Button>

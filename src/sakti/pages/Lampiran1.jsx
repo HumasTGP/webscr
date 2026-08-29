@@ -287,11 +287,11 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, tableLayout: "fixed" }}>
               <colgroup>
-                <col style={{ width: "14%" }} />
-                <col style={{ width: "34%" }} />
-                <col style={{ width: "14%" }} />
-                <col style={{ width: "16%" }} />
-                <col style={{ width: "22%" }} />
+                <col style={{ width: "13%" }} />
+                <col style={{ width: "27%" }} />
+                <col style={{ width: "13%" }} />
+                <col style={{ width: "17%" }} />
+                <col style={{ width: "30%" }} />
               </colgroup>
               <thead><tr>{["Submission ID", "Nama Pengadaan", "Tanggal", "Grand Total", "Aksi"].map((h) => <th key={h} style={th}>{h}</th>)}</tr></thead>
               <tbody>
@@ -304,9 +304,9 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
                       <td style={{ ...td, whiteSpace: "normal" }}>{r.submissionId}</td>
                       <td style={{ ...td, whiteSpace: "normal" }}>{r.form?.namaPengadaan || "-"}</td>
                       <td style={{ ...td, whiteSpace: "normal" }}>{formatTanggal(r.form?.tanggal)}</td>
-                      <td style={{ ...td, textAlign: "right", whiteSpace: "normal" }}>{rupiah(total)}</td>
-                      <td style={{ ...td, textAlign: "center" }}>
-                        <div style={{ display: "flex", gap: 5, justifyContent: "center", flexWrap: "wrap" }}>
+                      <td style={{ ...td, textAlign: "left", whiteSpace: "normal" }}>{rupiah(total)}</td>
+                      <td style={{ ...td, textAlign: "left" }}>
+                        <div style={{ display: "flex", gap: 5, justifyContent: "flex-start", flexWrap: "wrap" }}>
                           <IconBtn title="Lihat" onClick={() => setReviewRow(r)}><Eye size={13} /></IconBtn>
                           <IconBtn title="Edit" onClick={() => startEdit(r)}><Pencil size={13} /></IconBtn>
                           <IconBtn title="Hapus" danger onClick={() => setDeleteTarget(r)}><Trash2 size={13} /></IconBtn>

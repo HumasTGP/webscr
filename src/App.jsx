@@ -274,11 +274,16 @@ export default function App() {
   // RAB langsung masuk begitu disimpan (gak perlu nunggu ditandai "pelaksanaan
   // selesai" dulu di halaman Dokumentasi) — status dokumentasi cukup jadi
   // pengingat (lihat docByRabId / dokumentasiBelumLengkap), bukan syarat wajib.
-  const rabByKategori = useMemo(() => ({
-    "NON PO": rab.filter((r) => r.kategori === "NON PO"),
-    "PO": rab.filter((r) => r.kategori === "PO"),
-    "Cash Card": rab.filter((r) => r.kategori === "Cash Card"),
-  }), [rab]);
+  const rabByKategori = useMemo(() => {
+    // Terbaru di atas (newest-first) — dipakai konsisten di semua daftar/pemilihan
+    // RAB turunan (TOR, BAST, Lampiran 1/2, dst).
+    const sorted = [...rab].sort((a, b) => new Date(b.tanggalInput || 0) - new Date(a.tanggalInput || 0));
+    return {
+      "NON PO": sorted.filter((r) => r.kategori === "NON PO"),
+      "PO": sorted.filter((r) => r.kategori === "PO"),
+      "Cash Card": sorted.filter((r) => r.kategori === "Cash Card"),
+    };
+  }, [rab]);
   const rabIdOptionsByKategori = useMemo(() => ({
     "NON PO": rabByKategori["NON PO"].map((r) => r.idNumber),
     "PO": rabByKategori["PO"].map((r) => r.idNumber),
@@ -576,7 +581,7 @@ export default function App() {
             <Lampiran1Page rab={rabByKategori[kategori]} notify={notify} list={lmp1List} setList={setLmp1List} />
           );
           routes[`lmp2-${suffix}`] = (
-            <Lampiran2Page rab={rabByKategori[kategori]} notify={notify} list={lmp2List} setList={setLmp2List} />
+            <Lampiran2Page rab={rabByKategori[kategori]} notify={notify} list={lmp2List} setList={setLmp2List} lmp1List={lmp1List} />
           );
         });
         return routes;

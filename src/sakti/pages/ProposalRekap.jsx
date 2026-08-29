@@ -241,7 +241,6 @@ export default function ProposalRekapPage({ proposals, setProposals, notify, com
           { label: "Nominal Diajukan", value: row.nilaiDiajukan ? rupiah(row.nilaiDiajukan) : null },
           { label: "Nominal Disetujui", value: row.approvedBudget ? rupiah(row.approvedBudget) : null },
           { label: "Jumlah Barang yang Diajukan", value: row.itemDiminta },
-          { label: "Nominal yang Diajukan (Item)", value: row.nominalItemDiajukan ? rupiah(row.nominalItemDiajukan) : null },
         ],
       },
       {

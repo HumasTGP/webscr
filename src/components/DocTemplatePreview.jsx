@@ -117,7 +117,7 @@ export function BastDocPreview({ values }) {
     <div style={pageStyle}>
       <CtrBold size={13}>BERITA ACARA SERAH TERIMA</CtrBold>
       <div style={{ textAlign: "center", fontSize: 10, marginBottom: 10 }}>
-        Nomor: {values.nomor || "-"}/BAST/KAS/PRIOK/2026
+        Nomor: {values.nomor || "-"}
       </div>
 
       <CtrBold size={11}>Tentang</CtrBold>

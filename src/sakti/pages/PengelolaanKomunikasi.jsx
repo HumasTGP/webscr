@@ -200,12 +200,6 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
   const [detailId, setDetailId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [monthlyOpen, setMonthlyOpen] = useState(false);
-  const [monthlyBulan, setMonthlyBulan] = useState("Semua");
-
-  const bulanOptions = useMemo(() => {
-    const set = new Set(list.map((r) => bulanFromTanggal(r.tanggal)).filter(Boolean));
-    return Array.from(set);
-  }, [list]);
 
   const suggestNomorRilis = () => {
     const all = list.flatMap((r) => r.publikasi || []).map((p) => Number(p.nomorRilis) || 0);
@@ -261,9 +255,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
   };
 
   const monthlyStats = useMemo(() => {
-    const rows = list.filter(
-      (r) => monthlyBulan === "Semua" || bulanFromTanggal(r.tanggal) === monthlyBulan
-    );
+    const rows = list;
     const totalKonten = rows.length;
     const pubAll = rows.flatMap((r) => r.publikasi || []);
     const totalPub = pubAll.length;
@@ -280,7 +272,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
     const kategoriTerbanyak = tally(rows.map((r) => r.kategori));
 
     return { totalKonten, totalPub, totalScore, platformTerbanyak, kategoriTerbanyak };
-  }, [list, monthlyBulan]);
+  }, [list]);
 
   const detailRecord = list.find((r) => r.id === detailId);
 
@@ -579,30 +571,34 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
         </div>
         {monthlyOpen && (
           <div style={{ marginTop: 14 }}>
-            <select
-              value={monthlyBulan}
-              onChange={(e) => setMonthlyBulan(e.target.value)}
-              style={{ padding: "7px 10px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.card, color: T.text, fontSize: 12.5, fontFamily: font.body, marginBottom: 14 }}
-            >
-              <option value="Semua">Semua bulan</option>
-              {bulanOptions.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
               {[
                 { value: monthlyStats.totalKonten, label: "Konten", icon: "📝", color: T.blue, soft: T.blueSoft },
                 { value: monthlyStats.totalPub,    label: "Publikasi", icon: "📢", color: "#7C3AED", soft: "#EDE9FE" },
                 { value: monthlyStats.totalScore,  label: "Total Score", icon: "⭐", color: "#059669", soft: "#D1FAE5" },
               ].map(({ value, label, icon, color, soft }) => (
-                <div key={label} style={{ background: soft, border: `1px solid ${color}20`, borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ fontSize: 22, lineHeight: 1 }}>{icon}</div>
-                  <div>
-                    <div style={{ fontFamily: font.display, fontSize: 26, color, lineHeight: 1, fontWeight: 700 }}>{value}</div>
-                    <div style={{ fontSize: 11.5, color, opacity: 0.75, marginTop: 3, fontWeight: 600 }}>{label}</div>
+                <div
+                  key={label}
+                  style={{
+                    background: soft, border: `1px solid ${color}20`, borderRadius: 12,
+                    padding: "18px 14px", display: "flex", flexDirection: "column",
+                    alignItems: "center", textAlign: "center", gap: 6,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 40, height: 40, borderRadius: 999, background: "#fff",
+                      display: "grid", placeItems: "center", fontSize: 19, marginBottom: 2,
+                    }}
+                  >
+                    {icon}
                   </div>
+                  <div style={{ fontFamily: font.display, fontSize: 26, color, lineHeight: 1, fontWeight: 700 }}>{value}</div>
+                  <div style={{ fontSize: 11.5, color, opacity: 0.8, fontWeight: 600 }}>{label}</div>
                 </div>
               ))}
             </div>
-            <div style={{ display: "flex", gap: 24, marginTop: 12, fontSize: 12.5, color: T.text }}>
+            <div style={{ display: "flex", gap: 24, marginTop: 14, fontSize: 12.5, color: T.text, flexWrap: "wrap" }}>
               <span><b>Platform terbanyak:</b> {monthlyStats.platformTerbanyak.join(", ") || "-"}</span>
               <span><b>Kategori terbanyak:</b> {monthlyStats.kategoriTerbanyak.join(", ") || "-"}</span>
             </div>

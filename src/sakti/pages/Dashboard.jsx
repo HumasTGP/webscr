@@ -4,7 +4,6 @@ import {
   ChevronRight,
   FileSpreadsheet,
   Handshake,
-  Megaphone,
   Clock,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
@@ -179,104 +178,6 @@ function ProposalSpotlight({ items, goto }) {
           </div>
         </div>
       ))}
-    </Card>
-  );
-}
-
-function KontenPipeline({ items, goto }) {
-  // Highlight konten yang butuh perhatian: Draft (belum terbit).
-  const perluAksi = items.filter((k) => k.status === "Draft");
-  const shown = perluAksi.slice(0, 3);
-  return (
-    <Card>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 12,
-        }}
-      >
-        <h3
-          style={{
-            fontFamily: font.display,
-            fontSize: 15.5,
-            margin: 0,
-            color: T.heading,
-          }}
-        >
-          Antrean Publikasi
-        </h3>
-        <button
-          onClick={() => goto("konten")}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: T.blue,
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
-            padding: 0,
-          }}
-        >
-          Buka Mirroring Konten →
-        </button>
-      </div>
-      {!shown.length && (
-        <div style={{ fontSize: 13, color: T.muted, padding: "18px 0" }}>
-          Tidak ada konten yang menunggu terbit,semua sudah published atau
-          dibatalkan.
-        </div>
-      )}
-      {shown.map((k, i) => {
-        const jmlPublikasi = Array.isArray(k.publikasi) ? k.publikasi.length : 0;
-        return (
-          <div
-            key={k.id}
-            style={{
-              display: "flex",
-              gap: 12,
-              padding: "10px 0",
-              borderBottom: i < shown.length - 1 ? `1px solid ${T.border}` : "none",
-            }}
-          >
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 9,
-                background: "#FFF4D6",
-                display: "grid",
-                placeItems: "center",
-                flexShrink: 0,
-              }}
-            >
-              <Megaphone size={15} color={T.yellowText} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: T.heading,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {k.judul || "(tanpa judul)"}
-              </div>
-              <div style={{ fontSize: 11.5, color: T.muted, marginTop: 2 }}>
-                {k.kategori || "-"} · {k.tanggal || "belum dijadwal"}
-                {jmlPublikasi ? ` · ${jmlPublikasi} publikasi` : ""}
-              </div>
-            </div>
-            <div style={{ alignSelf: "center" }}>
-              <StatusBadge value={k.status} />
-            </div>
-          </div>
-        );
-      })}
     </Card>
   );
 }
@@ -561,12 +462,6 @@ export default function Dashboard({ data, packages = [], goto, user }) {
     baru: data.proposals.filter((p) => p.statusProposal === "Baru Masuk").length,
     disetujui: data.proposals.filter((p) => p.statusProposal === "Disetujui").length,
   };
-  const kontenCounts = {
-    total: data.konten.length,
-    draft: data.konten.filter((k) => k.status === "Draft").length,
-    terbit: data.konten.filter((k) => k.status === "Terbit").length,
-  };
-  const kontenPerluAksi = kontenCounts.draft;
 
   return (
     <div>
@@ -598,12 +493,12 @@ export default function Dashboard({ data, packages = [], goto, user }) {
       {/* Grafik dokumen masuk per kategori (NON PO / PO / Cash Card) */}
       <KategoriLineChart submissions={data.nonpoSubmissions} proposals={data.proposals} goto={goto} />
 
-      {/* Stakeholder + Konten tiles */}
+      {/* Stakeholder + RAB tiles */}
       <div
         className="stat-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
           gap: 12,
           marginBottom: 20,
         }}
@@ -615,13 +510,6 @@ export default function Dashboard({ data, packages = [], goto, user }) {
           onClick={() => goto("proposal-rekap")}
         />
         <Tile
-          icon={Megaphone}
-          value={kontenCounts.total}
-          label={`${kontenCounts.terbit} terbit · ${kontenPerluAksi} antrean`}
-          tone="yellow"
-          onClick={() => goto("konten")}
-        />
-        <Tile
           icon={FileSpreadsheet}
           value={data.rab.length}
           label="RAB diajukan"
@@ -629,7 +517,7 @@ export default function Dashboard({ data, packages = [], goto, user }) {
         />
       </div>
 
-      {/* Panels: proposal terbaru + antrean publikasi konten */}
+      {/* Panel: proposal terbaru */}
       <div
         style={{
           display: "grid",
@@ -639,7 +527,6 @@ export default function Dashboard({ data, packages = [], goto, user }) {
         }}
       >
         <ProposalSpotlight items={data.proposals} goto={goto} />
-        <KontenPipeline items={data.konten} goto={goto} />
       </div>
 
       {/* RAB terbaru,referensi cepat */}

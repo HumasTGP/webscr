@@ -220,7 +220,13 @@ export default function FieldInput({ field, value, onChange }) {
   );
 }
 
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; 
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const ALLOWED_UPLOAD_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+const ALLOWED_UPLOAD_EXT = [".pdf", ".doc", ".docx"];
 
 function formatBytes(bytes) {
   if (!bytes && bytes !== 0) return "";
@@ -239,8 +245,14 @@ function RealFileUpload({ field, value, onChange, disabled, commonStyle }) {
 
   const handleFile = (file) => {
     if (!file) return;
+    const ext = "." + (file.name.split(".").pop() || "").toLowerCase();
+    const typeOk = ALLOWED_UPLOAD_TYPES.includes(file.type) || ALLOWED_UPLOAD_EXT.includes(ext);
+    if (!typeOk) {
+      setError("Format file harus PDF atau Word (.pdf, .doc, .docx).");
+      return;
+    }
     if (file.size > MAX_UPLOAD_BYTES) {
-      setError("Ukuran file melebihi 10MB.");
+      setError("Ukuran file melebihi 5MB.");
       return;
     }
     setError("");
@@ -279,7 +291,7 @@ function RealFileUpload({ field, value, onChange, disabled, commonStyle }) {
         >
           {value
             ? `${value.name} · ${formatBytes(value.size)}`
-            : field.placeholder || "Klik untuk pilih file (bentuk apapun, maks 10MB)"}
+            : field.placeholder || "Klik untuk pilih file PDF/Word (maks 5MB)"}
         </span>
         <span style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
           {value && !disabled && (
@@ -301,6 +313,7 @@ function RealFileUpload({ field, value, onChange, disabled, commonStyle }) {
       <input
         ref={inputRef}
         type="file"
+        accept={ALLOWED_UPLOAD_EXT.join(",")}
         disabled={disabled}
         style={{ display: "none" }}
         onChange={(e) => handleFile(e.target.files?.[0])}
