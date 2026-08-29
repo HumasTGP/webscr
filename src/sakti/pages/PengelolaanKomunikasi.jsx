@@ -16,6 +16,7 @@ import {
   bulanFromTanggal,
   kategoriMediaPrefixesFor,
   scoreForKategoriMedia,
+  multiplierForKategoriIsu,
 } from "../../lib/utils";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
@@ -24,6 +25,7 @@ import PageHeader from "../../components/PageHeader";
 import FlowSteps from "../../components/FlowSteps";
 import EmptyState from "../../components/EmptyState";
 import FieldInput from "../../components/FieldInput";
+import ComboManaged from "../../components/ComboManaged";
 import { StatusBadge } from "../../components/Badge";
 
 const SECTION_LABEL = {
@@ -45,7 +47,7 @@ const FIELD_LABEL = {
 
 function totalScoreOf(record) {
   return (record.publikasi || []).reduce(
-    (sum, p) => sum + scoreForKategoriMedia(p.kategoriMedia),
+    (sum, p) => sum + scoreForKategoriMedia(p.kategoriMedia, record.kategori),
     0
   );
 }
@@ -68,7 +70,7 @@ function KpiCard({ value, sub }) {
   );
 }
 
-function PublikasiBlock({ index, pub, onChange, onRemove, removable }) {
+function PublikasiBlock({ index, pub, onChange, onRemove, removable, kategoriIsu }) {
   const katOptions = useMemo(() => {
     const prefixes = kategoriMediaPrefixesFor(pub.mediaPemberitaan);
     return OPT.komunikasiKategoriMedia.filter((k) =>
@@ -76,7 +78,9 @@ function PublikasiBlock({ index, pub, onChange, onRemove, removable }) {
     );
   }, [pub.mediaPemberitaan]);
 
-  const score = scoreForKategoriMedia(pub.kategoriMedia);
+  const baseScore = scoreForKategoriMedia(pub.kategoriMedia);
+  const score = scoreForKategoriMedia(pub.kategoriMedia, kategoriIsu);
+  const multiplier = multiplierForKategoriIsu(kategoriIsu);
 
   const set = (key, val) => {
     const next = { ...pub, [key]: val };
@@ -163,7 +167,7 @@ function PublikasiBlock({ index, pub, onChange, onRemove, removable }) {
         <div style={{ flex: "1 1 160px", maxWidth: 200 }}>
           <label style={FIELD_LABEL}>
             Nomor rilis{" "}
-            <span style={{ fontWeight: 400, color: T.muted }}>(otomatis lanjut nomor)</span>
+            <span style={{ fontWeight: 400, color: T.muted }}>(opsional)</span>
           </label>
           <FieldInput
             field={{ type: "number" }}
@@ -172,7 +176,7 @@ function PublikasiBlock({ index, pub, onChange, onRemove, removable }) {
           />
         </div>
 
-        <div style={{ flex: "1 1 100px", display: "flex", alignItems: "flex-end" }}>
+        <div style={{ flex: "1 1 140px", display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 4 }}>
           <span
             style={{
               background: T.blueSoft,
@@ -181,17 +185,36 @@ function PublikasiBlock({ index, pub, onChange, onRemove, removable }) {
               fontWeight: 700,
               padding: "6px 12px",
               borderRadius: 999,
+              display: "inline-block",
+              width: "fit-content",
             }}
           >
             Score {score}
           </span>
+          {!!pub.kategoriMedia && (
+            <span style={{ fontSize: 10.5, color: T.muted }}>
+              {baseScore} (dasar) × {multiplier} ({kategoriIsu || "-"})
+            </span>
+          )}
         </div>
       </div>
     </Card>
   );
 }
 
-export default function PengelolaanKomunikasi({ list, setList, notify }) {
+export default function PengelolaanKomunikasi({
+  list,
+  setList,
+  notify,
+  narasumberOptions,
+  setNarasumberOptions,
+}) {
+  // Fallback lokal kalau parent belum kirim prop (mis. dipakai di tempat lain
+  // tanpa wiring baru) — supaya komponen tetap jalan tanpa error.
+  const [localNarasumberOptions, setLocalNarasumberOptions] = useState(OPT.komunikasiNarasumber);
+  const narOptions = narasumberOptions ?? localNarasumberOptions;
+  const setNarOptions = setNarasumberOptions ?? setLocalNarasumberOptions;
+
   const [mode, setMode] = useState("list"); // list | wizard | detail
   const [step, setStep] = useState(1);
   const [editingId, setEditingId] = useState(null);
@@ -201,11 +224,6 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
   const [deleteId, setDeleteId] = useState(null);
   const [monthlyOpen, setMonthlyOpen] = useState(false);
 
-  const suggestNomorRilis = () => {
-    const all = list.flatMap((r) => r.publikasi || []).map((p) => Number(p.nomorRilis) || 0);
-    return all.length ? Math.max(...all) + 1 : 1;
-  };
-
   const blankPub = () => ({
     id: uid("PUB"),
     mediaPemberitaan: "Social Media",
@@ -213,7 +231,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
     namaMedia: "",
     link: "",
     kategoriMedia: "",
-    nomorRilis: suggestNomorRilis(),
+    nomorRilis: "",
   });
 
   const startAdd = () => {
@@ -326,9 +344,9 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
             >
               <span>
                 {p.mediaPemberitaan === "Social Media" ? p.jenisAkunMedsos : p.mediaPemberitaan}
-                {p.namaMedia ? ` · ${p.namaMedia}` : ""} · {p.kategoriMedia || "-"} · No. rilis {p.nomorRilis ?? "-"}
+                {p.namaMedia ? ` · ${p.namaMedia}` : ""} · {p.kategoriMedia || "-"} · No. rilis {p.nomorRilis || "-"}
               </span>
-              <b style={{ color: T.blue }}>{scoreForKategoriMedia(p.kategoriMedia)}</b>
+              <b style={{ color: T.blue }}>{scoreForKategoriMedia(p.kategoriMedia, detailRecord.kategori)}</b>
             </div>
           ))}
 
@@ -345,7 +363,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
   // ---------------- WIZARD ----------------
   if (mode === "wizard") {
     const stepsLabels = ["Isi Formulir", "Konfirmasi", "Simpan"];
-    const totalScore = pubs.reduce((n, p) => n + scoreForKategoriMedia(p.kategoriMedia), 0);
+    const totalScore = pubs.reduce((n, p) => n + scoreForKategoriMedia(p.kategoriMedia, values.kategori), 0);
 
     return (
       <div>
@@ -387,11 +405,13 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
                 />
               </div>
               <div style={{ flex: "1 1 220px", maxWidth: 320 }}>
-                <label style={FIELD_LABEL}>Narasumber</label>
-                <FieldInput
-                  field={{ type: "select", label: "narasumber", options: OPT.komunikasiNarasumber, allowManual: true }}
+                <ComboManaged
+                  label="Narasumber"
                   value={values.narasumber}
+                  options={narOptions}
                   onChange={(v) => setValues({ ...values, narasumber: v })}
+                  onOptions={setNarOptions}
+                  placeholder="Pilih narasumber…"
                 />
               </div>
               <div style={{ flex: "1 1 100%" }}>
@@ -435,6 +455,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
                 index={i}
                 pub={p}
                 removable={pubs.length > 1}
+                kategoriIsu={values.kategori}
                 onChange={(next) => setPubs(pubs.map((x) => (x.id === p.id ? next : x)))}
                 onRemove={() => setPubs(pubs.filter((x) => x.id !== p.id))}
               />
@@ -497,7 +518,7 @@ export default function PengelolaanKomunikasi({ list, setList, notify }) {
                   ))}
                   <div style={{ flex: "0 0 auto", alignSelf: "flex-end" }}>
                     <span style={{ background: T.blueSoft, color: T.blue, fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 999 }}>
-                      Score {scoreForKategoriMedia(p.kategoriMedia)}
+                      Score {scoreForKategoriMedia(p.kategoriMedia, values.kategori)}
                     </span>
                   </div>
                 </div>

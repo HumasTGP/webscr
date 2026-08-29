@@ -206,6 +206,7 @@ export default function App() {
   const [vendors, setVendors] = useState(() => seed("VND", VENDOR_SEED));
   const [proposals, setProposals] = useState(() => seed("PRP", PROPOSAL_SEED));
   const [konten, setKonten] = useState(() => seed("KTN", KONTEN_SEED));
+  const [komunikasiNarasumberOptions, setKomunikasiNarasumberOptions] = useState(OPT.komunikasiNarasumber);
   const [evaluasi, setEvaluasi] = useState([]);
   const [history, setHistory] = useState([]);
   const [mitraList, setMitraList] = useState(() => seed("MTR", MITRA_SEED));
@@ -327,6 +328,8 @@ export default function App() {
           list={konten}
           setList={setKonten}
           notify={notify}
+          narasumberOptions={komunikasiNarasumberOptions}
+          setNarasumberOptions={setKomunikasiNarasumberOptions}
         />
       ),
       "mitra-overview": (
@@ -609,7 +612,7 @@ export default function App() {
     [
       user,
       rab, tor, bast, pakta, bapp, lmp1List, lmp2List, laporan, vendors, history,
-      proposals, konten, evaluasi, rabIdOptions, packages, users, rka,
+      proposals, konten, komunikasiNarasumberOptions, evaluasi, rabIdOptions, packages, users, rka,
       rabByKategori, rabIdOptionsByKategori, mitraList,
       nonpoSubmissions, formVerifList, nonpoCombo, dokumentasiDocs, rabIdsWithDokumentasi,
       paymentPackages,

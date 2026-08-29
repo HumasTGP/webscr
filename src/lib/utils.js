@@ -76,21 +76,111 @@ export function kategoriMediaPrefixesFor(mediaPemberitaan) {
   return [];
 }
 
-export function scoreForKategoriMedia(kategoriMedia) {
+const KATEGORI_MEDIA_SCORE = {
+  "TV - Cnbc": 100, "TV - Global Tv": 100, "TV - Indosiar": 100, "TV - Inews": 100,
+  "TV - Kompas Tv": 100, "TV - Metro Tv": 100, "TV - Mnc Tv": 100, "TV - Rcti": 100,
+  "TV - Sctv": 100, "TV - Sea Today": 100, "TV - Trans 7": 100, "TV - Trans Tv": 100,
+  "TV - Tv One": 100, "TV - Local & Lainnya Tv": 10,
+
+  "Radio - Elshinta": 25, "Radio - Gen Fm": 25, "Radio - Iradio": 25, "Radio - Kiss Fm": 25,
+  "Radio - Most Fm": 25, "Radio - Prambors Fm": 25, "Radio - Rri Pro 1 Banten": 25,
+  "Radio - Rri Pro 1 Jakarta": 25, "Radio - Rri Pro 2 Jakarta": 25, "Radio - Trijaya Fm": 25,
+  "Radio - Local & Lainnya Radio": 10,
+
+  "Media Cetak - Bisnis Indonesia": 50, "Media Cetak - Harian Kontan": 50,
+  "Media Cetak - Investor Daily": 50, "Media Cetak - Jawapos": 50, "Media Cetak - Kompas": 50,
+  "Media Cetak - Kontan Tabloid": 50, "Media Cetak - Koran Sindo": 50,
+  "Media Cetak - Koran Tempo": 50, "Media Cetak - Majalah Tempo": 50,
+  "Media Cetak - Media Indonesia": 50, "Media Cetak - Rakyat Merdeka": 50,
+  "Media Cetak - Local & Lainnya Media Cetak": 5,
+
+  "Media Online - Antaranews.com": 25, "Media Online - Bbc News": 25,
+  "Media Online - Berita Satu.com": 25, "Media Online - Bisnis.com": 25,
+  "Media Online - Cnbc Indonesia": 25, "Media Online - Cnn Indonesia": 25,
+  "Media Online - Detik.com": 25, "Media Online - Idn Times": 25,
+  "Media Online - Idxchannel.com": 25, "Media Online - Inews.id": 25,
+  "Media Online - Investor.id": 25, "Media Online - Jawapos.com": 25,
+  "Media Online - Jpnn.com": 25, "Media Online - Kompas.com": 25,
+  "Media Online - Kontan.co.id": 25, "Media Online - Kumparan.com": 25,
+  "Media Online - Liputan6.com": 25, "Media Online - Medcom.id": 25,
+  "Media Online - Merdeka.com": 25, "Media Online - Okezone": 25,
+  "Media Online - Pikiran-Rakyat.com": 25, "Media Online - Republika.co.id": 25,
+  "Media Online - Sindonews.com": 25, "Media Online - Suara.com": 25,
+  "Media Online - Tempo.co": 25, "Media Online - The Jakarta Post": 25,
+  "Media Online - Tirto.id": 25, "Media Online - Tribunnews.com": 25,
+  "Media Online - Viva.co.id": 25, "Media Online - Warta Ekonomi": 25,
+  "Media Online - Warta Kota": 25, "Media Online - Local & Lainnya Media Online": 1,
+
+  "Media Sosial - Twitter Views/Like <=99": 0, "Media Sosial - Twitter Views/Like >=100": 1,
+  "Media Sosial - Twitter Views/Like >=1000": 5, "Media Sosial - Twitter Views/Like >=5000": 10,
+  "Media Sosial - Twitter Views/Like >=10000": 15, "Media Sosial - Twitter Views/Like >=50000": 50,
+  "Media Sosial - Twitter Views/Like >=100000": 100,
+
+  "Media Sosial - Facebook Views/Like <=99": 0, "Media Sosial - Facebook Views/Like >=100": 1,
+  "Media Sosial - Facebook Views/Like >=1000": 5, "Media Sosial - Facebook Views/Like >=5000": 10,
+  "Media Sosial - Facebook Views/Like >=10000": 15, "Media Sosial - Facebook Views/Like >=50000": 50,
+  "Media Sosial - Facebook Views/Like >=100000": 100,
+
+  "Media Sosial - Threads Views/Like <=99": 0, "Media Sosial - Threads Views/Like >=100": 1,
+  "Media Sosial - Threads Views/Like >=1000": 5, "Media Sosial - Threads Views/Like >=5000": 10,
+  "Media Sosial - Threads Views/Like >=10000": 15, "Media Sosial - Threads Views/Like >=50000": 50,
+  "Media Sosial - Threads Views/Like >=100000": 100,
+
+  "Media Sosial - Instagram Feeds Views/Like <=99": 0, "Media Sosial - Instagram Feeds Views/Like >=100": 5,
+  "Media Sosial - Instagram Feeds Views/Like >=1000": 10, "Media Sosial - Instagram Feeds Views/Like >=5000": 15,
+  "Media Sosial - Instagram Feeds Views/Like >=10000": 50, "Media Sosial - Instagram Feeds Views/Like >=50000": 100,
+  "Media Sosial - Instagram Feeds Views/Like >=100000": 200,
+
+  "Media Sosial - Instagram Reels Views/Like <=99": 0, "Media Sosial - Instagram Reels Views/Like >=100": 5,
+  "Media Sosial - Instagram Reels Views/Like >=1000": 15, "Media Sosial - Instagram Reels Views/Like >=5000": 25,
+  "Media Sosial - Instagram Reels Views/Like >=10000": 50, "Media Sosial - Instagram Reels Views/Like >=50000": 150,
+  "Media Sosial - Instagram Reels Views/Like >=100000": 300,
+
+  "Media Sosial - Tiktok Views/Like <=99": 0, "Media Sosial - Tiktok Views/Like >=100": 5,
+  "Media Sosial - Tiktok Views/Like >=1000": 15, "Media Sosial - Tiktok Views/Like >=5000": 25,
+  "Media Sosial - Tiktok Views/Like >=10000": 50, "Media Sosial - Tiktok Views/Like >=50000": 150,
+  "Media Sosial - Tiktok Views/Like >=100000": 300,
+
+  "Media Sosial - Youtube Short Views/Like <=99": 0, "Media Sosial - Youtube Short Views/Like >=100": 5,
+  "Media Sosial - Youtube Short Views/Like >=1000": 15, "Media Sosial - Youtube Short Views/Like >=5000": 20,
+  "Media Sosial - Youtube Short Views/Like >=10000": 50, "Media Sosial - Youtube Short Views/Like >=50000": 150,
+  "Media Sosial - Youtube Short Views/Like >=100000": 300,
+
+  "Media Sosial - Youtube Video Views/Like <=99": 0, "Media Sosial - Youtube Video Views/Like >=100": 25,
+  "Media Sosial - Youtube Video Views/Like >=1000": 50, "Media Sosial - Youtube Video Views/Like >=5000": 75,
+  "Media Sosial - Youtube Video Views/Like >=10000": 125, "Media Sosial - Youtube Video Views/Like >=50000": 200,
+  "Media Sosial - Youtube Video Views/Like >=100000": 400,
+
+  "Media Sosial - KOL Instagram Views/Like >=5000": 50, "Media Sosial - KOL Instagram Views/Like >=10000": 75,
+  "Media Sosial - KOL Instagram Views/Like >=50000": 250, "Media Sosial - KOL Instagram Views/Like >=100000": 500,
+
+  "Media Sosial - KOL Tiktok Views/Like >=5000": 50, "Media Sosial - KOL Tiktok Views/Like >=10000": 75,
+  "Media Sosial - KOL Tiktok Views/Like >=50000": 250, "Media Sosial - KOL Tiktok Views/Like >=100000": 500,
+
+  "Media Sosial - Homeless Media Reels Views/Like >=5000": 50, "Media Sosial - Homeless Media Reels Views/Like >=10000": 75,
+  "Media Sosial - Homeless Media Reels Views/Like >=50000": 250, "Media Sosial - Homeless Media Reels Views/Like >=100000": 500,
+
+  "Media Sosial - Homeless Media Feeds Views/Like >=5000": 45, "Media Sosial - Homeless Media Feeds Views/Like >=10000": 70,
+  "Media Sosial - Homeless Media Feeds Views/Like >=50000": 150, "Media Sosial - Homeless Media Feeds Views/Like >=100000": 300,
+};
+
+export function multiplierForKategoriIsu(kategori) {
+  if (!kategori) return 1;
+  if (kategori.startsWith("B1.")) return 3;
+  if (kategori.startsWith("B2.")) return 2;
+  if (kategori.startsWith("B3.")) return 1;
+  return 1;
+}
+
+export function baseScoreForKategoriMedia(kategoriMedia) {
   if (!kategoriMedia) return 0;
-  if (kategoriMedia.startsWith("TV -")) return 20;
-  if (kategoriMedia.startsWith("Media Cetak -")) return 15;
-  if (kategoriMedia.startsWith("Media Elektronik -")) return 15;
-  if (kategoriMedia.startsWith("Radio -")) return 10;
-  if (kategoriMedia.startsWith("Media Online -")) return 10;
-  if (kategoriMedia.startsWith("Media Sosial -")) {
-    if (kategoriMedia.includes("Trending > 10000")) return 20;
-    if (kategoriMedia.includes("Trending 1000-10000")) return 15;
-    if (kategoriMedia.includes("> 5000")) return 15;
-    if (kategoriMedia.includes("1000-5000")) return 10;
-    if (kategoriMedia.includes("< 1000")) return 5;
-  }
-  return 0;
+  return KATEGORI_MEDIA_SCORE[kategoriMedia] || 0;
+}
+
+export function scoreForKategoriMedia(kategoriMedia, kategoriIsu) {
+  const base = baseScoreForKategoriMedia(kategoriMedia);
+  if (!kategoriIsu) return base;
+  return base * multiplierForKategoriIsu(kategoriIsu);
 }
 
 export function nextIdFor(prefix, items, idKey = "id") {
