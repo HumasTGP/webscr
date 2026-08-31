@@ -1,6 +1,7 @@
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
-import { saveAs } from "file-saver";
+import FileSaver from "file-saver";
+const saveAs = FileSaver.saveAs || FileSaver;
 
 export async function generateDocxFromTemplate(templateUrl, data, outputName) {
   const res = await fetch(templateUrl);
