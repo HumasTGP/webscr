@@ -208,15 +208,15 @@ function LiveClock() {
   );
 }
 
-// ---------------- grafik garis: dokumen masuk per kategori & periode -------
+// ---------------- grafik bar berkelompok: dokumen masuk per kategori & periode
 const PERIODE_OPTIONS = [
   { key: "mingguan", label: "Mingguan" },
   { key: "bulanan", label: "Bulanan" },
   { key: "tahunan", label: "Tahunan" },
 ];
 
-const CHART_LINES = [
-  { key: "proposal-rekap", field: "proposal", label: "Proposal", color: "#7C4DBF" },
+const CHART_BARS = [
+  { key: "proposal-rekap", field: "proposal", label: "Proposal", color: T.success },
   { key: "nonpo-overview", field: "nonPo", label: "NON PO", color: T.blue },
   { key: "po-overview", field: "po", label: "PO", color: T.navy },
   { key: "cc-overview", field: "cc", label: "Cash Card", color: T.yellowText },
@@ -231,14 +231,30 @@ function startOfWeek(d) {
 }
 
 const MONTH_SHORT = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+const MONTH_FULL = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
-function pad2(n) { return String(n).padStart(2, "0"); }
-function ddmmyy(d) { return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${String(d.getFullYear()).slice(-2)}`; }
+// Label ringkas buat sumbu-X ("24–30 Agu"), dan label lengkap buat tooltip
+// ("24–30 Agustus 2026" / lintas bulan "28 Agu–3 Sep 2026" / lintas tahun).
+function weekLabels(from, toInclusive) {
+  const sameMonth = from.getMonth() === toInclusive.getMonth() && from.getFullYear() === toInclusive.getFullYear();
+  const short = sameMonth
+    ? `${from.getDate()}–${toInclusive.getDate()} ${MONTH_SHORT[from.getMonth()]}`
+    : `${from.getDate()} ${MONTH_SHORT[from.getMonth()]}–${toInclusive.getDate()} ${MONTH_SHORT[toInclusive.getMonth()]}`;
+  const sameYear = from.getFullYear() === toInclusive.getFullYear();
+  const full = sameMonth
+    ? `${from.getDate()}–${toInclusive.getDate()} ${MONTH_FULL[from.getMonth()]} ${toInclusive.getFullYear()}`
+    : sameYear
+      ? `${from.getDate()} ${MONTH_FULL[from.getMonth()]}–${toInclusive.getDate()} ${MONTH_FULL[toInclusive.getMonth()]} ${toInclusive.getFullYear()}`
+      : `${from.getDate()} ${MONTH_FULL[from.getMonth()]} ${from.getFullYear()}–${toInclusive.getDate()} ${MONTH_FULL[toInclusive.getMonth()]} ${toInclusive.getFullYear()}`;
+  return { short, full };
+}
 
 // Titik-titik waktu per periode:
-// - mingguan: beberapa minggu kalender terakhir (Senin s.d. Minggu), label
-//   rentang tanggal "dd/mm/yy - dd/mm/yy"
-// - bulanan: 12 bulan tahun berjalan penuh, scrollable — bukan di-squeeze
+// - mingguan: beberapa minggu kalender terakhir (Senin s.d. Minggu, interval 7
+//   hari yang konsisten — bukan dibagi berdasar jumlah data), label ringkas
+//   "24–30 Agu" buat sumbu-X dan label lengkap "24–30 Agustus 2026" buat tooltip
+// - bulanan: 12 bulan tahun berjalan penuh (Januari 31 hari, Februari ikut
+//   leap year lewat Date(y, m+1, 0), dst — gak diasumsikan sama), scrollable
 // - tahunan: 2025 s.d. tahun berjalan + 1 (otomatis nambah tiap tahun baru),
 //   minimal tetap menampilkan sampai 2027
 function buildPoints(periode, now) {
@@ -251,19 +267,20 @@ function buildPoints(periode, now) {
       from.setDate(from.getDate() - i * 7);
       const to = new Date(from);
       to.setDate(to.getDate() + 7);
-      const to_inclusive = new Date(to.getTime() - 86400000); // Minggu (hari terakhir minggu itu)
-      points.push({ label: `${ddmmyy(from)} - ${ddmmyy(to_inclusive)}`, from, to });
+      const toInclusive = new Date(to.getTime() - 86400000); // Minggu (hari terakhir minggu itu)
+      const { short, full } = weekLabels(from, toInclusive);
+      points.push({ label: short, labelFull: full, from, to });
     }
   } else if (periode === "bulanan") {
     const y = now.getFullYear();
     for (let m = 0; m < 12; m++) {
-      points.push({ label: MONTH_SHORT[m], from: new Date(y, m, 1), to: new Date(y, m + 1, 1) });
+      points.push({ label: MONTH_SHORT[m], labelFull: `${MONTH_FULL[m]} ${y}`, from: new Date(y, m, 1), to: new Date(y, m + 1, 1) });
     }
   } else {
     const startYear = 2025;
     const endYear = Math.max(2027, now.getFullYear() + 1);
     for (let y = startYear; y <= endYear; y++) {
-      points.push({ label: String(y), from: new Date(y, 0, 1), to: new Date(y + 1, 0, 1) });
+      points.push({ label: String(y), labelFull: String(y), from: new Date(y, 0, 1), to: new Date(y + 1, 0, 1) });
     }
   }
   return points;
@@ -282,6 +299,7 @@ function buildSeries(submissions, proposals, periode, now) {
     });
     return {
       label: p.label,
+      labelFull: p.labelFull,
       proposal: proposalsInRange.length,
       nonPo: subsInRange.filter((s) => s.kategori === "NON PO").length,
       po: subsInRange.filter((s) => s.kategori === "PO").length,
@@ -290,7 +308,7 @@ function buildSeries(submissions, proposals, periode, now) {
   });
 }
 
-function KategoriLineChart({ submissions, proposals, goto }) {
+function KategoriBarChart({ submissions, proposals, goto }) {
   const [periode, setPeriode] = useState("mingguan");
   // "now" disimpan sebagai state (bukan langsung new Date() di dalam useMemo)
   // dan di-refresh tiap beberapa menit, supaya begitu jam berganti ke minggu
@@ -307,44 +325,59 @@ function KategoriLineChart({ submissions, proposals, goto }) {
     [submissions, proposals, periode, now]
   );
 
-  // Bulanan di-scroll horizontal: container dibatasi max-width supaya cuma
-  // ~6 titik (bulan) yang keliatan di awal, sisanya discroll (drag/geser
-  // biasa, atau klik tombol panah kecil di kanan judul).
+  const [hover, setHover] = useState(null); // { left, top, gi, bi, bar, value, periodLabel }
+  const cardRef = useRef(null);
+
+  // Bulanan discroll horizontal: tiap grup (bulan) punya lebar tetap yang
+  // nyaman dibaca, sisanya discroll (drag/geser biasa, atau tombol panah).
   const scrollable = periode === "bulanan";
-  const H = 200, padL = 34, padR = 16, padT = 14, padB = 26;
-  const pointGap = scrollable ? 62 : null;
-  const innerW = scrollable ? pointGap * (series.length - 1) : undefined;
-  const W = scrollable ? innerW + padL + padR : 760;
-  const plotW = scrollable ? innerW : W - padL - padR;
+  const H = 210, padL = 34, padR = 16, padT = 14, padB = periode === "mingguan" ? 34 : 26;
+  const groupGap = 78;
+  const plotW = scrollable ? groupGap * series.length : 760 - padL - padR;
+  const W = scrollable ? plotW + padL + padR : 760;
   const innerH = H - padT - padB;
   const scrollBoxRef = useRef(null);
-  const scrollByPoint = (dir) => {
-    scrollBoxRef.current?.scrollBy({ left: dir * pointGap, behavior: "smooth" });
+  const scrollByGroup = (dir) => {
+    scrollBoxRef.current?.scrollBy({ left: dir * groupGap, behavior: "smooth" });
   };
 
-  const maxVal = Math.max(1, ...series.flatMap((s) => CHART_LINES.map((l) => s[l.field])));
+  const maxVal = Math.max(1, ...series.flatMap((s) => CHART_BARS.map((b) => s[b.field])));
   const niceMax = Math.ceil(maxVal / 4) * 4 || 4;
-  const stepX = series.length > 1 ? plotW / (series.length - 1) : 0;
+  const groupWidth = series.length > 0 ? plotW / series.length : 0;
+  const barGap = 3;
+  const barWidth = Math.max(6, (groupWidth - barGap * (CHART_BARS.length + 1)) / CHART_BARS.length);
   const yFor = (v) => padT + innerH - (v / niceMax) * innerH;
-  const xFor = (i) => padL + i * stepX;
-
-  const pathFor = (field) =>
-    series.map((s, i) => `${i === 0 ? "M" : "L"} ${xFor(i).toFixed(1)} ${yFor(s[field]).toFixed(1)}`).join(" ");
+  const groupX = (i) => padL + i * groupWidth;
 
   const gridVals = [0, niceMax / 2, niceMax];
 
+  // Tooltip diposisikan pakai koordinat layar sungguhan (bukan persentase dari
+  // total lebar SVG) — biar tetap akurat pas mode bulanan lagi discroll,
+  // karena SVG-nya jauh lebih lebar dari viewport yang keliatan.
+  const showTooltip = (e, gi, bi, bar, value, periodLabel) => {
+    const cardBox = cardRef.current?.getBoundingClientRect();
+    const barBox = e.currentTarget.getBoundingClientRect();
+    if (!cardBox) return;
+    setHover({
+      left: barBox.left + barBox.width / 2 - cardBox.left,
+      top: barBox.top - cardBox.top,
+      gi, bi, bar, value, periodLabel,
+    });
+  };
+
   return (
-    <Card style={{ marginBottom: 20 }}>
+    <div ref={cardRef} style={{ position: "relative", marginBottom: 20 }}>
+    <Card>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
         <div>
           <h3 style={{ fontFamily: font.display, fontSize: 15, margin: 0, color: T.heading, fontWeight: 700 }}>
             Dokumen Masuk
           </h3>
           <div style={{ display: "flex", gap: 12, marginTop: 7, flexWrap: "wrap" }}>
-            {CHART_LINES.map((l) => (
-              <div key={l.key} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: T.muted }}>
-                <span style={{ width: 7, height: 7, borderRadius: 999, background: l.color, display: "inline-block" }} />
-                {l.label}
+            {CHART_BARS.map((b) => (
+              <div key={b.key} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: T.muted }}>
+                <span style={{ width: 7, height: 7, borderRadius: 2, background: b.color, display: "inline-block" }} />
+                {b.label}
               </div>
             ))}
           </div>
@@ -354,7 +387,7 @@ function KategoriLineChart({ submissions, proposals, goto }) {
             {PERIODE_OPTIONS.map((opt) => (
               <button
                 key={opt.key}
-                onClick={() => setPeriode(opt.key)}
+                onClick={() => { setPeriode(opt.key); setHover(null); }}
                 style={{
                   border: "none",
                   borderRadius: 6,
@@ -365,7 +398,7 @@ function KategoriLineChart({ submissions, proposals, goto }) {
                   background: periode === opt.key ? T.card : "transparent",
                   color: periode === opt.key ? T.heading : T.muted,
                   boxShadow: periode === opt.key ? "0 1px 2px rgba(16,24,40,0.08)" : "none",
-                  transition: "background .15s ease",
+                  transition: "background .2s ease, color .2s ease",
                 }}
               >
                 {opt.label}
@@ -375,7 +408,7 @@ function KategoriLineChart({ submissions, proposals, goto }) {
           {scrollable && (
             <button
               type="button"
-              onClick={() => scrollByPoint(1)}
+              onClick={() => scrollByGroup(1)}
               title="Geser ke bulan berikutnya"
               style={{
                 width: 26, height: 26, borderRadius: 999, border: `1px solid ${T.border}`,
@@ -391,9 +424,11 @@ function KategoriLineChart({ submissions, proposals, goto }) {
 
       <div
         ref={scrollBoxRef}
+        className="hide-scrollbar"
         style={{
           width: "100%",
           overflowX: scrollable ? "auto" : "hidden",
+          transition: "opacity .2s ease",
         }}
       >
         <svg
@@ -407,45 +442,74 @@ function KategoriLineChart({ submissions, proposals, goto }) {
             </g>
           ))}
 
-          {CHART_LINES.map((l) => (
-            <path key={l.key} d={pathFor(l.field)} fill="none" stroke={l.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+          {series.map((s, gi) => (
+            <g key={gi}>
+              {CHART_BARS.map((b, bi) => {
+                const val = s[b.field];
+                const bh = (val / niceMax) * innerH;
+                const bx = groupX(gi) + barGap + bi * (barWidth + barGap);
+                const by = yFor(val);
+                const isHovered = hover?.gi === gi && hover?.bi === bi;
+                return (
+                  <rect
+                    key={b.key}
+                    x={bx}
+                    y={by}
+                    width={barWidth}
+                    height={Math.max(0, bh)}
+                    rx={2.5}
+                    fill={b.color}
+                    opacity={isHovered ? 1 : 0.92}
+                    style={{ cursor: "pointer", transition: "opacity .15s ease, transform .15s ease" }}
+                    transform={isHovered ? "translate(0 -2)" : undefined}
+                    onMouseEnter={(e) => showTooltip(e, gi, bi, b, val, s.labelFull)}
+                    onMouseMove={(e) => showTooltip(e, gi, bi, b, val, s.labelFull)}
+                    onMouseLeave={() => setHover(null)}
+                    onClick={() => goto(b.key)}
+                  />
+                );
+              })}
+            </g>
           ))}
 
-          {CHART_LINES.map((l) =>
-            series.map((s, i) => (
-              <circle
-                key={`${l.key}-${i}`}
-                cx={xFor(i)}
-                cy={yFor(s[l.field])}
-                r={2.6}
-                fill={l.color}
-                style={{ cursor: "pointer" }}
-                onClick={() => goto(l.key)}
-              >
-                <title>{`${l.label} · ${s.label}: ${s[l.field]}`}</title>
-              </circle>
-            ))
-          )}
-
-          {series.map((s, i) =>
-            periode === "mingguan" ? (
-              <g key={i}>
-                <text x={xFor(i)} y={H - 12} fontSize={8} fill={T.muted} textAnchor="middle">
-                  {s.label.split(" - ")[0]}
-                </text>
-                <text x={xFor(i)} y={H - 4} fontSize={8} fill={T.muted} textAnchor="middle">
-                  s/d {s.label.split(" - ")[1]}
-                </text>
-              </g>
-            ) : (
-              <text key={i} x={xFor(i)} y={H - 7} fontSize={9.5} fill={T.muted} textAnchor="middle">
-                {s.label}
-              </text>
-            )
-          )}
+          {series.map((s, i) => (
+            <text key={i} x={groupX(i) + groupWidth / 2} y={H - padB + 16} fontSize={9.5} fill={T.muted} textAnchor="middle">
+              {s.label}
+            </text>
+          ))}
         </svg>
       </div>
+
+      {/* Custom tooltip (bukan title/tooltip bawaan browser) — posisi pakai
+          koordinat layar sungguhan dari bar yang di-hover, jadi tetap akurat
+          walau mode bulanan lagi discroll. */}
+      {hover && (
+        <div
+          style={{
+            position: "absolute",
+            left: hover.left,
+            top: hover.top,
+            transform: "translate(-50%, calc(-100% - 8px))",
+            background: T.heading,
+            color: T.card,
+            borderRadius: 8,
+            padding: "8px 11px",
+            fontSize: 11.5,
+            lineHeight: 1.5,
+            pointerEvents: "none",
+            boxShadow: T.shadowMd,
+            whiteSpace: "nowrap",
+            zIndex: 5,
+            transition: "opacity .15s ease",
+          }}
+        >
+          <div style={{ fontWeight: 700 }}>{hover.bar.label}</div>
+          <div>{hover.value} dokumen</div>
+          <div style={{ color: T.muted, fontSize: 10.5, marginTop: 2 }}>{hover.periodLabel}</div>
+        </div>
+      )}
     </Card>
+    </div>
   );
 }
 
@@ -491,7 +555,7 @@ export default function Dashboard({ data, packages = [], goto, user }) {
       </div>
 
       {/* Grafik dokumen masuk per kategori (NON PO / PO / Cash Card) */}
-      <KategoriLineChart submissions={data.nonpoSubmissions} proposals={data.proposals} goto={goto} />
+      <KategoriBarChart submissions={data.nonpoSubmissions} proposals={data.proposals} goto={goto} />
 
       {/* Stakeholder + RAB tiles */}
       <div
