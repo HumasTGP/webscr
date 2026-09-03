@@ -189,6 +189,52 @@ export const paktaFields = (rabIdOptions) => () => [
   { key: "jabatan", label: "Jabatan" },
 ];
 
+// BAST-CC dan PI-CC - strukturnya PERSIS SAMA kayak BAST/PI NON PO (bastFields/
+// paktaFields di atas), cuma ID-nya diambil dari ccList (Cash Card), bukan RAB.
+export const bastCcFields = (ccIdOptions) => () => [
+  {
+    key: "id",
+    label: "Submission ID",
+    type: "select",
+    options: ccIdOptions,
+    section: "Identitas",
+  },
+  { key: "nomor", label: "Nomor", disabled: true, hint: "otomatis, format submissionId/BAST/KAS/PRIOK/tahun" },
+  { key: "judulBantuan", label: "Judul Bantuan", disabled: true, hint: "otomatis dari Cash Card" },
+  { key: "tanggal", label: "Tanggal", type: "date" },
+  { key: "namaPihakKedua", label: "Nama Pihak Kedua", section: "Pihak Kedua" },
+  { key: "jabatanPihakKedua", label: "Jabatan Pihak Kedua" },
+  { key: "instansiPihakKedua", label: "Instansi/Kedudukan Pihak Kedua" },
+  {
+    key: "jumlahBantuan",
+    label: "Jumlah Bantuan",
+    disabled: true,
+    hint: "otomatis, Rp",
+    full: true,
+  },
+];
+
+export const paktaCcFields = (ccIdOptions) => () => [
+  {
+    key: "id",
+    label: "Submission ID",
+    type: "select",
+    options: ccIdOptions,
+    allowManual: true,
+    section: "Identitas",
+  },
+  { key: "judulBantuan", label: "Judul Bantuan", disabled: true, hint: "otomatis dari Cash Card" },
+  { key: "tanggalPi", label: "Tanggal PI", type: "date" },
+  {
+    key: "lembagaPenerima",
+    label: "Lembaga Penerima Bantuan",
+    full: true,
+    section: "Data Penerima",
+  },
+  { key: "namaPenerima", label: "Nama Penerima" },
+  { key: "jabatan", label: "Jabatan" },
+];
+
 export const laporanFields = (rabIdOptions) => (opsi) => [
   {
     key: "id",
@@ -288,6 +334,18 @@ export const autoFromRab = {
     bidang: r.bidang,
     subBidang: r.subprogram,
     kategoriBantuan: r.kategoriProgram,
+  }),
+};
+
+// Sama kayak autoFromRab, tapi sumbernya ccList (Cash Card berdiri sendiri).
+export const autoFromCc = {
+  bast: (cc) => ({
+    judulBantuan: cc.judulCc,
+    jumlahBantuan: rupiah(cc.saldoKas),
+    nomor: `${cc.id}/BAST/KAS/PRIOK/${new Date().getFullYear()}`,
+  }),
+  pakta: (cc) => ({
+    judulBantuan: cc.judulCc,
   }),
 };
 

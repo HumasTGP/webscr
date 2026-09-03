@@ -12,9 +12,12 @@ import { uid } from "./lib/utils";
 import { formatTanggalPanjang } from "./lib/docxGenerate";
 import {
   autoFromRab,
+  autoFromCc,
   bastFields,
+  bastCcFields,
   laporanFields,
   paktaFields,
+  paktaCcFields,
 } from "./lib/wizardFields";
 
 import Sidebar from "./sakti/components/Sidebar";
@@ -57,6 +60,9 @@ import FormVerifikasiPage from "./sakti/pages/FormVerifikasi";
 import Lampiran1Page from "./sakti/pages/Lampiran1";
 import Lampiran2Page from "./sakti/pages/Lampiran2";
 import NonPoPage, { DEFAULT_COMBO } from "./sakti/pages/NonPoPage";
+import CashCardPage, { DEFAULT_CC_COMBO } from "./sakti/pages/CashCard";
+import DetailCCPage from "./sakti/pages/DetailCC";
+import TtdSerahTerimaPage from "./sakti/pages/TtdSerahTerima";
 import PoErpDataPage from "./sakti/pages/PoErpData";
 import RKAPage from "./sakti/pages/RKAPage";
 import RekapAnggaranPage from "./sakti/pages/RekapAnggaranPage";
@@ -171,6 +177,22 @@ export default function App() {
   const [nonpoCombo, setNonpoCombo] = useState(DEFAULT_COMBO);
   const [laporan, setLaporan] = useState([]);
   const [rka, setRka] = useState([]);
+
+  // ===== Cash Card (berdiri sendiri, TIDAK terhubung ke RAB) =====
+  // ccList  = header Cash Card (Judul CC, Bidang, Saldo Kas, Procost) + field
+  //           Detail CC stage 1 (Nomor Pengajuan, Judul Pengajuan, No. Rekening,
+  //           dst) - digabung di 1 record karena field2 itu 1:1 per Cash Card.
+  // ccItems = baris Item Pengajuan/Penagihan Detail CC (banyak per ccList).
+  // ccBast/ccPakta/ccBapp = sama polanya kayak NON PO/PO tapi sumber ID-nya dari
+  //           ccList, bukan rab.
+  // ccTtd   = TTD Serah Terima - berdiri sendiri, gak terhubung ke Cash Card manapun.
+  const [ccList, setCcList] = useState([]);
+  const [ccItems, setCcItems] = useState([]);
+  const [ccBast, setCcBast] = useState([]);
+  const [ccPakta, setCcPakta] = useState([]);
+  const [ccBapp, setCcBapp] = useState([]);
+  const [ccTtd, setCcTtd] = useState([]);
+  const [ccCombo, setCcCombo] = useState(DEFAULT_CC_COMBO);
 
   const USERS_LS_KEY = "sikas.users.v1";
   const [users, setUsers] = useState(() => {
@@ -382,24 +404,29 @@ export default function App() {
           rabIdsWithDokumentasi={rabIdsWithDokumentasi}
         />
       ),
+      // Cash Card berdiri sendiri - TIDAK pakai NonPoPage/rab lagi (beda dari
+      // NON PO/PO di atas). Detail CC, BAST-CC, PI-CC, BAPP-CC semua sumber
+      // datanya dari ccList, bukan rab.
       "cc-overview": (
-        <NonPoPage
-          rab={rabByKategori["Cash Card"]}
-          lmp1={lmp1List}
-          lmp2={lmp2List}
-          bast={bast.filter((b) => b.kategori === "Cash Card")}
-          pakta={pakta.filter((p) => p.kategori === "Cash Card")}
-          bapp={bapp.filter((b) => b.kategori === "Cash Card")}
-          formVerif={formVerifList}
+        <CashCardPage
+          ccList={ccList} setCcList={setCcList}
+          ccItems={ccItems}
+          ccBast={ccBast} ccPakta={ccPakta} ccBapp={ccBapp}
+          combo={ccCombo} setCombo={setCcCombo}
           notify={notify}
           onNavigate={setActive}
-          kategori="Cash Card"
-          submissions={nonpoSubmissions}
-          setSubmissions={setNonpoSubmissions}
-          combo={nonpoCombo}
-          setCombo={setNonpoCombo}
-          rabIdsWithDokumentasi={rabIdsWithDokumentasi}
         />
+      ),
+      "detail-cc": (
+        <DetailCCPage
+          ccList={ccList} setCcList={setCcList}
+          ccItems={ccItems} setCcItems={setCcItems}
+          combo={ccCombo} setCombo={setCcCombo}
+          notify={notify}
+        />
+      ),
+      "ttd-cc": (
+        <TtdSerahTerimaPage ccTtd={ccTtd} setCcTtd={setCcTtd} notify={notify} />
       ),
       "laporan-nonpo": (
         <GenericWizard
@@ -429,25 +456,6 @@ export default function App() {
           idPrefix="LAP"
           autoFrom={{ key: "id", source: rab, map: autoFromRab.laporan }}
           list={laporan.filter((l) => l.kategori === "PO")}
-          setList={setLaporan}
-          notify={notify}
-          pdfEnabled
-          columns={[
-            { key: "id", label: "ID Laporan" },
-            { key: "namaBarang", label: "Nama Barang" },
-            { key: "namaInstansiPenerima", label: "Instansi Penerima" },
-          ]}
-        />
-      ),
-      "laporan-cc": (
-        <GenericWizard
-          title="Laporan - CC"
-          eyebrow="Modul Laporan"
-          description="Laporan realisasi bantuan untuk pengajuan kategori Cash Card."
-          buildFields={laporanFields(rabIdOptionsByKategori["Cash Card"])}
-          idPrefix="LAP"
-          autoFrom={{ key: "id", source: rab, map: autoFromRab.laporan }}
-          list={laporan.filter((l) => l.kategori === "Cash Card")}
           setList={setLaporan}
           notify={notify}
           pdfEnabled
@@ -520,10 +528,12 @@ export default function App() {
       ),
       "log-aktivitas": <LogAktivitasPage history={history} />,
       ...(() => {
+        // Cash Card SENGAJA gak ikut loop ini lagi - BAST-CC/PI-CC/BAPP-CC punya
+        // route sendiri di bawah (autoFrom dari ccList, bukan rab), karena Cash
+        // Card sekarang berdiri sendiri dan gak punya LMP1/LMP2/Form Verifikasi.
         const kategoriList = [
           { suffix: "nonpo", kategori: "NON PO" },
           { suffix: "po", kategori: "PO" },
-          { suffix: "cc", kategori: "Cash Card" },
         ];
         const routes = {};
         kategoriList.forEach(({ suffix, kategori }) => {
@@ -593,6 +603,60 @@ export default function App() {
       // bukan dokumen lengkap kayak NON PO/CC.
       "bast-po": <PoErpDataPage rab={rabByKategori["PO"]} notify={notify} />,
       "bapp-po": <PoErpDataPage rab={rabByKategori["PO"]} notify={notify} />,
+      // BAST-CC/PI-CC/BAPP-CC - Cash Card berdiri sendiri, ID-nya dari ccList
+      // (bukan rab). Struktur wizard tetap sama polanya dengan NON PO/PO.
+      "bast-cc": (
+        <GenericWizard
+          title="BAST - Cash Card"
+          eyebrow="Modul BAST"
+          description="Berita Acara Serah Terima untuk pengajuan Cash Card."
+          buildFields={bastCcFields(ccList.map((r) => r.id), ccCombo.vendor)}
+          idPrefix="BAST"
+          autoFrom={{ key: "id", source: ccList, map: autoFromCc.bast }}
+          list={ccBast}
+          setList={setCcBast}
+          notify={notify}
+          pdfEnabled
+          docxTemplate={DOCX_TEMPLATES.bast}
+          buildDocPreview={(v) => <BastDocPreview values={v} />}
+          columns={[
+            { key: "id", label: "Submission ID" },
+            { key: "nomor", label: "Nomor" },
+            { key: "jumlahBantuan", label: "Jumlah Bantuan" },
+          ]}
+        />
+      ),
+      "pakta-cc": (
+        <GenericWizard
+          title="PI - Cash Card"
+          eyebrow="Modul Pakta Integritas"
+          description="Pakta Integritas penerima bantuan untuk pengajuan Cash Card."
+          buildFields={paktaCcFields(ccList.map((r) => r.id), ccCombo.vendor)}
+          idPrefix="PI"
+          autoFrom={{ key: "id", source: ccList, map: autoFromCc.pakta }}
+          list={ccPakta}
+          setList={setCcPakta}
+          notify={notify}
+          pdfEnabled
+          docxTemplate={DOCX_TEMPLATES.pakta}
+          buildDocPreview={(v) => <PaktaDocPreview values={v} />}
+          columns={[
+            { key: "id", label: "Submission ID" },
+            { key: "namaPenerima", label: "Nama Penerima" },
+            { key: "namaMitra", label: "Nama Mitra" },
+          ]}
+        />
+      ),
+      "bapp-cc": (
+        <BAPPPage
+          rab={ccList}
+          idKey="id"
+          idLabel="Submission ID"
+          list={ccBapp}
+          setList={setCcBapp}
+          notify={notify}
+        />
+      ),
       dokumentasi: <DokumentasiPage rab={rab} setRab={setRab} notify={notify} docs={dokumentasiDocs} setDocs={setDokumentasiDocs} />,
       "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
       eviden: <EvidenPage rab={rab} notify={notify} />,
@@ -616,6 +680,7 @@ export default function App() {
       rabByKategori, rabIdOptionsByKategori, mitraList,
       nonpoSubmissions, formVerifList, nonpoCombo, dokumentasiDocs, rabIdsWithDokumentasi,
       paymentPackages,
+      ccList, ccItems, ccBast, ccPakta, ccBapp, ccTtd, ccCombo,
     ]
   );
 

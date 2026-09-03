@@ -111,9 +111,9 @@ export const OPT = {
   ],
 
   komunikasiKategori: [
-  "B1. Grand Theme",
-  "B2. Operational Issue",
-  "B3. Addition Issue",
+    "B1. Grand Theme",
+    "B2. Operational Issue",
+    "B3. Addition Issue",
   ],
   komunikasiNarasumber: [
     "Buyung Arianto",
@@ -137,71 +137,90 @@ export const OPT = {
     "Youtube Korporat",
   ],
 
+  // Sumber skor: NAMA_UNIT_SKORING_AGSET_AGUSTUS_2026.xlsx (sheet TEMP).
+  // Skor dasar tiap opsi ada di scoreForKategoriMedia() (src/lib/utils.js) —
+  // daftar di bawah ini HANYA daftar pilihan dropdown, bukan sumber skor.
   komunikasiKategoriMedia: [
-  "TV - Cnbc", "TV - Global Tv", "TV - Indosiar", "TV - Inews", "TV - Kompas Tv",
-  "TV - Metro Tv", "TV - Mnc Tv", "TV - Rcti", "TV - Sctv", "TV - Sea Today",
-  "TV - Trans 7", "TV - Trans Tv", "TV - Tv One", "TV - Local & Lainnya Tv",
-  "Radio - Elshinta", "Radio - Gen Fm", "Radio - Iradio", "Radio - Kiss Fm",
-  "Radio - Most Fm", "Radio - Prambors Fm", "Radio - Rri Pro 1 Banten",
-  "Radio - Rri Pro 1 Jakarta", "Radio - Rri Pro 2 Jakarta", "Radio - Trijaya Fm",
-  "Radio - Local & Lainnya Radio",
-  "Media Cetak - Bisnis Indonesia", "Media Cetak - Harian Kontan", "Media Cetak - Investor Daily",
-  "Media Cetak - Jawapos", "Media Cetak - Kompas", "Media Cetak - Kontan Tabloid",
-  "Media Cetak - Koran Sindo", "Media Cetak - Koran Tempo", "Media Cetak - Majalah Tempo",
-  "Media Cetak - Media Indonesia", "Media Cetak - Rakyat Merdeka",
-  "Media Cetak - Local & Lainnya Media Cetak",
-  "Media Online - Antaranews.com", "Media Online - Bbc News", "Media Online - Berita Satu.com",
-  "Media Online - Bisnis.com", "Media Online - Cnbc Indonesia", "Media Online - Cnn Indonesia",
-  "Media Online - Detik.com", "Media Online - Idn Times", "Media Online - Idxchannel.com",
-  "Media Online - Inews.id", "Media Online - Investor.id", "Media Online - Jawapos.com",
-  "Media Online - Jpnn.com", "Media Online - Kompas.com", "Media Online - Kontan.co.id",
-  "Media Online - Kumparan.com", "Media Online - Liputan6.com", "Media Online - Medcom.id",
-  "Media Online - Merdeka.com", "Media Online - Okezone", "Media Online - Pikiran-Rakyat.com",
-  "Media Online - Republika.co.id", "Media Online - Sindonews.com", "Media Online - Suara.com",
-  "Media Online - Tempo.co", "Media Online - The Jakarta Post", "Media Online - Tirto.id",
-  "Media Online - Tribunnews.com", "Media Online - Viva.co.id", "Media Online - Warta Ekonomi",
-  "Media Online - Warta Kota", "Media Online - Local & Lainnya Media Online",
-  "Media Sosial - Twitter Views/Like <=99", "Media Sosial - Twitter Views/Like >=100",
-  "Media Sosial - Twitter Views/Like >=1000", "Media Sosial - Twitter Views/Like >=5000",
-  "Media Sosial - Twitter Views/Like >=10000", "Media Sosial - Twitter Views/Like >=50000",
-  "Media Sosial - Twitter Views/Like >=100000",
-  "Media Sosial - Facebook Views/Like <=99", "Media Sosial - Facebook Views/Like >=100",
-  "Media Sosial - Facebook Views/Like >=1000", "Media Sosial - Facebook Views/Like >=5000",
-  "Media Sosial - Facebook Views/Like >=10000", "Media Sosial - Facebook Views/Like >=50000",
-  "Media Sosial - Facebook Views/Like >=100000",
-  "Media Sosial - Threads Views/Like <=99", "Media Sosial - Threads Views/Like >=100",
-  "Media Sosial - Threads Views/Like >=1000", "Media Sosial - Threads Views/Like >=5000",
-  "Media Sosial - Threads Views/Like >=10000", "Media Sosial - Threads Views/Like >=50000",
-  "Media Sosial - Threads Views/Like >=100000",
-  "Media Sosial - Instagram Feeds Views/Like <=99", "Media Sosial - Instagram Feeds Views/Like >=100",
-  "Media Sosial - Instagram Feeds Views/Like >=1000", "Media Sosial - Instagram Feeds Views/Like >=5000",
-  "Media Sosial - Instagram Feeds Views/Like >=10000", "Media Sosial - Instagram Feeds Views/Like >=50000",
-  "Media Sosial - Instagram Feeds Views/Like >=100000",
-  "Media Sosial - Instagram Reels Views/Like <=99", "Media Sosial - Instagram Reels Views/Like >=100",
-  "Media Sosial - Instagram Reels Views/Like >=1000", "Media Sosial - Instagram Reels Views/Like >=5000",
-  "Media Sosial - Instagram Reels Views/Like >=10000", "Media Sosial - Instagram Reels Views/Like >=50000",
-  "Media Sosial - Instagram Reels Views/Like >=100000",
-  "Media Sosial - Tiktok Views/Like <=99", "Media Sosial - Tiktok Views/Like >=100",
-  "Media Sosial - Tiktok Views/Like >=1000", "Media Sosial - Tiktok Views/Like >=5000",
-  "Media Sosial - Tiktok Views/Like >=10000", "Media Sosial - Tiktok Views/Like >=50000",
-  "Media Sosial - Tiktok Views/Like >=100000",
-  "Media Sosial - Youtube Short Views/Like <=99", "Media Sosial - Youtube Short Views/Like >=100",
-  "Media Sosial - Youtube Short Views/Like >=1000", "Media Sosial - Youtube Short Views/Like >=5000",
-  "Media Sosial - Youtube Short Views/Like >=10000", "Media Sosial - Youtube Short Views/Like >=50000",
-  "Media Sosial - Youtube Short Views/Like >=100000",
-  "Media Sosial - Youtube Video Views/Like <=99", "Media Sosial - Youtube Video Views/Like >=100",
-  "Media Sosial - Youtube Video Views/Like >=1000", "Media Sosial - Youtube Video Views/Like >=5000",
-  "Media Sosial - Youtube Video Views/Like >=10000", "Media Sosial - Youtube Video Views/Like >=50000",
-  "Media Sosial - Youtube Video Views/Like >=100000",
-  "Media Sosial - KOL Instagram Views/Like >=5000", "Media Sosial - KOL Instagram Views/Like >=10000",
-  "Media Sosial - KOL Instagram Views/Like >=50000", "Media Sosial - KOL Instagram Views/Like >=100000",
-  "Media Sosial - KOL Tiktok Views/Like >=5000", "Media Sosial - KOL Tiktok Views/Like >=10000",
-  "Media Sosial - KOL Tiktok Views/Like >=50000", "Media Sosial - KOL Tiktok Views/Like >=100000",
-  "Media Sosial - Homeless Media Reels Views/Like >=5000", "Media Sosial - Homeless Media Reels Views/Like >=10000",
-  "Media Sosial - Homeless Media Reels Views/Like >=50000", "Media Sosial - Homeless Media Reels Views/Like >=100000",
-  "Media Sosial - Homeless Media Feeds Views/Like >=5000", "Media Sosial - Homeless Media Feeds Views/Like >=10000",
-  "Media Sosial - Homeless Media Feeds Views/Like >=50000", "Media Sosial - Homeless Media Feeds Views/Like >=100000",
-],
+    // Media Elektronik - TV (score 100, kecuali Local & Lainnya = 10)
+    "TV - Cnbc", "TV - Global Tv", "TV - Indosiar", "TV - Inews", "TV - Kompas Tv",
+    "TV - Metro Tv", "TV - Mnc Tv", "TV - Rcti", "TV - Sctv", "TV - Sea Today",
+    "TV - Trans 7", "TV - Trans Tv", "TV - Tv One", "TV - Local & Lainnya Tv",
+    // Media Elektronik - Radio (score 25, kecuali Local & Lainnya = 10)
+    "Radio - Elshinta", "Radio - Gen Fm", "Radio - Iradio", "Radio - Kiss Fm",
+    "Radio - Most Fm", "Radio - Prambors Fm", "Radio - Rri Pro 1 Banten",
+    "Radio - Rri Pro 1 Jakarta", "Radio - Rri Pro 2 Jakarta", "Radio - Trijaya Fm",
+    "Radio - Local & Lainnya Radio",
+    // Media Cetak (score 50, kecuali Local & Lainnya = 5)
+    "Media Cetak - Bisnis Indonesia", "Media Cetak - Harian Kontan", "Media Cetak - Investor Daily",
+    "Media Cetak - Jawapos", "Media Cetak - Kompas", "Media Cetak - Kontan Tabloid",
+    "Media Cetak - Koran Sindo", "Media Cetak - Koran Tempo", "Media Cetak - Majalah Tempo",
+    "Media Cetak - Media Indonesia", "Media Cetak - Rakyat Merdeka",
+    "Media Cetak - Local & Lainnya Media Cetak",
+    // Media Online (score 25, kecuali Local & Lainnya = 1)
+    "Media Online - Antaranews.com", "Media Online - Bbc News", "Media Online - Berita Satu.com",
+    "Media Online - Bisnis.com", "Media Online - Cnbc Indonesia", "Media Online - Cnn Indonesia",
+    "Media Online - Detik.com", "Media Online - Idn Times", "Media Online - Idxchannel.com",
+    "Media Online - Inews.id", "Media Online - Investor.id", "Media Online - Jawapos.com",
+    "Media Online - Jpnn.com", "Media Online - Kompas.com", "Media Online - Kontan.co.id",
+    "Media Online - Kumparan.com", "Media Online - Liputan6.com", "Media Online - Medcom.id",
+    "Media Online - Merdeka.com", "Media Online - Okezone", "Media Online - Pikiran-Rakyat.com",
+    "Media Online - Republika.co.id", "Media Online - Sindonews.com", "Media Online - Suara.com",
+    "Media Online - Tempo.co", "Media Online - The Jakarta Post", "Media Online - Tirto.id",
+    "Media Online - Tribunnews.com", "Media Online - Viva.co.id", "Media Online - Warta Ekonomi",
+    "Media Online - Warta Kota", "Media Online - Local & Lainnya Media Online",
+    // Media Sosial - Twitter (berdasarkan Views/Like)
+    "Media Sosial - Twitter Views/Like <=99", "Media Sosial - Twitter Views/Like >=100",
+    "Media Sosial - Twitter Views/Like >=1000", "Media Sosial - Twitter Views/Like >=5000",
+    "Media Sosial - Twitter Views/Like >=10000", "Media Sosial - Twitter Views/Like >=50000",
+    "Media Sosial - Twitter Views/Like >=100000",
+    // Media Sosial - Facebook
+    "Media Sosial - Facebook Views/Like <=99", "Media Sosial - Facebook Views/Like >=100",
+    "Media Sosial - Facebook Views/Like >=1000", "Media Sosial - Facebook Views/Like >=5000",
+    "Media Sosial - Facebook Views/Like >=10000", "Media Sosial - Facebook Views/Like >=50000",
+    "Media Sosial - Facebook Views/Like >=100000",
+    // Media Sosial - Threads
+    "Media Sosial - Threads Views/Like <=99", "Media Sosial - Threads Views/Like >=100",
+    "Media Sosial - Threads Views/Like >=1000", "Media Sosial - Threads Views/Like >=5000",
+    "Media Sosial - Threads Views/Like >=10000", "Media Sosial - Threads Views/Like >=50000",
+    "Media Sosial - Threads Views/Like >=100000",
+    // Media Sosial - Instagram Feeds
+    "Media Sosial - Instagram Feeds Views/Like <=99", "Media Sosial - Instagram Feeds Views/Like >=100",
+    "Media Sosial - Instagram Feeds Views/Like >=1000", "Media Sosial - Instagram Feeds Views/Like >=5000",
+    "Media Sosial - Instagram Feeds Views/Like >=10000", "Media Sosial - Instagram Feeds Views/Like >=50000",
+    "Media Sosial - Instagram Feeds Views/Like >=100000",
+    // Media Sosial - Instagram Reels
+    "Media Sosial - Instagram Reels Views/Like <=99", "Media Sosial - Instagram Reels Views/Like >=100",
+    "Media Sosial - Instagram Reels Views/Like >=1000", "Media Sosial - Instagram Reels Views/Like >=5000",
+    "Media Sosial - Instagram Reels Views/Like >=10000", "Media Sosial - Instagram Reels Views/Like >=50000",
+    "Media Sosial - Instagram Reels Views/Like >=100000",
+    // Media Sosial - TikTok
+    "Media Sosial - Tiktok Views/Like <=99", "Media Sosial - Tiktok Views/Like >=100",
+    "Media Sosial - Tiktok Views/Like >=1000", "Media Sosial - Tiktok Views/Like >=5000",
+    "Media Sosial - Tiktok Views/Like >=10000", "Media Sosial - Tiktok Views/Like >=50000",
+    "Media Sosial - Tiktok Views/Like >=100000",
+    // Media Sosial - Youtube Short
+    "Media Sosial - Youtube Short Views/Like <=99", "Media Sosial - Youtube Short Views/Like >=100",
+    "Media Sosial - Youtube Short Views/Like >=1000", "Media Sosial - Youtube Short Views/Like >=5000",
+    "Media Sosial - Youtube Short Views/Like >=10000", "Media Sosial - Youtube Short Views/Like >=50000",
+    "Media Sosial - Youtube Short Views/Like >=100000",
+    // Media Sosial - Youtube Video
+    "Media Sosial - Youtube Video Views/Like <=99", "Media Sosial - Youtube Video Views/Like >=100",
+    "Media Sosial - Youtube Video Views/Like >=1000", "Media Sosial - Youtube Video Views/Like >=5000",
+    "Media Sosial - Youtube Video Views/Like >=10000", "Media Sosial - Youtube Video Views/Like >=50000",
+    "Media Sosial - Youtube Video Views/Like >=100000",
+    // Media Sosial - KOL Instagram (mulai 5000)
+    "Media Sosial - KOL Instagram Views/Like >=5000", "Media Sosial - KOL Instagram Views/Like >=10000",
+    "Media Sosial - KOL Instagram Views/Like >=50000", "Media Sosial - KOL Instagram Views/Like >=100000",
+    // Media Sosial - KOL Tiktok (mulai 5000)
+    "Media Sosial - KOL Tiktok Views/Like >=5000", "Media Sosial - KOL Tiktok Views/Like >=10000",
+    "Media Sosial - KOL Tiktok Views/Like >=50000", "Media Sosial - KOL Tiktok Views/Like >=100000",
+    // Media Sosial - Homeless Media Reels (mulai 5000)
+    "Media Sosial - Homeless Media Reels Views/Like >=5000", "Media Sosial - Homeless Media Reels Views/Like >=10000",
+    "Media Sosial - Homeless Media Reels Views/Like >=50000", "Media Sosial - Homeless Media Reels Views/Like >=100000",
+    // Media Sosial - Homeless Media Feeds (mulai 5000)
+    "Media Sosial - Homeless Media Feeds Views/Like >=5000", "Media Sosial - Homeless Media Feeds Views/Like >=10000",
+    "Media Sosial - Homeless Media Feeds Views/Like >=50000", "Media Sosial - Homeless Media Feeds Views/Like >=100000",
+  ],
   komunikasiStatus: ["Draft", "Terbit"],
 };
 
@@ -375,14 +394,17 @@ export const MENU_TREE = [
         ],
       },
       {
-        key: "cc-overview", hasOwnPage: true, label: "CC", icon: FileText,
+        // Cash Card berdiri sendiri - TIDAK terhubung ke RAB (beda dari NON PO/PO
+        // di atas). Submenu-nya juga beda: Detail CC (item baris + 4 dokumen cetak)
+        // gantiin LMP1/LMP2/Form Verifikasi, plus TTD Serah Terima yang gak ada
+        // padanannya di NON PO/PO.
+        key: "cc-overview", hasOwnPage: true, label: "Cash Card", icon: FileText,
         children: [
-          { key: "lmp1-cc",            label: "LMP 1",           icon: FileText },
-          { key: "lmp2-cc",            label: "LMP 2",           icon: FileText },
-          { key: "form-verifikasi-cc", label: "Form Verifikasi", icon: FilePlus },
-          { key: "bast-cc",            label: "BAST",            icon: ClipboardList },
-          { key: "pakta-cc",           label: "PI",              icon: ShieldCheck },
-          { key: "bapp-cc",            label: "BAPP",            icon: FileCheck },
+          { key: "detail-cc", label: "Detail CC",        icon: FileText },
+          { key: "bast-cc",   label: "BAST",              icon: ClipboardList },
+          { key: "pakta-cc",  label: "PI",                icon: ShieldCheck },
+          { key: "ttd-cc",    label: "TTD Serah Terima",  icon: FilePlus },
+          { key: "bapp-cc",   label: "BAPP",              icon: FileCheck },
         ],
       },
       { key: "checklist-dokumen", label: "Checklist Dokumen", icon: CheckSquare },
@@ -402,11 +424,14 @@ export const MENU_TREE = [
     children: [
       { key: "paket-kas", label: "Paket Kas (Kirim ke Asman)", icon: FolderCheck },
       {
+        // Laporan CC dihapus dari sini - modul Laporan ini sumbernya dari RAB
+        // (rabIdOptionsByKategori), sedangkan Cash Card sekarang berdiri sendiri,
+        // gak connect ke RAB lagi. Rekap realisasi Cash Card ada di Pertanggungjawaban
+        // CC (dicetak per baris Detail CC), bukan di modul Laporan generik ini.
         key: "grp-laporan", label: "Laporan", icon: FileText,
         children: [
           { key: "laporan-nonpo", label: "NON PO", icon: FileText },
           { key: "laporan-po",    label: "PO",      icon: FileText },
-          { key: "laporan-cc",    label: "CC",      icon: FileText },
         ],
       },
       { key: "vendor", label: "Vendor", icon: Building2 },
@@ -552,7 +577,7 @@ export const KONTEN_SEED = [
         jenisAkunMedsos: "Instagram Korporat",
         namaMedia: "@plnip.ubppriok",
         link: "https://instagram.com/p/mangrove-priok-2026",
-        kategoriMedia: "Media Sosial - Instagram Views < 1000",
+        kategoriMedia: "Media Sosial - Instagram Feeds Views/Like >=1000",
         nomorRilis: 67,
       },
       {
@@ -561,7 +586,7 @@ export const KONTEN_SEED = [
         jenisAkunMedsos: "",
         namaMedia: "dki.rasionews.com",
         link: "https://dki.rasionews.com/2026/07/01/mangrove-priok",
-        kategoriMedia: "Media Sosial - Instagram Feeds Views/Like >=1000",
+        kategoriMedia: "Media Online - Local & Lainnya Media Online",
         nomorRilis: 68,
       },
     ],

@@ -1,24 +1,147 @@
 import PizZip from "pizzip";
-import Docxtemplater from "docxtemplater";
 import { saveAs } from "file-saver";
 
-export async function generateDocxFromTemplate(templateUrl, data, outputName) {
-  const res = await fetch(templateUrl);
-  if (!res.ok) {
-    throw new Error(`Gagal memuat template: ${templateUrl}`);
-  }
-  const arrayBuffer = await res.arrayBuffer();
+/**
+ * Escape text agar aman dimasukkan ke XML Word.
+ */
+function escapeXml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
 
-  const zip = new PizZip(arrayBuffer);
-  const doc = new Docxtemplater(zip, {
-    paragraphLoop: true,
-    linebreaks: true,
-    nullGetter: () => "",
+/**
+ * Mengganti placeholder di dalam SATU paragraf <w:p>...</w:p>.
+ *
+ * MASALAH YANG DIPERBAIKI:
+ * Word sering memecah satu placeholder seperti "[nama]" jadi beberapa
+ * <w:t> terpisah, contoh: <w:t>[na</w:t><w:t>ma]</w:t>.
+ * Kalau dicek satu <w:t> per satu, placeholder yang kepecah gini gak
+ * akan pernah ketemu utuh, jadi gak pernah diganti, dan hasil akhirnya
+ * template kosong / apa adanya.
+ *
+ * SOLUSI:
+ * Gabungkan dulu semua teks dari <w:t> di dalam satu paragraf jadi satu
+ * string utuh, baru cari-ganti placeholder di string gabungan itu.
+ * Setelah itu, taruh hasilnya di <w:t> pertama, kosongkan sisanya,
+ * supaya XML tetap valid.
+ */
+function replacePlaceholdersInParagraph(paragraphXml, data) {
+  const tRegex = /<w:t([^>]*)>([\s\S]*?)<\/w:t>/g;
+  const runs = [];
+  let match;
+
+  while ((match = tRegex.exec(paragraphXml)) !== null) {
+    runs.push({
+      fullMatch: match[0],
+      attributes: match[1],
+      text: match[2],
+      index: match.index,
+    });
+  }
+
+  if (!runs.length) return paragraphXml;
+
+  const combinedText = runs.map((r) => r.text).join("");
+  let newCombinedText = combinedText;
+
+  for (const [placeholder, rawValue] of Object.entries(data)) {
+    const values = Array.isArray(rawValue) ? rawValue : [rawValue];
+    let occurrence = 0;
+
+    const escapedPlaceholder = placeholder.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
+    );
+
+    // Cari format [placeholder] — kurung tutup dibuat opsional
+    // karena ada template yang placeholder-nya gak ditutup "]".
+    const normalRegex = new RegExp(`\\[${escapedPlaceholder}\\]?`, "g");
+
+    newCombinedText = newCombinedText.replace(normalRegex, () => {
+      const value = values[occurrence] ?? "";
+      occurrence++;
+      return escapeXml(value);
+    });
+
+    if (occurrence === 0 && !placeholder.startsWith("[")) {
+      const malformedRegex = new RegExp(escapedPlaceholder, "g");
+      newCombinedText = newCombinedText.replace(malformedRegex, () => {
+        const value = values[occurrence] ?? "";
+        occurrence++;
+        return escapeXml(value);
+      });
+    }
+  }
+
+  if (newCombinedText === combinedText) {
+    return paragraphXml;
+  }
+
+  let rebuiltParagraph = paragraphXml;
+
+  for (let i = runs.length - 1; i >= 0; i--) {
+    const run = runs[i];
+    const newText = i === 0 ? newCombinedText : "";
+    const newRun = `<w:t${run.attributes}>${newText}</w:t>`;
+
+    rebuiltParagraph =
+      rebuiltParagraph.slice(0, run.index) +
+      newRun +
+      rebuiltParagraph.slice(run.index + run.fullMatch.length);
+  }
+
+  return rebuiltParagraph;
+}
+
+function replacePlaceholders(xml, data) {
+  return xml.replace(
+    /<w:p\b[^>]*>[\s\S]*?<\/w:p>/g,
+    (paragraphXml) => replacePlaceholdersInParagraph(paragraphXml, data)
+  );
+}
+
+export async function generateDocxFromTemplate(templateUrl, data, outputName) {
+  const response = await fetch(templateUrl);
+
+  if (!response.ok) {
+    throw new Error(`Template tidak ditemukan: ${templateUrl}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+
+  let zip;
+
+  try {
+    zip = new PizZip(arrayBuffer);
+  } catch (error) {
+    throw new Error("File template bukan DOCX/ZIP yang valid.");
+  }
+
+  const xmlFiles = Object.keys(zip.files).filter((name) =>
+    /^word\/(document|header\d*|footer\d*)\.xml$/.test(name)
+  );
+
+  if (!xmlFiles.length) {
+    throw new Error("Struktur dokumen Word tidak ditemukan.");
+  }
+
+  xmlFiles.forEach((fileName) => {
+    const file = zip.file(fileName);
+
+    if (!file) return;
+
+    const xml = file.asText();
+
+    const updatedXml = replacePlaceholders(xml, data);
+
+    zip.file(fileName, updatedXml);
   });
 
-  doc.render(data);
-
-  const blob = doc.getZip().generate({
+  const blob = zip.generate({
     type: "blob",
     mimeType:
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -27,14 +150,45 @@ export async function generateDocxFromTemplate(templateUrl, data, outputName) {
   saveAs(blob, outputName);
 }
 
-// Format tanggal "YYYY-MM-DD" (dari <input type="date">) jadi "16 April 2026".
+// Format tanggal "YYYY-MM-DD" → "31 Agustus 2026"
 export function formatTanggalPanjang(isoDate) {
   if (!isoDate) return "";
+
   const d = new Date(`${isoDate}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return isoDate;
+
+  if (Number.isNaN(d.getTime())) {
+    return isoDate;
+  }
+
   return d.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+}
+
+// Hitung "Week ke berapa" dalam bulan berjalan (Senin dianggap awal minggu).
+function getWeekOfMonth(date) {
+  const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+  const firstDayWeekday = (firstDayOfMonth.getDay() + 6) % 7; // 0=Senin..6=Minggu
+  const adjustedDate = date.getDate() + firstDayWeekday;
+  return Math.ceil(adjustedDate / 7);
+}
+
+const NAMA_BULAN_ID = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+];
+
+/**
+ * Menghasilkan teks otomatis: "Week 4/Januari/2026"
+ * @param {Date} [date] - default: tanggal hari ini
+ * @returns {string}
+ */
+export function formatWeekBulanTahun(date = new Date()) {
+  const week = getWeekOfMonth(date);
+  const bulan = NAMA_BULAN_ID[date.getMonth()];
+  const tahun = date.getFullYear();
+
+  return `Week ${week}/${bulan}/${tahun}`;
 }
