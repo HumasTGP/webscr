@@ -1,6 +1,6 @@
 export const HELP_CONTACT = {
-  phone: "+62 858-1429-0877",
-  waNumber: "6285814290877",
+  phone: "+62 812-3456-7890",
+  waNumber: "+62 812-3456-7890",
   waMessage: "Halo! Saya mengalami problem",
   hours: "Senin-Jumat, 08.00-16.00 WIB",
 };

@@ -1,9 +1,6 @@
-import PizZip from "pizzip";
-import { saveAs } from "file-saver";
-
-/**
- * Escape text agar aman dimasukkan ke XML Word.
- */
+import PizZip from "pizzip";import { saveAs } from "file-saver";
+import Docxtemplater from "docxtemplater";
+import FileSaver from "file-saver";const saveAs = FileSaver.saveAs || FileSaver;
 function escapeXml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -188,7 +185,5 @@ const NAMA_BULAN_ID = [
 export function formatWeekBulanTahun(date = new Date()) {
   const week = getWeekOfMonth(date);
   const bulan = NAMA_BULAN_ID[date.getMonth()];
-  const tahun = date.getFullYear();
-
-  return `Week ${week}/${bulan}/${tahun}`;
+  const tahun = date.getFullYear();  return `Week ${week}/${bulan}/${tahun}`;
 }

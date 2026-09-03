@@ -70,3 +70,10 @@ input[type="password"]::-ms-reveal,input[type="password"]::-ms-clear{display:non
 @media(max-width:430px){.app-content{padding:14px 10px}.system-body{padding:14px 10px 42px}.responsive-toolbar{gap:8px!important}.responsive-card-header>button{width:100%;margin-left:0}.responsive-actions>button,.responsive-actions>a{flex-basis:100%}.count-summary{width:100%}}
 
 @keyframes fade-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}@keyframes toast-in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes modal-in{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}@keyframes overlay-in{from{opacity:0}to{opacity:1}}@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+/* Chart Dashboard: scrollbar disembunyikan secara visual (mode bulanan
+   grouped bar chart) tapi horizontal scroll tetap berfungsi normal. */
+.hide-scrollbar{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.hide-scrollbar::-webkit-scrollbar{height:6px}
+.hide-scrollbar::-webkit-scrollbar-track{background:transparent}
+.hide-scrollbar::-webkit-scrollbar-thumb{background:var(--border);border-radius:999px}
