@@ -1,6 +1,7 @@
-import PizZip from "pizzip";import { saveAs } from "file-saver";
+import PizZip from "pizzip";
+import { saveAs } from "file-saver";
 import Docxtemplater from "docxtemplater";
-import FileSaver from "file-saver";const saveAs = FileSaver.saveAs || FileSaver;
+
 function escapeXml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -10,22 +11,6 @@ function escapeXml(value) {
     .replace(/'/g, "&apos;");
 }
 
-/**
- * Mengganti placeholder di dalam SATU paragraf <w:p>...</w:p>.
- *
- * MASALAH YANG DIPERBAIKI:
- * Word sering memecah satu placeholder seperti "[nama]" jadi beberapa
- * <w:t> terpisah, contoh: <w:t>[na</w:t><w:t>ma]</w:t>.
- * Kalau dicek satu <w:t> per satu, placeholder yang kepecah gini gak
- * akan pernah ketemu utuh, jadi gak pernah diganti, dan hasil akhirnya
- * template kosong / apa adanya.
- *
- * SOLUSI:
- * Gabungkan dulu semua teks dari <w:t> di dalam satu paragraf jadi satu
- * string utuh, baru cari-ganti placeholder di string gabungan itu.
- * Setelah itu, taruh hasilnya di <w:t> pertama, kosongkan sisanya,
- * supaya XML tetap valid.
- */
 function replacePlaceholdersInParagraph(paragraphXml, data) {
   const tRegex = /<w:t([^>]*)>([\s\S]*?)<\/w:t>/g;
   const runs = [];
