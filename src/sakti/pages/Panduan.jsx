@@ -1,94 +1,126 @@
-import { ArrowRight, ClipboardList, FileSpreadsheet, FileText, Handshake } from "lucide-react";
+import { ArrowRight, ClipboardList, FileSpreadsheet, FileText, Handshake, ShieldCheck, FilePlus, Wallet } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import Card from "../../components/Card";
 import PageHeader from "../../components/PageHeader";
 
-// ---------------- pipeline (Proposal → RAB → BAST → Laporan) --------------
-function Pipeline({ counts, goto }) {
-  const nodes = [
-    { key: "proposal-rekap", label: "Proposal", value: counts.proposal, icon: Handshake },
-    { key: "rab", label: "RAB", value: counts.rab, icon: FileSpreadsheet },
-    { key: "bast", label: "BAST, PI, TOR", value: counts.bastPiTor, icon: ClipboardList },
-    { key: "laporan", label: "Laporan", value: counts.laporan, icon: FileText },
-  ];
+// ---------------- pipeline generik (dipakai utk 4 alur di bawah) --------------
+// Beda dari versi lama: node-nya dibungkus flex-wrap (bukan grid kaku), biar
+// pipeline yang panjang (misal Alur NON PO, 10 step) bisa turun ke baris
+// berikutnya dengan wajar di layar sempit, sementara pipeline pendek (Alur
+// Proposal, 4 step) tetap sejajar 1 baris di layar biasa.
+function Pipeline({ nodes, goto }) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${nodes.length}, minmax(0, 1fr))`,
-        gap: 10,
-        alignItems: "stretch",
-      }}
-    >
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch", gap: "10px 4px" }}>
       {nodes.map((n, i) => {
-        const Icon = n.icon;
+        const Icon = n.icon || FileText;
         return (
-          <button
-            key={n.key}
-            onClick={() => goto?.(n.key)}
-            style={{
-              position: "relative",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 6,
-              padding: "16px 10px",
-              background: T.bg,
-              borderRadius: 10,
-              border: `1px solid ${T.border}`,
-              cursor: goto ? "pointer" : "default",
-              textAlign: "center",
-              transition: "background .15s ease, border-color .15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = T.blueSoft;
-              e.currentTarget.style.borderColor = T.blue;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = T.bg;
-              e.currentTarget.style.borderColor = T.border;
-            }}
-          >
-            <div
+          <div key={`${n.key}-${i}`} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <button
+              onClick={() => n.key && goto?.(n.key)}
+              title={n.hint || n.label}
               style={{
-                width: 30,
-                height: 30,
-                borderRadius: "50%",
-                background: T.card,
-                color: T.blue,
-                display: "grid",
-                placeItems: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 6,
+                width: 108,
+                padding: "14px 8px",
+                background: T.bg,
+                borderRadius: 10,
                 border: `1px solid ${T.border}`,
+                cursor: n.key && goto ? "pointer" : "default",
+                textAlign: "center",
+                transition: "background .15s ease, border-color .15s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (!n.key) return;
+                e.currentTarget.style.background = T.blueSoft;
+                e.currentTarget.style.borderColor = T.blue;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = T.bg;
+                e.currentTarget.style.borderColor = T.border;
               }}
             >
-              <Icon size={15} />
-            </div>
-            <div style={{ fontSize: 11, color: T.muted, letterSpacing: 0.3 }}>
-              {n.label}
-            </div>
-            {i < nodes.length - 1 && (
-              <ArrowRight
-                size={14}
-                color={T.muted}
+              <div
                 style={{
-                  position: "absolute",
-                  right: -12,
-                  top: "50%",
-                  transform: "translateY(-50%)",
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
                   background: T.card,
-                  padding: 1,
-                  borderRadius: 6,
-                  zIndex: 1,
+                  color: T.blue,
+                  display: "grid",
+                  placeItems: "center",
+                  border: `1px solid ${T.border}`,
+                  flexShrink: 0,
                 }}
-                className="hide-mobile"
-              />
+              >
+                <Icon size={14} />
+              </div>
+              <div style={{ fontSize: 10.5, color: T.muted, letterSpacing: 0.2, lineHeight: 1.3 }}>
+                {n.label}
+              </div>
+            </button>
+            {i < nodes.length - 1 && (
+              <ArrowRight size={13} color={T.muted} style={{ flexShrink: 0 }} />
             )}
-          </button>
+          </div>
         );
       })}
     </div>
   );
 }
+
+// ---------------- 4 alur kerja SAKTI ----------------
+// Key di tiap node = key routing (goto/setActive) yang sama dengan MENU_TREE
+// di lib/data.js. Node tanpa key (kalau ada) berarti bukan halaman tersendiri,
+// cuma penanda tahapan di alur.
+const ALUR_PROPOSAL = [
+  { key: "proposal-rekap", label: "Pengajuan & Rekap Proposal", icon: Handshake },
+  { key: "proposal-evaluasi", label: "Form Evaluasi", icon: FileText },
+  { key: "rab", label: "RAB", icon: FileSpreadsheet },
+];
+
+const ALUR_RAB = [
+  { key: "rab", label: "RAB", icon: FileSpreadsheet },
+  { key: "tor", label: "TOR", icon: FileText },
+  { key: "bast-nonpo", label: "BA (BAST)", icon: ClipboardList },
+  { key: "pakta-nonpo", label: "PI", icon: ShieldCheck },
+  { key: "nonpo-overview", label: "NON PO", icon: FileText },
+  { key: "po-overview", label: "PO", icon: FileText },
+  { key: "cc-overview", label: "Cash Card", icon: Wallet },
+];
+
+const ALUR_NONPO = [
+  { key: "nonpo-overview", label: "Create ID", icon: FileText },
+  { key: "lmp1-nonpo", label: "Lamp 1 (+Procost)", icon: FileText },
+  { key: "lmp2-nonpo", label: "Lamp 2", icon: FileText },
+  { key: "laporan-nonpo", label: "Report NON PO", icon: FileSpreadsheet },
+  { key: "form-verifikasi-nonpo", label: "Form Eval", icon: FilePlus },
+  { key: "lmp1-nonpo", label: "Lamp 1", icon: FileText },
+  { key: "lmp2-nonpo", label: "Lamp 2", icon: FileText },
+  { key: "bast-nonpo", label: "BA (BAST)", icon: ClipboardList },
+  { key: "pakta-nonpo", label: "PI", icon: ShieldCheck },
+  { key: "tor", label: "TOR", icon: FileText },
+];
+
+const ALUR_CC = [
+  { key: "cc-overview", label: "Cash Card", icon: Wallet },
+  { key: "detail-cc", label: "Report CC", hint: "Pertanggungjawaban Cash Card, dicetak dari Detail CC", icon: FileSpreadsheet },
+  { key: "detail-cc", label: "Form Eval", hint: "Formulir Verifikasi, dicetak dari Detail CC", icon: FilePlus },
+  { key: "detail-cc", label: "Permintaan CC", hint: "Permintaan Dana Cash Card, dicetak dari Detail CC", icon: FileText },
+  { key: "detail-cc", label: "LPJ CC", hint: "Rencana Permintaan Tunai, dicetak dari Detail CC", icon: FileText },
+  { key: "bast-cc", label: "BA (BAST)", icon: ClipboardList },
+  { key: "pakta-cc", label: "PI", icon: ShieldCheck },
+  { key: "tor", label: "TOR", icon: FileText },
+];
+
+const ALUR_LIST = [
+  { title: "Alur Proposal", nodes: ALUR_PROPOSAL },
+  { title: "Alur RAB", nodes: ALUR_RAB },
+  { title: "Alur NON PO", nodes: ALUR_NONPO },
+  { title: "Alur CC", nodes: ALUR_CC },
+];
 
 const SECTIONS = [
   {
@@ -215,15 +247,6 @@ function StepRow({ n, title, description, last }) {
 }
 
 export default function Panduan({ data, goto }) {
-  const counts = data
-    ? {
-        proposal: data.proposals?.length || 0,
-        rab: data.rab?.length || 0,
-        bastPiTor: (data.bast?.length || 0) + (data.pakta?.length || 0) + (data.tor?.length || 0),
-        laporan: data.laporan?.length || 0,
-      }
-    : { proposal: 0, rab: 0, bastPiTor: 0, laporan: 0 };
-
   return (
     <div>
       <PageHeader
@@ -232,28 +255,32 @@ export default function Panduan({ data, goto }) {
         description="Ringkasan alur kerja SAKTI, dari proposal masuk sampai realisasi bantuan tercatat."
       />
 
-      <Card style={{ marginBottom: 20 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: font.display,
-              fontSize: 15.5,
-              margin: 0,
-              color: T.heading,
-            }}
-          >
-            Alur Kerja SAKTI
-          </h3>
-        </div>
-        <Pipeline counts={counts} goto={goto} />
-      </Card>
+      <div style={{ display: "grid", gap: 16, marginBottom: 20 }}>
+        {ALUR_LIST.map((alur) => (
+          <Card key={alur.title}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                justifyContent: "space-between",
+                marginBottom: 12,
+              }}
+            >
+              <h3
+                style={{
+                  fontFamily: font.display,
+                  fontSize: 15.5,
+                  margin: 0,
+                  color: T.heading,
+                }}
+              >
+                {alur.title}
+              </h3>
+            </div>
+            <Pipeline nodes={alur.nodes} goto={goto} />
+          </Card>
+        ))}
+      </div>
 
       <div
         style={{

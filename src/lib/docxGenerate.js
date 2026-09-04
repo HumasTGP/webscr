@@ -1,7 +1,9 @@
 import PizZip from "pizzip";
 import { saveAs } from "file-saver";
-import Docxtemplater from "docxtemplater";
 
+/**
+ * Escape text agar aman dimasukkan ke XML Word.
+ */
 function escapeXml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -11,6 +13,22 @@ function escapeXml(value) {
     .replace(/'/g, "&apos;");
 }
 
+/**
+ * Mengganti placeholder di dalam SATU paragraf <w:p>...</w:p>.
+ *
+ * MASALAH YANG DIPERBAIKI:
+ * Word sering memecah satu placeholder seperti "[nama]" jadi beberapa
+ * <w:t> terpisah, contoh: <w:t>[na</w:t><w:t>ma]</w:t>.
+ * Kalau dicek satu <w:t> per satu, placeholder yang kepecah gini gak
+ * akan pernah ketemu utuh, jadi gak pernah diganti, dan hasil akhirnya
+ * template kosong / apa adanya.
+ *
+ * SOLUSI:
+ * Gabungkan dulu semua teks dari <w:t> di dalam satu paragraf jadi satu
+ * string utuh, baru cari-ganti placeholder di string gabungan itu.
+ * Setelah itu, taruh hasilnya di <w:t> pertama, kosongkan sisanya,
+ * supaya XML tetap valid.
+ */
 function replacePlaceholdersInParagraph(paragraphXml, data) {
   const tRegex = /<w:t([^>]*)>([\s\S]*?)<\/w:t>/g;
   const runs = [];
@@ -132,6 +150,112 @@ export async function generateDocxFromTemplate(templateUrl, data, outputName) {
   saveAs(blob, outputName);
 }
 
+// =========================================================================
+// GENERATE DOCX DENGAN TABEL BARIS DINAMIS (row-cloning)
+// =========================================================================
+// generateDocxFromTemplate() di atas cuma cari-ganti "[placeholder]" per
+// paragraf - dia TIDAK bisa mengulang baris tabel (<w:tr>) sebanyak N kali,
+// karena XML baris tabelnya statis, cuma ada 1 di file template.
+//
+// Fungsi ini dipisah SENGAJA (bukan menimpa generateDocxFromTemplate yang
+// sudah dipakai banyak halaman lain) - dipakai khusus untuk kasus dokumen
+// yang butuh jumlah baris tabel dinamis, misalnya TTD Serah Terima (jumlah
+// baris tanda tangan bisa 1 sampai puluhan, tergantung input user).
+//
+// CARA PAKAI TEMPLATE-NYA:
+// 1. Di Word, bikin tabel dengan 1 baris "contoh" berisi placeholder biasa,
+//    misalnya: | [no] | [nama] | [jumlah] |
+// 2. Tandai baris itu sebagai baris yang di-loop dengan menaruh marker
+//    "[[row]]" di salah satu sel baris tersebut (boleh sel manapun, boleh
+//    digabung dengan teks lain di sel yang sama).
+// 3. rowsData yang dikirim ke fungsi ini = array of object, tiap object
+//    berisi placeholder utk 1 baris (misal { no: "1", nama: "", jumlah: "" }).
+// 4. Baris template itu akan di-clone sebanyak rowsData.length, masing2
+//    diisi datanya sendiri-sendiri, lalu marker "[[row]]" dihapus otomatis.
+//
+// Kalau template belum punya marker "[[row]]" sama sekali (atau template-nya
+// belum ada), fungsi ini melempar error yang jelas - BUKAN diam-diam gagal.
+export async function generateDocxFromTemplateWithRows(
+  templateUrl,
+  { data = {}, rowsData = [], rowMarker = "[[row]]" } = {},
+  outputName
+) {
+  const response = await fetch(templateUrl);
+
+  if (!response.ok) {
+    throw new Error(`Template tidak ditemukan: ${templateUrl}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+
+  let zip;
+  try {
+    zip = new PizZip(arrayBuffer);
+  } catch (error) {
+    throw new Error("File template bukan DOCX/ZIP yang valid.");
+  }
+
+  const xmlFiles = Object.keys(zip.files).filter((name) =>
+    /^word\/(document|header\d*|footer\d*)\.xml$/.test(name)
+  );
+
+  if (!xmlFiles.length) {
+    throw new Error("Struktur dokumen Word tidak ditemukan.");
+  }
+
+  let rowMarkerFound = false;
+
+  xmlFiles.forEach((fileName) => {
+    const file = zip.file(fileName);
+    if (!file) return;
+
+    let xml = file.asText();
+
+    // Cari <w:tr>...</w:tr> yang mengandung marker baris-loop.
+    xml = xml.replace(/<w:tr\b[^>]*>[\s\S]*?<\/w:tr>/g, (trXml) => {
+      if (!trXml.includes(rowMarker)) return trXml;
+      rowMarkerFound = true;
+
+      if (!rowsData.length) {
+        // Gak ada data baris sama sekali - buang baris template + markernya
+        // biar gak ada baris kosong aneh nyisa di dokumen hasil.
+        return "";
+      }
+
+      return rowsData
+        .map((rowData) => {
+          let rowXml = trXml.replace(
+            new RegExp(rowMarker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
+            ""
+          );
+          rowXml = replacePlaceholders(rowXml, rowData);
+          return rowXml;
+        })
+        .join("");
+    });
+
+    // Placeholder non-loop (header, judul, total, dst) tetap diganti seperti biasa.
+    xml = replacePlaceholders(xml, data);
+
+    zip.file(fileName, xml);
+  });
+
+  if (!rowMarkerFound) {
+    throw new Error(
+      `Template "${templateUrl}" belum punya baris tabel bertanda "${rowMarker}". ` +
+      `Tambahkan marker itu di salah satu sel baris yang mau di-loop, lalu coba lagi.`
+    );
+  }
+
+  const blob = zip.generate({
+    type: "blob",
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
+
+  saveAs(blob, outputName);
+}
+
 // Format tanggal "YYYY-MM-DD" → "31 Agustus 2026"
 export function formatTanggalPanjang(isoDate) {
   if (!isoDate) return "";
@@ -170,5 +294,7 @@ const NAMA_BULAN_ID = [
 export function formatWeekBulanTahun(date = new Date()) {
   const week = getWeekOfMonth(date);
   const bulan = NAMA_BULAN_ID[date.getMonth()];
-  const tahun = date.getFullYear();  return `Week ${week}/${bulan}/${tahun}`;
+  const tahun = date.getFullYear();
+
+  return `Week ${week}/${bulan}/${tahun}`;
 }

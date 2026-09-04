@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, ArrowRight, Eye, FileText, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { nextNumericId, rupiah } from "../../lib/utils";
-import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
+import { generateDocxFromTemplateWithRows, formatTanggalPanjang } from "../../lib/docxGenerate";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
@@ -80,30 +80,43 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
     notify("TTD Serah Terima berhasil dihapus.", "success");
   };
 
-  const downloadDocx = async () => {
-    const row = activePreviewRow;
+  // downloadDocx bisa dipanggil dari 2 tempat: dari preview (pakai
+  // activePreviewRow) ATAU langsung dari tombol di list (row dikirim
+  // eksplisit) - supaya download gak wajib buka preview dulu.
+  //
+  // CATATAN TEMPLATE (lihat generateDocxFromTemplateWithRows di
+  // docxGenerate.js untuk penjelasan lengkap cara bikin templatenya):
+  // Template_TTD_Serah_Terima_CC.docx BELUM ADA di public/templates/ - file
+  // ini perlu ditambahkan manual. Templatenya harus punya 1 baris tabel
+  // contoh dengan marker "[[row]]" di salah satu selnya, dan placeholder
+  // per kolom: [no], [nama], [jumlah], [ttd]. Baris itu akan di-clone
+  // otomatis sebanyak jumlahBaris yang diisi user di form.
+  const downloadDocx = async (rowArg) => {
+    const row = rowArg || activePreviewRow;
     if (!row) return;
     const nomorAwal = parseInt(row.nomorAwal, 10) || 1;
     const jumlahBaris = parseInt(row.jumlahBaris, 10) || 1;
-    const rows = Array.from({ length: jumlahBaris }, (_, i) => ({
-      no: nomorAwal + i,
+    const rowsData = Array.from({ length: jumlahBaris }, (_, i) => ({
+      no: String(nomorAwal + i),
       nama: "",
       jumlah: row.jumlahPerBaris ? rupiah(row.jumlahPerBaris) : "",
-      ttdSlot: "",
+      ttd: "",
     }));
     const totalJumlah = row.jumlahPerBaris ? rupiah((Number(row.jumlahPerBaris) || 0) * jumlahBaris) : "";
     try {
-      await generateDocxFromTemplate(
+      await generateDocxFromTemplateWithRows(
         "/templates/Template_TTD_Serah_Terima_CC.docx",
         {
-          hariTanggal: row.hariTanggal ? formatTanggalPanjang(row.hariTanggal) : "",
-          jam: row.jam || "",
-          tempat: row.tempat || "",
-          judul: row.judul || "",
-          rows,
-          totalJumlah,
-          tanggalCetak: formatTanggalPanjang(new Date().toISOString().slice(0, 10)),
-          namaAsmanKas: "Astri Oktavina",
+          data: {
+            hariTanggal: row.hariTanggal ? formatTanggalPanjang(row.hariTanggal) : "",
+            jam: row.jam || "",
+            tempat: row.tempat || "",
+            judul: row.judul || "",
+            totalJumlah,
+            tanggalCetak: formatTanggalPanjang(new Date().toISOString().slice(0, 10)),
+            namaAsmanKas: "Astri Oktavina",
+          },
+          rowsData,
         },
         `TTD-Serah-Terima-${row.id || "baru"}.docx`
       );
@@ -180,7 +193,7 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
       <div>
         <PageHeader eyebrow="Cash Card" title="Preview TTD Serah Terima" />
         <Card>
-          <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: "22px 26px", background: "#fff", maxWidth: 560, margin: "0 auto" }}>
+          <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: "22px 26px", background: "#fff", maxWidth: 560, margin: "0 auto", fontFamily: "'Times New Roman', Times, serif" }}>
             <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13.5, marginBottom: 2, color: T.heading, fontFamily: font.display }}>TANDA TERIMA</div>
             <div style={{ textAlign: "right", color: T.muted, fontSize: 11, marginBottom: 12 }}>
               Jakarta, {row.hariTanggal ? formatTanggalPanjang(row.hariTanggal) : "-"}
@@ -271,6 +284,7 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
                     <td style={{ ...tdStyle, textAlign: "right" }}>{row.jumlahBaris}</td>
                     <td style={tdCenterStyle}>
                       <button type="button" title="Lihat / Cetak" onClick={() => openPreviewFromList(row)} style={iconBtnStyle}><Eye size={12} /></button>
+                      <button type="button" title="Download Word (.docx)" onClick={() => downloadDocx(row)} style={iconBtnStyle}><FileText size={12} /></button>
                       <button type="button" title="Edit" onClick={() => startEdit(row)} style={iconBtnStyle}><Pencil size={12} /></button>
                       <button type="button" title="Hapus" onClick={() => setDeleteConfirm(row)} style={{ ...iconBtnStyle, color: T.danger }}><Trash2 size={12} /></button>
                     </td>

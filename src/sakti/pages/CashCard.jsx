@@ -22,9 +22,33 @@ function monthLabel(key) {
   return `${MONTHS_ID[parseInt(month, 10) - 1]} ${year}`;
 }
 
+// Daftar procost bawaan Cash Card. Bisa diedit/ditambah/dihapus langsung dari
+// UI (lihat ComboManaged di field Procost) - list ini cuma nilai default awal.
+const CC_PROCOST_DEFAULT = [
+  "23-1501-PPA-OP-LUO-8C-01",
+  "23-1501-PPA-OP-ADM-7Q-01",
+  "23-1501-PPA-OP-ADM-7Q-31",
+  "23-1501-PPA-OP-ADM-7Q-41",
+  "23-1501-PPA-OP-JAS-3A-04",
+  "23-1501-PPA-OP-JAS-3A-34",
+  "23-1501-PPA-OP-JAS-3A-44",
+  "23-1501-PPA-OP-JAS-3K-31",
+  "24-1501-PPA-OP-LUO-8C-01",
+  "24-1501-PPA-OP-ADM-7Q-01",
+  "24-1301-NON-OP-LUO-8C-01",
+  "24-1501-PPA-OP-JAS-3A-04",
+  "24-1501-PPA-OP-JAS-3D-01",
+  "25-1501-PPA-OP-LUO-8C-01",
+  "25-1501-PPA-OP-ADM-7Q-01",
+  "25-1301-NON-OP-LUO-8C-01",
+  "26-1501-PPA-OP-LUO-8C-01",
+  "26-1501-PPA-OP-ADM-7Q-01",
+  "26-1301-NON-OP-LUO-8C-01",
+];
+
 export const DEFAULT_CC_COMBO = {
   bidang: ["Keamanan & Humas", "Umum", "SDM"],
-  procost: OPT.procost,
+  procost: CC_PROCOST_DEFAULT,
   expType: OPT.expType,
   satuan: ["pcs", "set", "lot", "unit", "paket", "box", "dus", "liter", "meter", "orang", "hari"],
   vendor: ["CV Sumber Jaya", "ABB SAKTI INDUSTRI, PT", "ABDIBANGUN BUANA, PT"],

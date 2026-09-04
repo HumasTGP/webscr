@@ -12,6 +12,7 @@ import {
 
 import { T, font } from "../../lib/theme";
 import { rupiah, terbilang as toTerbilang } from "../../lib/utils";
+import { PENANDA_TANGAN } from "../../lib/data";
 import {
   generateDocxFromTemplate,
   formatTanggalPanjang,
@@ -25,6 +26,12 @@ import PageHeader from "../../components/PageHeader";
 import ComboManaged from "../../components/ComboManaged";
 import DatePicker from "../../components/DatePicker";
 import EmptyState from "../../components/EmptyState";
+import {
+  CcVerifikasiPreview,
+  CcPermintaanPreview,
+  CcRencanaPreview,
+  CcPertanggungjawabanPreview,
+} from "../../components/DocTemplatePreview";
 
 const DOC_LABELS = {
   verifikasi: "Formulir Verifikasi",
@@ -475,6 +482,68 @@ export default function DetailCCPage({
       url: "/templates/Template Rencana permintaan Tunai CC.docx",
       build: buildRencanaData,
     },
+  };
+
+  // Props buat preview A4 tiap dokumen CC - dipetakan dari data mentah
+  // (selectedCc/form1/itemsForCc) SUPAYA gak bergantung ke key string bebas
+  // yang dipakai buildVerifikasiData dkk (kayak "no ver dari sistem"), jadi
+  // preview tetap kebaca meski nanti key di build*Data() berubah.
+  const previewPropsFor = (key) => {
+    const year = new Date().getFullYear();
+    const tanggalHariIni = formatTanggalPanjang(new Date().toISOString().slice(0, 10));
+    const total = saldoKas || totalRealisasi;
+    if (key === "verifikasi") {
+      return {
+        nomorVerifikasi: `${selectedCcId}/VER/CD/PRIOK/${year}`,
+        tanggal: tanggalHariIni,
+        nomorLpj: formatWeekBulanTahun(),
+        judulKegiatan: selectedCc?.judulCc || form1.judulPengajuan || "",
+        jumlahBiaya: totalRealisasi,
+        asmanKas: PENANDA_TANGAN.asmanKas,
+      };
+    }
+    if (key === "permintaan") {
+      return {
+        nomorPengajuan: form1.nomorPengajuan || selectedCc?.nomorPengajuan || `${selectedCcId}/CC/CD/PRIOK/${year}`,
+        nomorWeek: formatWeekBulanTahun(),
+        saldoKas: total,
+        terbilang: toTerbilang(total),
+        tanggal: tanggalHariIni,
+        items: itemsForCc.slice(0, 4).map((it) => ({ expType: it.expType, harga: totalHargaOf(it) })),
+        totalPengajuan: total,
+        asmanKas: PENANDA_TANGAN.asmanKas,
+        madm: PENANDA_TANGAN.madm,
+      };
+    }
+    if (key === "rencana") {
+      return {
+        nomorPengajuan: form1.nomorPengajuan || selectedCc?.nomorPengajuan || `${selectedCcId}/CC/CD/PRIOK/${year}`,
+        bidang: selectedCc?.bidang || "",
+        uraian: `Pengajuan Cash Card ${formatWeekBulanTahun()}`,
+        nominalSaldoKas: total,
+        terbilang: toTerbilang(total),
+        tanggal: tanggalHariIni,
+        asmanKas: PENANDA_TANGAN.asmanKas,
+      };
+    }
+    if (key === "pertanggungjawaban") {
+      return {
+        nomorVerifikasi: `${selectedCcId}/VER/CD/PRIOK/${year}`,
+        nomorWeek: formatWeekBulanTahun(),
+        items: itemsForCc.slice(0, 2).map((it) => ({ expType: it.expType, harga: totalHargaOf(it) })),
+        totalPengajuan: totalRealisasi,
+        madm: PENANDA_TANGAN.madm,
+        asmanKas: PENANDA_TANGAN.asmanKas,
+      };
+    }
+    return {};
+  };
+
+  const PREVIEW_COMPONENT = {
+    verifikasi: CcVerifikasiPreview,
+    permintaan: CcPermintaanPreview,
+    rencana: CcRencanaPreview,
+    pertanggungjawaban: CcPertanggungjawabanPreview,
   };
 
   // =========================================================
@@ -1725,6 +1794,15 @@ export default function DetailCCPage({
           saat ini dan diunduh setelah kamu
           klik tombol download.
         </p>
+
+        {PREVIEW_COMPONENT[printDoc.key] && (
+          <div style={{ marginBottom: 18 }}>
+            {(() => {
+              const PreviewComp = PREVIEW_COMPONENT[printDoc.key];
+              return <PreviewComp {...previewPropsFor(printDoc.key)} />;
+            })()}
+          </div>
+        )}
 
         <div
           style={{

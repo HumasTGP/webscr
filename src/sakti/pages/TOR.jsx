@@ -328,6 +328,9 @@ export default function TORPage({ tor, setTor, rab, notify }) {
             <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: 16, background: T.bg }}>
               <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{previewRecord.id}</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: T.heading, margin: "3px 0 12px" }}>{previewRecord.judulKegiatan}</div>
+              <div style={{ marginBottom: 12 }}>
+                <TorDocPreview values={previewRecord} />
+              </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <Button icon={Download} onClick={() => doDownloadTorDocx(previewRecord)}>Unduh Word (.docx)</Button>
                 <Button variant="ghost" icon={Download} onClick={() => doDownloadTorPdf(previewRecord)}>Unduh PDF</Button>

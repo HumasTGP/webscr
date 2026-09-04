@@ -15,6 +15,7 @@ import DatePicker from "../../components/DatePicker";
 import ComboManaged from "../../components/ComboManaged";
 import ReviewModal from "../../components/ReviewModal";
 import { DEFAULT_SATUAN, SatuanSelect, SatuanSettingsModal, hitungTotalDenganSatuan } from "../../components/SatuanPicker";
+import { Lampiran1Preview } from "../../components/DocTemplatePreview";
 
 const STEPS = ["Isi Formulir", "RAB & Ruang Lingkup", "Konfirmasi", "Simpan"];
 const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
@@ -526,6 +527,26 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
             </table>
           </div>
           <div style={{ textAlign: "right", marginBottom: 18, fontSize: 16, fontWeight: 700, color: T.heading }}>Grand Total: {rupiah(grandTotal)}</div>
+
+          <SectionLabel dashed>Pratinjau Dokumen (A4, sesuai Template_Lampiran_1.docx)</SectionLabel>
+          <div style={{ marginBottom: 16 }}>
+            <Lampiran1Preview
+              submissionId={activeRab?.idNumber}
+              tanggal={formatTanggal(form.tanggal)}
+              namaPengadaan={form.namaPengadaan}
+              procost={form.procost}
+              expType={form.expType}
+              task={form.task}
+              expOrg={form.expOrg}
+              items={items.map((r) => ({
+                uraian: r.uraian, qty: r.qty, satuan: r.satuan, hargaVendor1: r.hargaVendor1,
+              }))}
+              grandTotal={grandTotal}
+              vendor1={form.vendor1}
+              vendor2={form.vendor2}
+              vendor3={form.vendor3}
+            />
+          </div>
 
           <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 6, flexWrap: "wrap" }}>
             <Button icon={Download} onClick={() => downloadDocx({ submissionId: activeRab?.idNumber, form, items })}>Unduh Word (.docx)</Button>

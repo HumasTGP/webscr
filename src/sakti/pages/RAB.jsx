@@ -15,6 +15,7 @@ import PageHeader from "../../components/PageHeader";
 import DatePicker from "../../components/DatePicker";
 import ReviewModal from "../../components/ReviewModal";
 import { DEFAULT_SATUAN, SatuanSelect, SatuanSettingsModal } from "../../components/SatuanPicker";
+import { RabDocPreview } from "../../components/DocTemplatePreview";
 
 const STEPS = ["Data RAB", "Uraian RAB", "Konfirmasi RAB", "Simpan"];
 const PPN_OPTIONS = ["Non PPN", "11%"];
@@ -329,6 +330,9 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
               <div style={{ fontSize: 14, fontWeight: 700, color: T.heading, margin: "3px 0 10px" }}>{previewRecord.judulKegiatan}</div>
               <div style={{ fontSize: 12.5, color: T.muted, marginBottom: 12 }}>
                 Tanggal RAB: {formatTanggal(previewRecord.tanggalRab)} · Total Evaluasi Vendor: {rupiah(previewRecord.totalEvaluasiVendor || previewRecord.totalEvaluasi || 0)}
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <RabDocPreview values={previewRecord} madm={PENANDA_TANGAN.madm} asmanKas={PENANDA_TANGAN.asmanKas} />
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <Button icon={Download} onClick={() => downloadDocx(previewRecord)}>Unduh Word (.docx)</Button>
@@ -646,56 +650,13 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             <ReviewRow label="Dokumen TOR" value={header.dokumenTor?.fileName || "-"} full />
           </div>
 
-          <SectionLabel>Uraian RAB ({items.length} baris)</SectionLabel>
-          {/* Tabel preview ini sengaja disusun persis kayak Template_RAB.docx: grup
-              kolom USULAN & EVALUASI berdampingan (masing-masing Qty/Harga
-              Satuan/Jumlah), lalu baris ringkasan Jumlah/PPN/Jumlah+PPN di bawah
-              per sisi - biar preview di web = isi dokumen yang bakal diunduh. */}
-          <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden", overflowX: "auto", marginBottom: 16 }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
-              <thead>
-                <tr>
-                  <th style={{ ...th, textAlign: "center" }} rowSpan={2}>Uraian</th>
-                  <th style={{ ...th, textAlign: "center" }} rowSpan={2}>Satuan</th>
-                  <th style={{ ...th, textAlign: "center" }} colSpan={3}>Usulan</th>
-                  <th style={{ ...th, textAlign: "center" }} colSpan={3}>Evaluasi</th>
-                </tr>
-                <tr>
-                  {["Qty", "Harga Satuan", "Jumlah", "Qty", "Harga Satuan", "Jumlah"].map((h, i) => (
-                    <th key={i} style={{ ...th, textAlign: "center" }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((r, i) => (
-                  <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
-                    <td style={{ ...td, textAlign: "center" }}>{r.uraian}</td>
-                    <td style={{ ...td, textAlign: "center" }}>{r.satuan}</td>
-                    <td style={{ ...td, textAlign: "center" }}>{r.qty}</td>
-                    <td style={{ ...td, textAlign: "center" }}>{rupiah(r.hargaSatuanVendor || 0)}</td>
-                    <td style={{ ...td, textAlign: "center", fontWeight: 700 }}>{rupiah(r.totalVendor || 0)}</td>
-                    <td style={{ ...td, textAlign: "center" }}>{r.qtyEvaluasi}</td>
-                    <td style={{ ...td, textAlign: "center" }}>{rupiah(r.hargaSatuanEvaluasiVendor || 0)}</td>
-                    <td style={{ ...td, textAlign: "center", fontWeight: 700 }}>{rupiah(r.totalEvaluasiVendor || 0)}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                {[
-                  { label: "Jumlah", u: items.reduce((s, r) => s + (r.baseVendor || 0), 0), e: items.reduce((s, r) => s + (r.baseEvaluasiVendor || 0), 0) },
-                  { label: "PPN", u: items.reduce((s, r) => s + (r.ppnNilaiVendor || 0), 0), e: items.reduce((s, r) => s + (r.ppnNilaiEvaluasiVendor || 0), 0) },
-                  { label: "Jumlah + PPN", u: totalVendor, e: totalEvaluasiVendor, bold: true },
-                ].map((row) => (
-                  <tr key={row.label} style={{ background: T.blueSoft }}>
-                    <td style={{ ...td, borderBottom: "none" }} colSpan={3}></td>
-                    <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: 700 }}>{row.label}</td>
-                    <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: row.bold ? 700 : 600 }}>{rupiah(row.u)}</td>
-                    <td style={{ ...td, borderBottom: "none" }} colSpan={2}></td>
-                    <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: row.bold ? 700 : 600 }}>{rupiah(row.e)}</td>
-                  </tr>
-                ))}
-              </tfoot>
-            </table>
+          <SectionLabel>Pratinjau Dokumen (A4, sesuai Template_RAB.docx)</SectionLabel>
+          <div style={{ marginBottom: 16 }}>
+            <RabDocPreview
+              values={{ ...header, items, totalVendor, totalEvaluasiVendor }}
+              madm={PENANDA_TANGAN.madm}
+              asmanKas={PENANDA_TANGAN.asmanKas}
+            />
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
@@ -718,66 +679,12 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
           {/* Preview lengkap - persis susunan Template_RAB.docx (sama kayak step
               Konfirmasi RAB), biar user bisa cek ulang seluruh isian sebelum
               mengunduh file yang sebenarnya. */}
-          <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: "22px 26px", background: "#fff", maxWidth: 780, margin: "0 auto 18px" }}>
-            <div style={{ textAlign: "center", fontWeight: 700, fontSize: 14.5, color: T.heading, letterSpacing: 0.3 }}>RENCANA ANGGARAN BIAYA</div>
-            <div style={{ textAlign: "center", color: T.text, fontSize: 12.5, marginBottom: 16 }}>{header.judulKegiatan || "-"}</div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 14 }}>
-              <span><b>ID Number:</b> {header.idNumber || "-"}</span>
-              <span><b>Tanggal RAB:</b> {formatTanggal(header.tanggalRab)}</span>
-            </div>
-
-            <div style={{ border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden", overflowX: "auto", marginBottom: 14 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
-                <thead>
-                  <tr>
-                    <th style={{ ...th, textAlign: "center" }} rowSpan={2}>Uraian</th>
-                    <th style={{ ...th, textAlign: "center" }} rowSpan={2}>Satuan</th>
-                    <th style={{ ...th, textAlign: "center" }} colSpan={3}>Usulan</th>
-                    <th style={{ ...th, textAlign: "center" }} colSpan={3}>Evaluasi</th>
-                  </tr>
-                  <tr>
-                    {["Qty", "Harga Satuan", "Jumlah", "Qty", "Harga Satuan", "Jumlah"].map((h, i) => (
-                      <th key={i} style={{ ...th, textAlign: "center" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((r, i) => (
-                    <tr key={r.id} style={{ background: i % 2 ? T.rowAlt : T.card }}>
-                      <td style={{ ...td, textAlign: "center" }}>{r.uraian}</td>
-                      <td style={{ ...td, textAlign: "center" }}>{r.satuan}</td>
-                      <td style={{ ...td, textAlign: "center" }}>{r.qty}</td>
-                      <td style={{ ...td, textAlign: "center" }}>{rupiah(r.hargaSatuanVendor || 0)}</td>
-                      <td style={{ ...td, textAlign: "center", fontWeight: 700 }}>{rupiah(r.totalVendor || 0)}</td>
-                      <td style={{ ...td, textAlign: "center" }}>{r.qtyEvaluasi}</td>
-                      <td style={{ ...td, textAlign: "center" }}>{rupiah(r.hargaSatuanEvaluasiVendor || 0)}</td>
-                      <td style={{ ...td, textAlign: "center", fontWeight: 700 }}>{rupiah(r.totalEvaluasiVendor || 0)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  {[
-                    { label: "Jumlah", u: items.reduce((s, r) => s + (r.baseVendor || 0), 0), e: items.reduce((s, r) => s + (r.baseEvaluasiVendor || 0), 0) },
-                    { label: "PPN", u: items.reduce((s, r) => s + (r.ppnNilaiVendor || 0), 0), e: items.reduce((s, r) => s + (r.ppnNilaiEvaluasiVendor || 0), 0) },
-                    { label: "Jumlah + PPN", u: totalVendor, e: totalEvaluasiVendor, bold: true },
-                  ].map((row) => (
-                    <tr key={row.label} style={{ background: T.blueSoft }}>
-                      <td style={{ ...td, borderBottom: "none" }} colSpan={3}></td>
-                      <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: 700 }}>{row.label}</td>
-                      <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: row.bold ? 700 : 600 }}>{rupiah(row.u)}</td>
-                      <td style={{ ...td, borderBottom: "none" }} colSpan={2}></td>
-                      <td style={{ ...td, borderBottom: "none", textAlign: "center", fontWeight: row.bold ? 700 : 600 }}>{rupiah(row.e)}</td>
-                    </tr>
-                  ))}
-                </tfoot>
-              </table>
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 26, textAlign: "center", fontSize: 12 }}>
-              <TtdCol role="Menyetujui" sub={PENANDA_TANGAN.madm.role} name={PENANDA_TANGAN.madm.nama} />
-              <TtdCol role="Dibuat Oleh" sub={PENANDA_TANGAN.asmanKas.role} name={PENANDA_TANGAN.asmanKas.nama} />
-            </div>
+          <div style={{ maxWidth: 780, margin: "0 auto 18px" }}>
+            <RabDocPreview
+              values={{ ...header, items, totalVendor, totalEvaluasiVendor }}
+              madm={PENANDA_TANGAN.madm}
+              asmanKas={PENANDA_TANGAN.asmanKas}
+            />
           </div>
 
           <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 12 }}>

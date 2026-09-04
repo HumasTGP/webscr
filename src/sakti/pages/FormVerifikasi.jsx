@@ -4,6 +4,8 @@ import { T, font } from "../../lib/theme";
 import { OPT } from "../../lib/data";
 import { uid, rupiah, terbilang as toTerbilang } from "../../lib/utils";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
+import { PENANDA_TANGAN } from "../../lib/data";
+import { FormVerifikasiPreview } from "../../components/DocTemplatePreview";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 import DatePicker from "../../components/DatePicker";
@@ -250,6 +252,21 @@ export default function FormVerifikasiPage({ rab, notify, forms = [], setForms }
                   padding: "9px 15px", borderRadius: 8, border: `1px solid ${T.border}`,
                   background: T.card, color: T.heading, cursor: "pointer", fontSize: 12.5, fontWeight: 700,
                 }}><Download size={14} /> Download Word</button>
+              </div>
+
+              <div style={{ marginTop: 22, borderTop: `1px dashed ${T.border}`, paddingTop: 16 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: T.blue, marginBottom: 10 }}>
+                  Pratinjau Dokumen (A4, sesuai Template_Verifikasi.docx)
+                </div>
+                <FormVerifikasiPreview
+                  nomorVerifikasi={formData.nomorVerifikasi}
+                  tanggal={formData.tanggal ? formatTanggalPanjang(formData.tanggal) : ""}
+                  kegiatan={formData.kegiatan || activeRab.judulKegiatan}
+                  jumlahBiaya={formData.jumlahBiaya ? Number(formData.jumlahBiaya) : null}
+                  terbilang={formData.terbilang}
+                  kepada={formData.kepada}
+                  asmanKas={PENANDA_TANGAN.asmanKas}
+                />
               </div>
             </div>
           )}

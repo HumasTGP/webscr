@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Download, Save } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
+import { Lampiran2Preview } from "../../components/DocTemplatePreview";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 import DatePicker from "../../components/DatePicker";
@@ -139,6 +140,20 @@ export default function Lampiran2Page({ rab, notify, list = [], setList, lmp1Lis
               <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 18 }}>
                 <button onClick={save} style={actionStyle(T.blue, "#fff", "transparent")}><Save size={14} /> Simpan</button>
                 <button onClick={downloadDocx} style={actionStyle(T.card, T.heading, T.border)}><Download size={14} /> Download Word</button>
+              </div>
+
+              <div style={{ marginTop: 22, borderTop: `1px dashed ${T.border}`, paddingTop: 16 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: T.blue, marginBottom: 10 }}>
+                  Pratinjau Dokumen (A4, sesuai Template_Lampiran_2.docx)
+                </div>
+                <Lampiran2Preview
+                  namaPengadaan={activeRab.judulKegiatan}
+                  nilaiPenawaran={form.nilaiPenawaran}
+                  nilaiNegosiasi={form.nilaiNegosiasi}
+                  tanggalNegosiasi={form.tanggalNegosiasi ? formatTanggalPanjang(form.tanggalNegosiasi) : ""}
+                  pelaksanaPekerjaan={form.pelaksanaPekerjaan}
+                  keterangan={form.keterangan}
+                />
               </div>
             </div>
           )}
