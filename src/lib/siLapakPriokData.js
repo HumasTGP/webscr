@@ -9,6 +9,10 @@ export const SHIFTS = [
 
 export const SATPAM_SEED = ["Tyo", "Andra", "Rizky", "Bagus"];
 
+// Jenis catatan Tambah/Data/Ambil Paket-Surat - satu set halaman menampung
+// keduanya (bukan modul terpisah), dibedakan lewat field `jenis` ini.
+export const JENIS_OPT = ["Paket", "Surat"];
+
 export const EKSPEDISI_OPT = [
   "JNE",
   "J&T Express",
@@ -17,6 +21,15 @@ export const EKSPEDISI_OPT = [
   "Anteraja",
   "Gojek/Grab (instan)",
   "Kurir internal",
+  "Lainnya",
+];
+
+export const ASAL_SURAT_OPT = [
+  "Internal PLN Group",
+  "Instansi Pemerintah",
+  "Vendor/Rekanan",
+  "Kurir internal",
+  "Pos Indonesia",
   "Lainnya",
 ];
 

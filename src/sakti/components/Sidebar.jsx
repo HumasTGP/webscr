@@ -74,7 +74,7 @@ export default function Sidebar({ active, onSelect, user, onLogout, onBackToPort
       <div className="system-brand">
         <button onClick={()=>setCollapsed(true)} title="Tutup sidebar" style={{...railButton,width:28,height:28,marginBottom:0}}><ChevronLeft size={13}/></button>
         <div className="system-brand-logo"><img src="/logo-sakti.png" alt="SAKTI"/></div>
-        <div className="system-brand-copy"><div className="system-brand-title">SAKTI</div><div className="system-brand-subtitle">Sistem Aplikasi Keuangan Terintegrasi</div></div>
+        <div className="system-brand-copy"><div className="system-brand-title">SAKTI</div><div className="system-brand-subtitle">Sistem Administrasi Kas Terintegrasi</div></div>
       </div>
       <div style={{flex:1,overflowY:"auto",overflowX:"hidden",display:"flex",flexDirection:"column",gap:6,padding:"12px 14px"}}>{tree.map((node)=><NavNode key={node.key} node={node} depth={0} active={active} onSelect={onSelect} openMap={openMap} toggleOpen={toggleOpen}/>)}</div>
       <SidebarExitButton onClick={handleExit} />

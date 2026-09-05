@@ -12,11 +12,11 @@ import SiLapakPageHeader from "../components/SiLapakPageHeader";
 import "../styles/silapak-pages.css";
 
 const VIEW_META = {
-  tambah: { title: "Tambah Paket", description: "Catat paket masuk, penerima, ekspedisi, dan petugas penerima paket." },
-  data: { title: "Data Paket", description: "Cari, periksa, edit, dan proses data paket yang sudah tercatat." },
-  ambil: { title: "Ambil Paket", description: "Proses serah terima paket dan simpan bukti pengambilan secara terstruktur." },
+  tambah: { title: "Tambah Paket/Surat", description: "Catat paket atau surat masuk, penerima, dan petugas penerima." },
+  data: { title: "Data Paket/Surat", description: "Cari, filter, periksa, edit, dan proses data paket atau surat yang sudah tercatat." },
+  ambil: { title: "Ambil Paket/Surat", description: "Proses serah terima paket atau surat dan simpan bukti pengambilan secara terstruktur." },
   tamu: { title: "Buku Tamu", description: "Catat identitas, tujuan, waktu kunjungan, dan pegawai yang dituju." },
-  riwayat: { title: "Riwayat", description: "Telusuri riwayat paket dan kunjungan tamu yang pernah dicatat." },
+  riwayat: { title: "Riwayat", description: "Telusuri riwayat paket, surat, dan kunjungan tamu yang pernah dicatat." },
   bantuan: { title: "Bantuan", description: "Panduan penggunaan, pertanyaan umum, dan kontak bantuan Si Lapak Priok." },
 };
 
@@ -52,7 +52,7 @@ export default function SiLapakApp({ onLogout }) {
     {view === "data" && framed("data", <DataPaket paket={paket} onProsesAmbil={handleProsesAmbil} onUpdate={updatePaket} onDelete={deletePaket} />)}
     {view === "ambil" && framed("ambil", <AmbilPaket paket={paket} prefillId={prefillAmbilId} duty={duty} onSaved={handleAmbilSaved} />)}
     {view === "tamu" && framed("tamu", <BukuTamu onSaved={(entry) => setTamu((prev) => [entry, ...prev])} />)}
-    {view === "riwayat" && framed("riwayat", <Riwayat paket={paket} tamu={tamu} onUpdateTamu={updateTamu} onDeleteTamu={deleteTamu} />)}
+    {view === "riwayat" && framed("riwayat", <Riwayat paket={paket} tamu={tamu} onUpdatePaket={updatePaket} onDeletePaket={deletePaket} onUpdateTamu={updateTamu} onDeleteTamu={deleteTamu} />)}
     {view === "bantuan" && framed("bantuan", <SiLapakBantuan />, true)}
     <DutyPickerModal open={dutyModalOpen} onClose={() => setDutyModalOpen(false)} duty={duty} onSave={setDuty} satpamList={satpamList} onAddSatpam={(name) => setSatpamList((prev) => [...prev, name])} />
   </SiLapakShell>;

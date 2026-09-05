@@ -121,7 +121,7 @@ export default function Sidebar({
               fontFamily: font.mono,
             }}
           >
-            Sistem Informasi Kas
+            Sistem Administrasi Kas Terintegrasi
           </div>
         </div>
         <button

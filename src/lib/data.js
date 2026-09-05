@@ -241,7 +241,7 @@ export const ADMIN_CREDENTIALS = {
 // Seed 3 user default sesuai kebutuhan demo. Nanti disimpan di state supaya
 // bisa ditambah/edit/dihapus via halaman "Manajemen Akses".
 export const DEFAULT_USERS = [
-  { id: "u-humas-1", role: "humas", username: "1",     password: "1",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  { id: "u-humas-1", role: "humas", username: "pkl humas", password: "humaspkl26", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
   { id: "u-asman-1", role: "asman", username: "2",     password: "2",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
   { id: "u-madm-1",  role: "madm",  username: "3",     password: "3",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
   { id: "u-mitra-admin",   role: "mitra",   username: "admin",        password: "admin123",    activeFrom: "2026-01-01", activeTo: "2026-12-31" },
@@ -343,7 +343,7 @@ export const MENU_TREE = [
   },
 
   {
-    key: "grp-mitra", label: "Pengajuan Mitra", icon: Building2, roles: ["humas"],
+    key: "grp-mitra", label: "Si Cepat", icon: Building2, roles: ["humas"],
     children: [
       { key: "proposal-rekap",    label: "Rekap Pengajuan Proposal", icon: Handshake },
       { key: "proposal-evaluasi", label: "Form Evaluasi",            icon: FileText },

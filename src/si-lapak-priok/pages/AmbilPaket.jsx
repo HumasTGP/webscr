@@ -1,20 +1,25 @@
 import { useState, useRef } from "react";
 import { Upload, X } from "lucide-react";
 import { T } from "../../lib/theme";
-import { bulanIni } from "../../lib/siLapakPriokData";
+import { bulanIni, JENIS_OPT } from "../../lib/siLapakPriokData";
 
 const MAX_SIZE = 5 * 1024 * 1024;
 const inputStyle = { width:"100%", boxSizing:"border-box", border:`1px solid ${T.border}`, borderRadius:8, padding:"10px 12px", fontSize:12.5, color:T.text, background:T.card, outline:"none" };
 const fieldLabel = { display:"block", fontSize:11.5, fontWeight:600, color:T.text, marginBottom:6 };
 
 export default function AmbilPaket({ paket, prefillId, duty, onSaved }) {
-  const belumDiambil = paket.filter((p) => p.status === "Belum Diambil");
+  const [jenisFilter, setJenisFilter] = useState("Semua");
+  const belumDiambilSemua = paket.filter((p) => p.status === "Belum Diambil");
+  const belumDiambil = belumDiambilSemua.filter((p) => jenisFilter === "Semua" || p.jenis === jenisFilter);
   const [selectedId, setSelectedId] = useState(prefillId || belumDiambil[0]?.id || "");
   const [pengambil, setPengambil] = useState("");
   const [satpamTugas, setSatpamTugas] = useState(duty?.names?.[0] || "");
   const [foto, setFoto] = useState(null);
   const [fotoError, setFotoError] = useState("");
   const fileRef = useRef(null);
+
+  const selectedItem = belumDiambilSemua.find((p) => p.id === selectedId);
+  const jenisTerpilih = selectedItem?.jenis || "Paket";
 
   const handleFile = (file) => {
     if (!file) return;
@@ -32,9 +37,16 @@ export default function AmbilPaket({ paket, prefillId, duty, onSaved }) {
   };
 
   return <div style={{ maxWidth:460 }}>
-    {belumDiambil.length === 0 ? <div style={{fontSize:12.5,color:T.muted}}>Tidak ada paket yang menunggu diambil.</div> : <div style={{display:"flex",flexDirection:"column",gap:16}}>
-      <div><label style={fieldLabel}>Nomor resi <span style={{color:"#D14343"}}>*</span></label><select style={inputStyle} value={selectedId} onChange={(e)=>setSelectedId(e.target.value)}>{belumDiambil.map((p)=><option key={p.id} value={p.id}>{p.noResi} · {p.namaPenerima}</option>)}</select></div>
-      <div><label style={fieldLabel}>Pengambil paket <span style={{color:"#D14343"}}>*</span></label><input style={inputStyle} value={pengambil} onChange={(e)=>setPengambil(e.target.value)} placeholder="Nama orang yang mengambil" /></div>
+    <div style={{ marginBottom: 16 }}>
+      <label style={fieldLabel}>Filter jenis</label>
+      <select style={inputStyle} value={jenisFilter} onChange={(e) => { setJenisFilter(e.target.value); setSelectedId(""); }}>
+        <option value="Semua">Semua jenis</option>
+        {JENIS_OPT.map((j) => (<option key={j} value={j}>{j}</option>))}
+      </select>
+    </div>
+    {belumDiambil.length === 0 ? <div style={{fontSize:12.5,color:T.muted}}>Tidak ada paket/surat yang menunggu diambil.</div> : <div style={{display:"flex",flexDirection:"column",gap:16}}>
+      <div><label style={fieldLabel}>Nomor resi / nomor surat <span style={{color:"#D14343"}}>*</span></label><select style={inputStyle} value={selectedId} onChange={(e)=>setSelectedId(e.target.value)}>{belumDiambil.map((p)=><option key={p.id} value={p.id}>[{p.jenis}] {p.jenis === "Surat" ? p.noSurat : p.noResi} · {p.namaPenerima}</option>)}</select></div>
+      <div><label style={fieldLabel}>{jenisTerpilih === "Surat" ? "Penerima surat" : "Pengambil paket"} <span style={{color:"#D14343"}}>*</span></label><input style={inputStyle} value={pengambil} onChange={(e)=>setPengambil(e.target.value)} placeholder="Nama orang yang mengambil" /></div>
       <div><label style={fieldLabel}>Satpam yang bertugas</label><select style={inputStyle} value={satpamTugas} onChange={(e)=>setSatpamTugas(e.target.value)}><option value="">Pilih satpam</option>{(duty?.names || []).map((n)=><option key={n} value={n}>{n}</option>)}</select></div>
       <div>
         <label style={fieldLabel}>Foto bukti serah terima <span style={{color:"#D14343"}}>*</span></label>

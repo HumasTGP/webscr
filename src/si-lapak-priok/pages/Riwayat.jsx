@@ -1,22 +1,95 @@
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { T } from "../../lib/theme";
+import { EKSPEDISI_OPT, ASAL_SURAT_OPT } from "../../lib/siLapakPriokData";
 
 const inputStyle = { width:"100%", boxSizing:"border-box", border:`1px solid ${T.border}`, borderRadius:8, padding:"8px 10px", fontSize:12, color:T.text, background:T.card, outline:"none" };
 
-export default function Riwayat({ paket, tamu, onUpdateTamu, onDeleteTamu }) {
+export default function Riwayat({ paket, tamu, onUpdatePaket, onDeletePaket, onUpdateTamu, onDeleteTamu }) {
   const [tab,setTab]=useState("paket");
+  const hanyaPaket = paket.filter((p) => p.jenis !== "Surat");
+  const hanyaSurat = paket.filter((p) => p.jenis === "Surat");
   return <div>
-    <div style={{display:"flex",gap:8,marginBottom:18}}><Tab active={tab==="paket"} onClick={()=>setTab("paket")}>Paket ({paket.length})</Tab><Tab active={tab==="tamu"} onClick={()=>setTab("tamu")}>Kunjungan tamu ({tamu.length})</Tab></div>
-    {tab==="paket" ? <RiwayatPaket paket={paket}/> : <RiwayatTamu tamu={tamu} onUpdate={onUpdateTamu} onDelete={onDeleteTamu}/>} 
+    <div style={{display:"flex",gap:8,marginBottom:18,flexWrap:"wrap"}}>
+      <Tab active={tab==="paket"} onClick={()=>setTab("paket")}>Paket ({hanyaPaket.length})</Tab>
+      <Tab active={tab==="surat"} onClick={()=>setTab("surat")}>Surat ({hanyaSurat.length})</Tab>
+      <Tab active={tab==="tamu"} onClick={()=>setTab("tamu")}>Kunjungan tamu ({tamu.length})</Tab>
+    </div>
+    {tab==="paket" && <RiwayatPaket data={hanyaPaket} onUpdate={onUpdatePaket} onDelete={onDeletePaket}/>}
+    {tab==="surat" && <RiwayatSurat data={hanyaSurat} onUpdate={onUpdatePaket} onDelete={onDeletePaket}/>}
+    {tab==="tamu" && <RiwayatTamu tamu={tamu} onUpdate={onUpdateTamu} onDelete={onDeleteTamu}/>}
   </div>;
 }
 
 function Tab({active,onClick,children}) { return <button type="button" onClick={onClick} style={{padding:"8px 16px",borderRadius:8,border:`1px solid ${active?T.navy:T.border}`,background:active?T.navy:T.card,color:active?"#fff":T.muted,fontSize:12.5,fontWeight:600,cursor:"pointer"}}>{children}</button>; }
 
-function RiwayatPaket({paket}) {
-  if(paket.length===0) return <Empty text="Belum ada riwayat paket."/>;
-  return <div style={{overflowX:"auto"}}><table style={{width:"100%",minWidth:720,borderCollapse:"collapse",fontSize:12}}><thead><tr><Th>Diterima</Th><Th>Penerima</Th><Th>Ekspedisi</Th><Th>Resi</Th><Th>Status</Th><Th>Pengambil</Th></tr></thead><tbody>{paket.map((p)=><tr key={p.id}><Td>{p.diterimaTanggal}, {p.diterimaJam}</Td><Td>{p.namaPenerima}</Td><Td>{p.ekspedisi}</Td><Td>{p.noResi}</Td><Td><span style={{fontSize:9.5,fontWeight:600,padding:"2px 8px",borderRadius:20,background:p.status==="Sudah Diambil"?"#E5F6EF":"#FDF3DD",color:p.status==="Sudah Diambil"?"#1D9E75":"#B7791F"}}>{p.status}</span></Td><Td>{p.pengambil||"-"}</Td></tr>)}</tbody></table></div>;
+function RiwayatPaket({data, onUpdate, onDelete}) {
+  const [editId,setEditId]=useState(null);
+  const [draft,setDraft]=useState(null);
+  const [confirmId,setConfirmId]=useState(null);
+  if(data.length===0) return <Empty text="Belum ada riwayat paket."/>;
+  const startEdit=(p)=>{setEditId(p.id);setDraft({...p});};
+  const saveEdit=()=>{onUpdate(draft);setEditId(null);};
+  return <div style={{overflowX:"auto"}}>
+    <table style={{width:"100%",minWidth:760,borderCollapse:"collapse",fontSize:12}}>
+      <thead><tr><Th>Diterima</Th><Th>Penerima</Th><Th>Ekspedisi</Th><Th>Resi</Th><Th>Status</Th><Th>Pengambil</Th><Th></Th></tr></thead>
+      <tbody>{data.map((p)=>editId===p.id ? (
+        <tr key={p.id}><td colSpan={7} style={{padding:"10px",borderBottom:`1px solid ${T.border}`,background:T.bg}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:10}}>
+            <div><label style={smallLabel}>Nama penerima</label><input style={inputStyle} value={draft.namaPenerima} onChange={(e)=>setDraft({...draft,namaPenerima:e.target.value})}/></div>
+            <div><label style={smallLabel}>Ekspedisi</label><select style={inputStyle} value={draft.ekspedisi} onChange={(e)=>setDraft({...draft,ekspedisi:e.target.value})}>{EKSPEDISI_OPT.map((op)=>(<option key={op} value={op}>{op}</option>))}</select></div>
+            <div><label style={smallLabel}>Nomor resi</label><input style={inputStyle} value={draft.noResi} onChange={(e)=>setDraft({...draft,noResi:e.target.value})}/></div>
+          </div>
+          <div style={{display:"flex",gap:8}}><button type="button" onClick={saveEdit} style={primaryBtn}>Simpan</button><button type="button" onClick={()=>setEditId(null)} style={secondaryBtn}>Batal</button></div>
+        </td></tr>
+      ) : (
+        <tr key={p.id}>
+          <Td>{p.diterimaTanggal}, {p.diterimaJam}</Td><Td>{p.namaPenerima}</Td><Td>{p.ekspedisi}</Td><Td>{p.noResi}</Td>
+          <Td><span style={{fontSize:9.5,fontWeight:600,padding:"2px 8px",borderRadius:20,background:p.status==="Sudah Diambil"?"#E5F6EF":"#FDF3DD",color:p.status==="Sudah Diambil"?"#1D9E75":"#B7791F"}}>{p.status}</span></Td>
+          <Td>{p.pengambil||"-"}</Td>
+          <Td>
+            <div style={{display:"flex",gap:6}}><IconBtn onClick={()=>startEdit(p)} title="Edit"><Pencil size={13}/></IconBtn><IconBtn onClick={()=>setConfirmId(p.id)} title="Hapus" danger><Trash2 size={13}/></IconBtn></div>
+            {confirmId===p.id && <div style={{marginTop:8,background:"#FBE4E4",border:"1px solid #E8B4B4",borderRadius:8,padding:8}}><div style={{fontSize:10.5,color:"#7A1F1F",marginBottom:6}}>Hapus data ini?</div><div style={{display:"flex",gap:6}}><button type="button" onClick={()=>{onDelete(p.id);setConfirmId(null);}} style={{...primaryBtn,background:"#C43A2B",padding:"6px 12px"}}>Hapus</button><button type="button" onClick={()=>setConfirmId(null)} style={{...secondaryBtn,padding:"6px 12px"}}>Batal</button></div></div>}
+          </Td>
+        </tr>
+      ))}</tbody>
+    </table>
+  </div>;
+}
+
+function RiwayatSurat({data, onUpdate, onDelete}) {
+  const [editId,setEditId]=useState(null);
+  const [draft,setDraft]=useState(null);
+  const [confirmId,setConfirmId]=useState(null);
+  if(data.length===0) return <Empty text="Belum ada riwayat surat."/>;
+  const startEdit=(s)=>{setEditId(s.id);setDraft({...s});};
+  const saveEdit=()=>{onUpdate(draft);setEditId(null);};
+  return <div style={{overflowX:"auto"}}>
+    <table style={{width:"100%",minWidth:800,borderCollapse:"collapse",fontSize:12}}>
+      <thead><tr><Th>Diterima</Th><Th>Penerima</Th><Th>Asal Surat</Th><Th>No. Surat</Th><Th>Perihal</Th><Th>Status</Th><Th>Diserahkan ke</Th><Th></Th></tr></thead>
+      <tbody>{data.map((s)=>editId===s.id ? (
+        <tr key={s.id}><td colSpan={8} style={{padding:"10px",borderBottom:`1px solid ${T.border}`,background:T.bg}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10,marginBottom:10}}>
+            <div><label style={smallLabel}>Nama penerima</label><input style={inputStyle} value={draft.namaPenerima} onChange={(e)=>setDraft({...draft,namaPenerima:e.target.value})}/></div>
+            <div><label style={smallLabel}>Asal surat</label><select style={inputStyle} value={draft.asalSurat} onChange={(e)=>setDraft({...draft,asalSurat:e.target.value})}>{ASAL_SURAT_OPT.map((op)=>(<option key={op} value={op}>{op}</option>))}</select></div>
+            <div><label style={smallLabel}>Nomor surat</label><input style={inputStyle} value={draft.noSurat} onChange={(e)=>setDraft({...draft,noSurat:e.target.value})}/></div>
+            <div><label style={smallLabel}>Perihal</label><input style={inputStyle} value={draft.perihal} onChange={(e)=>setDraft({...draft,perihal:e.target.value})}/></div>
+          </div>
+          <div style={{display:"flex",gap:8}}><button type="button" onClick={saveEdit} style={primaryBtn}>Simpan</button><button type="button" onClick={()=>setEditId(null)} style={secondaryBtn}>Batal</button></div>
+        </td></tr>
+      ) : (
+        <tr key={s.id}>
+          <Td>{s.diterimaTanggal}, {s.diterimaJam}</Td><Td>{s.namaPenerima}</Td><Td>{s.asalSurat}</Td><Td>{s.noSurat}</Td><Td>{s.perihal}</Td>
+          <Td><span style={{fontSize:9.5,fontWeight:600,padding:"2px 8px",borderRadius:20,background:s.status==="Sudah Diambil"?"#E5F6EF":"#FDF3DD",color:s.status==="Sudah Diambil"?"#1D9E75":"#B7791F"}}>{s.status}</span></Td>
+          <Td>{s.pengambil||"-"}</Td>
+          <Td>
+            <div style={{display:"flex",gap:6}}><IconBtn onClick={()=>startEdit(s)} title="Edit"><Pencil size={13}/></IconBtn><IconBtn onClick={()=>setConfirmId(s.id)} title="Hapus" danger><Trash2 size={13}/></IconBtn></div>
+            {confirmId===s.id && <div style={{marginTop:8,background:"#FBE4E4",border:"1px solid #E8B4B4",borderRadius:8,padding:8}}><div style={{fontSize:10.5,color:"#7A1F1F",marginBottom:6}}>Hapus data ini?</div><div style={{display:"flex",gap:6}}><button type="button" onClick={()=>{onDelete(s.id);setConfirmId(null);}} style={{...primaryBtn,background:"#C43A2B",padding:"6px 12px"}}>Hapus</button><button type="button" onClick={()=>setConfirmId(null)} style={{...secondaryBtn,padding:"6px 12px"}}>Batal</button></div></div>}
+          </Td>
+        </tr>
+      ))}</tbody>
+    </table>
+  </div>;
 }
 
 function RiwayatTamu({tamu,onUpdate,onDelete}) {

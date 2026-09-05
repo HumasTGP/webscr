@@ -29,6 +29,7 @@ import LandingGateway from "./portal/pages/LandingGateway";
 import SiLapakLogin from "./si-lapak-priok/pages/SiLapakLogin";
 import SiLapakApp from "./si-lapak-priok/pages/SiLapakApp";
 import LoginScreen from "./sakti/pages/Login";
+import NamaPenggunaModal from "./sakti/components/NamaPenggunaModal";
 import Dashboard from "./sakti/pages/Dashboard";
 import RABPage from "./sakti/pages/RAB";
 import TORPage from "./sakti/pages/TOR";
@@ -133,6 +134,11 @@ export default function App() {
   const [silapakLoggedIn, setSilapakLoggedIn] = useState(false);
 
   const [user, setUser] = useState(null);
+  // Menahan hasil login humas sementara sampai popup nama diisi (lihat
+  // NamaPenggunaModal) - akses humas sekarang 1 akun bersama, jadi username
+  // akun ("1") ditimpa dengan nama asli yang diketik user di popup, supaya
+  // Log Aktivitas mencatat nama orangnya, bukan cuma username akun bersama.
+  const [pendingLoginUser, setPendingLoginUser] = useState(null);
   const [active, setActive] = useState("dashboard");
   const [collapsed, setCollapsed] = useState(false);
   const [toast, setToast] = useState(null);
@@ -709,14 +715,34 @@ export default function App() {
   }
 
 
+  if (pendingLoginUser)
+    return (
+      <NamaPenggunaModal
+        open
+        onSubmit={(nama) => {
+          const u = { ...pendingLoginUser, username: nama };
+          setPendingLoginUser(null);
+          setUser(u);
+          setActive("dashboard");
+        }}
+      />
+    );
+
   if (!user)
     return (
       <LoginScreen
         authenticate={authenticate}
         onBack={() => setPortal(null)}
         onLogin={(u) => {
+          if (u.role === "humas" && !u.isAdmin) {
+            // Login humas (akun bersama "pkl humas") ditahan dulu - popup
+            // nama wajib diisi sebelum masuk ke dashboard (lihat
+            // pendingLoginUser di bawah). Akun admin dikecualikan.
+            setPendingLoginUser(u);
+            return;
+          }
           setUser(u);
-          setActive(u.role === "humas" ? "dashboard" : u.role === "madm" ? "madm-dashboard" : "asman-dashboard");
+          setActive(u.role === "madm" ? "madm-dashboard" : u.role === "humas" ? "dashboard" : "asman-dashboard");
         }}
       />
     );

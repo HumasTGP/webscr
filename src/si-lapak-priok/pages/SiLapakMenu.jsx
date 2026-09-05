@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BarChart3, Boxes, PackageCheck, UserRoundCheck, Users } from "lucide-react";
+import { BarChart3, Boxes, FileText, PackageCheck, UserRoundCheck, Users } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import Card from "../../components/Card";
 import PageHeader from "../../components/PageHeader";
@@ -19,29 +19,32 @@ export default function SiLapakMenu({ duty, onOpenDuty, paket, tamu }) {
     return () => window.clearInterval(timer);
   }, []);
 
+  const hanyaPaket = paket.filter((p) => p.jenis !== "Surat");
+  const hanyaSurat = paket.filter((p) => p.jenis === "Surat");
   const belumDiambil = paket.filter((p) => p.status === "Belum Diambil").length;
   const tamuHariIni = tamu.filter((t) => t.tanggalKey === new Date().toDateString()).length;
-  const paketMasukPerBulan = groupByBulan(paket, (p) => p.diterimaTanggal);
-  const paketKeluarPerBulan = groupByBulan(paket.filter((p) => p.status === "Sudah Diambil"), (p) => p.diterimaTanggal);
+  const paketMasukPerBulan = groupByBulan(hanyaPaket, (p) => p.diterimaTanggal);
+  const suratMasukPerBulan = groupByBulan(hanyaSurat, (s) => s.diterimaTanggal);
   const tamuPerBulan = groupByBulan(tamu, (t) => t.tanggal, true);
   const clock = formatClock(now);
 
   const stats = [
-    { icon: Boxes, label: "Paket Belum Diambil", value: belumDiambil, note: "Menunggu proses pengambilan" },
+    { icon: Boxes, label: "Paket Belum Diambil", value: belumDiambil, note: "Menunggu proses pengambilan (paket & surat)" },
     { icon: UserRoundCheck, label: "Tamu Hari Ini", value: tamuHariIni, note: "Kunjungan tercatat hari ini" },
-    { icon: PackageCheck, label: "Total Paket", value: paket.length, note: "Seluruh paket yang tercatat" },
+    { icon: PackageCheck, label: "Total Paket", value: hanyaPaket.length, note: "Seluruh paket yang tercatat" },
+    { icon: FileText, label: "Total Surat", value: hanyaSurat.length, note: "Seluruh surat yang tercatat" },
     { icon: Users, label: "Total Kunjungan", value: tamu.length, note: "Seluruh kunjungan tamu" },
   ];
 
   return <div>
     <PageHeader
       title="Dashboard"
-      description="Ringkasan aktivitas paket, kunjungan tamu, dan petugas yang sedang berjaga."
+      description="Ringkasan aktivitas paket, surat, kunjungan tamu, dan petugas yang sedang berjaga."
       meta={[{ label:"Tanggal", value:clock.tanggal }, { label:"Waktu", value:clock.waktu }]}
     />
     <DutyBanner duty={duty} onOpen={onOpenDuty} />
 
-    <div className="responsive-card-grid silapak-kpi-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,minmax(0,1fr))", gap:12, margin:"18px 0" }}>
+    <div className="responsive-card-grid silapak-kpi-grid" style={{ display:"grid", gridTemplateColumns:"repeat(5,minmax(0,1fr))", gap:12, margin:"18px 0" }}>
       {stats.map(({ icon:Icon, label, value, note }) => <Card key={label} style={{ padding:"16px 17px", minWidth:0 }}>
         <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:12 }}>
           <div style={{ minWidth:0 }}>
@@ -57,7 +60,7 @@ export default function SiLapakMenu({ duty, onOpenDuty, paket, tamu }) {
     <div style={{ display:"flex", alignItems:"center", gap:8, margin:"8px 0 12px" }}><BarChart3 size={16} color="#8C7600"/><h3 style={{ margin:0, fontFamily:font.display, fontSize:14, color:T.heading }}>Aktivitas Bulanan</h3></div>
     <div className="silapak-chart-grid" style={{ display:"grid", gridTemplateColumns:"repeat(3,minmax(0,1fr))", gap:14 }}>
       <ChartPanel title="Paket Masuk" subtitle="Jumlah paket yang diterima" data={paketMasukPerBulan} color="#B79A00" />
-      <ChartPanel title="Paket Keluar" subtitle="Paket yang sudah diambil" data={paketKeluarPerBulan} color="#1D9E75" />
+      <ChartPanel title="Surat Masuk" subtitle="Jumlah surat yang diterima" data={suratMasukPerBulan} color="#1D5FBF" />
       <ChartPanel title="Kunjungan Tamu" subtitle="Jumlah tamu yang tercatat" data={tamuPerBulan} color="#7C4FD1" />
     </div>
   </div>;

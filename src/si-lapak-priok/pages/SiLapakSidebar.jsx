@@ -6,9 +6,9 @@ const ACCENT = "#FDEA6F";
 const ACCENT_TEXT = "#5B4B00";
 const ITEMS = [
   { key:"dashboard",label:"Dashboard",icon:LayoutDashboard },
-  { key:"tambah",label:"Tambah Paket",icon:Package },
-  { key:"data",label:"Data Paket",icon:ListChecks },
-  { key:"ambil",label:"Ambil Paket",icon:PackageCheck },
+  { key:"tambah",label:"Tambah Paket/Surat",icon:Package },
+  { key:"data",label:"Data Paket/Surat",icon:ListChecks },
+  { key:"ambil",label:"Ambil Paket/Surat",icon:PackageCheck },
   { key:"tamu",label:"Buku Tamu",icon:BookUser },
   { key:"riwayat",label:"Riwayat",icon:History },
   { key:"bantuan",label:"Bantuan",icon:HelpCircle },
