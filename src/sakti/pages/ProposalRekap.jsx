@@ -22,6 +22,7 @@ import {
 } from "../../lib/wizardFields";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
 import { BastDocPreview, PaktaDocPreview } from "../../components/DocTemplatePreview";
+import { proposalDocuments } from "../../lib/recordLinks";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
@@ -97,7 +98,7 @@ function OverviewSectionHeading({ children }) {
   );
 }
 
-export default function ProposalRekapPage({ proposals, setProposals, notify, comboProgram = [], setComboProgram }) {
+export default function ProposalRekapPage({ proposals, setProposals, notify, comboProgram = [], setComboProgram, evaluasiList = [] }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(0);
   const [values, setValues] = useState({});
@@ -333,6 +334,8 @@ export default function ProposalRekapPage({ proposals, setProposals, notify, com
     { key: "nilaiDiajukan", label: "Diajukan", render: (r) => (r.nilaiDiajukan ? rupiah(r.nilaiDiajukan) : "-") },
     { key: "approvedBudget", label: "Disetujui", render: (r) => (r.approvedBudget ? rupiah(r.approvedBudget) : "-") },
     { key: "statusProposal", label: "Status", render: (r) => <StatusBadge value={r.statusProposal} /> },
+    ...[["evaluasi", "Form Evaluasi"], ["bast", "BAST"], ["pi", "PI"]].map(([key, label]) => ({ key, label, render: (r) => proposalDocuments(r, evaluasiList)[key] ? "✓" : "—" })),
+    ...[["signatureAsman", "TTD Asman"], ["signatureMadm", "TTD MADM"]].map(([key, label]) => ({ key, label, render: (r) => r[key] ? "✓" : "—" })),
     {
       key: "aksi",
       label: "Aksi",
@@ -418,6 +421,9 @@ export default function ProposalRekapPage({ proposals, setProposals, notify, com
                 </div>
               )}
               <OverviewRows fields={[...FIELDS, ...ADMIN_FIELDS]} values={overviewRow} />
+              <OverviewSectionHeading>Form Evaluasi</OverviewSectionHeading>
+              {evaluasiList.filter((e) => e.proposalId === overviewRow.id).map((e) => <div key={e.id} style={{ fontSize: 13 }}>Penilai: {e.penilai} · Skor: {e.skorAkhir} · {e.keputusan}<p>{e.catatan}</p></div>)}
+              {!proposalDocuments(overviewRow, evaluasiList).evaluasi && <p>Belum ada Form Evaluasi.</p>}
               <OverviewSectionHeading>BAST - Preview Dokumen</OverviewSectionHeading>
               <BastDocPreview
                 values={{

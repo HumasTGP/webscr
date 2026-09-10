@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   ArrowLeft, ArrowRight, Check, Download, Eye, FileText, Pencil, Plus,
   Printer, Settings, Trash2, Upload, X,
@@ -16,6 +16,8 @@ import DatePicker from "../../components/DatePicker";
 import ReviewModal from "../../components/ReviewModal";
 import { DEFAULT_SATUAN, SatuanSelect, SatuanSettingsModal } from "../../components/SatuanPicker";
 import { RabDocPreview } from "../../components/DocTemplatePreview";
+import SignaturePanel from "../../components/SignaturePanel";
+import { buildSignatureStamp, hasSavedSignature } from "../../lib/signature";
 
 const STEPS = ["Data RAB", "Uraian RAB", "Konfirmasi RAB", "Simpan"];
 const PPN_OPTIONS = ["Non PPN", "11%"];
@@ -90,7 +92,7 @@ function nextRabIdNumber(rab) {
   return String(maxNum + 1).padStart(3, "0");
 }
 
-export default function RABPage({ rab, setRab, vendors, notify, user, packages = [], defaultKategori }) {
+export default function RABPage({ rab, setRab, vendors, notify, user, packages = [], defaultKategori, signRab, saveMySignature, tor = [], openTargetId, onConsumeOpenTarget }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(0);
   const [items, setItems] = useState([]);
@@ -104,10 +106,31 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   const [savingRow, setSavingRow] = useState(false);
 
   const [reviewRow, setReviewRow] = useState(null);
+  // Versi "hidup" dari reviewRow - selalu ambil data TERBARU dari array rab
+  // berdasarkan idNumber, bukan snapshot beku. Tanpa ini, modal yang sedang
+  // terbuka tetap menampilkan status TTD lama walau signRab() sudah
+  // menyimpan tanda tangannya ke state rab (pola sama seperti liveDetail
+  // di InboxProposal.jsx).
+  const liveReviewRow = reviewRow ? (rab.find((r) => r.idNumber === reviewRow.idNumber) || reviewRow) : null;
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [previewId, setPreviewId] = useState("");
   const [filterBulan, setFilterBulan] = useState("");
   const [query, setQuery] = useState("");
+
+  // Deep-link dari notifikasi (lihat App.jsx openNotificationTarget) -
+  // begitu openTargetId cocok dengan salah satu idNumber RAB, otomatis buka
+  // detailnya, bukan cuma pindah ke halaman RAB doang. One-shot: begitu
+  // berhasil dibuka, minta App.jsx bersihkan openTargetId (onConsumeOpenTarget)
+  // supaya balik ke halaman ini lewat menu biasa nanti tidak otomatis buka
+  // detail yang sama lagi.
+  useEffect(() => {
+    if (!openTargetId) return;
+    const found = rab.find((r) => r.idNumber === openTargetId);
+    if (found) {
+      setReviewRow(found);
+      onConsumeOpenTarget?.();
+    }
+  }, [openTargetId, rab]);
 
   const totalPengajuan = items.reduce((s, r) => s + (r.totalPengajuan || 0), 0);
   const totalVendor = items.reduce((s, r) => s + (r.totalVendor || 0), 0);
@@ -126,6 +149,22 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
     // Terbaru di atas (newest-first), berdasarkan waktu input terakhir.
     return [...list].sort((a, b) => new Date(b.tanggalInput || 0) - new Date(a.tanggalInput || 0));
   }, [rab, defaultKategori, filterBulan, query]);
+
+  // Set ID RAB yang sudah punya TOR — dipakai buat kolom checklist TOR di tabel.
+  const torIds = useMemo(() => new Set((tor || []).map((t) => t.id)), [tor]);
+
+  // Tempel tanda tangan tersimpan user ke RAB `r` untuk tahap `stage`
+  // ("asman"/"madm") - dipanggil dari tombol cepat di tabel maupun dari
+  // panel tanda tangan di modal review. Tidak buka form apapun, langsung jadi.
+  const quickSign = (r, stage) => {
+    if (!hasSavedSignature(user)) {
+      notify?.("Belum ada tanda tangan tersimpan di profil kamu. Unggah dulu di Pengaturan Profil.", "error");
+      return;
+    }
+    const stamp = buildSignatureStamp(user);
+    signRab?.(r.idNumber, stage, stamp);
+    notify?.(`RAB ${r.idNumber} berhasil ditandatangani.`, "success");
+  };
 
   const monthOptions = useMemo(() => {
     const set = new Set();
@@ -190,12 +229,15 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
   const deleteItemRow = (id) => setItems((prev) => prev.filter((r) => r.id !== id));
 
   const finalizeSave = () => {
+    // Kategori RAB ditentukan otomatis dari totalPengajuan:
+    // - totalPengajuan > Rp10.000.000 -> "NON PO"
+    // - totalPengajuan <= Rp10.000.000 -> "Cash Card"
+    // Kalau header.kategori sudah "PO" (kategori lama, dipilih manual di alur lain),
+    // dibiarkan apa adanya dan tidak ditimpa oleh aturan angka ini.
+    const autoKategori = totalPengajuan > 10000000 ? "NON PO" : "Cash Card";
     const record = {
       ...header,
-      // Kategori RAB udah gak dipakai lagi di web (fitur pemilihan kategori dihapus),
-      // tapi field ini masih dipakai downstream (menu NON PO/PO/CC, laporan, dashboard)
-      // buat filter data — jadi tiap RAB baru otomatis dianggap masuk ke NON PO.
-      kategori: header.kategori || "NON PO",
+      kategori: header.kategori === "PO" ? "PO" : autoKategori,
       items,
       totalPengajuan,
       totalVendor,
@@ -301,6 +343,12 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
     : "Kelola seluruh data Rencana Anggaran Biaya. Klik salah satu baris untuk melihat detail atau mengubah data.";
   const addLabel = defaultKategori ? `Buat RAB ${defaultKategori}` : "Tambah RAB Baru";
 
+  // Humas bisa tambah/edit/hapus/cetak RAB. Asman/MADM yang datang untuk TTD
+  // HARUS TIDAK BISA melakukan aksi destruktif ini - sebelumnya tombol-tombol
+  // ini muncul tanpa role check sama sekali, itu bug keamanan yang diperbaiki
+  // di sini (Humas = bisa edit, Asman/MADM = lihat & TTD saja).
+  const canManageRab = !user || user.role === "humas";
+
   // ================= LIST MODE =================
   if (mode === "list") {
     return (
@@ -308,7 +356,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
         <PageHeader
           title={pageTitle}
           description={pageDesc}
-          right={<Button icon={Plus} onClick={startWizard}>{addLabel}</Button>}
+          right={canManageRab ? <Button icon={Plus} onClick={startWizard}>{addLabel}</Button> : undefined}
         />
 
         <Card style={{ marginBottom: 14 }}>
@@ -357,33 +405,65 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr>
-                  {["ID Number", "Judul Kegiatan", "Kategori", "Bidang", "Vendor", "Total Eval. Vendor", "Aksi"].map((h) => (
-                    <th key={h} style={th}>{h}</th>
+                  {[
+                    "ID Number", "Judul Kegiatan", "Kategori", "Bidang", "Vendor", "Total Eval. Vendor",
+                    "TOR", "TTD Asman", "TTD MADM", "Aksi",
+                  ].map((h) => (
+                    <th key={h} style={h.startsWith("TTD") || h === "TOR" ? { ...th, textAlign: "center" } : th}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {displayRab.length === 0 ? (
-                  <tr><td colSpan={7} style={{ textAlign: "center", color: T.muted, padding: "28px 12px" }}>
+                  <tr><td colSpan={10} style={{ textAlign: "center", color: T.muted, padding: "28px 12px" }}>
                     Belum ada data RAB{defaultKategori ? ` kategori ${defaultKategori}` : ""}. Klik &quot;{addLabel}&quot; untuk membuat pengajuan pertama.
                   </td></tr>
-                ) : displayRab.map((r, i) => (
-                  <tr key={r.idNumber} onClick={() => setReviewRow(r)} style={{ cursor: "pointer", background: i % 2 ? T.rowAlt : T.card }}>
-                    <td style={td}>{r.idNumber}</td>
-                    <td style={td}>{r.judulKegiatan}</td>
-                    <td style={td}>{r.kategori || "-"}</td>
-                    <td style={td}>{r.bidang || "-"}</td>
-                    <td style={td}>{r.vendor || "-"}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalEvaluasiVendor || r.totalEvaluasi || 0)}</td>
-                    <td style={{ ...td, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-                      <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                        <IconBtn title="Edit" onClick={() => startEdit(r)}><Pencil size={13} /></IconBtn>
-                        <IconBtn title="Cetak" onClick={() => downloadDocx(r)}><Printer size={13} /></IconBtn>
-                        <IconBtn title="Hapus" danger onClick={() => setDeleteTarget(r)}><Trash2 size={13} /></IconBtn>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                ) : displayRab.map((r, i) => {
+                  const hasTor = torIds?.has ? torIds.has(r.idNumber) : false;
+                  const asmanSigned = !!r.signatureAsman;
+                  const madmSigned = !!r.signatureMadm;
+                  // Tombol TTD cepat cuma muncul buat Asman (kalau belum dia TTD)
+                  // dan MADM (kalau Asman sudah TTD tapi MADM belum) - Humas
+                  // tidak pernah lihat tombol ini, cuma kolom status.
+                  const canQuickSignAsman = user?.role === "asman" && !asmanSigned;
+                  const canQuickSignMadm = user?.role === "madm" && asmanSigned && !madmSigned;
+                  return (
+                    <tr key={r.idNumber} onClick={() => setReviewRow(r)} style={{ cursor: "pointer", background: i % 2 ? T.rowAlt : T.card }}>
+                      <td style={td}>{r.idNumber}</td>
+                      <td style={td}>{r.judulKegiatan}</td>
+                      <td style={td}>{r.kategori || "-"}</td>
+                      <td style={td}>{r.bidang || "-"}</td>
+                      <td style={td}>{r.vendor || "-"}</td>
+                      <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalEvaluasiVendor || r.totalEvaluasi || 0)}</td>
+                      <td style={{ ...td, textAlign: "center" }}><TtdDot signed={hasTor} /></td>
+                      <td style={{ ...td, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                        {canQuickSignAsman ? (
+                          <IconBtn title="Tanda tangan sebagai Asman" onClick={() => quickSign(r, "asman")}><Check size={13} /></IconBtn>
+                        ) : (
+                          <TtdDot signed={asmanSigned} />
+                        )}
+                      </td>
+                      <td style={{ ...td, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                        {canQuickSignMadm ? (
+                          <IconBtn title="Tanda tangan sebagai MADM" onClick={() => quickSign(r, "madm")}><Check size={13} /></IconBtn>
+                        ) : (
+                          <TtdDot signed={madmSigned} />
+                        )}
+                      </td>
+                      <td style={{ ...td, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                        {canManageRab ? (
+                          <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+                            <IconBtn title="Edit" onClick={() => startEdit(r)}><Pencil size={13} /></IconBtn>
+                            <IconBtn title="Cetak" onClick={() => downloadDocx(r)}><Printer size={13} /></IconBtn>
+                            <IconBtn title="Hapus" danger onClick={() => setDeleteTarget(r)}><Trash2 size={13} /></IconBtn>
+                          </div>
+                        ) : (
+                          <IconBtn title="Lihat detail" onClick={() => setReviewRow(r)}><Eye size={13} /></IconBtn>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -393,28 +473,39 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
         <ReviewModal
           open={!!reviewRow}
           onClose={() => setReviewRow(null)}
-          title={`Review ${reviewRow?.idNumber || ""}`}
+          title={`Review ${liveReviewRow?.idNumber || ""}`}
           subtitle="Ringkasan data yang sudah tersimpan. Ini bukan mode edit, cuma buat lihat sekilas."
-          rows={reviewRow ? [
-            { label: "ID number", value: reviewRow.idNumber },
-            { label: "Tanggal RAB", value: formatTanggal(reviewRow.tanggalRab) },
-            { label: "Judul program", value: reviewRow.judulKegiatan, full: true },
-            { label: "Dokumen TOR", value: reviewRow.dokumenTor?.fileName || "-", full: true },
+          rows={liveReviewRow ? [
+            { label: "ID number", value: liveReviewRow.idNumber },
+            { label: "Tanggal RAB", value: formatTanggal(liveReviewRow.tanggalRab) },
+            { label: "Judul program", value: liveReviewRow.judulKegiatan, full: true },
+            { label: "Dokumen TOR", value: liveReviewRow.dokumenTor?.fileName || "-", full: true },
           ] : []}
-          table={reviewRow ? {
-            title: `Uraian RAB (${(reviewRow.items || []).length} baris)`,
+          table={liveReviewRow ? {
+            title: `Uraian RAB (${(liveReviewRow.items || []).length} baris)`,
             columns: [
               { key: "uraian", label: "Uraian" },
               { key: "qty", label: "Qty" },
               { key: "ppn", label: "PPN" },
               { key: "totalEvaluasiVendor", label: "Total Eval. Vendor", render: (r) => rupiah(r.totalEvaluasiVendor || r.totalEvaluasi || 0) },
             ],
-            data: reviewRow.items || [],
+            data: liveReviewRow.items || [],
           } : null}
-          totals={reviewRow ? [{ label: "Total Evaluasi Vendor", value: rupiah(reviewRow.totalEvaluasiVendor || reviewRow.totalEvaluasi || 0) }] : []}
-          onEdit={() => startEdit(reviewRow)}
+          totals={liveReviewRow ? [{ label: "Total Evaluasi Vendor", value: rupiah(liveReviewRow.totalEvaluasiVendor || liveReviewRow.totalEvaluasi || 0) }] : []}
+          onEdit={canManageRab ? () => startEdit(liveReviewRow) : undefined}
           editLabel="Edit RAB ini"
-        />
+        >
+          {liveReviewRow && (
+            <SignaturePanel
+              asman={liveReviewRow.signatureAsman}
+              madm={liveReviewRow.signatureMadm}
+              canSignAsman={user?.role === "asman" && !liveReviewRow.signatureAsman}
+              canSignMadm={user?.role === "madm" && !!liveReviewRow.signatureAsman && !liveReviewRow.signatureMadm}
+              onSignAsman={() => quickSign(liveReviewRow, "asman")}
+              onSignMadm={() => quickSign(liveReviewRow, "madm")}
+            />
+          )}
+        </ReviewModal>
 
         <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Hapus RAB?" tone="danger">
           <p style={{ color: T.muted, fontSize: 13.5, marginBottom: 20, lineHeight: 1.6 }}>
@@ -786,6 +877,24 @@ function TtdCol({ role, sub, name }) {
     </div>
   );
 }
+// Dot status TTD di kolom tabel — hijau centang kalau sudah, abu titik kalau
+// belum. Beda dari IconBtn (bukan tombol, murni indikator, tidak bisa diklik).
+function TtdDot({ signed }) {
+  return (
+    <span
+      title={signed ? "Sudah tanda tangan" : "Belum tanda tangan"}
+      style={{
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        width: 20, height: 20, borderRadius: "50%", fontSize: 11, fontWeight: 700,
+        background: signed ? T.successSoft : "#EEF0F3",
+        color: signed ? T.success : "#9AA3AD",
+      }}
+    >
+      {signed ? "✓" : "•"}
+    </span>
+  );
+}
+
 function IconBtn({ children, onClick, title, danger }) {
   return (
     <button

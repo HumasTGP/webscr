@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Calendar, Check, FileText, Trash2, Upload, X } from "lucide-react";
+import OrganizationInput from "./OrganizationInput";
 import { T, font } from "../lib/theme";
 
 const baseInput = (disabled) => ({
@@ -18,6 +19,9 @@ export default function FieldInput({ field, value, onChange }) {
   const commonStyle = baseInput(field.disabled);
   const disabled = field.disabled;
 
+  if (["namaLembaga", "instansiPihakKedua", "lembagaPenerima", "lembagaPemohon", "namaInstansiPenerima", "namaMitra", "vendor", "vendor1", "vendor2", "vendor3"].includes(field.key) && !disabled && !["number", "file", "file-upload"].includes(field.type)) {
+    return <OrganizationInput value={value} onChange={onChange} style={commonStyle} placeholder={`Cari ${field.label}…`} />;
+  }
   if (field.type === "select") {
     const inManualMode = field.allowManual && value === "__manual__";
     const typedOutside =

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Eye, FileText, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, FileText, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { nextNumericId, rupiah } from "../../lib/utils";
-import { generateDocxFromTemplateWithRows, formatTanggalPanjang } from "../../lib/docxGenerate";
+import { generateDocxFromTemplateWithPages, formatTanggalPanjang } from "../../lib/docxGenerate";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
@@ -10,14 +10,19 @@ import PageHeader from "../../components/PageHeader";
 import DatePicker from "../../components/DatePicker";
 import EmptyState from "../../components/EmptyState";
 
-const EMPTY_FORM = {
-  judul: "", hariTanggal: "", jam: "", tempat: "", nomorAwal: "", jumlahBaris: "", jumlahPerBaris: "",
-};
+const EMPTY_KEGIATAN = { nama: "", keterangan: "", jumlah: "" };
+const EMPTY_FORM = { ccId: "", judul: "", kegiatan: [{ ...EMPTY_KEGIATAN }] };
 
-// TTD Serah Terima BERDIRI SENDIRI - tidak terhubung ke Cash Card manapun.
-// Nomor barisnya bisa lanjutan (mis. 21-40), bukan selalu mulai dari 1, sesuai
-// pola asli yang dipakai lapangan (lihat contoh TANDA_TERIMA_21-40.xlsx).
-export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
+// TTD Serah Terima dipilih dari Cash Card (sama seperti Non PO/CC lain) -
+// pilih ccId dari daftar, Judul otomatis terisi dari judulCc Cash Card itu.
+//
+// SATU submission TTD Serah Terima = SATU FILE Word berisi BEBERAPA HALAMAN,
+// satu halaman per kegiatan dalam Cash Card itu (sesuai contoh dokumen asli
+// user: tiap kegiatan minggu itu dapat lembar "TANDA TERIMA" sendiri, karena
+// penerimanya beda-beda orang dan tanda tangannya ditulis tangan manual,
+// bukan tanda tangan digital sistem). Makanya form-nya berupa daftar
+// kegiatan yang bisa ditambah/dihapus baris, bukan cuma "jumlah baris" angka.
+export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, ccList = [], notify }) {
   const [stage, setStage] = useState("list"); // list | form | preview
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingRow, setEditingRow] = useState(null);
@@ -27,6 +32,18 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
+  const setKegiatan = (idx, key, value) => {
+    setForm((p) => ({
+      ...p,
+      kegiatan: p.kegiatan.map((k, i) => (i === idx ? { ...k, [key]: value } : k)),
+    }));
+  };
+  const addKegiatan = () => setForm((p) => ({ ...p, kegiatan: [...p.kegiatan, { ...EMPTY_KEGIATAN }] }));
+  const removeKegiatan = (idx) => setForm((p) => ({
+    ...p,
+    kegiatan: p.kegiatan.length > 1 ? p.kegiatan.filter((_, i) => i !== idx) : p.kegiatan,
+  }));
+
   const displayList = search
     ? ccTtd.filter((r) => (r.judul || "").toLowerCase().includes(search.toLowerCase()))
     : ccTtd;
@@ -34,27 +51,24 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
   const startAdd = () => {
     setEditingRow(null);
     const id = nextNumericId(ccTtd, "id");
-    setForm({ ...EMPTY_FORM, id, hariTanggal: new Date().toISOString().slice(0, 10) });
+    setForm({ ...EMPTY_FORM, id, kegiatan: [{ ...EMPTY_KEGIATAN }] });
     setStage("form");
   };
   const startEdit = (row) => {
     setEditingRow(row);
-    setForm({ ...row });
+    setForm({ ...row, kegiatan: row.kegiatan?.length ? row.kegiatan : [{ ...EMPTY_KEGIATAN }] });
     setStage("form");
   };
 
   const goPreview = () => {
-    if (!form.judul.trim()) return notify("Isi Judul terlebih dahulu.", "error");
-    const jumlahBaris = parseInt(form.jumlahBaris, 10) || 1;
-    const nomorAwal = parseInt(form.nomorAwal, 10) || 1;
+    if (!form.judul.trim()) return notify("Pilih Cash Card terlebih dahulu.", "error");
+    if (!form.kegiatan.some((k) => k.nama.trim())) return notify("Isi minimal satu kegiatan.", "error");
     setStage("preview");
-    setActivePreviewRow({ ...form, jumlahBaris, nomorAwal });
+    setActivePreviewRow({ ...form });
   };
 
   const saveAndBack = () => {
-    const jumlahBaris = parseInt(form.jumlahBaris, 10) || 1;
-    const nomorAwal = parseInt(form.nomorAwal, 10) || 1;
-    const payload = { ...form, jumlahBaris, nomorAwal };
+    const payload = { ...form };
     if (editingRow) {
       setCcTtd((prev) => prev.map((r) => (r.id === editingRow.id ? payload : r)));
       notify("TTD Serah Terima berhasil diperbarui.", "success");
@@ -84,43 +98,37 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
   // activePreviewRow) ATAU langsung dari tombol di list (row dikirim
   // eksplisit) - supaya download gak wajib buka preview dulu.
   //
-  // CATATAN TEMPLATE (lihat generateDocxFromTemplateWithRows di
-  // docxGenerate.js untuk penjelasan lengkap cara bikin templatenya):
-  // Template_TTD_Serah_Terima_CC.docx BELUM ADA di public/templates/ - file
-  // ini perlu ditambahkan manual. Templatenya harus punya 1 baris tabel
-  // contoh dengan marker "[[row]]" di salah satu selnya, dan placeholder
-  // per kolom: [no], [nama], [jumlah], [ttd]. Baris itu akan di-clone
-  // otomatis sebanyak jumlahBaris yang diisi user di form.
+  // Template_TTD_Serah_Terima_CC.docx sudah ada di public/templates/, marker
+  // "[[page-start]]"/"[[page-end]]" menandai satu halaman "TANDA TERIMA" yang
+  // di-clone sebanyak jumlah kegiatan - tiap halaman kolom TTD-nya dibiarkan
+  // kosong untuk ditandatangani manual oleh penerima masing-masing kegiatan.
   const downloadDocx = async (rowArg) => {
     const row = rowArg || activePreviewRow;
     if (!row) return;
-    const nomorAwal = parseInt(row.nomorAwal, 10) || 1;
-    const jumlahBaris = parseInt(row.jumlahBaris, 10) || 1;
-    const rowsData = Array.from({ length: jumlahBaris }, (_, i) => ({
-      no: String(nomorAwal + i),
-      nama: "",
-      jumlah: row.jumlahPerBaris ? rupiah(row.jumlahPerBaris) : "",
-      ttd: "",
+    const kegiatanList = (row.kegiatan || []).filter((k) => k.nama.trim());
+    if (!kegiatanList.length) return notify("Tidak ada kegiatan untuk dicetak.", "error");
+
+    const pagesData = kegiatanList.map((k) => ({
+      no: "1",
+      nama: k.nama || "",
+      keterangan: k.keterangan || "",
+      jumlah: k.jumlah ? rupiah(k.jumlah).replace("Rp", "").trim() : "",
+      totalJumlah: k.jumlah ? rupiah(k.jumlah).replace("Rp", "").trim() : "",
     }));
-    const totalJumlah = row.jumlahPerBaris ? rupiah((Number(row.jumlahPerBaris) || 0) * jumlahBaris) : "";
+
     try {
-      await generateDocxFromTemplateWithRows(
+      await generateDocxFromTemplateWithPages(
         "/templates/Template_TTD_Serah_Terima_CC.docx",
         {
           data: {
-            hariTanggal: row.hariTanggal ? formatTanggalPanjang(row.hariTanggal) : "",
-            jam: row.jam || "",
-            tempat: row.tempat || "",
-            judul: row.judul || "",
-            totalJumlah,
             tanggalCetak: formatTanggalPanjang(new Date().toISOString().slice(0, 10)),
             namaAsmanKas: "Astri Oktavina",
           },
-          rowsData,
+          pagesData,
         },
         `TTD-Serah-Terima-${row.id || "baru"}.docx`
       );
-      notify("TTD Serah Terima (.docx) berhasil diunduh.", "success");
+      notify(`TTD Serah Terima (.docx, ${pagesData.length} halaman) berhasil diunduh.`, "success");
     } catch (e) {
       notify(`Gagal membuat TTD Serah Terima: ${e.message}`, "error");
     }
@@ -142,40 +150,86 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
           right={<Button variant="ghost" icon={ArrowLeft} onClick={() => setStage("list")}>Kembali ke daftar</Button>}
         />
         <Card>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px 18px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px 18px", marginBottom: 20 }}>
             <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
               <label style={labelStyle}>ID <span style={{ fontWeight: 400, color: T.muted }}>(otomatis)</span></label>
               <input value={form.id || ""} disabled style={inputDisabledStyle} />
             </div>
+
             <div style={{ flex: "1 1 100%" }}>
-              <label style={labelStyle}>Judul</label>
-              <input value={form.judul} onChange={(e) => set("judul", e.target.value)} placeholder="cth. Bantuan Peringatan HUT RI RW 05" style={inputStyle} />
+              <label style={labelStyle}>
+                Cash Card <span style={{ fontWeight: 400, color: T.muted }}>(ketik untuk cari, lalu pilih dari daftar)</span>
+              </label>
+              <input
+                list="cc-options-ttd"
+                value={form.ccId ? `${form.ccId} - ${form.judul || ""}` : ""}
+                onChange={(e) => {
+                  const typed = e.target.value;
+                  const match = ccList.find((r) => `${r.id} - ${r.judulCc || ""}` === typed);
+                  if (match) {
+                    set("ccId", match.id);
+                    set("judul", match.judulCc || "");
+                  } else {
+                    set("ccId", "");
+                    set("judul", typed);
+                  }
+                }}
+                placeholder="Cari ID atau judul Cash Card..."
+                style={inputStyle}
+              />
+              <datalist id="cc-options-ttd">
+                {ccList.map((r) => (
+                  <option key={r.id} value={`${r.id} - ${r.judulCc || ""}`} />
+                ))}
+              </datalist>
             </div>
-            <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
-              <label style={labelStyle}>Hari/Tanggal</label>
-              <DatePicker value={form.hariTanggal} onChange={(v) => set("hariTanggal", v)} />
-            </div>
-            <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
-              <label style={labelStyle}>Jam</label>
-              <input value={form.jam} onChange={(e) => set("jam", e.target.value)} placeholder="cth. 09.00-Selesai" style={inputStyle} />
-            </div>
-            <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
-              <label style={labelStyle}>Tempat</label>
-              <input value={form.tempat} onChange={(e) => set("tempat", e.target.value)} placeholder="cth. RPTRA Sunter" style={inputStyle} />
-            </div>
-            <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
-              <label style={labelStyle}>Nomor Awal <span style={{ fontWeight: 400, color: T.muted }}>(bisa lanjutan, cth. 21)</span></label>
-              <input type="number" min="1" value={form.nomorAwal} onChange={(e) => set("nomorAwal", e.target.value)} placeholder="cth. 21" style={inputStyle} />
-            </div>
-            <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
-              <label style={labelStyle}>Jumlah Baris <span style={{ fontWeight: 400, color: T.muted }}>(berapa baris TTD dibutuhkan)</span></label>
-              <input type="number" min="1" value={form.jumlahBaris} onChange={(e) => set("jumlahBaris", e.target.value)} placeholder="cth. 20" style={inputStyle} />
-            </div>
-            <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
-              <label style={labelStyle}>Jumlah per baris <span style={{ fontWeight: 400, color: T.muted }}>(opsional, Rp per orang)</span></label>
-              <input type="number" value={form.jumlahPerBaris} onChange={(e) => set("jumlahPerBaris", e.target.value)} placeholder="cth. 100000" style={inputStyle} />
+
+            <div style={{ flex: "1 1 100%" }}>
+              <label style={labelStyle}>
+                Judul <span style={{ fontWeight: 400, color: T.muted }}>(otomatis dari Cash Card yang dipilih)</span>
+              </label>
+              <input value={form.judul} disabled placeholder="terisi otomatis setelah pilih Cash Card" style={inputDisabledStyle} />
             </div>
           </div>
+
+          <div style={{
+            fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2, textTransform: "uppercase",
+            color: T.muted, marginBottom: 10,
+          }}>Daftar Kegiatan (satu halaman Tanda Terima per kegiatan)</div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
+            {form.kegiatan.map((k, idx) => (
+              <div key={idx} style={{
+                border: `1px solid ${T.border}`, borderRadius: 8, padding: "12px 14px",
+                display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end",
+              }}>
+                <div style={{ flex: "2 1 220px" }}>
+                  <label style={labelStyle}>Uraian kegiatan</label>
+                  <input value={k.nama} onChange={(e) => setKegiatan(idx, "nama", e.target.value)} placeholder="cth. Partisipasi Kegiatan HUT RI" style={inputStyle} />
+                </div>
+                <div style={{ flex: "1 1 120px" }}>
+                  <label style={labelStyle}>Keterangan</label>
+                  <input value={k.keterangan} onChange={(e) => setKegiatan(idx, "keterangan", e.target.value)} placeholder="cth. 1 Lot" style={inputStyle} />
+                </div>
+                <div style={{ flex: "1 1 150px" }}>
+                  <label style={labelStyle}>Jumlah (Rp)</label>
+                  <input type="number" value={k.jumlah} onChange={(e) => setKegiatan(idx, "jumlah", e.target.value)} placeholder="cth. 1000000" style={inputStyle} />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeKegiatan(idx)}
+                  disabled={form.kegiatan.length <= 1}
+                  title="Hapus kegiatan ini"
+                  style={{ ...iconBtnStyle, color: T.danger, opacity: form.kegiatan.length <= 1 ? 0.4 : 1, marginBottom: 2 }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <Button variant="ghost" icon={Plus} onClick={addKegiatan}>Tambah kegiatan</Button>
+
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
             <Button icon={ArrowRight} onClick={goPreview}>Lihat preview</Button>
           </div>
@@ -186,61 +240,54 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
 
   if (stage === "preview") {
     const row = activePreviewRow || {};
-    const nomorAwal = parseInt(row.nomorAwal, 10) || 1;
-    const jumlahBaris = parseInt(row.jumlahBaris, 10) || 1;
-    const nomorAkhir = nomorAwal + jumlahBaris - 1;
+    const kegiatanList = (row.kegiatan || []).filter((k) => k.nama.trim());
     return (
       <div>
         <PageHeader eyebrow="Cash Card" title="Preview TTD Serah Terima" />
         <Card>
-          <div style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: "22px 26px", background: "#fff", maxWidth: 560, margin: "0 auto", fontFamily: "'Times New Roman', Times, serif" }}>
-            <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13.5, marginBottom: 2, color: T.heading, fontFamily: font.display }}>TANDA TERIMA</div>
-            <div style={{ textAlign: "right", color: T.muted, fontSize: 11, marginBottom: 12 }}>
-              Jakarta, {row.hariTanggal ? formatTanggalPanjang(row.hariTanggal) : "-"}
-            </div>
-            <div style={{ fontSize: 12, lineHeight: 1.8, marginBottom: 12 }}>
-              <div>Hari/Tanggal : {row.hariTanggal ? formatTanggalPanjang(row.hariTanggal) : "-"}</div>
-              <div>Jam : {row.jam || "-"}</div>
-              <div>Tempat : {row.tempat || "-"}</div>
-              <div>Agenda/Acara : {row.judul || "-"}</div>
-            </div>
-            <div style={{ border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-                <thead>
-                  <tr>
-                    <th style={{ ...thStyle, textAlign: "center" }}>No</th>
-                    <th style={thStyle}>Nama</th>
-                    <th style={{ ...thStyle, textAlign: "right" }}>Jumlah</th>
-                    <th style={{ ...thStyle, textAlign: "center" }}>Tanda Tangan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: Math.min(jumlahBaris, 6) }, (_, i) => (
-                    <tr key={i}>
-                      <td style={{ ...tdStyle, textAlign: "center" }}>{nomorAwal + i}</td>
-                      <td style={tdStyle}>&nbsp;</td>
-                      <td style={{ ...tdStyle, textAlign: "right" }}>{row.jumlahPerBaris ? rupiah(row.jumlahPerBaris) : "-"}</td>
-                      <td style={tdStyle}>&nbsp;</td>
-                    </tr>
-                  ))}
-                  {jumlahBaris > 6 && (
-                    <tr>
-                      <td colSpan={4} style={{ ...tdStyle, textAlign: "center", color: T.muted }}>
-                        … dan {jumlahBaris - 6} baris lagi (nomor {nomorAwal + 6} - {nomorAkhir})
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div style={{ textAlign: "center", marginTop: 22, fontSize: 11.5 }}>
-              <div>Mengetahui,</div>
-              <div style={{ fontWeight: 700, marginTop: 34 }}>Astri Oktavina</div>
-              <div style={{ color: T.muted, fontSize: 10 }}>ASMAN KAS</div>
-            </div>
+          <div style={{ fontSize: 12.5, color: T.muted, marginBottom: 14, textAlign: "center" }}>
+            {kegiatanList.length} halaman akan dibuat, satu halaman "TANDA TERIMA" untuk tiap kegiatan berikut ini.
           </div>
-          <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 16 }}>
-            <Button icon={FileText} onClick={downloadDocx}>Unduh Word (.docx)</Button>
+          {kegiatanList.map((k, i) => (
+            <div key={i} style={{
+              border: `1px solid ${T.border}`, borderRadius: 10, padding: "18px 22px",
+              background: "#fff", maxWidth: 560, margin: "0 auto 16px",
+              fontFamily: "'Times New Roman', Times, serif",
+            }}>
+              <div style={{ textAlign: "center", fontWeight: 700, fontSize: 13.5, marginBottom: 14, color: T.heading, fontFamily: font.display }}>
+                TANDA TERIMA {kegiatanList.length > 1 ? `(halaman ${i + 1})` : ""}
+              </div>
+              <div style={{ border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      <th style={{ ...thStyle, textAlign: "center" }}>No</th>
+                      <th style={thStyle}>Uraian</th>
+                      <th style={{ ...thStyle, textAlign: "center" }}>Keterangan</th>
+                      <th style={{ ...thStyle, textAlign: "right" }}>Jumlah</th>
+                      <th style={{ ...thStyle, textAlign: "center" }}>TTD</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ ...tdStyle, textAlign: "center" }}>1</td>
+                      <td style={tdStyle}>{k.nama}</td>
+                      <td style={{ ...tdStyle, textAlign: "center" }}>{k.keterangan || "-"}</td>
+                      <td style={{ ...tdStyle, textAlign: "right" }}>{k.jumlah ? rupiah(k.jumlah) : "-"}</td>
+                      <td style={tdStyle}>&nbsp;</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ textAlign: "center", marginTop: 22, fontSize: 11.5 }}>
+                <div>Mengetahui,</div>
+                <div style={{ fontWeight: 700, marginTop: 34 }}>Astri Oktavina</div>
+                <div style={{ color: T.muted, fontSize: 10 }}>ASMAN KAS</div>
+              </div>
+            </div>
+          ))}
+          <div style={{ display: "flex", justifyContent: "center", gap: 10, marginTop: 6 }}>
+            <Button icon={FileText} onClick={() => downloadDocx()}>Unduh Word ({kegiatanList.length} halaman)</Button>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 20 }}>
             <Button variant="ghost" icon={ArrowLeft} onClick={() => setStage("form")}>Edit lagi</Button>
@@ -272,7 +319,7 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
                 <tr>
                   <th style={thStyle}>ID</th>
                   <th style={thStyle}>Judul</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Jumlah Baris</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>Jumlah Kegiatan</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>Aksi</th>
                 </tr>
               </thead>
@@ -281,7 +328,7 @@ export default function TtdSerahTerimaPage({ ccTtd, setCcTtd, notify }) {
                   <tr key={row.id} style={{ background: i % 2 === 1 ? T.rowAlt : undefined }}>
                     <td style={tdStyle}>{row.id}</td>
                     <td style={tdStyle}>{row.judul}</td>
-                    <td style={{ ...tdStyle, textAlign: "right" }}>{row.jumlahBaris}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{(row.kegiatan || []).filter((k) => k.nama?.trim()).length}</td>
                     <td style={tdCenterStyle}>
                       <button type="button" title="Lihat / Cetak" onClick={() => openPreviewFromList(row)} style={iconBtnStyle}><Eye size={12} /></button>
                       <button type="button" title="Download Word (.docx)" onClick={() => downloadDocx(row)} style={iconBtnStyle}><FileText size={12} /></button>

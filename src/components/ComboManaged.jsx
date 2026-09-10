@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Settings, Trash2, Plus, Pencil, Check, X } from "lucide-react";
+import OrganizationInput from "./OrganizationInput";
 import { T } from "../lib/theme";
 
 /**
@@ -23,6 +24,9 @@ export default function ComboManaged({ id, label, hint, value, options = [], onC
   const [editingItem, setEditingItem] = useState(null);
   const [editText, setEditText] = useState("");
 
+  if (/vendor|instansi|lembaga/i.test(`${label || ""} ${placeholder || ""}`)) {
+    return <div>{label && <label style={{ fontSize: 12.5 }}>{label}</label>}<OrganizationInput value={value} onChange={onChange} placeholder={placeholder} /></div>;
+  }
   const filtered = search ? options.filter((o) => o.toLowerCase().includes(search.toLowerCase())) : options;
 
   const addItem = () => {

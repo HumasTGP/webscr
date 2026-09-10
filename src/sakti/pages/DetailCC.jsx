@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -84,12 +84,34 @@ export default function DetailCCPage({
   combo,
   setCombo,
   notify,
+  // Data dokumen turunan CC lain (BAST/PI/TTD Serah Terima/BAPP) - dilewatkan
+  // dari App.jsx supaya panel "Download dokumen" bisa menampilkan tombol
+  // download untuk semuanya di satu tempat, tanpa pindah halaman.
+  ccBast = [],
+  ccPakta = [],
+  ccTtd = [],
+  ccBapp = [],
+  onNavigate, openParentId, onConsumeParent,
+  // 4 dokumen bertemplate (Verifikasi/Permintaan/Rencana/Pertanggungjawaban) -
+  // sebelumnya cuma dihitung on-the-fly dari form1 (hilang tiap tutup
+  // halaman). Sekarang dicatat ke state persisten ini setiap kali user
+  // berhasil download dokumennya, supaya statusnya bisa ditrack di tabel
+  // utama Cash Card (lihat downloadPrintDoc di bawah).
+  ccVerifikasi = [], setCcVerifikasi,
+  ccPermintaan = [], setCcPermintaan,
+  ccRencana = [], setCcRencana,
+  ccPertanggungjawaban = [], setCcPertanggungjawaban,
 }) {
   const [selectedCcId, setSelectedCcId] = useState(
     ccList[ccList.length - 1]?.id || ""
   );
 
   const [stage, setStage] = useState("list");
+  useEffect(() => {
+    if (!openParentId) return;
+    if (ccList.some((r) => r.id === openParentId)) setSelectedCcId(openParentId);
+    onConsumeParent?.();
+  }, [openParentId]);
 
   const [form1, setForm1] = useState({});
 
@@ -585,6 +607,26 @@ export default function DetailCCPage({
         "success"
       );
 
+      // Catat ke state persisten - sebelumnya dokumen ini cuma dihitung
+      // on-the-fly dan hilang tiap tutup halaman, sekarang tersimpan per
+      // ccId supaya status "sudah dibuat" muncul di tabel utama Cash Card.
+      const setterByKey = {
+        verifikasi: setCcVerifikasi,
+        permintaan: setCcPermintaan,
+        rencana: setCcRencana,
+        pertanggungjawaban: setCcPertanggungjawaban,
+      };
+      const setter = setterByKey[printDoc.key];
+      if (setter) {
+        const record = { id: selectedCcId, generatedAt: new Date().toISOString() };
+        setter((prev) => {
+          const exists = prev.some((r) => r.id === selectedCcId);
+          return exists
+            ? prev.map((r) => (r.id === selectedCcId ? { ...r, ...record } : r))
+            : [...prev, record];
+        });
+      }
+
       setPrintDoc(null);
     } catch (e) {
       notify(
@@ -648,6 +690,15 @@ export default function DetailCCPage({
     ...inputStyle,
     background: T.bg,
     color: T.muted,
+  };
+
+  // Style tombol di panel "Download Dokumen" (lihat STAGE LIST di bawah) -
+  // konsisten dengan iconBtnStyle yang sudah ada, tapi lebih lebar karena
+  // ada teks label, bukan cuma ikon.
+  const docDownloadBtnStyle = {
+    display: "inline-flex", alignItems: "center", gap: 6,
+    padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`,
+    background: "#fff", color: T.text, cursor: "pointer", fontSize: 12.5, fontWeight: 600,
   };
 
   const labelStyle = {
@@ -1950,6 +2001,46 @@ export default function DetailCCPage({
           ))}
         </select>
       </Card>
+
+      {/* Panel "Download Dokumen" - satu tempat buat lihat & download semua
+          dokumen turunan CC yang sedang dipilih, tanpa pindah ke halaman lain.
+          4 dokumen bertemplate (verifikasi/permintaan/rencana/pertanggungjawaban)
+          langsung download di tempat (1 dokumen per CC). BAST/PI/BAPP/TTD Serah
+          Terima disimpan per-baris (bisa lebih dari satu per CC), jadi tombolnya
+          mengarahkan ke halaman masing-masing lewat onNavigate. */}
+      {selectedCcId && (
+        <Card style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.heading, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.4 }}>
+            Download Dokumen: {selectedCcId}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <button type="button" onClick={() => openPrintModal("verifikasi")} style={docDownloadBtnStyle}>
+              📄 Verifikasi
+            </button>
+            <button type="button" onClick={() => openPrintModal("permintaan")} style={docDownloadBtnStyle}>
+              💳 Permintaan Dana
+            </button>
+            <button type="button" onClick={() => openPrintModal("rencana")} style={docDownloadBtnStyle}>
+              💵 Rencana Tunai
+            </button>
+            <button type="button" onClick={() => openPrintModal("pertanggungjawaban")} style={docDownloadBtnStyle}>
+              📋 Pertanggungjawaban
+            </button>
+            <button type="button" onClick={() => onNavigate?.("bast-cc", selectedCcId)} style={docDownloadBtnStyle}>
+              📑 BAST {ccBast.some((b) => b.id === selectedCcId) ? "(ada)" : ""}
+            </button>
+            <button type="button" onClick={() => onNavigate?.("pakta-cc", selectedCcId)} style={docDownloadBtnStyle}>
+              🛡️ PI {ccPakta.some((p) => p.id === selectedCcId) ? "(ada)" : ""}
+            </button>
+            <button type="button" onClick={() => onNavigate?.("ttd-cc")} style={docDownloadBtnStyle}>
+              ✍️ TTD Serah Terima {ccTtd.some((t) => t.id === selectedCcId) ? "(ada)" : ""}
+            </button>
+            <button type="button" onClick={() => onNavigate?.("bapp-cc", selectedCcId)} style={docDownloadBtnStyle}>
+              ✅ BAPP {ccBapp.some((b) => b.id === selectedCcId) ? "(ada)" : ""}
+            </button>
+          </div>
+        </Card>
+      )}
 
       <Card>
         <div

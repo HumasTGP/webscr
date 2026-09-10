@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import {
-  Check, ClipboardCheck, FileSpreadsheet, FileText,
-  FolderCheck, Send, ShieldCheck,
+  ClipboardCheck, FileSpreadsheet, FileText, FolderCheck, ShieldCheck,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { DOC_STATUS, STATUS_META, SUB_DOCS } from "../../lib/data";
+import { documentRoute } from "../../lib/recordLinks";
+import { SUB_DOCS } from "../../lib/data";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 import Button from "../../components/Button";
@@ -24,25 +24,6 @@ function packageContents(idRab, { rab, tor, bast, pakta }) {
   };
 }
 
-function StatusPill({ statusKey, rejectedBy }) {
-  const meta = STATUS_META[statusKey] || STATUS_META.draft;
-  let label = meta.label;
-  if (statusKey === DOC_STATUS.REJECTED && rejectedBy) {
-    label = rejectedBy === "asman" ? "Ditolak Asman" : "Ditolak MADM";
-  }
-  return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 6,
-      padding: "3px 10px", borderRadius: 999,
-      background: meta.bg, color: meta.color,
-      fontSize: 11.5, fontWeight: 700, letterSpacing: 0.3,
-    }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: meta.color }} />
-      {label}
-    </span>
-  );
-}
-
 function DotStatus({ done, label }) {
   return (
     <span
@@ -59,9 +40,16 @@ function DotStatus({ done, label }) {
   );
 }
 
+/**
+ * "Tracking Kelengkapan Dokumen" (dulu bernama Paket Kas - Kirim ke Asman).
+ *
+ * Fungsi lama (kirim paket ke Asman untuk direview/approve/reject) sudah
+ * dihapus. Sekarang murni menampilkan status kelengkapan dokumen per RAB
+ * (RAB, TOR, BAST, Pakta Integritas + Form Evaluasi) - mirip pola StatusDot
+ * di NonPoPage/CashCard, tidak ada approve/reject di sini lagi.
+ */
 export default function PaketKasPage({
-  rab, tor, bast, pakta, packages,
-  onUpsertPackage, notify, goto,
+  rab, tor, bast, pakta, packages, onUpsertPackage, notify, goto,
 }) {
   const [detail, setDetail] = useState(null);
 
@@ -73,41 +61,30 @@ export default function PaketKasPage({
       const completed = SUB_DOCS.reduce((n, sd) => n + (contents[sd.key] ? 1 : 0), 0);
       const totalRequired = SUB_DOCS.filter((sd) => sd.required).length;
       const isComplete = completed === totalRequired && (pkg?.formEvaluasi ?? false);
-      const status = pkg?.status || DOC_STATUS.DRAFT;
       return {
         idRab, judul: rabRow.judulKegiatan || "-",
         kategori: rabRow.kategori || "-",
-        contents, completed, totalRequired, isComplete, status, pkg,
+        contents, completed, totalRequired, isComplete, pkg,
       };
     });
   }, [rab, tor, bast, pakta, packages]);
 
-  const submit = (row) => {
-    onUpsertPackage(row.idRab, {
-      judul: row.judul, kategori: row.kategori,
-      formEvaluasi: row.pkg?.formEvaluasi ?? true,
-      status: DOC_STATUS.SUBMITTED,
-      submittedAt: new Date().toISOString(),
-      // Bersihkan semua trace review lama supaya paket resubmit tampil bersih.
-      reviewedAt: "", reviewedBy: "", reviewNote: "",
-      processedAt: "", processedBy: "", processNote: "",
-      rejectedBy: "",
-    });
-    notify(`Paket ${row.idRab} dikirim ke Asman.`, "success", "Paket Kas");
-    setDetail(null);
-  };
+  // Versi "hidup" dari detail - selalu ambil ulang dari rows (yang sudah
+  // dihitung ulang tiap render lewat useMemo di atas), bukan snapshot beku.
+  // Tanpa ini, toggleFormEval() mengubah packages tapi modal yang sedang
+  // terbuka tetap menampilkan status lama sampai ditutup dan dibuka lagi.
+  const liveDetail = detail ? (rows.find((r) => r.idRab === detail.idRab) || detail) : null;
 
   const toggleFormEval = (row) => {
     onUpsertPackage(row.idRab, {
       ...(row.pkg || {}),
       judul: row.judul, kategori: row.kategori,
       formEvaluasi: !(row.pkg?.formEvaluasi ?? false),
-      status: row.pkg?.status || DOC_STATUS.DRAFT,
     });
   };
 
   const columns = [
-    { key: "idRab", label: "ID Paket",
+    { key: "idRab", label: "ID RAB",
       render: (r) => <span style={{ fontFamily: font.mono, fontSize: 12.5, fontWeight: 700 }}>{r.idRab}</span> },
     { key: "judul",    label: "Judul Kegiatan" },
     { key: "kategori", label: "Kategori" },
@@ -136,22 +113,26 @@ export default function PaketKasPage({
         }}>Eval</span>
       </div>
     )},
-    { key: "status", label: "Status", render: (r) => <StatusPill statusKey={r.status} rejectedBy={r.pkg?.rejectedBy} /> },
+    { key: "status", label: "Status", render: (r) => (
+      r.isComplete
+        ? <span style={{ color: "#1E7F3E", fontWeight: 700, fontSize: 12 }}>Lengkap</span>
+        : <span style={{ color: "#94A3B8", fontWeight: 700, fontSize: 12 }}>{r.completed}/{r.totalRequired} dokumen</span>
+    )},
   ];
 
   return (
     <div>
       <PageHeader
         eyebrow="Administrasi Kas"
-        title="Paket Kas - Kirim ke Asman"
-        description="Satu paket = satu ID RAB berisi RAB + TOR + BAST + Pakta Integritas + Form Evaluasi. Setelah semua lengkap, kirim satu paket sekaligus ke Asman untuk review."
+        title="Tracking Kelengkapan Dokumen"
+        description="Status kelengkapan RAB, TOR, BAST, Pakta Integritas, dan Form Evaluasi untuk tiap RAB. Klik baris untuk lihat rincian dan membuka dokumen yang belum ada."
       />
 
       <Card padded={false} style={{ marginBottom: 14 }}>
         <DataTable
           rows={rows}
           columns={columns}
-          emptyLabel="Belum ada RAB. Buat RAB dulu di menu RAB untuk membentuk paket kas."
+          emptyLabel="Belum ada RAB. Buat RAB dulu di menu RAB untuk membentuk kelengkapan dokumen."
           onRowClick={setDetail}
         />
       </Card>
@@ -159,16 +140,18 @@ export default function PaketKasPage({
       <Modal
         open={!!detail}
         onClose={() => setDetail(null)}
-        title={detail ? `Paket ${detail.idRab}` : ""}
+        title={liveDetail ? `Kelengkapan Dokumen ${liveDetail.idRab}` : ""}
         icon={FolderCheck}
         width={620}
       >
-        {detail && (
+        {liveDetail && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              <StatusPill statusKey={detail.status} rejectedBy={detail.pkg?.rejectedBy} />
+              {liveDetail.isComplete
+                ? <span style={{ color: "#1E7F3E", fontWeight: 700, fontSize: 13 }}>Lengkap</span>
+                : <span style={{ color: "#94A3B8", fontWeight: 700, fontSize: 13 }}>Belum lengkap</span>}
               <span style={{ fontSize: 12, color: T.muted }}>
-                {detail.completed}/{detail.totalRequired} dokumen wajib terisi
+                {liveDetail.completed}/{liveDetail.totalRequired} dokumen wajib terisi
               </span>
             </div>
 
@@ -179,19 +162,19 @@ export default function PaketKasPage({
               fontSize: 13, marginBottom: 14,
             }}>
               <div style={{ color: T.muted }}>Judul</div>
-              <div style={{ fontWeight: 600 }}>{detail.judul}</div>
+              <div style={{ fontWeight: 600 }}>{liveDetail.judul}</div>
               <div style={{ color: T.muted }}>Kategori</div>
-              <div>{detail.kategori}</div>
+              <div>{liveDetail.kategori}</div>
             </div>
 
             <div style={{
               fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2, textTransform: "uppercase",
               color: T.muted, marginBottom: 6,
-            }}>Isi Paket</div>
+            }}>Isi Dokumen</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
               {SUB_DOCS.map((sd) => {
                 const Icon = SUB_ICONS[sd.key];
-                const done = !!detail.contents[sd.key];
+                const done = !!liveDetail.contents[sd.key];
                 return (
                   <div key={sd.key} style={{
                     display: "flex", alignItems: "center", gap: 10,
@@ -205,7 +188,7 @@ export default function PaketKasPage({
                     <DotStatus done={done} label={sd.label} />
                     <Button
                       variant="ghost"
-                      onClick={() => goto(sd.key)}
+                      onClick={() => goto(documentRoute(sd.key, liveDetail.kategori), liveDetail.idRab)}
                       style={{ padding: "4px 10px", fontSize: 12 }}
                     >
                       {done ? "Buka" : "Buat"}
@@ -216,92 +199,31 @@ export default function PaketKasPage({
 
               <button
                 type="button"
-                onClick={() => toggleFormEval(detail)}
+                onClick={() => toggleFormEval(liveDetail)}
                 style={{
                   display: "flex", alignItems: "center", gap: 10,
                   padding: "9px 12px",
-                  border: `1px solid ${detail.pkg?.formEvaluasi ? "#87D3A2" : T.border}`,
-                  background: detail.pkg?.formEvaluasi ? "#F0FBF4" : T.bg,
+                  border: `1px solid ${liveDetail.pkg?.formEvaluasi ? "#87D3A2" : T.border}`,
+                  background: liveDetail.pkg?.formEvaluasi ? "#F0FBF4" : T.bg,
                   borderRadius: 8, cursor: "pointer", textAlign: "left", width: "100%",
                 }}
               >
-                <Check size={16} color={detail.pkg?.formEvaluasi ? "#1E7F3E" : T.muted} />
+                <ShieldCheck size={16} color={liveDetail.pkg?.formEvaluasi ? "#1E7F3E" : T.muted} />
                 <div style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>
                   Form Evaluasi
                   <div style={{ fontSize: 11, fontWeight: 400, color: T.muted }}>
                     Klik untuk tandai form evaluasi sudah dilampirkan.
                   </div>
                 </div>
-                <DotStatus done={!!detail.pkg?.formEvaluasi} label="Form Evaluasi" />
+                <DotStatus done={!!liveDetail.pkg?.formEvaluasi} label="Form Evaluasi" />
               </button>
             </div>
 
-            {detail.pkg?.reviewNote && (
-              <div style={{
-                padding: "10px 12px", borderRadius: 8, marginBottom: 8,
-                background: STATUS_META.rejected.bg,
-                border: `1px solid ${STATUS_META.rejected.color}30`,
-                color: STATUS_META.rejected.color, fontSize: 12.5,
-              }}>
-                <div style={{ fontWeight: 700, marginBottom: 2 }}>
-                  Catatan Asman ({detail.pkg.reviewedBy || "asman"}):
-                </div>
-                {detail.pkg.reviewNote}
-              </div>
-            )}
-            {detail.pkg?.processNote && (
-              <div style={{
-                padding: "10px 12px", borderRadius: 8, marginBottom: 12,
-                background: STATUS_META.processed.bg,
-                border: `1px solid ${STATUS_META.processed.color}30`,
-                color: STATUS_META.processed.color, fontSize: 12.5,
-              }}>
-                <div style={{ fontWeight: 700, marginBottom: 2 }}>
-                  Catatan MADM ({detail.pkg.processedBy || "madm"}):
-                </div>
-                {detail.pkg.processNote}
-              </div>
-            )}
-            {detail.status === DOC_STATUS.PROCESSED && !detail.pkg?.processNote && (
-              <div style={{
-                padding: "10px 12px", borderRadius: 8, marginBottom: 12,
-                background: STATUS_META.processed.bg,
-                border: `1px solid ${STATUS_META.processed.color}30`,
-                color: STATUS_META.processed.color, fontSize: 12.5,
-              }}>
-                <div style={{ fontWeight: 700, marginBottom: 2 }}>
-                  Paket selesai diproses oleh MADM ({detail.pkg?.processedBy || "madm"}).
-                </div>
-                Tidak ada catatan tambahan.
-              </div>
-            )}
-
             <div style={{
-              display: "flex", gap: 10, justifyContent: "flex-end",
-              paddingTop: 14, borderTop: `1px solid ${T.border}`, flexWrap: "wrap",
+              display: "flex", justifyContent: "flex-end",
+              paddingTop: 14, borderTop: `1px solid ${T.border}`,
             }}>
               <Button variant="ghost" onClick={() => setDetail(null)}>Tutup</Button>
-              {(detail.status === DOC_STATUS.DRAFT ||
-                detail.status === DOC_STATUS.REJECTED) && (
-                <Button
-                  variant="accent"
-                  icon={Send}
-                  disabled={!detail.isComplete}
-                  onClick={() => submit(detail)}
-                  title={
-                    !detail.isComplete
-                      ? "Lengkapi RAB, TOR, BAST, PI, dan Form Evaluasi dulu"
-                      : "Kirim paket ini ke Asman"
-                  }
-                >
-                  Kirim ke Asman
-                </Button>
-              )}
-              {detail.status === DOC_STATUS.SUBMITTED && (
-                <span style={{ color: T.muted, fontSize: 12.5, alignSelf: "center" }}>
-                  Sudah dikirim - menunggu review Asman.
-                </span>
-              )}
             </div>
           </>
         )}

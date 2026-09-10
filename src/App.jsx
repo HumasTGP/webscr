@@ -20,6 +20,7 @@ import {
   paktaCcFields,
 } from "./lib/wizardFields";
 
+import { OrganizationContext } from "./components/OrganizationInput";
 import Sidebar from "./sakti/components/Sidebar";
 import Topbar from "./sakti/components/Topbar";
 import HelpModal from "./components/HelpModal";
@@ -36,6 +37,10 @@ import TORPage from "./sakti/pages/TOR";
 import VendorPage from "./sakti/pages/Vendor";
 import HistoryPage from "./sakti/pages/History";
 import Panduan from "./sakti/pages/Panduan";
+import PengaturanProfilPage from "./sakti/pages/PengaturanProfil";
+import NotifikasiPage from "./sakti/pages/Notifikasi";
+import NotificationPopup from "./components/NotificationPopup";
+import { buildActiveNotifications, buildNotificationHistory } from "./lib/notifications";
 import GenericWizard from "./sakti/pages/GenericWizard";
 import { BastDocPreview, PaktaDocPreview } from "./components/DocTemplatePreview";
 import ProposalRekapPage from "./sakti/pages/ProposalRekap";
@@ -169,8 +174,24 @@ export default function App() {
     PACKAGE_SEED.map((p) => ({
       idNumber: p.idRab, judulKegiatan: p.judul, kategori: p.kategori,
       tanggalRab: "2026-04-20", totalEvaluasi: 15000000,
+      // Field tanda tangan digital: null = belum TTD, kalau sudah berisi
+      // { signatureUrl, signatureName, signedAt } (lihat lib/signature.js).
+      // MADM baru bisa TTD setelah signatureAsman terisi.
+      signatureAsman: null,
+      signatureMadm: null,
     }))
   );
+
+  // Tempel tanda tangan Asman/MADM ke sebuah RAB. `stage` = "asman" | "madm".
+  const signRab = (idNumber, stage, stamp) => {
+    setRab((prev) =>
+      prev.map((r) =>
+        r.idNumber === idNumber
+          ? { ...r, [stage === "asman" ? "signatureAsman" : "signatureMadm"]: stamp }
+          : r
+      )
+    );
+  };
   const [tor, setTor] = useState(() => seedSubDoc("id", "judulKegiatan"));
   const [bast, setBast] = useState(() => seedSubDoc("id", "judulBantuan"));
   const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
@@ -180,6 +201,7 @@ export default function App() {
   const [formVerifList, setFormVerifList] = useState([]);
   const [dokumentasiDocs, setDokumentasiDocs] = useState([]);
   const [nonpoSubmissions, setNonpoSubmissions] = useState([]);
+  const [poDocuments, setPoDocuments] = useState({});
   const [nonpoCombo, setNonpoCombo] = useState(DEFAULT_COMBO);
   const [laporan, setLaporan] = useState([]);
   const [rka, setRka] = useState([]);
@@ -198,7 +220,30 @@ export default function App() {
   const [ccPakta, setCcPakta] = useState([]);
   const [ccBapp, setCcBapp] = useState([]);
   const [ccTtd, setCcTtd] = useState([]);
+  // 4 dokumen CC dengan template Word (lihat DetailCC.jsx DOC_CONFIG) -
+  // sebelumnya cuma dihitung on-the-fly dari form sesi (hilang tiap tutup
+  // halaman), sekarang disimpan per ccId biar statusnya bisa di-tracking di
+  // tabel utama Cash Card. Masing-masing array isinya objek {id: ccId, ...data}.
+  const [ccVerifikasi, setCcVerifikasi] = useState([]);
+  const [ccPermintaan, setCcPermintaan] = useState([]);
+  const [ccRencana, setCcRencana] = useState([]);
+  const [ccPertanggungjawaban, setCcPertanggungjawaban] = useState([]);
   const [ccCombo, setCcCombo] = useState(DEFAULT_CC_COMBO);
+
+  // Notifikasi: pop-up muncul di login/refresh selama masih ada item aktif.
+  // `notifDismissed` = ditutup sementara untuk SESI ini saja (klik "Nanti
+  // dulu") - direset lagi setiap kali app dimuat ulang dari awal, sesuai
+  // kesepakatan supaya pop-up "nempel" sampai syaratnya benar-benar terpenuhi.
+  const [notifPopupOpen, setNotifPopupOpen] = useState(false);
+  const [notifDismissed, setNotifDismissed] = useState(false);
+  // ID dokumen (RAB/Proposal) yang harus otomatis dibuka detailnya begitu
+  // halaman tujuannya aktif - diisi dari klik notifikasi (lihat
+  // openNotificationTarget di bawah), dibaca oleh RAB.jsx/InboxProposal.jsx
+  // lewat prop openTargetId.
+  const [openTargetId, setOpenTargetId] = useState(null);
+  const [documentTarget, setDocumentTarget] = useState(null);
+  const openDocument = (page, parentId) => { setDocumentTarget({ page, id: parentId }); setActive(page); };
+  const documentProps = { openParentId: documentTarget?.page === active ? documentTarget.id : null, onConsumeParent: () => setDocumentTarget(null) };
 
   const USERS_LS_KEY = "sikas.users.v1";
   const [users, setUsers] = useState(() => {
@@ -220,6 +265,18 @@ export default function App() {
   }, [users]);
   const authenticate = (role, uname, pw) => authenticateUser(users, role, uname, pw);
 
+  // Simpan tanda tangan (dan nama) ke profil user yang sedang login. Dipanggil
+  // sekali dari halaman pengaturan profil, dipakai berkali-kali saat TTD.
+  // Update DUA state sekaligus: `users` (daftar akun, biar tersimpan) dan
+  // `user` (sesi yang lagi login, biar preview langsung berubah tanpa perlu
+  // logout-login ulang).
+  const saveMySignature = (userId, signatureUrl, signatureName) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, signatureUrl, signatureName } : u))
+    );
+    setUser((prev) => (prev && prev.id === userId ? { ...prev, signatureUrl, signatureName } : prev));
+  };
+
   const [packages, setPackages] = useState(() =>
     PACKAGE_SEED.map((p) => ({
       idRab: p.idRab, judul: p.judul, kategori: p.kategori,
@@ -232,10 +289,84 @@ export default function App() {
     }))
   );
   const [vendors, setVendors] = useState(() => seed("VND", VENDOR_SEED));
-  const [proposals, setProposals] = useState(() => seed("PRP", PROPOSAL_SEED));
+  // signatureAsman/signatureMadm: field baru untuk TTD digital Proposal (pola
+  // sama seperti RAB, lihat signRab). Ditambahkan lewat .map() tambahan di sini
+  // (bukan mengubah PROPOSAL_SEED atau fungsi seed()) supaya data asli Proposal
+  // tidak tersentuh sama sekali.
+  const [proposals, setProposals] = useState(() =>
+    seed("PRP", PROPOSAL_SEED).map((p) => ({ ...p, signatureAsman: p.signatureAsman ?? null, signatureMadm: p.signatureMadm ?? null }))
+  );
+
+  // Tempel tanda tangan Asman/MADM ke sebuah Proposal - pola SAMA PERSIS
+  // seperti signRab() di atas, cuma target state-nya proposals.
+  const signProposal = (id, stage, stamp) => {
+    setProposals((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? { ...p, [stage === "asman" ? "signatureAsman" : "signatureMadm"]: stamp }
+          : p
+      )
+    );
+  };
+
+  // Daftar notifikasi AKTIF untuk user yang sedang login - dihitung ulang
+  // otomatis tiap render dari data RAB/Non PO/Cash Card/Proposal terkini
+  // (lihat lib/notifications.js). Tidak disimpan sebagai list statis.
+  // Dipindah ke sini (setelah proposals & signProposal dideklarasikan)
+  // supaya bisa memasukkan proposals ke notifikasi (poin 7).
+  const activeNotifications = useMemo(
+    () => buildActiveNotifications({ user, rab, nonPoList: nonpoSubmissions, ccList, proposals }),
+    [user, rab, nonpoSubmissions, ccList, proposals]
+  );
+  const notificationHistory = useMemo(
+    () => buildNotificationHistory({ user, rab, nonPoList: nonpoSubmissions, ccList, proposals }),
+    [user, rab, nonpoSubmissions, ccList, proposals]
+  );
+
+  // Pop-up muncul otomatis begitu user login (berubah dari null ke terisi)
+  // atau setiap kali halaman dimuat ulang dari awal - TIDAK dicek ulang
+  // setiap pindah menu, sesuai kesepakatan biar tidak mengganggu kerja.
+  useEffect(() => {
+    if (user && activeNotifications.length > 0 && !notifDismissed) {
+      setNotifPopupOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Buka RAB/halaman terkait dari sebuah item notifikasi, lalu tutup
+  // pop-up/dropdown yang sedang terbuka.
+  const openNotificationTarget = (item) => {
+    setNotifPopupOpen(false);
+    if (!item?.target?.page) return;
+    // openTargetId CUMA dikonsumsi oleh RAB.jsx dan InboxProposal.jsx - kalau
+    // target-nya halaman lain (nonpo-overview/po-overview/cc-overview/
+    // tracking-nonpo dkk), openTargetId TIDAK diisi sama sekali. Tanpa
+    // pembatasan ini, id yang tidak pernah dikonsumsi bisa "bocor" dan
+    // tiba-tiba membuka detail RAB yang salah begitu user pindah ke menu RAB
+    // lewat cara lain (bukan dari notifikasi ini).
+    const supportsDeepLink = item.target.page === "rab" || item.target.page === "inbox-proposal";
+    setOpenTargetId(null);
+    setActive(item.target.page);
+    if (supportsDeepLink && item.target.idNumber) {
+      setTimeout(() => setOpenTargetId(item.target.idNumber), 0);
+    }
+  };
+
+  // Deep-link one-shot: setelah RAB.jsx/InboxProposal.jsx berhasil membuka
+  // detail dokumen yang dituju, mereka panggil ini untuk membersihkan
+  // openTargetId. Tanpa ini, balik ke halaman yang sama nanti (lewat menu
+  // biasa, bukan notifikasi) akan otomatis membuka detail yang sama lagi
+  // karena openTargetId masih menyimpan id lama.
+  const consumeOpenTarget = () => setOpenTargetId(null);
+
   const [konten, setKonten] = useState(() => seed("KTN", KONTEN_SEED));
   const [komunikasiNarasumberOptions, setKomunikasiNarasumberOptions] = useState(OPT.komunikasiNarasumber);
   const [evaluasi, setEvaluasi] = useState([]);
+  // TOR/BAST/PI khusus konteks Proposal (bukan RAB) - diisi Humas di
+  // ProposalDokumenTambahan.jsx, ditarik read-only oleh Asman di
+  // InboxProposal.jsx. Kunci datanya proposalId, pola sama seperti Form
+  // Evaluasi (evaluasi di atas).
+  const [dokumenTambahanProposal, setDokumenTambahanProposal] = useState([]);
   const [history, setHistory] = useState([]);
   const [mitraList, setMitraList] = useState(() => seed("MTR", MITRA_SEED));
 
@@ -336,6 +467,7 @@ export default function App() {
       ),
       "proposal-rekap": (
         <ProposalRekapPage
+          evaluasiList={evaluasi}
           proposals={proposals}
           setProposals={setProposals}
           notify={notify}
@@ -370,7 +502,13 @@ export default function App() {
         />
       ),
       "mitra-tracking": <GandengTrackingPage mitraList={mitraList} />,
-      rab: <RABPage rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} packages={packages} />,
+      rab: (
+        <RABPage
+          rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user}
+          packages={packages} signRab={signRab} saveMySignature={saveMySignature} tor={tor}
+          openTargetId={openTargetId} onConsumeOpenTarget={consumeOpenTarget}
+        />
+      ),
       tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
       "nonpo-overview": (
         <NonPoPage
@@ -382,13 +520,14 @@ export default function App() {
           bapp={bapp.filter((b) => b.kategori === "NON PO")}
           formVerif={formVerifList}
           notify={notify}
-          onNavigate={setActive}
+          onNavigate={openDocument}
           kategori="NON PO"
           submissions={nonpoSubmissions}
           setSubmissions={setNonpoSubmissions}
           combo={nonpoCombo}
           setCombo={setNonpoCombo}
           rabIdsWithDokumentasi={rabIdsWithDokumentasi}
+          user={user}
         />
       ),
       "po-overview": (
@@ -401,38 +540,112 @@ export default function App() {
           bapp={bapp.filter((b) => b.kategori === "PO")}
           formVerif={formVerifList}
           notify={notify}
-          onNavigate={setActive}
+          onNavigate={openDocument}
           kategori="PO"
           submissions={nonpoSubmissions}
           setSubmissions={setNonpoSubmissions}
           combo={nonpoCombo}
           setCombo={setNonpoCombo}
           rabIdsWithDokumentasi={rabIdsWithDokumentasi}
+          user={user}
         />
       ),
-      // Cash Card berdiri sendiri - TIDAK pakai NonPoPage/rab lagi (beda dari
-      // NON PO/PO di atas). Detail CC, BAST-CC, PI-CC, BAPP-CC semua sumber
-      // datanya dari ccList, bukan rab.
+
+      // ---- Tracking Pembayaran (Asman, read-only) ----
+      // Route TERPISAH dari nonpo-overview/po-overview/cc-overview di atas,
+      // supaya bisa dibatasi role sendiri di sidebar tanpa membuka akses edit
+      // Humas ke Asman. Komponennya SAMA PERSIS (NonPoPage/CashCardPage sudah
+      // punya logika canEdit = user.role === "humas"), cuma dipanggil ulang
+      // lewat key routing baru dengan user Asman yang dipaksakan eksplisit -
+      // jadi walau suatu saat menu ini kebuka role lain, tetap read-only.
+      "tracking-nonpo": (
+        <NonPoPage
+          rab={rabByKategori["NON PO"]}
+          lmp1={lmp1List}
+          lmp2={lmp2List}
+          bast={bast.filter((b) => b.kategori === "NON PO")}
+          pakta={pakta.filter((p) => p.kategori === "NON PO")}
+          bapp={bapp.filter((b) => b.kategori === "NON PO")}
+          formVerif={formVerifList}
+          notify={notify}
+          onNavigate={openDocument}
+          kategori="NON PO"
+          submissions={nonpoSubmissions}
+          setSubmissions={setNonpoSubmissions}
+          combo={nonpoCombo}
+          setCombo={setNonpoCombo}
+          rabIdsWithDokumentasi={rabIdsWithDokumentasi}
+          user={{ role: "asman" }}
+        />
+      ),
+      "tracking-po": (
+        <NonPoPage
+          rab={rabByKategori["PO"]}
+          lmp1={lmp1List}
+          lmp2={lmp2List}
+          bast={bast.filter((b) => b.kategori === "PO")}
+          pakta={pakta.filter((p) => p.kategori === "PO")}
+          bapp={bapp.filter((b) => b.kategori === "PO")}
+          formVerif={formVerifList}
+          notify={notify}
+          onNavigate={openDocument}
+          kategori="PO"
+          submissions={nonpoSubmissions}
+          setSubmissions={setNonpoSubmissions}
+          combo={nonpoCombo}
+          setCombo={setNonpoCombo}
+          rabIdsWithDokumentasi={rabIdsWithDokumentasi}
+          user={{ role: "asman" }}
+        />
+      ),
+      "tracking-cc": (
+        <CashCardPage
+          ccList={ccList} setCcList={setCcList}
+          ccItems={ccItems}
+          ccBast={ccBast} ccPakta={ccPakta} ccBapp={ccBapp} ccTtd={ccTtd}
+          ccVerifikasi={ccVerifikasi} ccPermintaan={ccPermintaan}
+          ccRencana={ccRencana} ccPertanggungjawaban={ccPertanggungjawaban}
+          combo={ccCombo} setCombo={setCcCombo}
+          notify={notify}
+          onNavigate={openDocument}
+          rab={rab}
+          user={{ role: "asman" }}
+        />
+      ),
+
+      // Cash Card sekarang dipilih dari RAB (sama seperti Non PO) - ccList
+      // punya field rabId yang mengisi judulCc & tanggal otomatis. ID/Submission
+      // ID Cash Card sendiri tetap angka berjalan terpisah dari idNumber RAB.
       "cc-overview": (
         <CashCardPage
           ccList={ccList} setCcList={setCcList}
           ccItems={ccItems}
-          ccBast={ccBast} ccPakta={ccPakta} ccBapp={ccBapp}
+          ccBast={ccBast} ccPakta={ccPakta} ccBapp={ccBapp} ccTtd={ccTtd}
+          ccVerifikasi={ccVerifikasi} ccPermintaan={ccPermintaan}
+          ccRencana={ccRencana} ccPertanggungjawaban={ccPertanggungjawaban}
           combo={ccCombo} setCombo={setCcCombo}
           notify={notify}
-          onNavigate={setActive}
+          onNavigate={openDocument}
+          rab={rab}
+          user={user}
         />
       ),
       "detail-cc": (
-        <DetailCCPage
+        <DetailCCPage {...documentProps}
           ccList={ccList} setCcList={setCcList}
           ccItems={ccItems} setCcItems={setCcItems}
           combo={ccCombo} setCombo={setCcCombo}
           notify={notify}
+          ccBast={ccBast} ccPakta={ccPakta} ccTtd={ccTtd} ccBapp={ccBapp}
+          onNavigate={openDocument}
+          ccVerifikasi={ccVerifikasi} setCcVerifikasi={setCcVerifikasi}
+          ccPermintaan={ccPermintaan} setCcPermintaan={setCcPermintaan}
+          ccRencana={ccRencana} setCcRencana={setCcRencana}
+          ccPertanggungjawaban={ccPertanggungjawaban} setCcPertanggungjawaban={setCcPertanggungjawaban}
         />
       ),
       "ttd-cc": (
-        <TtdSerahTerimaPage ccTtd={ccTtd} setCcTtd={setCcTtd} notify={notify} />
+        <TtdSerahTerimaPage ccTtd={ccTtd} setCcTtd={setCcTtd} ccList={ccList} notify={notify} />
       ),
       "laporan-nonpo": (
         <GenericWizard
@@ -500,6 +713,11 @@ export default function App() {
           proposals={proposals}
           onUpdateProposal={updateProposal}
           notify={notify}
+          dokumenTambahanProposal={dokumenTambahanProposal}
+          signProposal={signProposal}
+          openTargetId={openTargetId}
+          onConsumeOpenTarget={consumeOpenTarget}
+          evaluasiList={evaluasi}
         />
       ),
       "inbox-pembayaran": (
@@ -522,7 +740,13 @@ export default function App() {
           packages={packages}
           onUpsertPackage={upsertPackage}
           notify={notify}
-          goto={setActive}
+          goto={(page, rabId) => {
+            if (["bast-cc", "pakta-cc"].includes(page)) {
+              const cc = ccList.find((r) => r.rabId === rabId);
+              if (!cc) return notify("Buat master Cash Card untuk RAB ini terlebih dahulu.", "error");
+              openDocument(page, cc.id);
+            } else openDocument(page, rabId);
+          }}
         />
       ),
       "user-mgmt": (
@@ -544,7 +768,7 @@ export default function App() {
         const routes = {};
         kategoriList.forEach(({ suffix, kategori }) => {
           routes[`bast-${suffix}`] = (
-            <GenericWizard
+            <GenericWizard {...documentProps}
               title={`BAST - ${kategori}`}
               eyebrow="Modul BAST"
               description={`Berita Acara Serah Terima untuk pengajuan kategori ${kategori}.`}
@@ -565,7 +789,7 @@ export default function App() {
             />
           );
           routes[`pakta-${suffix}`] = (
-            <GenericWizard
+            <GenericWizard {...documentProps}
               title={`Pakta Integritas - ${kategori}`}
               eyebrow="Modul Pakta Integritas"
               description={`Pakta Integritas penerima bantuan untuk pengajuan kategori ${kategori}.`}
@@ -586,7 +810,7 @@ export default function App() {
             />
           );
           routes[`bapp-${suffix}`] = (
-            <BAPPPage
+            <BAPPPage {...documentProps}
               rab={rabByKategori[kategori]}
               list={bapp.filter((b) => b.kategori === kategori)}
               setList={setBapp}
@@ -594,25 +818,25 @@ export default function App() {
             />
           );
           routes[`form-verifikasi-${suffix}`] = (
-            <FormVerifikasiPage rab={rabByKategori[kategori]} notify={notify} forms={formVerifList} setForms={setFormVerifList} />
+            <FormVerifikasiPage {...documentProps} rab={rabByKategori[kategori]} notify={notify} forms={formVerifList} setForms={setFormVerifList} />
           );
           routes[`lmp1-${suffix}`] = (
-            <Lampiran1Page rab={rabByKategori[kategori]} notify={notify} list={lmp1List} setList={setLmp1List} />
+            <Lampiran1Page {...documentProps} rab={rabByKategori[kategori]} notify={notify} list={lmp1List} setList={setLmp1List} />
           );
           routes[`lmp2-${suffix}`] = (
-            <Lampiran2Page rab={rabByKategori[kategori]} notify={notify} list={lmp2List} setList={setLmp2List} lmp1List={lmp1List} />
+            <Lampiran2Page {...documentProps} rab={rabByKategori[kategori]} notify={notify} list={lmp2List} setList={setLmp2List} lmp1List={lmp1List} />
           );
         });
         return routes;
       })(),
       // PO punya alur beda (lewat ERP) — BAST & BAPB-nya cukup dicatat ID-nya aja,
       // bukan dokumen lengkap kayak NON PO/CC.
-      "bast-po": <PoErpDataPage rab={rabByKategori["PO"]} notify={notify} />,
-      "bapp-po": <PoErpDataPage rab={rabByKategori["PO"]} notify={notify} />,
+      "bast-po": <PoErpDataPage records={poDocuments} setRecords={setPoDocuments} {...documentProps} rab={rabByKategori["PO"]} notify={notify} />,
+      "bapp-po": <PoErpDataPage records={poDocuments} setRecords={setPoDocuments} {...documentProps} rab={rabByKategori["PO"]} notify={notify} />,
       // BAST-CC/PI-CC/BAPP-CC - Cash Card berdiri sendiri, ID-nya dari ccList
       // (bukan rab). Struktur wizard tetap sama polanya dengan NON PO/PO.
       "bast-cc": (
-        <GenericWizard
+        <GenericWizard {...documentProps}
           title="BAST - Cash Card"
           eyebrow="Modul BAST"
           description="Berita Acara Serah Terima untuk pengajuan Cash Card."
@@ -633,7 +857,7 @@ export default function App() {
         />
       ),
       "pakta-cc": (
-        <GenericWizard
+        <GenericWizard {...documentProps}
           title="PI - Cash Card"
           eyebrow="Modul Pakta Integritas"
           description="Pakta Integritas penerima bantuan untuk pengajuan Cash Card."
@@ -654,7 +878,7 @@ export default function App() {
         />
       ),
       "bapp-cc": (
-        <BAPPPage
+        <BAPPPage {...documentProps}
           rab={ccList}
           idKey="id"
           idLabel="Submission ID"
@@ -666,7 +890,7 @@ export default function App() {
       dokumentasi: <DokumentasiPage rab={rab} setRab={setRab} notify={notify} docs={dokumentasiDocs} setDocs={setDokumentasiDocs} />,
       "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
       eviden: <EvidenPage rab={rab} notify={notify} />,
-      "checklist-dokumen": <ChecklistDokumenPage rab={rab} tor={tor} bast={bast} pakta={pakta} notify={notify} paymentPackages={paymentPackages} setPaymentPackages={setPaymentPackages} />,
+      "checklist-dokumen": <ChecklistDokumenPage rab={rab} tor={tor} bast={bast} pakta={pakta} notify={notify} paymentPackages={paymentPackages} setPaymentPackages={setPaymentPackages} user={user} />,
       "proposal-evaluasi-pembayaran": (
         <ProposalEvaluasiPage
           proposals={proposals}
@@ -677,6 +901,12 @@ export default function App() {
       ),
       history: <HistoryPage history={history} />,
       panduan: <Panduan data={{ rab, tor, bast, pakta, laporan, proposals }} goto={setActive} />,
+      "pengaturan-profil": (
+        <PengaturanProfilPage user={user} saveMySignature={saveMySignature} notify={notify} />
+      ),
+      notifikasi: (
+        <NotifikasiPage items={notificationHistory} onOpenItem={openNotificationTarget} />
+      ),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -687,6 +917,11 @@ export default function App() {
       nonpoSubmissions, formVerifList, nonpoCombo, dokumentasiDocs, rabIdsWithDokumentasi,
       paymentPackages,
       ccList, ccItems, ccBast, ccPakta, ccBapp, ccTtd, ccCombo,
+      // Ditambahkan (poin 16) - sebelumnya state ini dipakai di dalam modules
+      // tapi tidak masuk dependency array, jadi tabel/status bisa nampilkan
+      // nilai lama (stale closure) setelah upload/update.
+      dokumenTambahanProposal, ccVerifikasi, ccPermintaan, ccRencana, ccPertanggungjawaban,
+      notificationHistory, signRab, saveMySignature, signProposal, openTargetId, evaluasi, documentTarget, active, poDocuments,
     ]
   );
 
@@ -791,6 +1026,9 @@ export default function App() {
           onToggleTheme={() =>
             setThemeMode((m) => (m === "dark" ? "light" : "dark"))
           }
+          notificationItems={activeNotifications}
+          onOpenNotification={openNotificationTarget}
+          onSeeAllNotifications={() => setActive("notifikasi")}
         />
         <div
           key={active}
@@ -802,7 +1040,7 @@ export default function App() {
             animation: "fade-in .2s ease",
           }}
         >
-          {modules[active]}
+          <OrganizationContext.Provider value={vendors}>{modules[active]}</OrganizationContext.Provider>
         </div>
       </div>
       <Toast toast={toast} />
@@ -810,6 +1048,12 @@ export default function App() {
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
         onGotoPanduan={() => setActive("panduan")}
+      />
+      <NotificationPopup
+        open={notifPopupOpen}
+        items={activeNotifications}
+        onClose={() => { setNotifPopupOpen(false); setNotifDismissed(true); }}
+        onOpenItem={openNotificationTarget}
       />
     </div>
   );

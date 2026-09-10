@@ -1,6 +1,7 @@
 import { ChevronRight, HelpCircle, Moon, Sun } from "lucide-react";
 import { T, font } from "../lib/theme";
 import { roleInitials, roleLabel } from "../lib/utils";
+import NotificationBell from "./NotificationBell";
 
 export default function Topbar({
   activeLabel,
@@ -8,6 +9,9 @@ export default function Topbar({
   onHelpClick,
   themeMode,
   onToggleTheme,
+  notificationItems = [],
+  onOpenNotification,
+  onSeeAllNotifications,
 }) {
   return (
     <div
@@ -72,6 +76,17 @@ export default function Topbar({
         >
           {themeMode === "dark" ? <Sun size={15} /> : <Moon size={15} />}
         </button>
+
+        {/* Lonceng notifikasi - hanya tampil kalau ada handler-nya (dipasang
+            dari App.jsx). Aman untuk role yang tidak dapat notifikasi apapun,
+            karena notificationItems default-nya array kosong. */}
+        {onOpenNotification && (
+          <NotificationBell
+            items={notificationItems}
+            onOpenItem={onOpenNotification}
+            onSeeAll={onSeeAllNotifications}
+          />
+        )}
 
         <button
           onClick={onHelpClick}

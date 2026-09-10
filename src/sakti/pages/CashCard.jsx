@@ -3,6 +3,7 @@ import { Eye, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { nextNumericId, parseLocalDate, rupiah, terbilang as toTerbilang } from "../../lib/utils";
 import { OPT } from "../../lib/data";
+import { availablePaymentRabs, duplicatePayment } from "../../lib/recordLinks";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
@@ -81,16 +82,21 @@ function StatusDot({ status, title, onClick }) {
 }
 
 const EMPTY_CC = {
-  judulCc: "", tanggal: "", bidang: "", saldoKas: "", procost: "",
+  judulCc: "", tanggal: "", bidang: "", saldoKas: "", procost: "", rabId: "",
 };
 
-// Cash Card BERDIRI SENDIRI - tidak dipilih dari RAB. "ID" dan "Submission ID"
-// dibuat otomatis (angkanya sama) dan jadi bagian depan nomor dokumen turunan
-// (Nomor Pengajuan, Nomor BA, dst), yang diisi di halaman Detail CC, bukan di sini.
+// Cash Card dipilih dari RAB (sama seperti Non PO): pilih ID RAB dari daftar,
+// judulCc & tanggal otomatis terisi dari data RAB itu dan tidak bisa diketik
+// manual. "ID"/"Submission ID" Cash Card tetap dibuat otomatis sendiri (angka
+// berjalan), TERPISAH dari idNumber RAB - RAB cuma sumber judul & tanggal.
 export default function CashCardPage({
-  ccList, setCcList, ccItems, ccBast, ccPakta, ccBapp,
-  combo, setCombo, notify, onNavigate,
+  ccList, setCcList, ccItems, ccBast, ccPakta, ccBapp, ccTtd = [],
+  ccVerifikasi = [], ccPermintaan = [], ccRencana = [], ccPertanggungjawaban = [],
+  rab = [], combo, setCombo, notify, onNavigate, user,
 }) {
+  // Sama seperti NonPoPage - Asman cuma boleh LIHAT tracking, tidak bisa
+  // tambah/edit/hapus. Humas tetap penuh seperti sebelumnya.
+  const canEdit = !user || user.role === "humas";
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_CC);
   const [search, setSearch] = useState("");
@@ -134,12 +140,14 @@ export default function CashCardPage({
   };
 
   const saveAdd = () => {
+    if (!rab.some((r) => r.idNumber === form.rabId && r.kategori === "Cash Card")) return notify("Pilih RAB kategori Cash Card.", "error");
+    if (duplicatePayment(ccList, form.rabId, editingRow?.id)) return notify("RAB ini sudah memiliki data Cash Card.", "error");
     if (!form.judulCc.trim()) return notify("Isi Judul CC terlebih dahulu.", "error");
     if (editingRow) {
-      setCcList((prev) => prev.map((r) => (r.id === editingRow.id ? { ...r, ...form } : r)));
+      setCcList((prev) => duplicatePayment(prev, form.rabId, editingRow.id) ? prev : prev.map((r) => (r.id === editingRow.id ? { ...r, ...form } : r)));
       notify("Cash Card berhasil diperbarui.", "success");
     } else {
-      setCcList((prev) => [...prev, { ...form, createdAt: new Date().toISOString() }]);
+      setCcList((prev) => duplicatePayment(prev, form.rabId) ? prev : [...prev, { ...form, createdAt: new Date().toISOString() }]);
       notify("Cash Card berhasil ditambahkan.", "success");
     }
     setAddOpen(false);
@@ -163,7 +171,7 @@ export default function CashCardPage({
       <PageHeader
         eyebrow="Pembayaran"
         title="Cash Card"
-        right={<Button icon={Plus} onClick={openAdd}>Tambah Cash Card</Button>}
+        right={canEdit && <Button icon={Plus} onClick={openAdd}>Tambah Cash Card</Button>}
       />
 
       <Card style={{ marginBottom: 14, padding: "12px 16px" }}>
@@ -197,9 +205,9 @@ export default function CashCardPage({
         {displayList.length === 0 ? (
           <EmptyState
             label="Belum ada pengajuan Cash Card."
-            hint='Klik "Tambah Cash Card" untuk mulai.'
-            actionLabel="Tambah Cash Card"
-            onAction={openAdd}
+            hint={canEdit ? 'Klik "Tambah Cash Card" untuk mulai.' : "Belum ada Cash Card yang diajukan Humas."}
+            actionLabel={canEdit ? "Tambah Cash Card" : undefined}
+            onAction={canEdit ? openAdd : undefined}
           />
         ) : (
           <div style={{ overflowX: "auto" }}>
@@ -211,11 +219,16 @@ export default function CashCardPage({
                   <th style={thStyle}>Judul CC</th>
                   <th style={thStyle}>Bidang</th>
                   <th style={{ ...thStyle, textAlign: "right" }}>Saldo Kas</th>
-                  <th style={{ ...thStyle, textAlign: "center" }}>Penagihan</th>
+                  <th style={{ ...thStyle, textAlign: "center" }}>Detail/Item</th>
+                  <th style={{ ...thStyle, textAlign: "center" }}>Verifikasi</th>
+                  <th style={{ ...thStyle, textAlign: "center" }}>Permintaan Dana</th>
+                  <th style={{ ...thStyle, textAlign: "center" }}>Rencana Tunai</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>BAST</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>PI</th>
+                  <th style={{ ...thStyle, textAlign: "center" }}>TTD Serah Terima</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>BAPP</th>
-                  <th style={{ ...thStyle, textAlign: "center" }}>Aksi</th>
+                  <th style={{ ...thStyle, textAlign: "center" }}>Pertanggungjawaban</th>
+                  {canEdit && <th style={{ ...thStyle, textAlign: "center" }}>Aksi</th>}
                 </tr>
               </thead>
               <tbody>
@@ -224,9 +237,15 @@ export default function CashCardPage({
                   const bastRow = ccBast.find((b) => b.id === row.id);
                   const paktaRow = ccPakta.find((p) => p.id === row.id);
                   const bappRow = ccBapp.find((b) => b.id === row.id);
+                  const ttdRow = ccTtd.find((t) => t.id === row.id || t.ccId === row.id);
+                  const verifRow = ccVerifikasi.find((v) => v.id === row.id);
+                  const permintaanRow = ccPermintaan.find((p) => p.id === row.id);
+                  const rencanaRow = ccRencana.find((r) => r.id === row.id);
+                  const pjRow = ccPertanggungjawaban.find((p) => p.id === row.id);
                   const bastStatus = bastRow ? (bastRow.tanggal && bastRow.namaPihakKedua ? "done" : "draft") : "none";
                   const piStatus = paktaRow ? (paktaRow.tanggalPi && paktaRow.namaPenerima ? "done" : "draft") : "none";
                   const bappStatus = bappRow ? "done" : "none";
+                  const ttdStatus = ttdRow ? "done" : "none";
                   return (
                     <tr key={row.id} style={{ background: i % 2 === 1 ? T.rowAlt : undefined }}>
                       <td style={tdStyle}>
@@ -236,21 +255,28 @@ export default function CashCardPage({
                       <td style={tdStyle}>{row.judulCc}</td>
                       <td style={tdStyle}>{row.bidang || "-"}</td>
                       <td style={tdNumStyle}>{row.saldoKas ? rupiah(row.saldoKas) : "-"}</td>
-                      <td style={tdCenterStyle}><StatusDot status={hasItems ? "done" : "none"} onClick={() => onNavigate?.("detail-cc")} /></td>
-                      <td style={tdCenterStyle}><StatusDot status={bastStatus} onClick={() => onNavigate?.("bast-cc")} /></td>
-                      <td style={tdCenterStyle}><StatusDot status={piStatus} onClick={() => onNavigate?.("pakta-cc")} /></td>
-                      <td style={tdCenterStyle}><StatusDot status={bappStatus} onClick={() => onNavigate?.("bapp-cc")} /></td>
-                      <td style={tdCenterStyle}>
-                        <button type="button" title="Lihat" onClick={() => setOverviewRow(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.muted, display: "inline-flex", alignItems: "center", justifyContent: "center", marginRight: 3 }}>
-                          <Eye size={12} />
-                        </button>
-                        <button type="button" title="Edit" onClick={() => openEdit(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.muted, display: "inline-flex", alignItems: "center", justifyContent: "center", marginRight: 3 }}>
-                          <Pencil size={12} />
-                        </button>
-                        <button type="button" title="Hapus" onClick={() => setDeleteConfirm(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.danger, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                          <Trash2 size={12} />
-                        </button>
-                      </td>
+                      <td style={tdCenterStyle}><StatusDot status={hasItems ? "done" : "none"} onClick={() => onNavigate?.("detail-cc", row.id)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={verifRow ? "done" : "none"} onClick={() => onNavigate?.("detail-cc", row.id)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={permintaanRow ? "done" : "none"} onClick={() => onNavigate?.("detail-cc", row.id)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={rencanaRow ? "done" : "none"} onClick={() => onNavigate?.("detail-cc", row.id)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={bastStatus} onClick={() => onNavigate?.("bast-cc", row.id)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={piStatus} onClick={() => onNavigate?.("pakta-cc", row.id)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={ttdStatus} onClick={() => onNavigate?.("ttd-cc")} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={bappStatus} onClick={() => onNavigate?.("bapp-cc", row.id)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={pjRow ? "done" : "none"} onClick={() => onNavigate?.("detail-cc", row.id)} /></td>
+                      {canEdit && (
+                        <td style={tdCenterStyle}>
+                          <button type="button" title="Lihat" onClick={() => setOverviewRow(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.muted, display: "inline-flex", alignItems: "center", justifyContent: "center", marginRight: 3 }}>
+                            <Eye size={12} />
+                          </button>
+                          <button type="button" title="Edit" onClick={() => openEdit(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.muted, display: "inline-flex", alignItems: "center", justifyContent: "center", marginRight: 3 }}>
+                            <Pencil size={12} />
+                          </button>
+                          <button type="button" title="Hapus" onClick={() => setDeleteConfirm(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.danger, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                            <Trash2 size={12} />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -272,17 +298,46 @@ export default function CashCardPage({
             </label>
             <input value={form.id || ""} disabled style={{ width: "100%", padding: "9px 11px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bg, color: T.muted, fontSize: 13, boxSizing: "border-box" }} />
           </div>
+
+          <div style={{ flex: "1 1 100%", maxWidth: "100%" }}>
+            <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 6 }}>
+              ID dari RAB <span style={{ fontWeight: 400, color: T.muted }}>(pilih dari daftar RAB)</span>
+            </label>
+            <select
+              value={form.rabId || ""}
+              onChange={(e) => {
+                const id = e.target.value;
+                const r = rab.find((r) => r.idNumber === id);
+                set("rabId", id);
+                set("judulCc", r ? (r.judulKegiatan || "") : "");
+                set("tanggal", r ? (r.tanggalRab || "") : "");
+              }}
+              style={{ width: "100%", padding: "9px 11px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.inputBg, color: T.text, fontSize: 13, fontFamily: "inherit" }}
+            >
+              <option value="">— Pilih ID RAB —</option>
+              {availablePaymentRabs(rab, ccList, "Cash Card", editingRow?.id).map((r) => (
+                <option key={r.idNumber} value={r.idNumber}>
+                  {r.idNumber}{r.judulKegiatan ? ` - ${r.judulKegiatan}` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div style={{ flex: "1 1 200px", maxWidth: 280 }}>
-            <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 6 }}>Tanggal</label>
-            <DatePicker value={form.tanggal} onChange={(v) => set("tanggal", v)} />
+            <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 6 }}>
+              Tanggal <span style={{ fontWeight: 400, color: T.muted }}>(otomatis dari RAB)</span>
+            </label>
+            <DatePicker value={form.tanggal} onChange={(v) => set("tanggal", v)} disabled />
           </div>
           <div style={{ flex: "1 1 100%", maxWidth: "100%" }}>
-            <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 6 }}>Judul CC</label>
+            <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: T.text, marginBottom: 6 }}>
+              Judul CC <span style={{ fontWeight: 400, color: T.muted }}>(otomatis dari RAB)</span>
+            </label>
             <input
               value={form.judulCc}
-              onChange={(e) => set("judulCc", e.target.value)}
-              placeholder="cth. Cash Card Kegiatan Donor Darah PMI"
-              style={{ width: "100%", padding: "9px 11px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.inputBg, color: T.text, fontSize: 13, fontFamily: "inherit", boxSizing: "border-box" }}
+              disabled
+              placeholder="terisi otomatis setelah pilih RAB"
+              style={{ width: "100%", padding: "9px 11px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bg, color: T.muted, fontSize: 13, fontFamily: "inherit", boxSizing: "border-box" }}
             />
           </div>
           <div style={{ flex: "1 1 200px", maxWidth: 280 }}>

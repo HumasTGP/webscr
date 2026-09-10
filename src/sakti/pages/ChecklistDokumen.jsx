@@ -1,247 +1,167 @@
-import { useState } from "react";
-import { CheckSquare, Plus, Printer, Send, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { CheckSquare, Upload } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { DOC_STATUS } from "../../lib/data";
-import { printChecklist } from "../../lib/utils";
-import { uid } from "../../lib/utils";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
+import { fileToDataUrl } from "../../lib/signature";
 
-const STANDAR_CHECKLIST_DOCS = [
-  "Surat Permohonan Pembayaran (SPP)",
-  "Kwitansi",
-  "Invoice",
-  "Faktur Pajak (FP)/Surat Keterangan Non PKP (bila tidak dapat menerbitkan FP)",
-  "Surat Pengukuhan Pengusaha Kena Pajak (bila ada FP)",
-  "NPWP (bila ada)/KTP (bila tidak ada NPWP)",
-  "Berita Acara Pemeriksaan Pekerjaan (BAPP)",
-  "Berita Acara Serah Terima Pekerjaan (BASTP)",
-  "Kontrak (PJ/SPK)",
-  "Laporan",
-  "Bank Garansi",
-  "Daftar Hadir",
-  "Form Verifikasi",
-  "Lampiran 1 (Rincian Pekerjaan)",
-  "Lampiran 2",
-];
+/**
+ * "Tracking Dokumen Selesai" (dulu bernama Checklist Dokumen).
+ *
+ * Tahap SETELAH dokumen di menu Non PO/Cash Card/PO lengkap - laporan Humas
+ * soal proses pencairan dana kas. Isinya murni PENANDA MANUAL, bukan alur
+ * approval sistem: checkbox "Sudah di Akutansi" lalu "Sudah di Keuangan"
+ * (diklik sendiri oleh Humas), plus tempat upload scan dokumen fisik yang
+ * sudah ditandatangani basah. TIDAK ADA akun/role baru Akutansi/Keuangan -
+ * proses itu terjadi di luar sistem, ini cuma status penanda.
+ *
+ * Hanya HUMAS dan ASMAN yang bisa melihat halaman ini, tidak MADM.
+ */
+export default function ChecklistDokumenPage({ rab = [], notify, paymentPackages = [], setPaymentPackages, user }) {
+  const [search, setSearch] = useState("");
+  const fileInputRefs = useRef({});
 
-export default function ChecklistDokumenPage({ rab, notify, paymentPackages = [], setPaymentPackages }) {
-  const [checked, setChecked] = useState({});
-  const [lainnya, setLainnya] = useState({}); // { [rabId]: [{ id, nama, ada }] }
+  if (user && user.role !== "humas" && user.role !== "asman") {
+    return (
+      <div>
+        <PageHeader
+          eyebrow="Pembayaran"
+          title="Tracking Dokumen Selesai"
+          description="Halaman ini hanya bisa diakses oleh Humas dan Asman."
+        />
+        <Card>
+          <div style={{ padding: "24px 12px", textAlign: "center", color: T.muted, fontSize: 13 }}>
+            Kamu tidak memiliki akses ke halaman ini.
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
-  const packageFor = (idRab) => paymentPackages.find((p) => p.idRab === idRab);
+  const packageFor = (idRab) => paymentPackages.find((p) => p.idRab === idRab) || {};
 
-  const kirimKeAsman = (r) => {
-    const existing = packageFor(r.idNumber);
-    const now = new Date().toISOString();
-    const checklistSnapshot = {
-      standar: STANDAR_CHECKLIST_DOCS.map((item) => ({ nama: item, ada: !!checked[`${r.idNumber}::${item}`] })),
-      lainnya: (lainnya[r.idNumber] || []).filter((it) => it.nama.trim()),
-    };
-    if (existing) {
-      setPaymentPackages((prev) => prev.map((p) => p.idRab === r.idNumber ? {
-        ...p, status: DOC_STATUS.SUBMITTED, submittedAt: now, checklist: checklistSnapshot,
-        reviewedBy: "", reviewedAt: "", reviewNote: "",
-        processedBy: "", processedAt: "", processNote: "", rejectedBy: "",
-      } : p));
-    } else {
-      setPaymentPackages((prev) => [...prev, {
-        id: uid("PAY"), idRab: r.idNumber, judulKegiatan: r.judulKegiatan,
-        kategori: r.kategori || "-", status: DOC_STATUS.SUBMITTED, submittedAt: now,
-        checklist: checklistSnapshot,
-      }]);
-    }
-    notify?.(`Paket pembayaran ${r.idNumber} dikirim ke Asman.`, "success", "Kirim ke Asman");
-  };
+  // Humas bisa centang & upload, Asman read-only (cuma lihat) - sesuai
+  // ketentuan role untuk halaman ini.
+  const canEdit = !user || user.role === "humas";
 
-  const toggleStandar = (rabId, item) => {
-    setChecked((prev) => {
-      const key = `${rabId}::${item}`;
-      return { ...prev, [key]: !prev[key] };
+  const toggleFlag = (idRab, key) => {
+    const existing = packageFor(idRab);
+    const current = { idRab, ...existing };
+    const next = { ...current, [key]: !current[key] };
+    setPaymentPackages?.((prev) => {
+      const found = prev.find((p) => p.idRab === idRab);
+      if (found) return prev.map((p) => (p.idRab === idRab ? { ...p, [key]: next[key] } : p));
+      return [...prev, next];
     });
   };
 
-  const addLainnya = (rabId) => {
-    setLainnya((prev) => ({
-      ...prev,
-      [rabId]: [...(prev[rabId] || []), { id: uid("CKL"), nama: "", ada: false }],
-    }));
-  };
-  const updateLainnya = (rabId, id, patch) => {
-    setLainnya((prev) => ({
-      ...prev,
-      [rabId]: (prev[rabId] || []).map((it) => (it.id === id ? { ...it, ...patch } : it)),
-    }));
-  };
-  const removeLainnya = (rabId, id) => {
-    setLainnya((prev) => ({
-      ...prev,
-      [rabId]: (prev[rabId] || []).filter((it) => it.id !== id),
-    }));
-  };
-
-  const getProgress = (rabId) => {
-    const extra = lainnya[rabId] || [];
-    const total = STANDAR_CHECKLIST_DOCS.length + extra.length;
-    const doneStandar = STANDAR_CHECKLIST_DOCS.filter((item) => checked[`${rabId}::${item}`]).length;
-    const doneExtra = extra.filter((it) => it.ada).length;
-    const done = doneStandar + doneExtra;
-    return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
-  };
-
-  const handlePrint = (r) => {
-    const extra = lainnya[r.idNumber] || [];
-    const items = [
-      ...STANDAR_CHECKLIST_DOCS.map((nama) => ({ nama, ada: !!checked[`${r.idNumber}::${nama}`] })),
-      ...extra.filter((it) => it.nama.trim()).map((it) => ({ nama: it.nama, ada: it.ada })),
-    ];
-    printChecklist({
-      title: "Checklist Kelengkapan Dokumen",
-      subtitle: `${r.idNumber} - ${r.judulKegiatan}`,
-      items,
+  const handleUploadScan = async (idRab, file) => {
+    if (!file) return;
+    const dataUrl = await fileToDataUrl(file);
+    setPaymentPackages?.((prev) => {
+      const found = prev.find((p) => p.idRab === idRab);
+      const entry = { scanFileName: file.name, scanUrl: dataUrl };
+      if (found) return prev.map((p) => (p.idRab === idRab ? { ...p, ...entry } : p));
+      return [...prev, { idRab, ...entry }];
     });
+    notify?.(`Scan dokumen untuk ${idRab} berhasil diunggah.`, "success");
   };
+
+  const filteredRab = search.trim()
+    ? rab.filter(
+        (r) =>
+          (r.idNumber || "").toLowerCase().includes(search.trim().toLowerCase()) ||
+          (r.judulKegiatan || "").toLowerCase().includes(search.trim().toLowerCase())
+      )
+    : rab;
 
   return (
     <div>
       <PageHeader
         eyebrow="Pembayaran"
-        title="Checklist Dokumen"
-        description="Centang dokumen standar yang sudah tersedia sebelum proses pembayaran. Dokumen di luar daftar bisa ditambahkan lewat bagian Lainnya."
+        title="Tracking Dokumen Selesai"
+        description="Tandai progres pencairan dana kas untuk tiap RAB, lalu unggah scan dokumen fisik yang sudah ditandatangani basah."
       />
 
-      {(!rab || rab.length === 0) ? (
-        <Card>
-          <div style={{ padding: "32px 0", textAlign: "center", color: T.muted, fontSize: 14 }}>
-            Belum ada RAB.
+      <Card>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Cari ID RAB atau judul kegiatan..."
+          style={{
+            width: "100%", maxWidth: 320, padding: "9px 12px", borderRadius: 8,
+            border: `1px solid ${T.border}`, background: T.inputBg, color: T.text,
+            fontSize: 13, fontFamily: "inherit", marginBottom: 16,
+          }}
+        />
+
+        {filteredRab.length === 0 ? (
+          <div style={{ padding: "24px 12px", textAlign: "center", color: T.muted, fontSize: 13 }}>
+            Tidak ada RAB yang cocok.
           </div>
-        </Card>
-      ) : (
-        <div style={{ display: "grid", gap: 14 }}>
-          {rab.map((r) => {
-            const progress = getProgress(r.idNumber);
-            const extra = lainnya[r.idNumber] || [];
+        ) : (
+          filteredRab.map((r) => {
+            const pkg = packageFor(r.idNumber);
             return (
-              <Card key={r.idNumber}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-                  <div>
-                    <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{r.idNumber}</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: T.heading, marginTop: 2 }}>{r.judulKegiatan}</div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <button onClick={() => handlePrint(r)} style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`,
-                      background: T.card, color: T.heading, cursor: "pointer", fontSize: 12, fontWeight: 600,
-                    }}><Printer size={14} /> Cetak</button>
-                    {(() => {
-                      const pkg = packageFor(r.idNumber);
-                      const already = pkg && pkg.status !== DOC_STATUS.REJECTED;
-                      const noneChecked = progress.done === 0;
-                      return (
+              <div key={r.idNumber} style={{ border: `1px solid ${T.border}`, borderRadius: 10, padding: "14px 16px", marginBottom: 12 }}>
+                <div style={{ fontFamily: font.mono, fontWeight: 700, color: T.blue, fontSize: 12 }}>{r.idNumber}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: T.heading, marginTop: 2, marginBottom: 12 }}>{r.judulKegiatan}</div>
+
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, padding: "7px 0", borderTop: `1px solid ${T.border}`, cursor: canEdit ? "pointer" : "default" }}>
+                  <input type="checkbox" checked={!!pkg.diAkutansi} disabled={!canEdit} onChange={() => canEdit && toggleFlag(r.idNumber, "diAkutansi")} style={{ width: 16, height: 16 }} />
+                  Sudah di Akutansi
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, padding: "7px 0", borderTop: `1px solid ${T.border}`, cursor: canEdit ? "pointer" : "default" }}>
+                  <input type="checkbox" checked={!!pkg.diKeuangan} disabled={!canEdit} onChange={() => canEdit && toggleFlag(r.idNumber, "diKeuangan")} style={{ width: 16, height: 16 }} />
+                  Sudah di Keuangan
+                </label>
+
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", paddingTop: 10, marginTop: 4, borderTop: `1px solid ${T.border}` }}>
+                  <span style={{ fontSize: 12.5, color: T.muted, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: "1 1 140px" }}>
+                    {pkg.scanFileName ? `Scan: ${pkg.scanFileName}` : "Scan dokumen fisik (TTD basah)"}
+                  </span>
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                    {pkg.scanUrl && (
+                      <a
+                        href={pkg.scanUrl}
+                        download={pkg.scanFileName}
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12,
+                          fontWeight: 600, padding: "6px 12px", borderRadius: 6,
+                          border: `1px solid ${T.border}`, background: "#fff", color: T.blue, textDecoration: "none",
+                        }}
+                      >
+                        Lihat
+                      </a>
+                    )}
+                    {canEdit && (
+                      <>
+                        <input
+                          ref={(el) => (fileInputRefs.current[r.idNumber] = el)}
+                          type="file"
+                          accept="image/*,.pdf"
+                          style={{ display: "none" }}
+                          onChange={(e) => handleUploadScan(r.idNumber, e.target.files?.[0])}
+                        />
                         <button
-                          onClick={() => kirimKeAsman(r)}
-                          disabled={noneChecked || already}
-                          title={noneChecked ? "Centang minimal 1 dokumen dulu" : already ? "Sudah dikirim, menunggu diproses" : "Kirim dokumen yang sudah ada ke Asman"}
+                          onClick={() => fileInputRefs.current[r.idNumber]?.click()}
                           style={{
-                            display: "flex", alignItems: "center", gap: 6,
-                            padding: "8px 14px", borderRadius: 8, border: "none",
-                            background: (noneChecked || already) ? T.border : T.blue,
-                            color: (noneChecked || already) ? T.muted : "#fff",
-                            cursor: (noneChecked || already) ? "not-allowed" : "pointer",
-                            fontSize: 12, fontWeight: 600,
+                            display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12,
+                            fontWeight: 600, padding: "6px 12px", borderRadius: 6,
+                            border: `1px solid ${T.border}`, background: "#fff", color: T.text, cursor: "pointer",
                           }}
-                        ><Send size={14} /> {already ? "Terkirim" : "Kirim ke Asman"}</button>
-                      );
-                    })()}
+                        >
+                          <Upload size={13} /> {pkg.scanFileName ? "Ganti" : "Upload"}
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
-
-                <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>
-                  Dokumen Standar
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 8, marginBottom: 16 }}>
-                  {STANDAR_CHECKLIST_DOCS.map((item, i) => {
-                    const key = `${r.idNumber}::${item}`;
-                    const isChecked = !!checked[key];
-                    return (
-                      <button
-                        key={item}
-                        onClick={() => toggleStandar(r.idNumber, item)}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          padding: "10px 12px", borderRadius: 8,
-                          border: `1px solid ${isChecked ? "#1E7F3E" : T.border}`,
-                          background: isChecked ? "#DEF6E5" : T.bg,
-                          cursor: "pointer", textAlign: "left", fontSize: 12.5,
-                          color: isChecked ? "#1E7F3E" : T.text,
-                          fontWeight: isChecked ? 600 : 500,
-                        }}
-                      >
-                        <CheckSquare size={16} color={isChecked ? "#1E7F3E" : T.muted} style={{ flexShrink: 0 }} />
-                        <span>{i + 1}. {item}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>
-                  Lainnya (diisi manual)
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
-                  {extra.length === 0 && (
-                    <div style={{ padding: "12px 14px", border: `1px dashed ${T.border}`, borderRadius: 8, color: T.muted, fontSize: 12 }}>
-                      Belum ada dokumen tambahan.
-                    </div>
-                  )}
-                  {extra.map((it) => (
-                    <div key={it.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <button
-                        type="button"
-                        onClick={() => updateLainnya(r.idNumber, it.id, { ada: !it.ada })}
-                        style={{
-                          flexShrink: 0, width: 24, height: 24, borderRadius: 6,
-                          border: `1px solid ${it.ada ? "#1E7F3E" : T.border}`,
-                          background: it.ada ? "#DEF6E5" : T.card,
-                          display: "grid", placeItems: "center", cursor: "pointer",
-                        }}
-                      >
-                        {it.ada && <CheckSquare size={13} color="#1E7F3E" />}
-                      </button>
-                      <input
-                        value={it.nama}
-                        onChange={(e) => updateLainnya(r.idNumber, it.id, { nama: e.target.value })}
-                        placeholder="Nama dokumen lainnya…"
-                        style={{
-                          flex: 1, padding: "8px 10px", borderRadius: 7,
-                          border: `1px solid ${T.border}`, background: T.card, color: T.text, fontSize: 12.5,
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeLainnya(r.idNumber, it.id)}
-                        style={{ flexShrink: 0, border: "none", background: "transparent", color: T.danger, cursor: "pointer", padding: 4 }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => addLainnya(r.idNumber)}
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: 6,
-                    padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`,
-                    background: T.bg, color: T.text, cursor: "pointer", fontSize: 12, fontWeight: 600,
-                  }}
-                >
-                  <Plus size={13} /> Tambah dokumen lainnya
-                </button>
-              </Card>
+              </div>
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </Card>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -42,6 +42,7 @@ export default function GenericWizard({
   docxTemplate,
   buildDocPreview,
   hideIdSelector = false,
+  openParentId, onConsumeParent,
 }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(opsiOptions ? 0 : 1);
@@ -85,7 +86,22 @@ export default function GenericWizard({
     setMode("wizard");
   };
 
+  const singleParent = autoFrom?.key === "id" && ["BAST", "PI", "BAPP"].includes(idPrefix);
+  useEffect(() => {
+    if (!openParentId || !singleParent) return;
+    const existing = list.find((r) => r.id === openParentId);
+    if (existing) setDetailRow(existing);
+    else {
+      const parent = autoFrom.source.find((r) => (r.idNumber || r.id) === openParentId);
+      if (parent) { start(); setValues({ id: openParentId, ...autoFrom.map(parent) }); }
+    }
+    onConsumeParent?.();
+  }, [openParentId]);
   const onChange = (key, val) => {
+    if (singleParent && key === autoFrom.key) {
+      const existing = list.find((r) => r.id === val);
+      if (existing) { startEdit(existing); return; }
+    }
     let next = { ...values, [key]: val };
     if (autoFrom && key === autoFrom.key) {
       const match = autoFrom.source.find((s) => s.idNumber === val || s.id === val);
@@ -95,7 +111,13 @@ export default function GenericWizard({
   };
 
   const save = () => {
-    if (editingRecord) {
+    if (singleParent) {
+      if (!values.id || !autoFrom.source.some((r) => (r.idNumber || r.id) === values.id)) return notify("Pilih ID parent yang tersedia.", "error");
+      setList((prev) => {
+        const existing = prev.find((r) => r.id === values.id);
+        return existing ? prev.map((r) => r === existing ? { ...r, ...values, opsi } : r) : [{ ...values, opsi, tanggalInput: new Date().toISOString() }, ...prev];
+      });
+    } else if (editingRecord) {
       setList((prev) => prev.map((r) => (r === editingRecord ? { ...r, ...values, opsi } : r)));
     } else {
       setList((prev) => [

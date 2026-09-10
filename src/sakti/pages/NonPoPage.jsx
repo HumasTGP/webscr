@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Plus, Search, Trash2, X } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { parseLocalDate, uid } from "../../lib/utils";
+import { availablePaymentRabs, duplicatePayment } from "../../lib/recordLinks";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
@@ -80,7 +81,10 @@ export const DEFAULT_COMBO = {
 
 const EMPTY_FORM = { rabId: "", bidang: "", tanggalKegiatan: "", judulKegiatan: "", program: "", subprogram: "", kategoriProgram: "" };
 
-export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVerif, notify, onNavigate, kategori, submissions, setSubmissions, combo, setCombo, rabIdsWithDokumentasi }) {
+export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVerif, notify, onNavigate, kategori, submissions, setSubmissions, combo, setCombo, rabIdsWithDokumentasi, user }) {
+  // Asman (dan role lain di luar humas) cuma boleh LIHAT tracking di sini -
+  // tidak bisa tambah/edit/hapus data. Humas tetap penuh seperti sebelumnya.
+  const canEdit = !user || user.role === "humas";
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [search, setSearch] = useState("");
@@ -121,7 +125,9 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
   const kategoriSuffix = kategori === "PO" ? "po" : kategori === "Cash Card" ? "cc" : "nonpo";
   const saveAdd = () => {
     if (!form.rabId) return notify("Pilih ID RAB terlebih dahulu.", "error");
-    setNonpoList((prev) => [
+    if (!rab.some((r) => r.idNumber === form.rabId && r.kategori === (kategori || "NON PO"))) return notify("Pilih RAB dengan kategori yang sesuai.", "error");
+    if (duplicatePayment(nonpoList, form.rabId)) return notify(`RAB ini sudah memiliki data ${kategori || "NON PO"}.`, "error");
+    setNonpoList((prev) => duplicatePayment(prev, form.rabId) ? prev : [
       ...prev,
       { ...form, id: uid("NPO"), kategori: kategori || "NON PO", createdAt: new Date().toISOString() },
     ]);
@@ -138,7 +144,7 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
     notify("NON PO berhasil dihapus.", "success");
   };
 
-  const rabOptions = rab.map((r) => r.idNumber);
+  const rabOptions = availablePaymentRabs(rab, nonpoList, kategori || "NON PO").map((r) => r.idNumber);
 
   const thStyle = { textAlign: "left", padding: "8px 10px", background: T.bg, borderBottom: `1px solid ${T.border}`, color: T.muted, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.3px", whiteSpace: "nowrap" };
   const tdStyle = { padding: "9px 10px", borderBottom: `1px solid ${T.border}`, fontSize: 12.5 };
@@ -149,7 +155,7 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
       <PageHeader
         eyebrow="Pembayaran"
         title={kategori || "NON PO"}
-        right={<Button icon={Plus} onClick={() => setAddOpen(true)}>Tambah {kategori || "NON PO"}</Button>}
+        right={canEdit && <Button icon={Plus} onClick={() => setAddOpen(true)}>Tambah {kategori || "NON PO"}</Button>}
       />
 
       {/* Filter + search bar */}
@@ -196,7 +202,7 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
                 <th style={{ ...thStyle, textAlign: "center" }}>BAST</th>
                 <th style={{ ...thStyle, textAlign: "center" }}>PI</th>
                 <th style={{ ...thStyle, textAlign: "center" }}>BAPP</th>
-                <th style={{ ...thStyle, textAlign: "center" }}>Aksi</th>
+                {canEdit && <th style={{ ...thStyle, textAlign: "center" }}>Aksi</th>}
               </tr>
             </thead>
             <tbody>
@@ -229,17 +235,19 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
                     <td style={tdStyle}>{row.judulKegiatan}</td>
                     <td style={tdStyle}>{row.bidang}</td>
                     <td style={tdStyle}>{row.program}</td>
-                    <td style={tdCenterStyle}><StatusDot status={lmp1Status} onClick={() => onNavigate?.(`lmp1-${kategoriSuffix}`)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={lmp2Status} onClick={() => onNavigate?.(`lmp2-${kategoriSuffix}`)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={verifStatus} onClick={() => onNavigate?.(`form-verifikasi-${kategoriSuffix}`)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={bastStatus} onClick={() => onNavigate?.(`bast-${kategoriSuffix}`)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={piStatus} onClick={() => onNavigate?.(`pakta-${kategoriSuffix}`)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={bappStatus} onClick={() => onNavigate?.(`bapp-${kategoriSuffix}`)} /></td>
-                    <td style={tdCenterStyle}>
-                      <button type="button" title="Hapus" onClick={() => setDeleteConfirm(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.danger, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                        <Trash2 size={12} />
-                      </button>
-                    </td>
+                    <td style={tdCenterStyle}><StatusDot status={lmp1Status} onClick={() => onNavigate?.(`lmp1-${kategoriSuffix}`, rabId)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={lmp2Status} onClick={() => onNavigate?.(`lmp2-${kategoriSuffix}`, rabId)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={verifStatus} onClick={() => onNavigate?.(`form-verifikasi-${kategoriSuffix}`, rabId)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={bastStatus} onClick={() => onNavigate?.(`bast-${kategoriSuffix}`, rabId)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={piStatus} onClick={() => onNavigate?.(`pakta-${kategoriSuffix}`, rabId)} /></td>
+                    <td style={tdCenterStyle}><StatusDot status={bappStatus} onClick={() => onNavigate?.(`bapp-${kategoriSuffix}`, rabId)} /></td>
+                    {canEdit && (
+                      <td style={tdCenterStyle}>
+                        <button type="button" title="Hapus" onClick={() => setDeleteConfirm(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.danger, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                          <Trash2 size={12} />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}

@@ -242,8 +242,11 @@ export const ADMIN_CREDENTIALS = {
 // bisa ditambah/edit/dihapus via halaman "Manajemen Akses".
 export const DEFAULT_USERS = [
   { id: "u-humas-1", role: "humas", username: "pkl humas", password: "humaspkl26", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
-  { id: "u-asman-1", role: "asman", username: "2",     password: "2",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
-  { id: "u-madm-1",  role: "madm",  username: "3",     password: "3",        activeFrom: "2026-01-01", activeTo: "2026-12-31" },
+  // signatureUrl & signatureName: dipakai untuk tanda tangan digital RAB/Proposal.
+  // Diisi user sendiri lewat halaman pengaturan profil (upload sekali), lalu
+  // dipakai berkali-kali tiap kali menandatangani dokumen (lihat lib/signature.js).
+  { id: "u-asman-1", role: "asman", username: "2",     password: "2",        activeFrom: "2026-01-01", activeTo: "2026-12-31", nama: "Astri Oktavina", signatureUrl: "/signatures/ttd_asman.png", signatureName: "Astri Oktavina" },
+  { id: "u-madm-1",  role: "madm",  username: "3",     password: "3",        activeFrom: "2026-01-01", activeTo: "2026-12-31", nama: "Donny Ureansyah", signatureUrl: "/signatures/ttd_madm.png", signatureName: "Donny Ureansyah" },
   { id: "u-mitra-admin",   role: "mitra",   username: "admin",        password: "admin123",    activeFrom: "2026-01-01", activeTo: "2026-12-31" },
   { id: "u-silapak-1",    role: "silapak", username: "satpam.priok", password: "lapakpriok26", activeFrom: "2026-01-01", activeTo: "2026-12-31" },
 ];
@@ -330,7 +333,12 @@ export const MENU_TREE = [
   { key: "dashboard",       label: "Dashboard", icon: LayoutDashboard, roles: ["humas"] },
   { key: "asman-dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["asman"] },
   { key: "madm-dashboard",  label: "Dashboard", icon: LayoutDashboard, roles: ["madm"] },
-  { key: "inbox",           label: "Inbox Paket Kas",     icon: Inbox,      roles: ["asman", "madm"] },
+  // "Inbox Paket Kas" DIHAPUS dari sidebar - Paket Kas sekarang murni tracking
+  // (tidak ada lagi approve/reject, lihat PaketKas.jsx), jadi Inbox.jsx yang
+  // mengandalkan status SUBMITTED/APPROVED/REJECTED tidak relevan lagi. Untuk
+  // Asman, tracking pembayaran digantikan menu "Tracking Pembayaran" baru
+  // (grp-tracking-pembayaran) yang lebih tepat sasaran. Inbox.jsx sendiri
+  // TIDAK dihapus filenya, cuma sudah tidak direferensikan di sidebar.
   { key: "inbox-evaluasi",  label: "Inbox Form Evaluasi", icon: FileSearch, roles: ["asman", "madm"] },
   { key: "inbox-proposal",  label: "Inbox Proposal",      icon: Handshake,  roles: ["asman", "madm"] },
   { key: "inbox-pembayaran", label: "Inbox Pembayaran",   icon: Wallet,     roles: ["asman", "madm"] },
@@ -394,10 +402,10 @@ export const MENU_TREE = [
         ],
       },
       {
-        // Cash Card berdiri sendiri - TIDAK terhubung ke RAB (beda dari NON PO/PO
-        // di atas). Submenu-nya juga beda: Detail CC (item baris + 4 dokumen cetak)
-        // gantiin LMP1/LMP2/Form Verifikasi, plus TTD Serah Terima yang gak ada
-        // padanannya di NON PO/PO.
+        // Cash Card sekarang dipilih dari RAB (sama seperti NON PO/PO di atas) -
+        // ccList punya field rabId. Submenu-nya beda: Detail CC (item baris + 4
+        // dokumen cetak) gantiin LMP1/LMP2/Form Verifikasi, plus TTD Serah Terima
+        // yang gak ada padanannya di NON PO/PO.
         key: "cc-overview", hasOwnPage: true, label: "Cash Card", icon: FileText,
         children: [
           { key: "detail-cc", label: "Detail CC",        icon: FileText },
@@ -407,7 +415,7 @@ export const MENU_TREE = [
           { key: "bapp-cc",   label: "BAPP",              icon: FileCheck },
         ],
       },
-      { key: "checklist-dokumen", label: "Checklist Dokumen", icon: CheckSquare },
+      { key: "checklist-dokumen", label: "Tracking Dokumen Selesai", icon: CheckSquare },
     ],
   },
 
@@ -422,7 +430,7 @@ export const MENU_TREE = [
   {
     key: "grp-administrasi", label: "Administrasi", icon: FolderCheck, roles: ["humas"],
     children: [
-      { key: "paket-kas", label: "Paket Kas (Kirim ke Asman)", icon: FolderCheck },
+      { key: "paket-kas", label: "Tracking Kelengkapan Dokumen", icon: FolderCheck },
       {
         // Laporan CC dihapus dari sini - modul Laporan ini sumbernya dari RAB
         // (rabIdOptionsByKategori), sedangkan Cash Card sekarang berdiri sendiri,
@@ -438,11 +446,30 @@ export const MENU_TREE = [
     ],
   },
 
+  // Menu khusus Asman: tracking read-only untuk semua pembayaran (PO, Non PO,
+  // Cash Card). Beda dari grp-pembayaran di atas (yang khusus Humas, bisa
+  // tambah/edit/hapus) - ini cuma untuk LIHAT progres dokumen, tidak ada
+  // tombol aksi apapun. Datanya sama persis, cuma halamannya route terpisah
+  // supaya bisa dibatasi role tanpa bentrok sama menu Humas.
+  {
+    key: "grp-tracking-pembayaran", label: "Tracking Pembayaran", icon: ClipboardList, roles: ["asman"],
+    children: [
+      { key: "tracking-nonpo", label: "NON PO",    icon: FileText },
+      { key: "tracking-po",    label: "PO",         icon: FileText },
+      { key: "tracking-cc",    label: "Cash Card",  icon: FileText },
+    ],
+  },
+
   {
     key: "grp-history", label: "History & Guide", icon: Clock,
     children: [
       { key: "history", label: "History", icon: Clock },
       { key: "panduan", label: "Panduan", icon: HelpCircle },
+      { key: "notifikasi", label: "Notifikasi", icon: FileCheck },
+      // Halaman upload tanda tangan digital - dipakai Asman & MADM untuk
+      // simpan gambar tanda tangan mereka sekali, dipakai berkali-kali saat
+      // TTD RAB/Proposal (lihat lib/signature.js).
+      { key: "pengaturan-profil", label: "Pengaturan Profil", icon: UserCog },
     ],
   },
 ];

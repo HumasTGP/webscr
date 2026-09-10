@@ -256,6 +256,96 @@ export async function generateDocxFromTemplateWithRows(
   saveAs(blob, outputName);
 }
 
+// generateDocxFromTemplateWithPages() - clone SATU HALAMAN PENUH sebanyak
+// jumlah data yang dikirim, dipisah page break otomatis di antaranya. Beda
+// dari generateDocxFromTemplateWithRows() yang meng-clone satu BARIS TABEL
+// (dipakai kalau 1 dokumen = banyak baris ringkas dalam satu tabel). Fungsi
+// ini dipakai kalau 1 dokumen = banyak halaman terpisah, tiap halaman formatnya
+// sama tapi datanya beda (misal Tanda Terima: tiap kegiatan dapat halaman
+// sendiri dengan tanda tangan penerima yang beda-beda, ditulis tangan).
+//
+// CARA PAKAI TEMPLATE-NYA:
+// 1. Di Word, buat SATU halaman contoh dengan placeholder biasa, misalnya
+//    [nama], [jumlah], [tanggalCetak].
+// 2. Tandai AWAL halaman dengan menaruh teks "[[page-start]]" di paragraf
+//    pertama halaman itu, dan AKHIR halaman dengan "[[page-end]]" di paragraf
+//    terakhir (boleh digabung teks lain di paragraf yang sama).
+// 3. pagesData yang dikirim ke fungsi ini = array of object, tiap object
+//    berisi placeholder untuk 1 halaman (misal { nama: "...", jumlah: "..." }).
+// 4. Blok halaman itu (dari [[page-start]] sampai [[page-end]]) di-clone
+//    sebanyak pagesData.length, dipisah page break, markernya dihapus otomatis.
+export async function generateDocxFromTemplateWithPages(
+  templateUrl,
+  { data = {}, pagesData = [], startMarker = "[[page-start]]", endMarker = "[[page-end]]" } = {},
+  outputName
+) {
+  const response = await fetch(templateUrl);
+
+  if (!response.ok) {
+    throw new Error(`Template tidak ditemukan: ${templateUrl}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+
+  let zip;
+  try {
+    zip = new PizZip(arrayBuffer);
+  } catch (error) {
+    throw new Error("File template bukan DOCX/ZIP yang valid.");
+  }
+
+  const file = zip.file("word/document.xml");
+  if (!file) {
+    throw new Error("Struktur dokumen Word tidak ditemukan.");
+  }
+
+  let xml = file.asText();
+
+  const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Cari blok dari paragraf berisi startMarker sampai paragraf berisi
+  // endMarker (inklusif keduanya) - blok ini yang akan di-clone per halaman.
+  const blockRe = new RegExp(
+    `(<w:p\\b[^>]*>(?:(?!<\\/w:p>)[\\s\\S])*?${escRe(startMarker)}[\\s\\S]*?<\\/w:p>)([\\s\\S]*?)(<w:p\\b[^>]*>(?:(?!<\\/w:p>)[\\s\\S])*?${escRe(endMarker)}[\\s\\S]*?<\\/w:p>)`
+  );
+
+  const match = xml.match(blockRe);
+  if (!match) {
+    throw new Error(
+      `Template "${templateUrl}" belum punya marker "${startMarker}" dan "${endMarker}". ` +
+      `Tandai awal dan akhir halaman yang mau di-loop, lalu coba lagi.`
+    );
+  }
+
+  const fullBlock = match[0];
+  const pageBreak = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+
+  const cloned = pagesData.length
+    ? pagesData
+        .map((pageData, i) => {
+          let pageXml = fullBlock
+            .replace(new RegExp(escRe(startMarker), "g"), "")
+            .replace(new RegExp(escRe(endMarker), "g"), "");
+          pageXml = replacePlaceholders(pageXml, { ...data, ...pageData });
+          // Page break di ANTARA halaman, bukan sesudah halaman terakhir.
+          return i < pagesData.length - 1 ? pageXml + pageBreak : pageXml;
+        })
+        .join("")
+    : "";
+
+  xml = xml.replace(fullBlock, cloned);
+  xml = replacePlaceholders(xml, data);
+
+  zip.file("word/document.xml", xml);
+
+  const blob = zip.generate({
+    type: "blob",
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
+
+  saveAs(blob, outputName);
+}
+
 // Format tanggal "YYYY-MM-DD" → "31 Agustus 2026"
 export function formatTanggalPanjang(isoDate) {
   if (!isoDate) return "";

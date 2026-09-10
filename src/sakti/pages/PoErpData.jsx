@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import PageHeader from "../../components/PageHeader";
@@ -6,18 +6,41 @@ import Card from "../../components/Card";
 
 const EMPTY = { nomorPR: "", nomorPO: "", idBast: "", idBapb: "" };
 
+// Dot status kecil untuk BAST/BAPB di daftar RAB kiri - pola sama seperti
+// StatusDot di NonPoPage/CashCard, ditulis ulang di sini biar file ini
+// tidak perlu import silang antar halaman.
+function StatusDot({ filled }) {
+  return (
+    <span title={filled ? "Sudah diisi" : "Belum diisi"} style={{
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      width: 16, height: 16, borderRadius: "50%", fontSize: 9.5, fontWeight: 700,
+      background: filled ? "#E7F5EE" : "#EEF0F3", color: filled ? "#166E49" : "#9AA3AD",
+    }}>
+      {filled ? "✓" : "•"}
+    </span>
+  );
+}
+
 /**
  * Alur PO beda dari NON PO/CC — ada proses ERP (Nomor PR -> diproses PCR -> Nomor PO),
  * dan begitu kerjaan selesai, BAST + BAPB dibuat di luar sistem (di ERP) - yang perlu
  * dicatat di sini cukup Nomor PR/PO dan ID BAST/BAPB-nya, bukan dokumen lengkap.
  */
-export default function PoErpDataPage({ rab, notify }) {
-  const [dataByRab, setDataByRab] = useState({});
+export default function PoErpDataPage({ rab, notify , openParentId, onConsumeParent, records, setRecords }) {
+  const [localData, setLocalData] = useState({});
+  const dataByRab = records ?? localData;
+  const setDataByRab = setRecords ?? setLocalData;
   const [activeRab, setActiveRab] = useState(null);
   const [form, setForm] = useState(EMPTY);
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
+  useEffect(() => {
+    if (!openParentId) return;
+    const parent = rab.find((r) => r.idNumber === openParentId);
+    if (parent) select(parent);
+    onConsumeParent?.();
+  }, [openParentId]);
   const select = (r) => {
     setActiveRab(r);
     setForm(dataByRab[r.idNumber] || EMPTY);
@@ -55,7 +78,8 @@ export default function PoErpDataPage({ rab, notify }) {
             <div style={{ display: "grid", gap: 6 }}>
               {rab.map((r) => {
                 const isActive = activeRab?.idNumber === r.idNumber;
-                const hasSaved = !!dataByRab[r.idNumber];
+                const saved = dataByRab[r.idNumber];
+                const hasSaved = !!saved;
                 return (
                   <button key={r.idNumber} onClick={() => select(r)} style={{
                     padding: "10px 12px", borderRadius: 8, textAlign: "left",
@@ -63,7 +87,13 @@ export default function PoErpDataPage({ rab, notify }) {
                     background: isActive ? T.blueSoft : T.bg,
                     color: T.text, cursor: "pointer", minWidth: 0,
                   }}>
-                    <div style={{ fontFamily: font.mono, fontWeight: 700, color: T.blue, fontSize: 12 }}>{r.idNumber}</div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                      <div style={{ fontFamily: font.mono, fontWeight: 700, color: T.blue, fontSize: 12 }}>{r.idNumber}</div>
+                      <div style={{ display: "flex", gap: 4 }} title="Status BAST / BAPB">
+                        <StatusDot filled={!!saved?.idBast} />
+                        <StatusDot filled={!!saved?.idBapb} />
+                      </div>
+                    </div>
                     <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3, lineHeight: 1.45, overflowWrap: "anywhere" }}>
                       {r.judulKegiatan}{hasSaved && <span style={{ color: "#1E7F3E", fontWeight: 700 }}> · tersimpan</span>}
                     </div>

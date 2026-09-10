@@ -13,7 +13,7 @@ const bappFields = (rabIdOptions, idLabel = "ID RAB") => () => [
 
 // idKey: nama field di `rab` yang dipakai sebagai ID (RAB pakai "idNumber",
 // Cash Card berdiri sendiri pakai "id" - lihat App.jsx route bapp-cc).
-export default function BAPPPage({ rab, list, setList, notify, idKey = "idNumber", idLabel = "ID RAB" }) {
+export default function BAPPPage({ rab, list, setList, notify, idKey = "idNumber", idLabel = "ID RAB", openParentId, onConsumeParent }) {
   const rabIdOptions = rab.map((r) => r[idKey]);
   const autoMap = {
     key: "id",
@@ -24,7 +24,7 @@ export default function BAPPPage({ rab, list, setList, notify, idKey = "idNumber
   };
 
   return (
-    <GenericWizard
+    <GenericWizard openParentId={openParentId} onConsumeParent={onConsumeParent}
       title="BAPP"
       eyebrow="Modul BAPP"
       description="Berita Acara Pemeriksaan Pekerjaan. Kategori otomatis mengikuti ID yang dipilih."

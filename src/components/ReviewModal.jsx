@@ -10,7 +10,7 @@ import Button from "./Button";
  * `totals`: opsional array {label, value} buat bar total di bawah tabel.
  */
 export default function ReviewModal({
-  open, onClose, title, subtitle, rows = [], table, totals, onEdit, editLabel = "Edit ini", width = 560,
+  open, onClose, title, subtitle, rows = [], table, totals, onEdit, editLabel = "Edit ini", width = 560, children,
 }) {
   return (
     <Modal open={open} onClose={onClose} title={title} width={width}>
@@ -70,6 +70,11 @@ export default function ReviewModal({
           ))}
         </div>
       )}
+
+      {/* Slot opsional buat konten tambahan (mis. panel tanda tangan RAB/Proposal) -
+          dirender di sini, sebelum baris tombol, biar tidak ganggu layout modal lain
+          yang tidak pakai children. */}
+      {children}
 
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 18, gap: 10, flexWrap: "wrap" }}>
         <Button variant="ghost" onClick={onClose}>Tutup</Button>
