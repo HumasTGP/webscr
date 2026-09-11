@@ -118,13 +118,26 @@ export default function RABPage({
   const [savingRow, setSavingRow] = useState(false);
 
   const [reviewRow, setReviewRow] = useState(null);
+  const [reviewCommentDraft, setReviewCommentDraft] = useState("");
   // Versi "hidup" dari reviewRow - selalu ambil data TERBARU dari array rab
   // berdasarkan idNumber, bukan snapshot beku. Tanpa ini, modal yang sedang
   // terbuka tetap menampilkan status TTD lama walau signRab() sudah
   // menyimpan tanda tangannya ke state rab (pola sama seperti liveDetail
   // di InboxProposal.jsx).
   const liveReviewRow = reviewRow ? (rab.find((r) => r.idNumber === reviewRow.idNumber) || reviewRow) : null;
+  const liveReviewPackage = liveReviewRow ? packages.find((p) => p.idRab === liveReviewRow.idNumber) : null;
   const [deleteTarget, setDeleteTarget] = useState(null);
+
+  useEffect(() => {
+    if (!liveReviewRow || !user || !["asman", "madm"].includes(user.role)) {
+      setReviewCommentDraft("");
+      return;
+    }
+    const ownComment = user.role === "asman"
+      ? (liveReviewRow.reviewCommentAsman ?? liveReviewPackage?.reviewNote ?? "")
+      : (liveReviewRow.reviewCommentMadm ?? liveReviewPackage?.processNote ?? "");
+    setReviewCommentDraft(ownComment || "");
+  }, [reviewRow?.idNumber, user?.role, liveReviewRow?.reviewCommentAsman, liveReviewRow?.reviewCommentMadm, liveReviewPackage?.reviewNote, liveReviewPackage?.processNote]);
   const [previewId, setPreviewId] = useState("");
   const [filterBulan, setFilterBulan] = useState("");
   const [query, setQuery] = useState("");
@@ -176,6 +189,18 @@ export default function RABPage({
     const stamp = buildSignatureStamp(user);
     signRab?.(r.idNumber, stage, stamp);
     notify?.(`RAB ${r.idNumber} berhasil ditandatangani.`, "success");
+  };
+
+  const saveReviewComment = () => {
+    if (!liveReviewRow || !user || !["asman", "madm"].includes(user.role)) return;
+    const now = new Date().toISOString();
+    const field = user.role === "asman" ? "reviewCommentAsman" : "reviewCommentMadm";
+    const atField = user.role === "asman" ? "reviewCommentAsmanAt" : "reviewCommentMadmAt";
+    const byField = user.role === "asman" ? "reviewCommentAsmanBy" : "reviewCommentMadmBy";
+    setRab((prev) => prev.map((r) => r.idNumber === liveReviewRow.idNumber
+      ? { ...r, [field]: reviewCommentDraft.trim(), [atField]: now, [byField]: user.username }
+      : r));
+    notify?.(`Komentar ${user.role === "asman" ? "Asman" : "MADM"} untuk RAB ${liveReviewRow.idNumber} disimpan.`, "success");
   };
 
   const monthOptions = useMemo(() => {
@@ -434,11 +459,6 @@ export default function RABPage({
                   const hasTor = torIds?.has ? torIds.has(r.idNumber) : false;
                   const asmanSigned = !!r.signatureAsman;
                   const madmSigned = !!r.signatureMadm;
-                  // Tombol TTD cepat cuma muncul buat Asman (kalau belum dia TTD)
-                  // dan MADM (kalau Asman sudah TTD tapi MADM belum) - Humas
-                  // tidak pernah lihat tombol ini, cuma kolom status.
-                  const canQuickSignAsman = user?.role === "asman" && !asmanSigned;
-                  const canQuickSignMadm = user?.role === "madm" && asmanSigned && !madmSigned;
                   // Tahap Saat Ini - dihitung dari getPaymentStage() (lib/paymentStage.js),
                   // helper TERPUSAT yang sama dipakai di NonPoPage/CashCard/PoErpData,
                   // supaya labelnya selalu konsisten di semua halaman.
@@ -459,20 +479,8 @@ export default function RABPage({
                       <td style={td}>{r.vendor || "-"}</td>
                       <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalEvaluasiVendor || r.totalEvaluasi || 0)}</td>
                       <td style={{ ...td, textAlign: "center" }}><TtdDot signed={hasTor} /></td>
-                      <td style={{ ...td, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-                        {canQuickSignAsman ? (
-                          <IconBtn title="Tanda tangan sebagai Asman" onClick={() => quickSign(r, "asman")}><Check size={13} /></IconBtn>
-                        ) : (
-                          <TtdDot signed={asmanSigned} />
-                        )}
-                      </td>
-                      <td style={{ ...td, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-                        {canQuickSignMadm ? (
-                          <IconBtn title="Tanda tangan sebagai MADM" onClick={() => quickSign(r, "madm")}><Check size={13} /></IconBtn>
-                        ) : (
-                          <TtdDot signed={madmSigned} />
-                        )}
-                      </td>
+                      <td style={{ ...td, textAlign: "center" }}><TtdDot signed={asmanSigned} /></td>
+                      <td style={{ ...td, textAlign: "center" }}><TtdDot signed={madmSigned} /></td>
                       <td style={{ ...td, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
                         {canManageRab ? (
                           <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
@@ -481,7 +489,7 @@ export default function RABPage({
                             <IconBtn title="Hapus" danger onClick={() => setDeleteTarget(r)}><Trash2 size={13} /></IconBtn>
                           </div>
                         ) : (
-                          <IconBtn title="Lihat detail" onClick={() => setReviewRow(r)}><Eye size={13} /></IconBtn>
+                          <IconBtn wide title="Lihat detail lengkap" onClick={() => setReviewRow(r)}><Eye size={13} /> See More</IconBtn>
                         )}
                       </td>
                     </tr>
@@ -520,41 +528,95 @@ export default function RABPage({
           </div>
         )}
 
-        {/* ---- Review modal ---- */}
+        {/* ---- Review modal: read-only untuk Asman/MADM, lengkap sesuai input Humas ---- */}
         <ReviewModal
           open={!!reviewRow}
           onClose={() => setReviewRow(null)}
-          title={`Review ${liveReviewRow?.idNumber || ""}`}
-          subtitle="Ringkasan data yang sudah tersimpan. Ini bukan mode edit, cuma buat lihat sekilas."
+          title={`Detail RAB ${liveReviewRow?.idNumber || ""}`}
+          subtitle="Detail lengkap RAB yang sudah diinput Humas. Asman/MADM hanya dapat melihat, memberi komentar, dan menandatangani."
+          width={1080}
           rows={liveReviewRow ? [
             { label: "ID number", value: liveReviewRow.idNumber },
             { label: "Tanggal RAB", value: formatTanggal(liveReviewRow.tanggalRab) },
             { label: "Judul program", value: liveReviewRow.judulKegiatan, full: true },
-            { label: "Dokumen TOR", value: liveReviewRow.dokumenTor?.fileName || "-", full: true },
+            ...(liveReviewRow.kategori ? [{ label: "Kategori", value: liveReviewRow.kategori }] : []),
+            ...(liveReviewRow.bidang ? [{ label: "Bidang", value: liveReviewRow.bidang }] : []),
+            ...(liveReviewRow.vendor ? [{ label: "Vendor", value: liveReviewRow.vendor, full: true }] : []),
+            { label: "Dokumen TOR", value: liveReviewRow.dokumenTor?.fileName || liveReviewRow.dokumenTor?.name || "Belum dilampirkan", full: true },
           ] : []}
           table={liveReviewRow ? {
             title: `Uraian RAB (${(liveReviewRow.items || []).length} baris)`,
             columns: [
               { key: "uraian", label: "Uraian" },
-              { key: "qty", label: "Qty" },
-              { key: "ppn", label: "PPN" },
+              { key: "satuan", label: "Satuan" },
+              { key: "qty", label: "Qty Usulan" },
+              { key: "hargaSatuan", label: "Harga Sat. Usulan", render: (r) => rupiah(r.hargaSatuan || 0) },
+              { key: "hargaSatuanVendor", label: "Harga Sat. Vendor", render: (r) => rupiah(r.hargaSatuanVendor || 0) },
+              { key: "baseVendor", label: "Jumlah Vendor", render: (r) => rupiah(r.baseVendor || 0) },
+              { key: "ppn", label: "PPN Vendor" },
+              { key: "totalVendor", label: "Total Vendor", render: (r) => rupiah(r.totalVendor || 0) },
+              { key: "qtyEvaluasi", label: "Qty Evaluasi" },
+              { key: "hargaSatuanEvaluasi", label: "Harga Sat. Evaluasi", render: (r) => rupiah(r.hargaSatuanEvaluasi || 0) },
+              { key: "hargaSatuanEvaluasiVendor", label: "Harga Sat. Eval. Vendor", render: (r) => rupiah(r.hargaSatuanEvaluasiVendor || 0) },
+              { key: "baseEvaluasiVendor", label: "Jumlah Eval. Vendor", render: (r) => rupiah(r.baseEvaluasiVendor || 0) },
+              { key: "ppnEvaluasi", label: "PPN Evaluasi" },
               { key: "totalEvaluasiVendor", label: "Total Eval. Vendor", render: (r) => rupiah(r.totalEvaluasiVendor || r.totalEvaluasi || 0) },
+              { key: "keterangan", label: "Keterangan" },
+              { key: "keteranganPemakaian", label: "Keterangan Pemakaian" },
             ],
             data: liveReviewRow.items || [],
           } : null}
-          totals={liveReviewRow ? [{ label: "Total Evaluasi Vendor", value: rupiah(liveReviewRow.totalEvaluasiVendor || liveReviewRow.totalEvaluasi || 0) }] : []}
+          totals={liveReviewRow ? [
+            { label: "Total Vendor", value: rupiah(liveReviewRow.totalVendor || 0) },
+            { label: "Total Evaluasi Vendor", value: rupiah(liveReviewRow.totalEvaluasiVendor || liveReviewRow.totalEvaluasi || 0) },
+          ] : []}
           onEdit={canManageRab ? () => startEdit(liveReviewRow) : undefined}
           editLabel="Edit RAB ini"
         >
           {liveReviewRow && (
-            <SignaturePanel
-              asman={liveReviewRow.signatureAsman}
-              madm={liveReviewRow.signatureMadm}
-              canSignAsman={user?.role === "asman" && !liveReviewRow.signatureAsman}
-              canSignMadm={user?.role === "madm" && !!liveReviewRow.signatureAsman && !liveReviewRow.signatureMadm}
-              onSignAsman={() => quickSign(liveReviewRow, "asman")}
-              onSignMadm={() => quickSign(liveReviewRow, "madm")}
-            />
+            <>
+              <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px solid ${T.border}` }}>
+                <div style={{ fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.1, textTransform: "uppercase", color: T.blue, fontWeight: 700, marginBottom: 9 }}>Komentar Review</div>
+                {(liveReviewRow.reviewCommentAsman || liveReviewPackage?.reviewNote) && (
+                  <div style={{ padding: "9px 11px", borderRadius: 8, background: T.bg, border: `1px solid ${T.border}`, fontSize: 12.5, marginBottom: 7 }}>
+                    <b>Asman:</b> {liveReviewRow.reviewCommentAsman || liveReviewPackage?.reviewNote}
+                  </div>
+                )}
+                {(liveReviewRow.reviewCommentMadm || liveReviewPackage?.processNote) && (
+                  <div style={{ padding: "9px 11px", borderRadius: 8, background: T.bg, border: `1px solid ${T.border}`, fontSize: 12.5, marginBottom: 7 }}>
+                    <b>MADM:</b> {liveReviewRow.reviewCommentMadm || liveReviewPackage?.processNote}
+                  </div>
+                )}
+                {!liveReviewRow.reviewCommentAsman && !liveReviewPackage?.reviewNote && !liveReviewRow.reviewCommentMadm && !liveReviewPackage?.processNote && (
+                  <div style={{ color: T.muted, fontSize: 12.5, marginBottom: 8 }}>Belum ada komentar review.</div>
+                )}
+
+                {["asman", "madm"].includes(user?.role) && (
+                  <div style={{ marginTop: 10 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Komentar {user.role === "asman" ? "Asman" : "MADM"}</label>
+                    <textarea
+                      value={reviewCommentDraft}
+                      onChange={(e) => setReviewCommentDraft(e.target.value)}
+                      rows={3}
+                      placeholder="Tulis komentar/catatan untuk RAB ini..."
+                      style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${T.border}`, borderRadius: 8, padding: "9px 11px", fontFamily: font.body, fontSize: 13, resize: "vertical", background: T.inputBg, color: T.text }}
+                    />
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 7 }}>
+                      <Button variant="ghost" onClick={saveReviewComment}>Simpan Komentar</Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <SignaturePanel
+                asman={liveReviewRow.signatureAsman}
+                madm={liveReviewRow.signatureMadm}
+                canSignAsman={user?.role === "asman" && !liveReviewRow.signatureAsman}
+                canSignMadm={user?.role === "madm" && !!liveReviewRow.signatureAsman && !liveReviewRow.signatureMadm}
+                onSignAsman={() => quickSign(liveReviewRow, "asman")}
+                onSignMadm={() => quickSign(liveReviewRow, "madm")}
+              />
+            </>
           )}
         </ReviewModal>
 
@@ -966,13 +1028,13 @@ function StageBadge({ label }) {
   );
 }
 
-function IconBtn({ children, onClick, title, danger }) {
+function IconBtn({ children, onClick, title, danger, wide = false }) {
   return (
     <button
       onClick={onClick}
       title={title}
       style={{
-        width: 28, height: 28, borderRadius: 6, border: `1px solid ${T.border}`, background: "#fff",
+        width: wide ? "auto" : 28, height: 28, padding: wide ? "0 8px" : 0, gap: wide ? 4 : 0, borderRadius: 6, border: `1px solid ${T.border}`, background: "#fff",
         display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
         color: danger ? T.danger : T.muted,
       }}

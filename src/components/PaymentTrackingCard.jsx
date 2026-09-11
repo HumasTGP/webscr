@@ -7,7 +7,7 @@ function formatTime(value) {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return null;
   return d.toLocaleString("id-ID", {
-    weekday: "long",
+    timeZone: "Asia/Jakarta",
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -18,7 +18,6 @@ function formatTime(value) {
 
 function stageMeta(label) {
   if (label === "Selesai") return { color: "#1E7F3E", bg: "#DEF6E5" };
-  if ((label || "").startsWith("Menunggu TTD")) return { color: "#5F6B76", bg: "#EEF0F3" };
   if ((label || "").startsWith("Menunggu")) return { color: "#8A6D00", bg: "#FFF4D6" };
   if ((label || "").startsWith("Siap")) return { color: "#0E4C92", bg: "#E8F1FB" };
   return { color: "#0E4C92", bg: "#E8F1FB" };
@@ -59,69 +58,72 @@ function CategoryBadge({ kategori }) {
   );
 }
 
-function getActiveKey(kategori, stageLabel) {
-  if (stageLabel === "Selesai") return "selesai";
-  if (stageLabel === "Menunggu TTD Asman") return "ttd-asman";
-  if (stageLabel === "Menunggu TTD MADM") return "ttd-madm";
-
-  if (kategori === "PO") {
-    if (stageLabel === "Siap Dibuat PO") return "proses-po";
-    if (stageLabel === "Menunggu Nomor PR") return "nomor-pr";
-    if (stageLabel === "Menunggu Nomor PO") return "nomor-po";
-    if (stageLabel === "Menunggu BAST/BAPB" || stageLabel === "Dokumen Lengkap") return "bast-bapb";
-  } else {
-    if ((stageLabel || "").startsWith("Siap Dibuat")) return "master";
-    if (stageLabel === "Dokumen Diproses" || stageLabel === "Dokumen Lengkap") return "dokumen";
-  }
-
-  if (stageLabel === "Sudah di Akutansi") return "akutansi";
-  if (stageLabel === "Menunggu Scan Dokumen") return "scan";
-  return "rab";
-}
-
-function buildSteps(kategori) {
+function buildRabSteps(kategori) {
   if (kategori === "PO") {
     return [
       { key: "rab", label: "RAB Dibuat" },
-      { key: "ttd-asman", label: "TTD Asman" },
-      { key: "ttd-madm", label: "TTD MADM" },
-      { key: "proses-po", label: "Proses PO" },
-      { key: "nomor-pr", label: "Nomor PR" },
-      { key: "nomor-po", label: "Nomor PO" },
-      { key: "bast-bapb", label: "BAST/BAPB" },
-      { key: "akutansi", label: "Akutansi" },
-      { key: "keuangan", label: "Keuangan" },
-      { key: "scan", label: "Scan" },
-      { key: "selesai", label: "Selesai" },
+      { key: "ttd-asman-rab", label: "TTD Asman RAB" },
+      { key: "ttd-madm-rab", label: "TTD MADM RAB" },
+      { key: "payment", label: "Proses PO" },
+      { key: "documents", label: "Dokumen" },
+      { key: "external", label: "Proses Akhir" },
+      { key: "done", label: "Selesai" },
     ];
   }
-
-  const masterLabel = kategori === "Cash Card" ? "Cash Card Dibuat" : "NON PO Dibuat";
   return [
     { key: "rab", label: "RAB Dibuat" },
-    { key: "ttd-asman", label: "TTD Asman" },
-    { key: "ttd-madm", label: "TTD MADM" },
-    { key: "master", label: masterLabel },
-    { key: "dokumen", label: "Dokumen Lengkap" },
-    { key: "akutansi", label: "Akutansi" },
-    { key: "keuangan", label: "Keuangan" },
-    { key: "scan", label: "Scan" },
-    { key: "selesai", label: "Selesai" },
+    { key: "ttd-asman-rab", label: "TTD Asman RAB" },
+    { key: "ttd-madm-rab", label: "TTD MADM RAB" },
+    { key: "payment", label: kategori === "Cash Card" ? "Cash Card Dibuat" : "NON PO Dibuat" },
+    { key: "documents", label: "Dokumen" },
+    { key: "external", label: "Proses Akhir" },
+    { key: "done", label: "Selesai" },
   ];
 }
 
-function StepProgress({ kategori, stageLabel }) {
-  const steps = useMemo(() => buildSteps(kategori), [kategori]);
-  const activeKey = getActiveKey(kategori, stageLabel);
-  const activeIndex = Math.max(0, steps.findIndex((s) => s.key === activeKey));
-  const finished = stageLabel === "Selesai";
+function rabActiveIndex(steps, stageLabel) {
+  if (stageLabel === "Selesai") return steps.length - 1;
+  if (stageLabel === "Menunggu TTD Asman") return 1;
+  if (stageLabel === "Menunggu TTD MADM") return 2;
+  if ((stageLabel || "").startsWith("Siap Dibuat")) return 3;
+  if (["Dokumen Diproses", "Menunggu Nomor PR", "Menunggu Nomor PO", "Menunggu BAST/BAPB"].includes(stageLabel)) return 4;
+  if (["Menunggu TTD Officer Comdev", "Menunggu TTD Asman Dokumen", "Menunggu Akutansi", "Menunggu Keuangan", "Menunggu Scan Dokumen"].includes(stageLabel)) return 5;
+  return 0;
+}
 
+function buildPaymentSteps(kategori, stage, paymentCreatedAt, paymentPackage) {
+  const masterLabel = kategori === "Cash Card" ? "Cash Card Dibuat" : kategori === "PO" ? "Proses PO Dimulai" : "NON PO Dibuat";
+  const docs = (stage.docProgress || []).map((doc) => ({
+    key: `doc-${doc.key}`,
+    label: doc.key,
+    done: !!doc.done,
+    at: doc.at || null,
+  }));
+
+  return [
+    {
+      key: "master",
+      label: masterLabel,
+      done: !!stage.paymentId || !!paymentCreatedAt,
+      at: paymentCreatedAt || null,
+    },
+    ...docs,
+    { key: "officer", label: "TTD Officer Comdev", done: !!paymentPackage?.ttdOfficerComdev, at: paymentPackage?.ttdOfficerComdevAt || null },
+    { key: "asman", label: "TTD Asman", done: !!paymentPackage?.ttdAsman, at: paymentPackage?.ttdAsmanAt || null },
+    { key: "akutansi", label: "Akutansi", done: !!paymentPackage?.diAkutansi, at: paymentPackage?.diAkutansiAt || null },
+    { key: "keuangan", label: "Keuangan", done: !!paymentPackage?.diKeuangan, at: paymentPackage?.diKeuanganAt || null },
+    { key: "scan", label: "Scan Dokumen", done: !!paymentPackage?.scanUrl, at: paymentPackage?.scanUploadedAt || null },
+    { key: "selesai", label: "Selesai", done: stage.label === "Selesai", at: stage.label === "Selesai" ? (paymentPackage?.scanUploadedAt || null) : null },
+  ];
+}
+
+function StepProgress({ steps, activeIndex }) {
   return (
     <div style={{ overflowX: "auto", paddingBottom: 4 }}>
-      <div style={{ display: "flex", alignItems: "center", minWidth: Math.max(760, steps.length * 108) }}>
+      <div style={{ display: "flex", alignItems: "center", minWidth: Math.max(760, steps.length * 104) }}>
         {steps.map((step, i) => {
-          const done = finished || i < activeIndex;
-          const active = !finished && i === activeIndex;
+          const done = !!step.done || i < activeIndex;
+          const active = !done && i === activeIndex;
           const bg = done ? "#1E7F3E" : active ? "#0E4C92" : T.border;
           const fg = done || active ? "#fff" : T.muted;
           return (
@@ -139,7 +141,7 @@ function StepProgress({ kategori, stageLabel }) {
                   fontSize: 10, lineHeight: 1.25, textAlign: "center",
                   color: active ? T.heading : T.muted,
                   fontWeight: active ? 700 : 500,
-                  maxWidth: 88,
+                  maxWidth: 92,
                 }}>
                   {step.label}
                 </span>
@@ -147,7 +149,7 @@ function StepProgress({ kategori, stageLabel }) {
               {i < steps.length - 1 && (
                 <div style={{
                   flex: 1, height: 2, margin: "0 3px 16px",
-                  background: finished || i < activeIndex ? "#1E7F3E" : T.border,
+                  background: done ? "#1E7F3E" : T.border,
                 }} />
               )}
             </div>
@@ -158,29 +160,25 @@ function StepProgress({ kategori, stageLabel }) {
   );
 }
 
-function buildHistory(rab, kategori, stage, paymentCreatedAt) {
-  const events = [];
-  const add = (label, tanggal, oleh, catatan) => {
-    if (!tanggal) return;
-    events.push({ label, tanggal, oleh, catatan });
-  };
-
-  add("RAB Dibuat", rab?.tanggalInput || rab?.tanggalRab, "Humas", "RAB masuk ke sistem.");
-  add("TTD Asman", rab?.signatureAsman?.signedAt, "Asman", "RAB sudah ditandatangani Asman.");
-  add("TTD MADM", rab?.signatureMadm?.signedAt, "MADM", "RAB sudah ditandatangani MADM.");
-  add(
-    kategori === "Cash Card" ? "Cash Card Dibuat" : kategori === "PO" ? "Proses PO Dimulai" : "NON PO Dibuat",
-    paymentCreatedAt,
-    "Humas",
-    "Master pembayaran sudah dibuat."
-  );
-
-  events.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-
-  const lastLabel = events.at(-1)?.label;
-  if (stage?.label && stage.label !== lastLabel) {
-    events.push({ label: stage.label, tanggal: null, oleh: "Sistem", catatan: "Tahap saat ini dihitung otomatis dari data yang sudah tersimpan." });
+function paymentHistory(kategori, stage, paymentCreatedAt, paymentPackage) {
+  const steps = buildPaymentSteps(kategori, stage, paymentCreatedAt, paymentPackage);
+  const completed = steps.filter((s) => s.done && s.key !== "selesai");
+  const events = completed.map((s) => ({ label: s.label, at: s.at, current: false }));
+  if (stage.label === "Selesai") {
+    events.push({ label: "Selesai", at: paymentPackage?.scanUploadedAt || null, current: true });
+  } else {
+    events.push({ label: stage.label, at: null, current: true });
   }
+  return events;
+}
+
+function rabHistory(rab, kategori, stage, paymentCreatedAt) {
+  const events = [];
+  if (rab?.tanggalInput || rab?.tanggalRab) events.push({ label: "RAB Dibuat", at: rab.tanggalInput || rab.tanggalRab });
+  if (rab?.signatureAsman?.signedAt) events.push({ label: "TTD Asman RAB", at: rab.signatureAsman.signedAt });
+  if (rab?.signatureMadm?.signedAt) events.push({ label: "TTD MADM RAB", at: rab.signatureMadm.signedAt });
+  if (paymentCreatedAt) events.push({ label: kategori === "Cash Card" ? "Cash Card Dibuat" : kategori === "PO" ? "Proses PO Dimulai" : "NON PO Dibuat", at: paymentCreatedAt });
+  events.push({ label: stage.label, at: null, current: true });
   return events;
 }
 
@@ -191,15 +189,30 @@ export default function PaymentTrackingCard({
   paymentCreatedAt,
   paymentPackage,
   defaultOpen = false,
+  scope = "rab", // "rab" | "payment"
 }) {
   const [open, setOpen] = useState(defaultOpen);
   if (!rab || !stage) return null;
 
   const actualKategori = kategori || rab.kategori || "NON PO";
-  const history = buildHistory(rab, actualKategori, stage, paymentCreatedAt);
   const meta = stageMeta(stage.label);
   const doneDocs = (stage.docProgress || []).filter((d) => d.done).length;
   const totalDocs = (stage.docProgress || []).length;
+
+  const paymentSteps = useMemo(
+    () => buildPaymentSteps(actualKategori, stage, paymentCreatedAt, paymentPackage),
+    [actualKategori, stage, paymentCreatedAt, paymentPackage]
+  );
+  const paymentActiveIndex = Math.max(0, paymentSteps.findIndex((s) => !s.done));
+  const rabSteps = useMemo(() => buildRabSteps(actualKategori), [actualKategori]);
+  const rabIndex = rabActiveIndex(rabSteps, stage.label);
+  const steps = scope === "payment"
+    ? paymentSteps
+    : rabSteps.map((s, i) => ({ ...s, done: stage.label === "Selesai" || i < rabIndex }));
+  const activeIndex = scope === "payment" ? paymentActiveIndex : rabIndex;
+  const history = scope === "payment"
+    ? paymentHistory(actualKategori, stage, paymentCreatedAt, paymentPackage)
+    : rabHistory(rab, actualKategori, stage, paymentCreatedAt);
 
   return (
     <div style={{
@@ -240,13 +253,12 @@ export default function PaymentTrackingCard({
         <div style={{ padding: "0 18px 18px", borderTop: `1px solid ${T.border}` }}>
           <div style={{ paddingTop: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 12 }}>
-              Progres Tahapan
+              {scope === "payment" ? "Tracking Aktivitas Dokumen" : "Progres Tahapan"}
             </div>
-            <StepProgress kategori={actualKategori} stageLabel={stage.label} />
+            <StepProgress steps={steps} activeIndex={activeIndex} />
 
             <div style={{ padding: "10px 12px", borderRadius: 8, background: meta.bg, color: meta.color, fontSize: 12.5, marginTop: 10 }}>
               Tahap saat ini: <b>{stage.label}</b>
-              {stage.label === "Selesai" && " — seluruh proses pencatatan sampai scan dokumen sudah lengkap."}
             </div>
 
             {totalDocs > 0 && (
@@ -271,16 +283,18 @@ export default function PaymentTrackingCard({
               </div>
             )}
 
-            {(paymentPackage?.diAkutansi || paymentPackage?.diKeuangan || paymentPackage?.scanUrl) && (
+            {scope === "payment" && (
               <div style={{ marginTop: 16 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 9 }}>
-                  Proses Akhir
+                  Proses Dokumen Selesai
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {[
+                    ["TTD Officer Comdev", !!paymentPackage?.ttdOfficerComdev],
+                    ["TTD Asman", !!paymentPackage?.ttdAsman],
                     ["Akutansi", !!paymentPackage?.diAkutansi],
                     ["Keuangan", !!paymentPackage?.diKeuangan],
-                    ["Scan Dokumen", !!paymentPackage?.scanUrl],
+                    ["Scan", !!paymentPackage?.scanUrl],
                   ].map(([label, done]) => (
                     <span key={label} style={{
                       padding: "5px 8px", borderRadius: 7, fontSize: 11.5, fontWeight: 600,
@@ -302,21 +316,21 @@ export default function PaymentTrackingCard({
                 </div>
                 <div style={{ borderLeft: `2px solid ${T.border}`, marginLeft: 10, paddingLeft: 14 }}>
                   {history.map((item, i) => {
-                    const isCurrent = !item.tanggal;
-                    const eventMeta = isCurrent ? meta : { color: "#1E7F3E" };
+                    const isCurrent = !!item.current;
+                    const color = isCurrent ? meta.color : "#1E7F3E";
+                    const time = formatTime(item.at);
                     return (
                       <div key={`${item.label}-${i}`} style={{ marginBottom: 13, position: "relative" }}>
                         <div style={{
                           position: "absolute", left: -20, top: 3,
                           width: 8, height: 8, borderRadius: "50%",
-                          background: eventMeta.color,
+                          background: color,
                           border: `2px solid ${T.card}`,
                         }} />
                         <div style={{ fontSize: 10.5, color: T.muted, marginBottom: 2 }}>
-                          {item.tanggal ? `${formatTime(item.tanggal)} — ${item.oleh}` : `Saat ini — ${item.oleh}`}
+                          {isCurrent && !item.at ? "Saat ini — Sistem" : time || "Waktu tidak tersedia"}
                         </div>
                         <div style={{ fontSize: 12.5, color: T.heading, fontWeight: 600 }}>{item.label}</div>
-                        {item.catatan && <div style={{ fontSize: 11.5, color: T.muted, marginTop: 2 }}>{item.catatan}</div>}
                       </div>
                     );
                   })}

@@ -1,92 +1,103 @@
 /**
- * lib/paymentStage.js
+ * Tahap pembayaran terpusat.
  *
- * getPaymentStage() - helper TERPUSAT untuk menghitung "Tahap Saat Ini" sebuah
- * RAB, dari mulai dibuat sampai selesai dibayar. SEMUA nilai dihitung dari
- * data yang sudah ada (signature RAB, master pembayaran per kategori, status
- * dokumen turunan, checkbox Akutansi/Keuangan, scan) - TIDAK ADA input manual
- * baru, tidak ada dropdown status yang bisa diubah user secara langsung.
- *
- * Alur umum (poin 3 di requirement):
- *  1. RAB Dibuat
- *  2. Menunggu TTD Asman
- *  3. Menunggu TTD MADM
- *  4. RAB Disetujui
- *  5. Siap Diproses sesuai kategori (Siap Dibuat NON PO/PO/Cash Card)
- *  6. Master pembayaran sudah dibuat (Dokumen Diproses)
- *  7. Dokumen Lengkap
- *  8. Sudah di Akutansi
- *  9. Sudah di Keuangan
- * 10. Menunggu Scan Dokumen
- * 11. Selesai
- *
- * PO tidak dipaksa sama dengan NON PO - pakai milestone ERP existing sendiri
- * (Nomor PR -> Nomor PO -> BAST/BAPB), sesuai requirement bagian 6.
+ * RAB overview masih boleh memakai approval digital RAB (TTD Asman/MADM).
+ * Halaman operasional/tracking NON PO, PO, dan Cash Card memanggil helper ini
+ * dengan `paymentTrackingOnly: true`, sehingga tahap pembayaran TIDAK menunggu
+ * TTD digital RAB. Setelah dokumen pembayaran lengkap, proses akhir dibaca dari
+ * Tracking Dokumen Selesai: Officer Comdev -> Asman -> Akutansi -> Keuangan -> Scan.
  */
 
-/** Cari master pembayaran (Non PO/PO/CC) yang terhubung ke RAB `r`. */
+function recordTime(record) {
+  if (!record) return null;
+  return (
+    record.createdAt ||
+    record.tanggalInput ||
+    record.savedAt ||
+    record.generatedAt ||
+    record.updatedAt ||
+    null
+  );
+}
+
 function findPaymentRecord(r, { nonPoList = [], ccList = [], poDocuments = {} }) {
   if (r.kategori === "Cash Card") {
     return ccList.find((c) => c.rabId === r.idNumber) || null;
   }
   if (r.kategori === "PO") {
-    // Master PO dibuat dari submissions (NonPoPage kategori PO), sedangkan
-    // milestone ERP disimpan terpisah di poDocuments. Gabungkan keduanya agar
-    // setelah master PO dibuat tahap langsung menjadi "Menunggu Nomor PR",
-    // bukan kembali dianggap "Siap Dibuat PO".
-    const master = nonPoList.find((n) => n.rabId === r.idNumber && (!n.kategori || n.kategori === "PO")) || null;
+    const master = nonPoList.find(
+      (n) => n.rabId === r.idNumber && (!n.kategori || n.kategori === "PO")
+    ) || null;
     const erp = poDocuments[r.idNumber] || null;
     const hasErp = !!(erp && (erp.nomorPR || erp.nomorPO || erp.idBast || erp.idBapb));
     if (!master && !hasErp) return null;
-    return { ...(master || {}), ...(erp || {}), _masterId: master?.id || null };
+    return { ...(master || {}), ...(erp || {}), _masterId: master?.id || null, _masterCreatedAt: master?.createdAt || null };
   }
   return nonPoList.find((n) => n.rabId === r.idNumber) || null;
 }
 
-/** Cocokkan satu record dengan rabId - fallback berantai persis seperti
- * docStatus() di NonPoPage.jsx, karena LMP1/LMP2/Verif pakai key
- * submissionId sedangkan BAST/PI/BAPP pakai key id. */
 function matchesRab(record, rabId, idKey = "id") {
-  return (record[idKey] || record.submissionId || record.id) === rabId;
+  return (record?.[idKey] || record?.submissionId || record?.id) === rabId;
 }
 
-/** Progress dokumen turunan NON PO - dipetakan dari 6 dokumen existing. */
+function matchedRecord(list, rabId, idKey = "id") {
+  return (list || []).find((d) => matchesRab(d, rabId, idKey)) || null;
+}
+
 function nonPoDocProgress(rabId, { lmp1 = [], lmp2 = [], formVerif = [], bast = [], pakta = [], bapp = [] }) {
-  const items = [
-    { key: "LMP1", done: lmp1.some((d) => matchesRab(d, rabId, "submissionId")) },
-    { key: "LMP2", done: lmp2.some((d) => matchesRab(d, rabId, "submissionId")) },
-    { key: "Verif", done: formVerif.some((d) => matchesRab(d, rabId, "submissionId")) },
-    { key: "BAST", done: bast.some((d) => matchesRab(d, rabId, "id")) },
-    { key: "PI", done: pakta.some((d) => matchesRab(d, rabId, "id")) },
-    { key: "BAPP", done: bapp.some((d) => matchesRab(d, rabId, "id")) },
+  const defs = [
+    ["LMP1", matchedRecord(lmp1, rabId, "submissionId")],
+    ["LMP2", matchedRecord(lmp2, rabId, "submissionId")],
+    ["Verif", matchedRecord(formVerif, rabId, "submissionId")],
+    ["BAST", matchedRecord(bast, rabId, "id")],
+    ["PI", matchedRecord(pakta, rabId, "id")],
+    ["BAPP", matchedRecord(bapp, rabId, "id")],
   ];
+  const items = defs.map(([key, rec]) => ({ key, done: !!rec, at: recordTime(rec) }));
   return { items, complete: items.every((i) => i.done) };
 }
 
-/** Progress dokumen turunan Cash Card - dipetakan dari 9 dokumen existing. */
-function ccDocProgress(ccId, { ccItems = [], ccVerifikasi = [], ccPermintaan = [], ccRencana = [], ccBast = [], ccPakta = [], ccTtd = [], ccBapp = [], ccPertanggungjawaban = [] }) {
-  const items = [
-    { key: "Item", done: ccItems.some((d) => d.ccId === ccId) },
-    { key: "Verifikasi", done: ccVerifikasi.some((d) => d.id === ccId) },
-    { key: "Permintaan Dana", done: ccPermintaan.some((d) => d.id === ccId) },
-    { key: "Rencana Tunai", done: ccRencana.some((d) => d.id === ccId) },
-    { key: "BAST", done: ccBast.some((d) => d.id === ccId) },
-    { key: "PI", done: ccPakta.some((d) => d.id === ccId) },
-    { key: "TTD Serah Terima", done: ccTtd.some((d) => d.id === ccId || d.ccId === ccId) },
-    { key: "BAPP", done: ccBapp.some((d) => d.id === ccId) },
-    { key: "Pertanggungjawaban", done: ccPertanggungjawaban.some((d) => d.id === ccId) },
+function ccRecord(list, ccId) {
+  return (list || []).find((d) => d?.id === ccId || d?.ccId === ccId) || null;
+}
+
+function itemTimestamp(items) {
+  const candidates = (items || [])
+    .map((d) => recordTime(d))
+    .filter(Boolean)
+    .map((value) => ({ value, time: new Date(value).getTime() }))
+    .filter((x) => !Number.isNaN(x.time))
+    .sort((a, b) => a.time - b.time);
+  return candidates[0]?.value || null;
+}
+
+function ccDocProgress(ccId, {
+  ccItems = [], ccVerifikasi = [], ccPermintaan = [], ccRencana = [],
+  ccBast = [], ccPakta = [], ccTtd = [], ccBapp = [], ccPertanggungjawaban = [],
+}) {
+  const itemRows = (ccItems || []).filter((d) => d?.ccId === ccId);
+  const defs = [
+    { key: "Detail/Item", rec: itemRows[0] || null, at: itemTimestamp(itemRows) },
+    { key: "Verifikasi", rec: ccRecord(ccVerifikasi, ccId) },
+    { key: "Permintaan Dana", rec: ccRecord(ccPermintaan, ccId) },
+    { key: "Rencana Tunai", rec: ccRecord(ccRencana, ccId) },
+    { key: "BAST", rec: ccRecord(ccBast, ccId) },
+    { key: "PI", rec: ccRecord(ccPakta, ccId) },
+    { key: "TTD Serah Terima", rec: ccRecord(ccTtd, ccId) },
+    { key: "BAPP", rec: ccRecord(ccBapp, ccId) },
+    { key: "Pertanggungjawaban", rec: ccRecord(ccPertanggungjawaban, ccId) },
   ];
+  const items = defs.map(({ key, rec, at }) => ({ key, done: !!rec, at: at || recordTime(rec) }));
   return { items, complete: items.every((i) => i.done) };
 }
 
-/** Progress milestone PO - beda struktur, ikut data ERP existing sendiri. */
 function poDocProgress(rec) {
   if (!rec) return { items: [], complete: false, nextLabel: "Menunggu Nomor PR" };
   const items = [
-    { key: "Nomor PR", done: !!rec.nomorPR },
-    { key: "Nomor PO", done: !!rec.nomorPO },
-    { key: "BAST", done: !!rec.idBast },
-    { key: "BAPB", done: !!rec.idBapb },
+    { key: "Nomor PR", done: !!rec.nomorPR, at: rec.nomorPRAt || null },
+    { key: "Nomor PO", done: !!rec.nomorPO, at: rec.nomorPOAt || null },
+    { key: "BAST ERP", done: !!rec.idBast, at: rec.idBastAt || null },
+    { key: "BAPB ERP", done: !!rec.idBapb, at: rec.idBapbAt || null },
   ];
   let nextLabel = null;
   if (!rec.nomorPR) nextLabel = "Menunggu Nomor PR";
@@ -95,34 +106,54 @@ function poDocProgress(rec) {
   return { items, complete: items.every((i) => i.done), nextLabel };
 }
 
+function finalTrackingStage(pkg, progress, paymentId) {
+  if (!pkg?.ttdOfficerComdev) {
+    return { label: "Menunggu TTD Officer Comdev", docProgress: progress.items, paymentId };
+  }
+  if (!pkg?.ttdAsman) {
+    return { label: "Menunggu TTD Asman Dokumen", docProgress: progress.items, paymentId };
+  }
+  if (!pkg?.diAkutansi) {
+    return { label: "Menunggu Akutansi", docProgress: progress.items, paymentId };
+  }
+  if (!pkg?.diKeuangan) {
+    return { label: "Menunggu Keuangan", docProgress: progress.items, paymentId };
+  }
+  if (!pkg?.scanUrl) {
+    return { label: "Menunggu Scan Dokumen", docProgress: progress.items, paymentId };
+  }
+  return { label: "Selesai", docProgress: progress.items, paymentId };
+}
+
 /**
- * Hasil utama: { label, docProgress, paymentId }
- *   label       - teks Tahap Saat Ini yang ditampilkan
- *   docProgress - array {key, done} dokumen turunan (buat ditampilkan sebagai
- *                 checklist ✓/—, kosong untuk tahap sebelum master dibuat)
- *   paymentId   - ID master pembayaran kalau sudah ada, null kalau belum
+ * Hasil: { label, docProgress, paymentId }
+ *
+ * `paymentTrackingOnly: true` dipakai di NON PO/PO/CC. Mode ini sengaja tidak
+ * membaca signature RAB Asman/MADM karena tracking pembayaran dimulai dari
+ * master pembayaran dan aktivitas dokumennya.
  */
-export function getPaymentStage(r, data) {
+export function getPaymentStage(r, data = {}) {
   const {
     nonPoList = [], ccList = [], poDocuments = {},
     lmp1 = [], lmp2 = [], formVerif = [], bast = [], pakta = [], bapp = [],
     ccItems = [], ccVerifikasi = [], ccPermintaan = [], ccRencana = [],
     ccBast = [], ccPakta = [], ccTtd = [], ccBapp = [], ccPertanggungjawaban = [],
-    paymentPackages = [],
+    paymentPackages = [], paymentTrackingOnly = false,
   } = data;
 
-  // 1-4: tahap TTD RAB, sebelum ada master pembayaran sama sekali.
-  if (!r.signatureAsman) {
-    return { label: "Menunggu TTD Asman", docProgress: [], paymentId: null };
-  }
-  if (!r.signatureMadm) {
-    return { label: "Menunggu TTD MADM", docProgress: [], paymentId: null };
+  // Hanya overview RAB yang mempertahankan tahap approval digital RAB.
+  if (!paymentTrackingOnly) {
+    if (!r.signatureAsman) {
+      return { label: "Menunggu TTD Asman", docProgress: [], paymentId: null };
+    }
+    if (!r.signatureMadm) {
+      return { label: "Menunggu TTD MADM", docProgress: [], paymentId: null };
+    }
   }
 
   const kategori = r.kategori === "Cash Card" ? "Cash Card" : r.kategori === "PO" ? "PO" : "NON PO";
   const record = findPaymentRecord(r, { nonPoList, ccList, poDocuments });
 
-  // 5: TTD lengkap, tapi master pembayaran belum dibuat sama sekali.
   if (!record) {
     return { label: `Siap Dibuat ${kategori}`, docProgress: [], paymentId: null };
   }
@@ -131,10 +162,12 @@ export function getPaymentStage(r, data) {
     ? (record.nomorPO || record.nomorPR || record._masterId || record.id || null)
     : record.id;
 
-  // 6-7: master sudah ada, cek kelengkapan dokumen turunan sesuai kategori.
   let progress;
   if (kategori === "Cash Card") {
-    progress = ccDocProgress(record.id, { ccItems, ccVerifikasi, ccPermintaan, ccRencana, ccBast, ccPakta, ccTtd, ccBapp, ccPertanggungjawaban });
+    progress = ccDocProgress(record.id, {
+      ccItems, ccVerifikasi, ccPermintaan, ccRencana, ccBast, ccPakta,
+      ccTtd, ccBapp, ccPertanggungjawaban,
+    });
   } else if (kategori === "PO") {
     progress = poDocProgress(record);
   } else {
@@ -149,17 +182,6 @@ export function getPaymentStage(r, data) {
     };
   }
 
-  // 8-11: dokumen lengkap, lanjut baca Tracking Dokumen Selesai (checkbox
-  // Akutansi/Keuangan + scan, semua sudah ada di paymentPackages).
   const pkg = paymentPackages.find((p) => p.idRab === r.idNumber);
-  if (!pkg?.diAkutansi) {
-    return { label: "Dokumen Lengkap", docProgress: progress.items, paymentId };
-  }
-  if (!pkg?.diKeuangan) {
-    return { label: "Sudah di Akutansi", docProgress: progress.items, paymentId };
-  }
-  if (!pkg?.scanUrl) {
-    return { label: "Menunggu Scan Dokumen", docProgress: progress.items, paymentId };
-  }
-  return { label: "Selesai", docProgress: progress.items, paymentId };
+  return finalTrackingStage(pkg, progress, paymentId);
 }

@@ -11,8 +11,59 @@ import Modal from "../../components/Modal";
 import PageHeader from "../../components/PageHeader";
 import DataTable from "../../components/DataTable";
 import { proposalDocuments } from "../../lib/recordLinks";
-import { bastStepFields, paktaStepFields } from "../../lib/wizardFields";
+import { bastStepFields, evaluasiKategoriFields, paktaStepFields, proposalFields } from "../../lib/wizardFields";
 import SignaturePanel from "../../components/SignaturePanel";
+
+const PROPOSAL_DETAIL_FIELDS = proposalFields()().flatMap((f) =>
+  f.key === "lokasiKegiatan"
+    ? [f, { key: "program", label: "Program", section: "Detail Kegiatan" }]
+    : [f]
+);
+const EVALUASI_FIELDS = evaluasiKategoriFields();
+
+function displayProposalValue(field, value) {
+  if (value === undefined || value === null || value === "") return "-";
+  if (field.type === "file-upload") return value?.name || value?.fileName || "File terlampir";
+  if (["nilaiDiajukan", "approvedBudget"].includes(field.key)) {
+    return `Rp${Number(value || 0).toLocaleString("id-ID")}`;
+  }
+  if (field.type === "date") {
+    const d = new Date(`${value}T00:00:00`);
+    if (!Number.isNaN(d.getTime())) return d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  }
+  return String(value);
+}
+
+function ProposalReadOnlyFields({ values }) {
+  let lastSection = null;
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: "8px 18px", marginBottom: 16 }}>
+      {PROPOSAL_DETAIL_FIELDS.map((f) => {
+        const section = f.section && f.section !== lastSection ? f.section : null;
+        if (f.section) lastSection = f.section;
+        return (
+          <div key={f.key} style={{ gridColumn: f.full ? "1 / -1" : "auto", minWidth: 0 }}>
+            {section && (
+              <div style={{ gridColumn: "1 / -1", fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.1, textTransform: "uppercase", color: T.blue, fontWeight: 700, margin: "10px 0 6px" }}>
+                {section}
+              </div>
+            )}
+            <div style={{ fontSize: 10.5, color: T.muted, marginBottom: 2 }}>{f.label}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: T.text, overflowWrap: "anywhere" }}>{displayProposalValue(f, values[f.key])}</div>
+          </div>
+        );
+      })}
+      <div>
+        <div style={{ fontSize: 10.5, color: T.muted, marginBottom: 2 }}>Status Proposal</div>
+        <div style={{ fontSize: 13, fontWeight: 600 }}>{values.statusProposal || "-"}</div>
+      </div>
+      <div style={{ gridColumn: "1 / -1" }}>
+        <div style={{ fontSize: 10.5, color: T.muted, marginBottom: 2 }}>Catatan Internal Humas</div>
+        <div style={{ fontSize: 13, fontWeight: 600, overflowWrap: "anywhere" }}>{values.catatanInternal || "-"}</div>
+      </div>
+    </div>
+  );
+}
 
 const TAB_FILTERS = {
   masuk:     (p) => p.status === DOC_STATUS.SUBMITTED || p.status === DOC_STATUS.IN_REVIEW,
@@ -91,6 +142,7 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
   const [detail, setDetail] = useState(null);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectNote, setRejectNote] = useState("");
+  const [commentDraft, setCommentDraft] = useState("");
 
   // Deep-link dari notifikasi (lihat App.jsx openNotificationTarget) - begitu
   // openTargetId cocok dengan salah satu id Proposal, otomatis buka
@@ -175,6 +227,16 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
     notify?.(`Proposal ${p.id} berhasil ditandatangani.`, "success");
   };
 
+  const saveReviewerComment = () => {
+    if (!detail || !["asman", "madm"].includes(user.role)) return;
+    const now = new Date().toISOString();
+    const patch = user.role === "asman"
+      ? { reviewNote: commentDraft.trim(), reviewCommentAt: now, reviewCommentBy: user.username }
+      : { processNote: commentDraft.trim(), processCommentAt: now, processCommentBy: user.username };
+    onUpdateProposal(detail.id, patch);
+    notify(`Komentar ${user.role === "asman" ? "Asman" : "MADM"} untuk Proposal ${detail.id} disimpan.`, "success");
+  };
+
   const doApprove = () => {
     if (!detail) return;
     onUpdateProposal(detail.id, {
@@ -182,7 +244,6 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
       statusProposal: "Disetujui",
       reviewedBy: user.username,
       reviewedAt: new Date().toISOString(),
-      reviewNote: "",
     });
     notify(`Proposal ${detail.id} disetujui - dikirim ke MADM.`, "success");
     setDetail(null);
@@ -215,13 +276,20 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
       statusProposal: "Disetujui",
       processedAt: new Date().toISOString(),
       processedBy: user.username,
-      processNote: "",
     });
     notify(`Proposal ${detail.id} selesai diproses.`, "success");
     setDetail(null);
   };
 
   const liveDetail = detail ? (proposals.find((p) => p.id === detail.id) || detail) : null;
+
+  useEffect(() => {
+    if (!liveDetail || !["asman", "madm"].includes(user.role)) {
+      setCommentDraft("");
+      return;
+    }
+    setCommentDraft(user.role === "asman" ? (liveDetail.reviewNote || "") : (liveDetail.processNote || ""));
+  }, [detail?.id, user.role, liveDetail?.reviewNote, liveDetail?.processNote]);
 
   return (
     <div>
@@ -290,24 +358,8 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
             ...[["evaluasi", "Form Evaluasi"], ["bast", "BAST"], ["pi", "PI"]].map(([key, label]) => ({
               key, label, render: (r) => <span title={proposalDocuments(r, evaluasiList)[key] ? "Tersedia" : "Belum tersedia"}>{proposalDocuments(r, evaluasiList)[key] ? "✓" : "—"}</span>,
             })),
-            { key: "ttdAsman", label: "TTD Asman", render: (r) => (
-              <span onClick={(e) => e.stopPropagation()}>
-                {canSignProposalAsman(r) ? (
-                  <IconBtn title="Tanda tangan sebagai Asman" onClick={() => quickSignProposal(r, "asman")}><Check size={13} /></IconBtn>
-                ) : (
-                  <TtdDotInline signed={!!r.signatureAsman} />
-                )}
-              </span>
-            ) },
-            { key: "ttdMadm", label: "TTD MADM", render: (r) => (
-              <span onClick={(e) => e.stopPropagation()}>
-                {canSignProposalMadm(r) ? (
-                  <IconBtn title="Tanda tangan sebagai MADM" onClick={() => quickSignProposal(r, "madm")}><Check size={13} /></IconBtn>
-                ) : (
-                  <TtdDotInline signed={!!r.signatureMadm} />
-                )}
-              </span>
-            ) },
+            { key: "ttdAsman", label: "TTD Asman", render: (r) => <TtdDotInline signed={!!r.signatureAsman} /> },
+            { key: "ttdMadm", label: "TTD MADM", render: (r) => <TtdDotInline signed={!!r.signatureMadm} /> },
             // See More sebagai tombol eksplisit (poin 3) - sebelumnya cuma
             // klik baris tanpa indikator visual bahwa ada detail yang bisa
             // dibuka. Tetap stopPropagation biar tidak dobel trigger.
@@ -332,7 +384,7 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
         onClose={() => setDetail(null)}
         title={detail ? `Proposal ${detail.id}` : ""}
         icon={Handshake}
-        width={560}
+        width={920}
       >
         {detail && liveDetail && (
           <>
@@ -354,111 +406,86 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
 
             <div style={{
               fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2, textTransform: "uppercase",
-              color: T.muted, margin: "4px 0 8px",
-            }}>Informasi Proposal</div>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "140px 1fr",
-              rowGap: 6, columnGap: 12,
-              fontSize: 13, marginBottom: 16,
-            }}>
-              <div style={{ color: T.muted }}>Tanggal Masuk</div>
-              <div>{liveDetail.tanggalMasuk ? new Date(liveDetail.tanggalMasuk).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-"}</div>
-              <div style={{ color: T.muted }}>Instansi</div>
-              <div style={{ fontWeight: 600 }}>{liveDetail.namaLembaga || "-"}</div>
-              <div style={{ color: T.muted }}>Sumber Pengaju</div>
-              <div>{liveDetail.sumberPengaju || "-"}</div>
-              <div style={{ color: T.muted }}>Judul Proposal</div>
-              <div>{liveDetail.judulProposal || "-"}</div>
-              <div style={{ color: T.muted }}>Program</div>
-              <div>{liveDetail.jenisProgram || "-"}{liveDetail.subprogram ? ` / ${liveDetail.subprogram}` : ""}</div>
-              {liveDetail.nilaiDiajukan != null && (
-                <>
-                  <div style={{ color: T.muted }}>Nilai Diajukan</div>
-                  <div style={{ fontWeight: 700 }}>Rp{Number(liveDetail.nilaiDiajukan).toLocaleString("id-ID")}</div>
-                </>
-              )}
-              {(liveDetail.kontakPIC || liveDetail.kontakTelp || liveDetail.kontakEmail) && (
-                <>
-                  <div style={{ color: T.muted }}>Kontak</div>
-                  <div>
-                    {liveDetail.kontakPIC || "-"}
-                    {liveDetail.kontakTelp && <div style={{ fontSize: 12, color: T.muted }}>{liveDetail.kontakTelp}</div>}
-                    {liveDetail.kontakEmail && <div style={{ fontSize: 12, color: T.muted }}>{liveDetail.kontakEmail}</div>}
-                  </div>
-                </>
-              )}
-              {liveDetail.ringkasan && (
-                <>
-                  <div style={{ color: T.muted }}>Ringkasan</div>
-                  <div>{liveDetail.ringkasan}</div>
-                </>
-              )}
-              {liveDetail.catatanInternal && (
-                <>
-                  <div style={{ color: T.muted }}>Catatan Internal</div>
-                  <div>{liveDetail.catatanInternal}</div>
-                </>
-              )}
-            </div>
+              color: T.blue, fontWeight: 700, margin: "4px 0 8px",
+            }}>Detail Proposal - Read Only</div>
+            <ProposalReadOnlyFields values={liveDetail} />
 
-            {/* Form Evaluasi (poin baru) - relasinya via proposalId, diisi
-                Humas di ProposalEvaluasi.jsx, ditarik read-only di sini. */}
-            {evaluasiByProposalId[liveDetail.id] && (
-              <>
-                <div style={{
-                  fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2, textTransform: "uppercase",
-                  color: T.muted, margin: "4px 0 8px",
-                }}>Form Evaluasi</div>
-                <div style={{
-                  border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px 12px",
-                  fontSize: 13, marginBottom: 16,
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                    <span style={{ color: T.muted }}>Penilai</span>
-                    <span style={{ fontWeight: 600 }}>{evaluasiByProposalId[liveDetail.id].penilai}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                    <span style={{ color: T.muted }}>Skor Akhir</span>
-                    <span style={{ fontFamily: font.mono, fontWeight: 700 }}>{evaluasiByProposalId[liveDetail.id].skorAkhir?.toFixed?.(2) ?? evaluasiByProposalId[liveDetail.id].skorAkhir}</span>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: T.muted }}>Keputusan</span>
-                    <span style={{ fontWeight: 600 }}>{evaluasiByProposalId[liveDetail.id].keputusan}</span>
-                  </div>
-                  {evaluasiByProposalId[liveDetail.id].catatan && (
-                    <div style={{ marginTop: 6, paddingTop: 6, borderTop: `1px solid ${T.border}`, color: T.text }}>
-                      {evaluasiByProposalId[liveDetail.id].catatan}
+            {/* Form Evaluasi - seluruh nilai yang sudah diinput Humas ditampilkan read-only. */}
+            {evaluasiByProposalId[liveDetail.id] ? (() => {
+              const ev = evaluasiByProposalId[liveDetail.id];
+              return (
+                <>
+                  <div style={{ fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2, textTransform: "uppercase", color: T.blue, fontWeight: 700, margin: "14px 0 8px" }}>Form Evaluasi</div>
+                  <div style={{ border: `1px solid ${T.border}`, borderRadius: 8, overflow: "hidden", marginBottom: 16 }}>
+                    <div style={{ padding: "10px 12px", background: T.bg, display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: "6px 16px", fontSize: 12.5 }}>
+                      <div><span style={{ color: T.muted }}>Penilai: </span><b>{ev.penilai || "-"}</b></div>
+                      <div><span style={{ color: T.muted }}>Tanggal: </span><b>{ev.tanggalPenilaian || "-"}</b></div>
                     </div>
-                  )}
-                </div>
+                    <div style={{ overflowX: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                        <thead><tr><th style={{ padding: 8, textAlign: "left", borderBottom: `1px solid ${T.border}` }}>Kategori</th><th style={{ padding: 8, textAlign: "center", borderBottom: `1px solid ${T.border}` }}>Nilai</th><th style={{ padding: 8, textAlign: "center", borderBottom: `1px solid ${T.border}` }}>Bobot</th></tr></thead>
+                        <tbody>
+                          {EVALUASI_FIELDS.map((f) => <tr key={f.key}><td style={{ padding: 8, borderBottom: `1px solid ${T.border}` }}>{f.label}</td><td style={{ padding: 8, textAlign: "center", borderBottom: `1px solid ${T.border}`, fontWeight: 700 }}>{ev.nilai?.[f.key] ?? "-"}</td><td style={{ padding: 8, textAlign: "center", borderBottom: `1px solid ${T.border}` }}>{f.bobot}</td></tr>)}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div style={{ padding: "10px 12px", display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8, fontSize: 12.5 }}>
+                      <div><span style={{ color: T.muted }}>Skor Akhir: </span><b>{ev.skorAkhir?.toFixed?.(2) ?? ev.skorAkhir ?? "-"}</b></div>
+                      <div><span style={{ color: T.muted }}>Keputusan: </span><b>{ev.keputusan || "-"}</b></div>
+                      <div style={{ gridColumn: "1 / -1" }}><span style={{ color: T.muted }}>Catatan Evaluasi: </span>{ev.catatan || "-"}</div>
+                    </div>
+                  </div>
+                </>
+              );
+            })() : (
+              <>
+                <div style={{ fontFamily: font.mono, fontSize: 10.5, letterSpacing: 1.2, textTransform: "uppercase", color: T.blue, fontWeight: 700, margin: "14px 0 8px" }}>Form Evaluasi</div>
+                <div style={{ color: T.muted, fontSize: 12.5, marginBottom: 16 }}>Belum ada Form Evaluasi.</div>
               </>
             )}
 
-            {liveDetail.reviewNote && (
-              <div style={{
+            {liveDetail.reviewNote && (() => {
+              const rejected = liveDetail.status === DOC_STATUS.REJECTED && liveDetail.rejectedBy === "asman";
+              return <div style={{
                 padding: "10px 12px", borderRadius: 8, marginBottom: 8,
-                background: STATUS_META.rejected.bg,
-                border: `1px solid ${STATUS_META.rejected.color}30`,
-                color: STATUS_META.rejected.color, fontSize: 12.5,
+                background: rejected ? STATUS_META.rejected.bg : T.bg,
+                border: `1px solid ${rejected ? `${STATUS_META.rejected.color}30` : T.border}`,
+                color: rejected ? STATUS_META.rejected.color : T.text, fontSize: 12.5,
               }}>
                 <div style={{ fontWeight: 700, marginBottom: 2 }}>
-                  Catatan Asman ({liveDetail.reviewedBy || "asman"}):
+                  Catatan Asman ({liveDetail.reviewCommentBy || liveDetail.reviewedBy || "asman"}):
                 </div>
                 {liveDetail.reviewNote}
-              </div>
-            )}
-            {liveDetail.processNote && (
-              <div style={{
+              </div>;
+            })()}
+            {liveDetail.processNote && (() => {
+              const rejected = liveDetail.status === DOC_STATUS.REJECTED && liveDetail.rejectedBy === "madm";
+              return <div style={{
                 padding: "10px 12px", borderRadius: 8, marginBottom: 12,
-                background: STATUS_META.processed.bg,
-                border: `1px solid ${STATUS_META.processed.color}30`,
-                color: STATUS_META.processed.color, fontSize: 12.5,
+                background: rejected ? STATUS_META.rejected.bg : T.bg,
+                border: `1px solid ${rejected ? `${STATUS_META.rejected.color}30` : T.border}`,
+                color: rejected ? STATUS_META.rejected.color : T.text, fontSize: 12.5,
               }}>
                 <div style={{ fontWeight: 700, marginBottom: 2 }}>
-                  Catatan MADM ({liveDetail.processedBy || "madm"}):
+                  Catatan MADM ({liveDetail.processCommentBy || liveDetail.processedBy || "madm"}):
                 </div>
                 {liveDetail.processNote}
+              </div>;
+            })()}
+
+            {["asman", "madm"].includes(user.role) && (
+              <div style={{ margin: "12px 0 16px", padding: "12px 14px", border: `1px solid ${T.border}`, borderRadius: 9, background: T.bg }}>
+                <div style={{ fontWeight: 700, fontSize: 12.5, marginBottom: 7 }}>Komentar {user.role === "asman" ? "Asman" : "MADM"}</div>
+                <textarea
+                  value={commentDraft}
+                  onChange={(e) => setCommentDraft(e.target.value)}
+                  rows={3}
+                  placeholder="Tulis komentar/catatan untuk Proposal ini..."
+                  style={{ width: "100%", boxSizing: "border-box", padding: "9px 11px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.inputBg, color: T.text, fontFamily: font.body, fontSize: 13, resize: "vertical" }}
+                />
+                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 7 }}>
+                  <Button variant="ghost" onClick={saveReviewerComment}>Simpan Komentar</Button>
+                </div>
               </div>
             )}
 
@@ -538,12 +565,12 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
         width={440}
       >
         <p style={{ fontSize: 13, color: T.muted, marginBottom: 12, lineHeight: 1.6 }}>
-          Isi catatan alasan penolakan. Catatan akan terlihat oleh Humas untuk direvisi dan dikirim ulang.
+          Isi catatan alasan penolakan. Catatan akan terlihat oleh Humas sebagai informasi penolakan.
         </p>
         <textarea
           value={rejectNote}
           onChange={(e) => setRejectNote(e.target.value)}
-          placeholder="Contoh: anggaran yang diajukan terlalu besar, mohon direvisi."
+          placeholder="Contoh: anggaran yang diajukan terlalu besar dan tidak dapat disetujui."
           rows={4}
           style={{
             width: "100%", boxSizing: "border-box",
