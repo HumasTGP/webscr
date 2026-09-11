@@ -3,12 +3,14 @@ import { Plus, Search, Trash2, X } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { parseLocalDate, uid } from "../../lib/utils";
 import { availablePaymentRabs, duplicatePayment } from "../../lib/recordLinks";
+import { getPaymentStage } from "../../lib/paymentStage";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
 import PageHeader from "../../components/PageHeader";
 import ComboManaged from "../../components/ComboManaged";
 import DatePicker from "../../components/DatePicker";
+import PaymentTrackingCard from "../../components/PaymentTrackingCard";
 
 const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
@@ -48,6 +50,26 @@ function StatusDot({ status, title, onClick }) {
   );
 }
 
+// Badge "Tahap Saat Ini" - sama persis (warna & logika) dengan yang di
+// RAB.jsx, ditulis ulang di sini biar tidak saling impor lintas-halaman.
+// Label dan logikanya sendiri SELALU dari getPaymentStage() yang sama.
+function StageBadge({ label }) {
+  const isDone = label === "Selesai";
+  const isEarly = label.startsWith("Menunggu TTD");
+  const color = isDone ? "#1E7F3E" : isEarly ? "#9AA3AD" : "#8A6D00";
+  const bg = isDone ? "#DEF6E5" : isEarly ? "#EEF0F3" : "#FFF4D6";
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 700,
+      color, background: bg, whiteSpace: "nowrap",
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+      {label}
+    </span>
+  );
+}
+
 function docStatus(list, rabId, idKey = "id", isComplete = null) {
   const match = list.find((r) => (r[idKey] || r.submissionId || r.id) === rabId);
   if (!match) return "none";
@@ -81,10 +103,20 @@ export const DEFAULT_COMBO = {
 
 const EMPTY_FORM = { rabId: "", bidang: "", tanggalKegiatan: "", judulKegiatan: "", program: "", subprogram: "", kategoriProgram: "" };
 
-export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVerif, notify, onNavigate, kategori, submissions, setSubmissions, combo, setCombo, rabIdsWithDokumentasi, user }) {
+export default function NonPoPage({
+  rab, lmp1, lmp2, bast, pakta, bapp, formVerif, notify, onNavigate, kategori, submissions, setSubmissions, combo, setCombo, rabIdsWithDokumentasi, user,
+  // Data tambahan buat getPaymentStage() - dipakai di kolom "Tahap Saat Ini".
+  // Semua opsional; komponen ini dipakai buat NON PO dan PO (lewat prop
+  // kategori), jadi butuh data lengkap terlepas kategori mana yang aktif.
+  ccList = [], poDocuments = {},
+  ccItems = [], ccVerifikasi = [], ccPermintaan = [], ccRencana = [],
+  ccBast = [], ccPakta = [], ccTtd = [], ccBapp = [], ccPertanggungjawaban = [],
+  paymentPackages = [],
+}) {
   // Asman (dan role lain di luar humas) cuma boleh LIHAT tracking di sini -
   // tidak bisa tambah/edit/hapus data. Humas tetap penuh seperti sebelumnya.
   const canEdit = !user || user.role === "humas";
+  const isPoTracking = kategori === "PO" && !canEdit;
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [search, setSearch] = useState("");
@@ -194,27 +226,48 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
               <tr>
                 <th style={thStyle}>Submission ID</th>
                 <th style={thStyle}>Judul kegiatan</th>
+                <th style={thStyle}>Tahap Saat Ini</th>
                 <th style={thStyle}>Bidang</th>
                 <th style={thStyle}>Program</th>
-                <th style={{ ...thStyle, textAlign: "center" }}>LMP1</th>
-                <th style={{ ...thStyle, textAlign: "center" }}>LMP2</th>
-                <th style={{ ...thStyle, textAlign: "center" }}>Verif</th>
-                <th style={{ ...thStyle, textAlign: "center" }}>BAST</th>
-                <th style={{ ...thStyle, textAlign: "center" }}>PI</th>
-                <th style={{ ...thStyle, textAlign: "center" }}>BAPP</th>
-                {canEdit && <th style={{ ...thStyle, textAlign: "center" }}>Aksi</th>}
+                {isPoTracking ? (
+                  <>
+                    <th style={thStyle}>Nomor PR</th>
+                    <th style={thStyle}>Nomor PO</th>
+                    <th style={{ ...thStyle, textAlign: "center" }}>BAST ERP</th>
+                    <th style={{ ...thStyle, textAlign: "center" }}>BAPB ERP</th>
+                  </>
+                ) : (
+                  <>
+                    <th style={{ ...thStyle, textAlign: "center" }}>LMP1</th>
+                    <th style={{ ...thStyle, textAlign: "center" }}>LMP2</th>
+                    <th style={{ ...thStyle, textAlign: "center" }}>Verif</th>
+                    <th style={{ ...thStyle, textAlign: "center" }}>BAST</th>
+                    <th style={{ ...thStyle, textAlign: "center" }}>PI</th>
+                    <th style={{ ...thStyle, textAlign: "center" }}>BAPP</th>
+                    {canEdit && <th style={{ ...thStyle, textAlign: "center" }}>Aksi</th>}
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
               {displayList.length === 0 && (
                 <tr>
-                  <td colSpan={11} style={{ ...tdStyle, textAlign: "center", color: T.muted, padding: "28px 12px" }}>
-                    Belum ada pengajuan NON PO. Klik "+ Tambah NON PO" untuk mulai.
+                  <td colSpan={isPoTracking ? 9 : canEdit ? 12 : 11} style={{ ...tdStyle, textAlign: "center", color: T.muted, padding: "28px 12px" }}>
+                    {`Belum ada pengajuan ${kategori || "NON PO"}.${canEdit ? ` Klik "+ Tambah ${kategori || "NON PO"}" untuk mulai.` : ""}`}
                   </td>
                 </tr>
               )}
               {displayList.map((row, i) => {
                 const rabId = row.rabId;
+                const rabRecord = rab.find((r) => r.idNumber === rabId);
+                const stage = rabRecord
+                  ? getPaymentStage(rabRecord, {
+                      nonPoList: submissions, ccList, poDocuments,
+                      lmp1, lmp2, formVerif, bast, pakta, bapp,
+                      ccItems, ccVerifikasi, ccPermintaan, ccRencana, ccBast, ccPakta, ccTtd, ccBapp, ccPertanggungjawaban,
+                      paymentPackages, paymentTrackingOnly: true,
+                    })
+                  : null;
                 const lmp1Status = docStatus(lmp1 || [], rabId, "submissionId", lmp1Complete);
                 const lmp2Status = docStatus(lmp2 || [], rabId, "submissionId", lmp2Complete);
                 const verifStatus = docStatus(formVerif || [], rabId, "submissionId", verifComplete);
@@ -233,21 +286,32 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
                       )}
                     </td>
                     <td style={tdStyle}>{row.judulKegiatan}</td>
+                    <td style={tdStyle}>{stage && <StageBadge label={stage.label} />}</td>
                     <td style={tdStyle}>{row.bidang}</td>
                     <td style={tdStyle}>{row.program}</td>
-                    <td style={tdCenterStyle}><StatusDot status={lmp1Status} onClick={() => onNavigate?.(`lmp1-${kategoriSuffix}`, rabId)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={lmp2Status} onClick={() => onNavigate?.(`lmp2-${kategoriSuffix}`, rabId)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={verifStatus} onClick={() => onNavigate?.(`form-verifikasi-${kategoriSuffix}`, rabId)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={bastStatus} onClick={() => onNavigate?.(`bast-${kategoriSuffix}`, rabId)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={piStatus} onClick={() => onNavigate?.(`pakta-${kategoriSuffix}`, rabId)} /></td>
-                    <td style={tdCenterStyle}><StatusDot status={bappStatus} onClick={() => onNavigate?.(`bapp-${kategoriSuffix}`, rabId)} /></td>
-                    {canEdit && (
-                      <td style={tdCenterStyle}>
-                        <button type="button" title="Hapus" onClick={() => setDeleteConfirm(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.danger, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                          <Trash2 size={12} />
-                        </button>
-                      </td>
-                    )}
+                    {isPoTracking ? (() => {
+                      const erp = poDocuments?.[rabId] || {};
+                      return <>
+                        <td style={tdStyle}>{erp.nomorPR || "-"}</td>
+                        <td style={tdStyle}>{erp.nomorPO || "-"}</td>
+                        <td style={tdCenterStyle}><StatusDot status={erp.idBast ? "done" : "none"} /></td>
+                        <td style={tdCenterStyle}><StatusDot status={erp.idBapb ? "done" : "none"} /></td>
+                      </>;
+                    })() : <>
+                      <td style={tdCenterStyle}><StatusDot status={lmp1Status} onClick={() => onNavigate?.(`lmp1-${kategoriSuffix}`, rabId)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={lmp2Status} onClick={() => onNavigate?.(`lmp2-${kategoriSuffix}`, rabId)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={verifStatus} onClick={() => onNavigate?.(`form-verifikasi-${kategoriSuffix}`, rabId)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={bastStatus} onClick={() => onNavigate?.(`bast-${kategoriSuffix}`, rabId)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={piStatus} onClick={() => onNavigate?.(`pakta-${kategoriSuffix}`, rabId)} /></td>
+                      <td style={tdCenterStyle}><StatusDot status={bappStatus} onClick={() => onNavigate?.(`bapp-${kategoriSuffix}`, rabId)} /></td>
+                      {canEdit && (
+                        <td style={tdCenterStyle}>
+                          <button type="button" title="Hapus" onClick={() => setDeleteConfirm(row)} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${T.border}`, background: T.card, cursor: "pointer", color: T.danger, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                            <Trash2 size={12} />
+                          </button>
+                        </td>
+                      )}
+                    </>}
                   </tr>
                 );
               })}
@@ -258,6 +322,35 @@ export default function NonPoPage({ rab, lmp1, lmp2, bast, pakta, bapp, formVeri
       <div style={{ fontSize: 11.5, color: T.muted, margin: "10px 2px 0", lineHeight: 1.6 }}>
         ✓ hijau = dokumen sudah dibuat, • kuning = masih draft, — abu = belum dibuat. Lanjutkan pengajuan dari submenu sidebar di sebelah kiri.
       </div>
+
+      {displayList.length > 0 && (
+        <div style={{ marginTop: 18 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>
+            Tracking Tahapan {kategori || "NON PO"}
+          </div>
+          {displayList.map((row) => {
+            const rabRecord = rab.find((r) => r.idNumber === row.rabId);
+            if (!rabRecord) return null;
+            const stage = getPaymentStage(rabRecord, {
+              nonPoList: submissions, ccList, poDocuments,
+              lmp1, lmp2, formVerif, bast, pakta, bapp,
+              ccItems, ccVerifikasi, ccPermintaan, ccRencana, ccBast, ccPakta, ccTtd, ccBapp, ccPertanggungjawaban,
+              paymentPackages, paymentTrackingOnly: true,
+            });
+            return (
+              <PaymentTrackingCard
+                key={`tracking-${row.id || row.rabId}`}
+                rab={rabRecord}
+                stage={stage}
+                kategori={kategori || rabRecord.kategori}
+                paymentCreatedAt={row.createdAt}
+                paymentPackage={paymentPackages.find((pkg) => pkg.idRab === row.rabId)}
+                scope="payment"
+              />
+            );
+          })}
+        </div>
+      )}
 
       {/* Add NON PO modal */}
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Tambah NON PO" width={560}>

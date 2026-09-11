@@ -1,0 +1,4940 @@
+[
+  {
+    "id": "ORG-SOURCE-0001",
+    "source_id": "2",
+    "name": "Adjusment Budget KP",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0002",
+    "source_id": "3",
+    "name": "ABB SAKTI INDUSTRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0003",
+    "source_id": "4",
+    "name": "ABDIBANGUN BUANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0004",
+    "source_id": "5",
+    "name": "ACITYA DIPTA KAHYUNA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0005",
+    "source_id": "6",
+    "name": "ADHIGANA PERKASA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0006",
+    "source_id": "7",
+    "name": "ADHIKA TEKNIK UTAMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0007",
+    "source_id": "8",
+    "name": "ADHIWIYATA BINA BESTARI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0008",
+    "source_id": "9",
+    "name": "ADIKARA KARYA PRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0009",
+    "source_id": "10",
+    "name": "ADIKA PUTRA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0010",
+    "source_id": "11",
+    "name": "AETRA AIR JAKARTA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0011",
+    "source_id": "12",
+    "name": "AGAPE TRIKARSA LIBRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0012",
+    "source_id": "13",
+    "name": "AGHEO LANGGENG CHEMINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0013",
+    "source_id": "14",
+    "name": "AGILITY INTERNATIONAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0014",
+    "source_id": "15",
+    "name": "AGUNG PERTIWI NAULI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0015",
+    "source_id": "16",
+    "name": "AGUNG SEDJAHTERA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0016",
+    "source_id": "17",
+    "name": "AGUNG SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0017",
+    "source_id": "18",
+    "name": "AIR SURYA RADIATOR, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0018",
+    "source_id": "19",
+    "name": "ALBANY ENGINEERING SERVICES, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0019",
+    "source_id": "20",
+    "name": "ALFA PEGASUS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0020",
+    "source_id": "21",
+    "name": "ALMA AMI ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0021",
+    "source_id": "22",
+    "name": "ALMEGA INTI PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0022",
+    "source_id": "23",
+    "name": "ALPHACON VALFINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0023",
+    "source_id": "24",
+    "name": "ALSTOM POWER ENERGY SYSTEMS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0024",
+    "source_id": "25",
+    "name": "ALTEKMES SIATOLU JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0025",
+    "source_id": "26",
+    "name": "AMALIA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0026",
+    "source_id": "27",
+    "name": "AMIDO MAKMOR TULUS SEJATI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0027",
+    "source_id": "28",
+    "name": "ANARGYA KARTIKA WIJAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0028",
+    "source_id": "29",
+    "name": "ANDALAN TEKNOLOGI INOVASI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0029",
+    "source_id": "30",
+    "name": "ANDA LESTARI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0030",
+    "source_id": "31",
+    "name": "ANDOR PANO GUNA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0031",
+    "source_id": "32",
+    "name": "ANEXCO MITRA ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0032",
+    "source_id": "33",
+    "name": "ANP ENGINEERING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0033",
+    "source_id": "34",
+    "name": "ANTA CANGGIH MURNI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0034",
+    "source_id": "35",
+    "name": "ANUGERAH KARYA MANDIRI INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0035",
+    "source_id": "36",
+    "name": "ANUGERAH WIDJAJA MANDIRI CHEMINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0036",
+    "source_id": "37",
+    "name": "ANUGRAH ADI WISATA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0037",
+    "source_id": "38",
+    "name": "ANUGRAH MITRA NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0038",
+    "source_id": "39",
+    "name": "ANUGRAH PATRAGAS LESTARI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0039",
+    "source_id": "40",
+    "name": "ANUGRAH YOMI ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0040",
+    "source_id": "41",
+    "name": "AQUAKULTURA LESTARI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0041",
+    "source_id": "42",
+    "name": "ARASAINS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0042",
+    "source_id": "43",
+    "name": "ARCSINDO KARYA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0043",
+    "source_id": "44",
+    "name": "ARETAS NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0044",
+    "source_id": "45",
+    "name": "ARISINDO JAYA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0045",
+    "source_id": "46",
+    "name": "ARITA PRIMA INDONESIA TBK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0046",
+    "source_id": "47",
+    "name": "ARLISCOPUTRA HANTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0047",
+    "source_id": "48",
+    "name": "ARLISCO ANUGRAH PRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0048",
+    "source_id": "49",
+    "name": "ARVA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0049",
+    "source_id": "50",
+    "name": "ASEMKA COMMERCE INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0050",
+    "source_id": "51",
+    "name": "ASIMA JAYA TEKNIK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0051",
+    "source_id": "52",
+    "name": "ASOSIASI PROFESI PENGELOLAAN LIMBAH DAN EMISI INDONESIA (APPLIED)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0052",
+    "source_id": "53",
+    "name": "ASTAMAN FINA RAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0053",
+    "source_id": "54",
+    "name": "ASWAR PERKASA PUTRA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0054",
+    "source_id": "55",
+    "name": "ATAMORA TEHNIK MAKMUR, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0055",
+    "source_id": "56",
+    "name": "ATLAS COPCO INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0056",
+    "source_id": "57",
+    "name": "ATLAS COPCO (THAILAND) LIMITED",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0057",
+    "source_id": "58",
+    "name": "ATLAS PETROCHEM INDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0058",
+    "source_id": "59",
+    "name": "ATRINDO ASIA GLOBAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0059",
+    "source_id": "60",
+    "name": "AZKA MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0060",
+    "source_id": "61",
+    "name": "BAKTI ENERGI SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0061",
+    "source_id": "62",
+    "name": "BALAI BESAR BAHAN DAN BARANG TEKNIK, KEMENTRIAN PERINDUSTRIAN REPUBLIK INDONESIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0062",
+    "source_id": "63",
+    "name": "BALTEC EXHAUST DAN INLET SYSTEM INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0063",
+    "source_id": "64",
+    "name": "BANGUN KARYA PERKASA JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0064",
+    "source_id": "65",
+    "name": "BANGUN MEGA PERTIWI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0065",
+    "source_id": "66",
+    "name": "BANTEN GEMILANG, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0066",
+    "source_id": "67",
+    "name": "BAREZ INTI ABDINUSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0067",
+    "source_id": "68",
+    "name": "BARNAM MAS PRIMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0068",
+    "source_id": "69",
+    "name": "BAROKAH JAYA ABADI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0069",
+    "source_id": "70",
+    "name": "BASUKI WATER INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0070",
+    "source_id": "71",
+    "name": "BAYU GLOBAL NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0071",
+    "source_id": "72",
+    "name": "BEGAWAN MUKTI WIBAWA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0072",
+    "source_id": "73",
+    "name": "BENEFITA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0073",
+    "source_id": "74",
+    "name": "BENGKEL REPARASI TJOKRO BERSAUDARA SEMARANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0074",
+    "source_id": "75",
+    "name": "BENS PRO INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0075",
+    "source_id": "76",
+    "name": "BERCA HARDAYAPERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0076",
+    "source_id": "77",
+    "name": "BERINA TIRTA GEMILANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0077",
+    "source_id": "78",
+    "name": "BERKAH MANDIRI ABADI SENTOSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0078",
+    "source_id": "79",
+    "name": "BERKAH MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0079",
+    "source_id": "80",
+    "name": "BERMAK UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0080",
+    "source_id": "81",
+    "name": "BERSAUDARA NINGRAT MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0081",
+    "source_id": "82",
+    "name": "BEXCELLENT MITRA CEMERLANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0082",
+    "source_id": "83",
+    "name": "BHATINI MITRA JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0083",
+    "source_id": "84",
+    "name": "BIDANG KEAMANAN DAN HUMAS",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0084",
+    "source_id": "85",
+    "name": "BIDANG PENGEMBANGAN KOMPETENSI, PT INDONESIA POWER",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0085",
+    "source_id": "86",
+    "name": "BIDANG UMUM",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0086",
+    "source_id": "87",
+    "name": "BINAR INTI GUNA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0087",
+    "source_id": "88",
+    "name": "BINA REKA SARANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0088",
+    "source_id": "89",
+    "name": "BINA SARANA EKATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0089",
+    "source_id": "90",
+    "name": "BINTANG CITRA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0090",
+    "source_id": "91",
+    "name": "BINTANG MERPATI, PD",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0091",
+    "source_id": "92",
+    "name": "BINTANG PELANGI MAS, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0092",
+    "source_id": "93",
+    "name": "BOROBUDUR AGUNG PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0093",
+    "source_id": "94",
+    "name": "BRENNTAG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0094",
+    "source_id": "95",
+    "name": "BUILDING AND PLANT SAFETY INSTITUTE (BPSI), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0095",
+    "source_id": "96",
+    "name": "BUMIMITRA ADIPERSADA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0096",
+    "source_id": "97",
+    "name": "BUMI CAHAYA UNGGUL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0097",
+    "source_id": "98",
+    "name": "BUMI SARANA PRIMA JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0098",
+    "source_id": "99",
+    "name": "CAHAYA AMATA VAJRA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0099",
+    "source_id": "100",
+    "name": "CAHAYA MAKMUR AGUNG MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0100",
+    "source_id": "101",
+    "name": "CAHAYA TERANG MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0101",
+    "source_id": "102",
+    "name": "CAKRA INTI PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0102",
+    "source_id": "103",
+    "name": "CALMIC INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0103",
+    "source_id": "104",
+    "name": "CARAKAMAS INTIALAM, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0104",
+    "source_id": "105",
+    "name": "CARAKA TIRTA PRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0105",
+    "source_id": "106",
+    "name": "CARBON & ELECTRIC, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0106",
+    "source_id": "107",
+    "name": "CG POWER SYSTEMS INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0107",
+    "source_id": "108",
+    "name": "CINTA KARYA TEKNIK, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0108",
+    "source_id": "109",
+    "name": "CIPAKU INDAH, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0109",
+    "source_id": "110",
+    "name": "CIPTA ALAM PERSADA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0110",
+    "source_id": "111",
+    "name": "CIPTA KARYA SELARAS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0111",
+    "source_id": "112",
+    "name": "CIPTA KRIDA BAHARI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0112",
+    "source_id": "113",
+    "name": "CIPTA MUKTI MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0113",
+    "source_id": "114",
+    "name": "CIPTA SOLUSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0114",
+    "source_id": "115",
+    "name": "CIPTA TAPAK SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0115",
+    "source_id": "116",
+    "name": "CISTECH ALPHA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0116",
+    "source_id": "117",
+    "name": "CITRA AIRINDO ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0117",
+    "source_id": "118",
+    "name": "CITRA CIPTA AVIGRHA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0118",
+    "source_id": "119",
+    "name": "CITRA TEKNIKA UTAMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0119",
+    "source_id": "120",
+    "name": "CITRA WAHANA SEKAR BUANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0120",
+    "source_id": "121",
+    "name": "COGINDO DAYABERSAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0121",
+    "source_id": "122",
+    "name": "CONMON PRIMA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0122",
+    "source_id": "123",
+    "name": "CONTROL SYSTEMS ARENA PARA NUSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0123",
+    "source_id": "124",
+    "name": "CONTROMATIC PRIMA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0124",
+    "source_id": "125",
+    "name": "CORELAB INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0125",
+    "source_id": "126",
+    "name": "CORPORATE FORUM FOR COMMUNITY DEVELOPMENT ASSOCIATION",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0126",
+    "source_id": "127",
+    "name": "Dewi Sri, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0127",
+    "source_id": "128",
+    "name": "DANAN WINGUS SAKTI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0128",
+    "source_id": "129",
+    "name": "DANIKIETA BERLIANVA PRAKARSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0129",
+    "source_id": "130",
+    "name": "DATA RAYA SOLUSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0130",
+    "source_id": "131",
+    "name": "DAVARA HEXA AROF CROME, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0131",
+    "source_id": "132",
+    "name": "DIELEKTRIKA PERSADA TEKNIK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0132",
+    "source_id": "133",
+    "name": "DIERS SUPPLY GLOBALTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0133",
+    "source_id": "134",
+    "name": "DINAMIKA AIR CON, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0134",
+    "source_id": "135",
+    "name": "DINAMIKA UNITAMA ARTISTIKA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0135",
+    "source_id": "136",
+    "name": "DINAS PEMADAM KEBAKARAN PROP. DKI JAKARTA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0136",
+    "source_id": "137",
+    "name": "DTHERMO INDUSTRIAL, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0137",
+    "source_id": "138",
+    "name": "DUA PENDAWA MAS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0138",
+    "source_id": "139",
+    "name": "DUNAMIS INTRA MITRA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0139",
+    "source_id": "140",
+    "name": "DUNAMIS INTRA SARANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0140",
+    "source_id": "141",
+    "name": "DUNIA CIPTA LESTARI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0141",
+    "source_id": "142",
+    "name": "DUNIA SARANA TEKNIK, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0142",
+    "source_id": "143",
+    "name": "DUTA BUANA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0143",
+    "source_id": "144",
+    "name": "DUTA WIBAWA SAKTI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0144",
+    "source_id": "145",
+    "name": "DWI MUTIARA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0145",
+    "source_id": "146",
+    "name": "EAGLEBURGMANN INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0146",
+    "source_id": "147",
+    "name": "EBARA TURBOMACHINERY SERVICES INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0147",
+    "source_id": "148",
+    "name": "ECOLAB INTERNATIONAL INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0148",
+    "source_id": "149",
+    "name": "EDUTRAIN, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0149",
+    "source_id": "150",
+    "name": "EFFO SINAMBUNG PERSADA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0150",
+    "source_id": "151",
+    "name": "EKATAMA PUTRA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0151",
+    "source_id": "152",
+    "name": "ELEKTRIKAL DAYA UTAMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0152",
+    "source_id": "153",
+    "name": "ELESKA HAKIT, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0153",
+    "source_id": "154",
+    "name": "ELMECON MULTIKENCANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0154",
+    "source_id": "155",
+    "name": "EMPLOYEE",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0155",
+    "source_id": "156",
+    "name": "ENERGI DUTA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0156",
+    "source_id": "157",
+    "name": "ENERGI PRIMA NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0157",
+    "source_id": "158",
+    "name": "ENERGI TONNY PRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0158",
+    "source_id": "159",
+    "name": "ENERGY MANDIRI SEJAHTERA BERSAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0159",
+    "source_id": "160",
+    "name": "ENTHEOS JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0160",
+    "source_id": "161",
+    "name": "EONCHEMICALS PUTRA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0161",
+    "source_id": "162",
+    "name": "EQUIVA LIGAND INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0162",
+    "source_id": "163",
+    "name": "ERA MANDIRI JAYA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0163",
+    "source_id": "164",
+    "name": "ESA PILAR UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0164",
+    "source_id": "165",
+    "name": "EUISANDRAMI TORMITA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0165",
+    "source_id": "166",
+    "name": "EXCEL ELECTRIC POWERINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0166",
+    "source_id": "167",
+    "name": "EXPERTINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0167",
+    "source_id": "168",
+    "name": "FAJAR BENUA INDOPACK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0168",
+    "source_id": "169",
+    "name": "FAJAR INTI SURYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0169",
+    "source_id": "170",
+    "name": "FAKULTAS ILMU SOSIAL DAN ILMU POLITIK UNIVERSITAS GADJAH MADA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0170",
+    "source_id": "171",
+    "name": "FERRINDO TATA WAHANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0171",
+    "source_id": "172",
+    "name": "FESTO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0172",
+    "source_id": "173",
+    "name": "FILTRA TEKNIK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0173",
+    "source_id": "174",
+    "name": "FIQRY JAYA MANUNGGAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0174",
+    "source_id": "175",
+    "name": "FIRE SAFETY INDONESIA (FSI), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0175",
+    "source_id": "176",
+    "name": "FOKUS MAKSIMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0176",
+    "source_id": "177",
+    "name": "FORTUNA CRANESINDO UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0177",
+    "source_id": "178",
+    "name": "FRESH GALANG MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0178",
+    "source_id": "179",
+    "name": "General Electric (Switzerland) GmbH",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0179",
+    "source_id": "180",
+    "name": "GANEFO BERKAH SUKOWATI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0180",
+    "source_id": "181",
+    "name": "GARDA POWER MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0181",
+    "source_id": "182",
+    "name": "GARUDA MAINTENANCE FACILITY AEROASIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0182",
+    "source_id": "183",
+    "name": "GELORA SUKSES, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0183",
+    "source_id": "184",
+    "name": "GEMILANG JAYA TEKNINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0184",
+    "source_id": "185",
+    "name": "GEMILANG TEKNIK DELAPAN NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0185",
+    "source_id": "186",
+    "name": "GENERAL ELECTRIC GLOBAL PARTS AND PRODUCTS GMBH",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0186",
+    "source_id": "187",
+    "name": "GENERAL ELECTRIC POWER SOLUTIONS INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0187",
+    "source_id": "188",
+    "name": "GENERATOR PASIFIK INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0188",
+    "source_id": "189",
+    "name": "GERAKAN CILIWUNG BERSIH",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0189",
+    "source_id": "190",
+    "name": "GE NUSANTARA TURBINE SERVICES, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0190",
+    "source_id": "191",
+    "name": "GE OPERATIONS INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0191",
+    "source_id": "192",
+    "name": "GHANIYA BERKAH, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0192",
+    "source_id": "193",
+    "name": "GHAZZIRAH ENERGIA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0193",
+    "source_id": "194",
+    "name": "GIGANTIKA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0194",
+    "source_id": "195",
+    "name": "GLOBALINDO SINERGI SEMESTA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0195",
+    "source_id": "196",
+    "name": "GLOBAL HADITECH, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0196",
+    "source_id": "197",
+    "name": "GLOBAL INDO SIMETRIKA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0197",
+    "source_id": "198",
+    "name": "GOLDEN PRATAMA ENGINEERING,PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0198",
+    "source_id": "199",
+    "name": "GOLTENS JAKARTA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0199",
+    "source_id": "200",
+    "name": "GRAHA BHAKTI KENCANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0200",
+    "source_id": "201",
+    "name": "GRAHA TANNA GEMILANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0201",
+    "source_id": "202",
+    "name": "GRAHA USAHA TEKNIK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0202",
+    "source_id": "203",
+    "name": "GREEN ENERGY NUSANTARA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0203",
+    "source_id": "204",
+    "name": "GUNA ELEKTRO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0204",
+    "source_id": "205",
+    "name": "GUNA POWER SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0205",
+    "source_id": "206",
+    "name": "GUNUNG MORIA MEGA PRIMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0206",
+    "source_id": "207",
+    "name": "HADASA DINAMIKA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0207",
+    "source_id": "208",
+    "name": "HAFRI MULTI MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0208",
+    "source_id": "209",
+    "name": "HALEYORA POWERINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0209",
+    "source_id": "210",
+    "name": "HANANG GEMA INSTRUMENT, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0210",
+    "source_id": "211",
+    "name": "HAPPI MANDIRI SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0211",
+    "source_id": "212",
+    "name": "HAPPI PRIOK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0212",
+    "source_id": "213",
+    "name": "HARMONI INTI PRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0213",
+    "source_id": "214",
+    "name": "HARTONO MARUNDA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0214",
+    "source_id": "215",
+    "name": "HARUNI CITRA GEMILANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0215",
+    "source_id": "216",
+    "name": "HASANATA KHARISMA ANUGRAH, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0216",
+    "source_id": "217",
+    "name": "HAY GROUP, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0217",
+    "source_id": "218",
+    "name": "HENGTRACO PROTECSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0218",
+    "source_id": "219",
+    "name": "HERMON PANCAKARSA LIBRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0219",
+    "source_id": "220",
+    "name": "HEXAREKA NIAGATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0220",
+    "source_id": "221",
+    "name": "HEXASTEEL ENGINEERING, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0221",
+    "source_id": "222",
+    "name": "HIDRO DINAMIKA KENCANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0222",
+    "source_id": "223",
+    "name": "HILMY ANUGERAH, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0223",
+    "source_id": "224",
+    "name": "HIMALAYA EVEREST JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0224",
+    "source_id": "225",
+    "name": "HITACHI ASIA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0225",
+    "source_id": "226",
+    "name": "HOGE HONJO HALAMEA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0226",
+    "source_id": "227",
+    "name": "HOPPECKE INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0227",
+    "source_id": "228",
+    "name": "HOTEL GRAND ORCHARDZ",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0228",
+    "source_id": "229",
+    "name": "HYPERINDO MEDIA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0229",
+    "source_id": "230",
+    "name": "HYPROWIRA ADHITAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0230",
+    "source_id": "231",
+    "name": "IDEALAND CIPTA HIJAU, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0231",
+    "source_id": "232",
+    "name": "IDE PENA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0232",
+    "source_id": "233",
+    "name": "IKATAN AKUNTAN INDONESIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0233",
+    "source_id": "234",
+    "name": "ILHAM SUKSES MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0234",
+    "source_id": "235",
+    "name": "IMECO INTER SARANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0235",
+    "source_id": "236",
+    "name": "IMIKA DEWANTOMAS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0236",
+    "source_id": "237",
+    "name": "INAKO PERSADA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0237",
+    "source_id": "238",
+    "name": "INDEVCO GLOBAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0238",
+    "source_id": "239",
+    "name": "INDOBARA BAHANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0239",
+    "source_id": "240",
+    "name": "INDOCO PRIMULA JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0240",
+    "source_id": "241",
+    "name": "INDOGRAMA DINAMIKA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0241",
+    "source_id": "242",
+    "name": "INDOKA PUTRA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0242",
+    "source_id": "243",
+    "name": "INDONESIA COMNETS PLUS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0243",
+    "source_id": "244",
+    "name": "INDONESIA HARVEST CHEMICAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0244",
+    "source_id": "245",
+    "name": "INDONESIA MANAGEMENT TRAINING",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0245",
+    "source_id": "246",
+    "name": "INDONESIA MEDIA TRAINING CONSULTANT, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0246",
+    "source_id": "247",
+    "name": "INDOSERAKO SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0247",
+    "source_id": "248",
+    "name": "INDOSURYA KONTROLINDO, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0248",
+    "source_id": "249",
+    "name": "INDOTAMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0249",
+    "source_id": "250",
+    "name": "INDO MAHAKARYA GEMILANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0250",
+    "source_id": "251",
+    "name": "INFILTRACO MURNI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0251",
+    "source_id": "252",
+    "name": "INNASCO KURNIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0252",
+    "source_id": "253",
+    "name": "INSPIRA KARYA DINAMIS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0253",
+    "source_id": "254",
+    "name": "INSTITUT PERTANIAN BOGOR, PN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0254",
+    "source_id": "255",
+    "name": "INTAN GAMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0255",
+    "source_id": "256",
+    "name": "INTEGRASINDO MITRA INFOTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0256",
+    "source_id": "257",
+    "name": "INTEGRA AUTOMASI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0257",
+    "source_id": "258",
+    "name": "INTERCHEM PLASAGRO JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0258",
+    "source_id": "259",
+    "name": "INTERCONSYS TECHNOLOGY, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0259",
+    "source_id": "260",
+    "name": "INTERTEK UTAMA SERVICES, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0260",
+    "source_id": "261",
+    "name": "INTI CIPTA SOLUSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0261",
+    "source_id": "262",
+    "name": "INTI COMP SOLUSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0262",
+    "source_id": "263",
+    "name": "INTI JASA KREATIF, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0263",
+    "source_id": "264",
+    "name": "INTI KARYA MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0264",
+    "source_id": "265",
+    "name": "INTI PRIMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0265",
+    "source_id": "266",
+    "name": "INTI UTAMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0266",
+    "source_id": "267",
+    "name": "IQBAL PUTRA PRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0267",
+    "source_id": "268",
+    "name": "IRADAT, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0268",
+    "source_id": "269",
+    "name": "IRIDIAN SURYA WAHANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0269",
+    "source_id": "270",
+    "name": "ITI MARINE & OILFIELD UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0270",
+    "source_id": "271",
+    "name": "JAKARTA TOURISINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0271",
+    "source_id": "272",
+    "name": "JAYA MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0272",
+    "source_id": "273",
+    "name": "JAYA POWER MAKMUR, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0273",
+    "source_id": "274",
+    "name": "JOHN CRANE INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0274",
+    "source_id": "275",
+    "name": "KAKA TRANSLINK INTERNATIONAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0275",
+    "source_id": "276",
+    "name": "KALASINDO PRIMA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0276",
+    "source_id": "277",
+    "name": "KALENESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0277",
+    "source_id": "278",
+    "name": "KALIMANIS RAKSA DAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0278",
+    "source_id": "279",
+    "name": "KAMANJAYA TEKNIK INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0279",
+    "source_id": "280",
+    "name": "KANAYA LINI SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0280",
+    "source_id": "281",
+    "name": "KARSAMUDIKA ANDALAN UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0281",
+    "source_id": "282",
+    "name": "KARTIKA YUDHA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0282",
+    "source_id": "283",
+    "name": "KARUNIA TRADA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0283",
+    "source_id": "284",
+    "name": "KARYA ENERGI INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0284",
+    "source_id": "285",
+    "name": "KARYA SARIKA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0285",
+    "source_id": "286",
+    "name": "KARYA SEJAHTERA METHOD, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0286",
+    "source_id": "287",
+    "name": "KASYASINDO MEGAH PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0287",
+    "source_id": "288",
+    "name": "KAS NEGARA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0288",
+    "source_id": "289",
+    "name": "KATIGA MUKTI PRIMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0289",
+    "source_id": "290",
+    "name": "KAUTSAR INTI PRIMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0290",
+    "source_id": "291",
+    "name": "KAWAN LAMA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0291",
+    "source_id": "292",
+    "name": "KENCANA SAKTI SOLUSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0292",
+    "source_id": "293",
+    "name": "KENDALI PARAMITA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0293",
+    "source_id": "294",
+    "name": "KHARISMA MITRA MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0294",
+    "source_id": "295",
+    "name": "KHARISMA PUTRA ADIGRAHA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0295",
+    "source_id": "296",
+    "name": "KHLORIN INTI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0296",
+    "source_id": "297",
+    "name": "KINARYA GEMILANG ADHITAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0297",
+    "source_id": "298",
+    "name": "KINARYA IMAJI INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0298",
+    "source_id": "299",
+    "name": "KJPP DASAAT YUDISTIRA DAN REKAN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0299",
+    "source_id": "300",
+    "name": "KJPP YANUAR BEY DAN REKAN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0300",
+    "source_id": "301",
+    "name": "KOEN CINEMA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0301",
+    "source_id": "302",
+    "name": "KOMPRESINDO UTAMAJAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0302",
+    "source_id": "303",
+    "name": "KONECRANES, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0303",
+    "source_id": "304",
+    "name": "KONE INDO ELEVATOR, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0304",
+    "source_id": "305",
+    "name": "KONSERVASI ENERGI SOLUSI INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0305",
+    "source_id": "306",
+    "name": "KONSORSIUM KINARYA LIMAN MARGASETA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0306",
+    "source_id": "307",
+    "name": "KONSORSIUM PT. HITACHI ASIA INDONESIA & PT. GRAHA USAHA TEKNIK",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0307",
+    "source_id": "308",
+    "name": "KOPERASI BERKAH USAHA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0308",
+    "source_id": "309",
+    "name": "KOPERASI KARYA USAHA BHAKTI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0309",
+    "source_id": "310",
+    "name": "KOPERASI MEKAR",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0310",
+    "source_id": "311",
+    "name": "KOPERASI PEGAWAI PLN SEKTOR PRIOK",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0311",
+    "source_id": "312",
+    "name": "KOPERASI RUSAMAS",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0312",
+    "source_id": "313",
+    "name": "KOTAMINYAK INTERNUSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0313",
+    "source_id": "314",
+    "name": "KRANINDO PRIMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0314",
+    "source_id": "315",
+    "name": "KREASI CIPTA ASIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0315",
+    "source_id": "316",
+    "name": "KREASI UTAMA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0316",
+    "source_id": "317",
+    "name": "KRIS MARGA PERINTIS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0317",
+    "source_id": "318",
+    "name": "KSB INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0318",
+    "source_id": "319",
+    "name": "KSB SALES INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0319",
+    "source_id": "320",
+    "name": "KSD INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0320",
+    "source_id": "321",
+    "name": "KSO COGINDO - MATRA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0321",
+    "source_id": "322",
+    "name": "KSO COGINDO - TAKA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0322",
+    "source_id": "323",
+    "name": "KSO COGINDO - VARLEY",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0323",
+    "source_id": "324",
+    "name": "KUBIK KREASI SISILAIN, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0324",
+    "source_id": "325",
+    "name": "LABORATORIUM DINAMIKA PUSAT PENELITIAN ANTAR UNIVERSITAS ILMU REKAYASA.",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0325",
+    "source_id": "326",
+    "name": "LAGAS MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0326",
+    "source_id": "327",
+    "name": "LAMOSIC UTAMA KARYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0327",
+    "source_id": "328",
+    "name": "LAPI GANESHATAMA CONSULTING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0328",
+    "source_id": "329",
+    "name": "LAUT TAWAR CATERING",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0329",
+    "source_id": "330",
+    "name": "LA TOFI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0330",
+    "source_id": "331",
+    "name": "LEMBAGA MASYARAKAT PROFESI INDONESIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0331",
+    "source_id": "332",
+    "name": "LEMBAGA PENELITIAN & PENGABDIAN KPD MASYARAKAT IPB",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0332",
+    "source_id": "333",
+    "name": "LEMBAGA PENGEMBANGAN DAN KONSULTASI NASIONAL (LPKN)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0333",
+    "source_id": "334",
+    "name": "LEMBAGA PUSAT STUDI KEBIJAKAN NASIONAL",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0334",
+    "source_id": "335",
+    "name": "LEMBAGA TEKNOLOGI FTUI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0335",
+    "source_id": "336",
+    "name": "LEMTEK KONSULTAN INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0336",
+    "source_id": "337",
+    "name": "LEN INDUSTRI (PERSERO), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0337",
+    "source_id": "338",
+    "name": "LEON JAYA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0338",
+    "source_id": "339",
+    "name": "LPPKM FKM UI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0339",
+    "source_id": "340",
+    "name": "LSP HAKE (LEMBAGA SERTIFIKASI PROFESI HMPUNAN AHLI KONSERVASI ENERGI)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0340",
+    "source_id": "341",
+    "name": "LSP LALINSA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0341",
+    "source_id": "342",
+    "name": "LUAS BIRUS UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0342",
+    "source_id": "343",
+    "name": "LUKY JAYA ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0343",
+    "source_id": "344",
+    "name": "Mulyadi, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0344",
+    "source_id": "345",
+    "name": "MADA PUTRA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0345",
+    "source_id": "346",
+    "name": "MADIT KARYA-852062348009000",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0346",
+    "source_id": "347",
+    "name": "MAGNA SARDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0347",
+    "source_id": "348",
+    "name": "MAHAPUTRA ADI NUSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0348",
+    "source_id": "349",
+    "name": "MAIRODI MANDIRI SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0349",
+    "source_id": "350",
+    "name": "MAITHRYA AMARTA TEKNIK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0350",
+    "source_id": "351",
+    "name": "MAJAPADA KARYA ENERGY, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0351",
+    "source_id": "352",
+    "name": "MAJA BINTANG INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0352",
+    "source_id": "353",
+    "name": "MAKMUR JAYA KENCANA CEMERLANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0353",
+    "source_id": "354",
+    "name": "MANDIRI MITRA KARYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0354",
+    "source_id": "355",
+    "name": "MANDIRI NUANSA ENERGI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0355",
+    "source_id": "356",
+    "name": "MANDIRI REKA ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0356",
+    "source_id": "357",
+    "name": "MANDIRI SEKAWAN INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0357",
+    "source_id": "358",
+    "name": "MANGATUR DHARMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0358",
+    "source_id": "359",
+    "name": "MANTISAGROUP INDONESIA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0359",
+    "source_id": "360",
+    "name": "MARDOHAR CATUR TUNGGAL GAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0360",
+    "source_id": "361",
+    "name": "MASTE DAYAA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0361",
+    "source_id": "362",
+    "name": "MBERE LANGI MUDA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0362",
+    "source_id": "363",
+    "name": "MECCA ELEKTRINDO INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0363",
+    "source_id": "364",
+    "name": "MEDIATAMA TEKNIK SOLUSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0364",
+    "source_id": "365",
+    "name": "MEDIA EDUTAMA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0365",
+    "source_id": "366",
+    "name": "MEDIA VOKASI TERINTEGRASI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0366",
+    "source_id": "367",
+    "name": "MEGA DUA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0367",
+    "source_id": "368",
+    "name": "MEGA POWER ENERGINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0368",
+    "source_id": "369",
+    "name": "MEGA SENTOSA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0369",
+    "source_id": "370",
+    "name": "MEGA TURBIN INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0370",
+    "source_id": "371",
+    "name": "MEKALEKSI SURYATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0371",
+    "source_id": "372",
+    "name": "MENAMAS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0372",
+    "source_id": "373",
+    "name": "MENARA ALFASEMESTA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0373",
+    "source_id": "374",
+    "name": "MENARA CIPTATEL INTERNUSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0374",
+    "source_id": "375",
+    "name": "MESINDO ANUGERAH SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0375",
+    "source_id": "376",
+    "name": "METROHM INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0376",
+    "source_id": "377",
+    "name": "MHE DEMAG INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0377",
+    "source_id": "378",
+    "name": "MICHS BINTANG GEMILANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0378",
+    "source_id": "379",
+    "name": "MILLERA TEKNO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0379",
+    "source_id": "380",
+    "name": "MITRAKARYA SERASI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0380",
+    "source_id": "381",
+    "name": "MITRA ASMOCO UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0381",
+    "source_id": "382",
+    "name": "MITRA FARLA TEKNOLOGI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0382",
+    "source_id": "383",
+    "name": "MITRA INTEGRASI INFORMATIKA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0383",
+    "source_id": "384",
+    "name": "MITRA KEMAYORAN, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0384",
+    "source_id": "385",
+    "name": "MITRA OPTIMA TALENTA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0385",
+    "source_id": "386",
+    "name": "MITRA TRAINING CONSULTING, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0386",
+    "source_id": "387",
+    "name": "MITRA TUNAS INDO PRIMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0387",
+    "source_id": "388",
+    "name": "MITRA USAHA KATIGA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0388",
+    "source_id": "389",
+    "name": "MITSUBISHI CORPORATION",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0389",
+    "source_id": "390",
+    "name": "MITSUBISHI CORPORATION - POESER INDONESIA, PT (JOINT OPERATION)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0390",
+    "source_id": "391",
+    "name": "MTS INDONESIA,PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0391",
+    "source_id": "392",
+    "name": "MUDA GIAT PRIMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0392",
+    "source_id": "393",
+    "name": "MULTIPRIMA INDOSEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0393",
+    "source_id": "394",
+    "name": "MULTI DAYA HANDARU SAKTI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0394",
+    "source_id": "395",
+    "name": "MULTI DINAMIKA KENCANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0395",
+    "source_id": "396",
+    "name": "MULTI FAKTORIAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0396",
+    "source_id": "397",
+    "name": "MULYA BANGUN SENTOSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0397",
+    "source_id": "398",
+    "name": "MUNGGARAN TEKNIK UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0398",
+    "source_id": "399",
+    "name": "MUTIARA PUTRA KRESNA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0399",
+    "source_id": "400",
+    "name": "NABEL SAKHA GEMILANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0400",
+    "source_id": "401",
+    "name": "NECTOR MASEL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0401",
+    "source_id": "402",
+    "name": "NETSOLUTION",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0402",
+    "source_id": "403",
+    "name": "NEUTRON MITRA ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0403",
+    "source_id": "404",
+    "name": "NEW GRIYA INKOPPABRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0404",
+    "source_id": "405",
+    "name": "NH INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0405",
+    "source_id": "406",
+    "name": "NIAGARA BARU, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0406",
+    "source_id": "407",
+    "name": "NINE BUSINESS MACHINES CORPORATION, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0407",
+    "source_id": "408",
+    "name": "NIPPON PILLAR SINGAPORE,. PTE. LTD",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0408",
+    "source_id": "409",
+    "name": "NISENTRALI FORENSTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0409",
+    "source_id": "410",
+    "name": "NORGANTARA ANDALAN MANDIRI INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0410",
+    "source_id": "411",
+    "name": "NORGANTARA GLOBAL INSPIRASI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0411",
+    "source_id": "412",
+    "name": "NOVITA PUTRI SULUNG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0412",
+    "source_id": "413",
+    "name": "NUGRAHA KARYA OSHINDA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0413",
+    "source_id": "414",
+    "name": "NURANI SEJATI PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0414",
+    "source_id": "415",
+    "name": "NUR AMAN LESTARI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0415",
+    "source_id": "416",
+    "name": "NUSANTARA TURBIN DAN PROPULSI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0416",
+    "source_id": "417",
+    "name": "NUSAPLAZA INTERNATIONAL HOTEL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0417",
+    "source_id": "418",
+    "name": "NUSA RAYA ENERGI UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0418",
+    "source_id": "419",
+    "name": "NUSCACO HASTELOY TURBINE SERVICES, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0419",
+    "source_id": "420",
+    "name": "NUSCACO PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0420",
+    "source_id": "421",
+    "name": "OASIS WATERS INTERNATIONAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0421",
+    "source_id": "422",
+    "name": "OMNI HOSPITAL",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0422",
+    "source_id": "423",
+    "name": "ORANGETAMA MONITORINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0423",
+    "source_id": "424",
+    "name": "OSA INDUSTRIES INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0424",
+    "source_id": "425",
+    "name": "OSCT INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0425",
+    "source_id": "426",
+    "name": "Pemakaian Barang (u/ Procost Pakai)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0426",
+    "source_id": "427",
+    "name": "PACIFIC INTERNATIONAL ENGINEERING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0427",
+    "source_id": "428",
+    "name": "PAL INDONESIA (PERSERO), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0428",
+    "source_id": "429",
+    "name": "PAM LYONAISE JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0429",
+    "source_id": "430",
+    "name": "PANCAR SEJAHTERA ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0430",
+    "source_id": "431",
+    "name": "PANCURAN BENGAWAN MAS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0431",
+    "source_id": "432",
+    "name": "PANCURAN MAS SURALAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0432",
+    "source_id": "433",
+    "name": "PANDU NUSA ENGINEERING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0433",
+    "source_id": "434",
+    "name": "PARDINGOT RIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0434",
+    "source_id": "435",
+    "name": "PARULIAN AGUNG JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0435",
+    "source_id": "436",
+    "name": "PATARUMAN JAYA ABADI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0436",
+    "source_id": "437",
+    "name": "PATRARI JAYA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0437",
+    "source_id": "438",
+    "name": "PATRIATEK GUNA NUSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0438",
+    "source_id": "439",
+    "name": "PDAM (LANGGAN)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0439",
+    "source_id": "440",
+    "name": "PELABUHAN INDONESIA II (PERSERO), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0440",
+    "source_id": "441",
+    "name": "PEMBANGKIT REZEKI UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0441",
+    "source_id": "442",
+    "name": "PENA CENDEKIA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0442",
+    "source_id": "443",
+    "name": "PENDIDIKAN MARITIM DAN LOGISTIK INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0443",
+    "source_id": "444",
+    "name": "PENSIUNAN PT. INDONESIA POWER",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0444",
+    "source_id": "445",
+    "name": "PERKINDO MITRA ANALITIKA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0445",
+    "source_id": "446",
+    "name": "PERMATA KALANI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0446",
+    "source_id": "447",
+    "name": "PERMATA SAKTI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0447",
+    "source_id": "448",
+    "name": "PERSATUAN ISTRI KARYAWAN DAN KARYAWATI (PIKK) PT. INDONESIA POWER",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0448",
+    "source_id": "449",
+    "name": "PERSATUAN PEGAWAI PT. INDONESIA POWER",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0449",
+    "source_id": "450",
+    "name": "PERTAMINA TRAINING & CONSULTING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0450",
+    "source_id": "451",
+    "name": "PERTAMINA TRANS KONTINENTAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0451",
+    "source_id": "452",
+    "name": "PETROLAB SERVICES, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0452",
+    "source_id": "453",
+    "name": "PETROTEC AIR POWER, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0453",
+    "source_id": "454",
+    "name": "PGAS SOLUTION, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0454",
+    "source_id": "455",
+    "name": "PILAR OLA CITRA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0455",
+    "source_id": "456",
+    "name": "PLN (PERSERO) PUSAT PEMELIHARAAN KETENAGALISTRIKAN (PUSHARLIS), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0456",
+    "source_id": "457",
+    "name": "PLN (PERSERO) PUSAT PENDIDIKAN DAN PELATIHAN (PUSDIKLAT), PT - SURALAYA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0457",
+    "source_id": "458",
+    "name": "PLN (PERSERO) PUSAT PENELITIAN DAN PENGEMBANGAN (PUSLITBANG), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0458",
+    "source_id": "459",
+    "name": "PLN (PERSERO) PUSAT SERTIFIKASI (PUSERTIF), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0459",
+    "source_id": "460",
+    "name": "PLN (PERSERO) PUSHARLIS UWP III, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0460",
+    "source_id": "461",
+    "name": "PLN (PERSERO) UNIT INDUK DISTRIBUSI JAKARTA RAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0461",
+    "source_id": "462",
+    "name": "PLN (PERSERO) UNIT INDUK WILAYAH SUMATERA SELATAN JAMBI DAN BENGKULU, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0462",
+    "source_id": "463",
+    "name": "PLN, PT (LANGGAN)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0463",
+    "source_id": "464",
+    "name": "POESER INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0464",
+    "source_id": "465",
+    "name": "POWERINDO NINE STAR, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0465",
+    "source_id": "466",
+    "name": "POWERINDO PRIMATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0466",
+    "source_id": "467",
+    "name": "POWER KARYA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0467",
+    "source_id": "468",
+    "name": "POWER SEJATI ENGINEERING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0468",
+    "source_id": "469",
+    "name": "POWER SYSTEMS SERVICE INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0469",
+    "source_id": "470",
+    "name": "PPM MANAJEMEN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0470",
+    "source_id": "471",
+    "name": "PRABAWA PARAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0471",
+    "source_id": "472",
+    "name": "PRACOM MITRAJAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0472",
+    "source_id": "473",
+    "name": "PRAJASATECH INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0473",
+    "source_id": "474",
+    "name": "PRAKASA PUTRA WIRATAMA SAKTI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0474",
+    "source_id": "475",
+    "name": "PRASADHA PAMUNAH LIMBAH INDUSTRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0475",
+    "source_id": "476",
+    "name": "PRASETIYA MULYA ELI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0476",
+    "source_id": "477",
+    "name": "PRATAMA CONTROMATIC ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0477",
+    "source_id": "478",
+    "name": "PRATAMA GRAHA SEMESTA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0478",
+    "source_id": "479",
+    "name": "PRATAMA JAYA PERKASA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0479",
+    "source_id": "480",
+    "name": "PRATAMA RINDO RAYA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0480",
+    "source_id": "481",
+    "name": "PRIMAINDO CONSULTING, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0481",
+    "source_id": "482",
+    "name": "PRIMATAMA UNGGUL MAKMUR, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0482",
+    "source_id": "483",
+    "name": "PRIMAXINDO TRAINING CENTRE, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0483",
+    "source_id": "484",
+    "name": "PRIMA KARYA NUSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0484",
+    "source_id": "485",
+    "name": "PRIMA LAYANAN NIAGA SUKU CADANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0485",
+    "source_id": "486",
+    "name": "PRIMA SAFTINDO ELEKTRIKA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0486",
+    "source_id": "487",
+    "name": "PRIMA UTAMA KREASI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0487",
+    "source_id": "488",
+    "name": "PRIMER KOPERASI TRIBUANA I",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0488",
+    "source_id": "489",
+    "name": "PROPERINDO ENVIRO TECH, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0489",
+    "source_id": "490",
+    "name": "PROQUAMAN KONSULTAN, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0490",
+    "source_id": "491",
+    "name": "PROSES MATERIAL INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0491",
+    "source_id": "492",
+    "name": "PROSES MAT OPS INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0492",
+    "source_id": "493",
+    "name": "PROSPERUM TERRA TEKNIK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0493",
+    "source_id": "494",
+    "name": "PUMA MAKMUR ANEKA ENGINEERING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0494",
+    "source_id": "495",
+    "name": "PUSAT PENELITIAN SAINS DAN TEKNOLOGI UI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0495",
+    "source_id": "496",
+    "name": "PUSAT PENGEMBANGAN AKUNTANSI FE-UI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0496",
+    "source_id": "497",
+    "name": "PUSPA WIDJAJA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0497",
+    "source_id": "498",
+    "name": "PUTERA INSTRUMENINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0498",
+    "source_id": "499",
+    "name": "PUTERA PERTAMA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0499",
+    "source_id": "500",
+    "name": "PUTERA TUNGGAL DARMO JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0500",
+    "source_id": "501",
+    "name": "PUTRANATA ADI MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0501",
+    "source_id": "502",
+    "name": "PUTRANOGAMA ADIKARYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0502",
+    "source_id": "503",
+    "name": "PUTRA BAKTI NIAGA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0503",
+    "source_id": "504",
+    "name": "PUTRA BHARATA MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0504",
+    "source_id": "505",
+    "name": "PUTRA CIPTA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0505",
+    "source_id": "506",
+    "name": "PUTRA DIMANGGALA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0506",
+    "source_id": "507",
+    "name": "PUTRA TEKNIK SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0507",
+    "source_id": "508",
+    "name": "PUTRA TUNGGAL, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0508",
+    "source_id": "509",
+    "name": "PUTRI LUBUK TANO, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0509",
+    "source_id": "510",
+    "name": "Retro, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0510",
+    "source_id": "511",
+    "name": "RAHADIAN JAYA PUTRA TEKNIK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0511",
+    "source_id": "512",
+    "name": "RAKAN TEKNOLOGI BANDUNG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0512",
+    "source_id": "513",
+    "name": "RAMA ZONAKIMIA PERTIWI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0513",
+    "source_id": "514",
+    "name": "RATU JAYA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0514",
+    "source_id": "515",
+    "name": "RDA PASUNDAN, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0515",
+    "source_id": "516",
+    "name": "REKAJASA ASYATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0516",
+    "source_id": "517",
+    "name": "REMCA PIONEER, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0517",
+    "source_id": "518",
+    "name": "RENTAL MOBIL AZAHRA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0518",
+    "source_id": "519",
+    "name": "RESSA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0519",
+    "source_id": "520",
+    "name": "RESTU PRIMA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0520",
+    "source_id": "521",
+    "name": "REXTEKINDO SOLUSI HIDROMATIK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0521",
+    "source_id": "522",
+    "name": "RINDANG MAS RAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0522",
+    "source_id": "523",
+    "name": "RITTINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0523",
+    "source_id": "524",
+    "name": "RIZA UTAMA TEKNIK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0524",
+    "source_id": "525",
+    "name": "RIZKI VEDORA SEJATI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0525",
+    "source_id": "526",
+    "name": "RIZKI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0526",
+    "source_id": "527",
+    "name": "RIZKY PERSADA NUSANTARA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0527",
+    "source_id": "528",
+    "name": "ROYAL BLESS MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0528",
+    "source_id": "529",
+    "name": "RUANG MITRA SINERGI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0529",
+    "source_id": "530",
+    "name": "RUMAH PERUBAHAN, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0530",
+    "source_id": "531",
+    "name": "RUMAH SAKIT ANAK DAN BUNDA HARAPAN KITA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0531",
+    "source_id": "532",
+    "name": "RUMAH SAKIT AWAL BROS",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0532",
+    "source_id": "533",
+    "name": "RUMAH SAKIT BMC MAYAPADA HOSPITAL BOGOR",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0533",
+    "source_id": "534",
+    "name": "RUMAH SAKIT EKA HOSPITAL BEKASI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0534",
+    "source_id": "535",
+    "name": "RUMAH SAKIT HAJI JAKARTA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0535",
+    "source_id": "536",
+    "name": "RUMAH SAKIT HERMINA BEKASI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0536",
+    "source_id": "537",
+    "name": "RUMAH SAKIT HERMINA KEMAYORAN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0537",
+    "source_id": "538",
+    "name": "RUMAH SAKIT HERMINA TANGERANG",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0538",
+    "source_id": "539",
+    "name": "RUMAH SAKIT ISLAM JAKARTA CEMPAKA PUTIH",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0539",
+    "source_id": "540",
+    "name": "RUMAH SAKIT JAKARTA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0540",
+    "source_id": "541",
+    "name": "RUMAH SAKIT KARYA BHAKTI PRATIWI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0541",
+    "source_id": "542",
+    "name": "RUMAH SAKIT MAYAPADA HOSPITAL TANGERANG",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0542",
+    "source_id": "543",
+    "name": "RUMAH SAKIT MEDIROS",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0543",
+    "source_id": "544",
+    "name": "RUMAH SAKIT MITRA KELUARGA BEKASI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0544",
+    "source_id": "545",
+    "name": "RUMAH SAKIT MITRA KELUARGA BEKASI TIMUR",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0545",
+    "source_id": "546",
+    "name": "RUMAH SAKIT MITRA KELUARGA CIBUBUR",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0546",
+    "source_id": "547",
+    "name": "RUMAH SAKIT MITRA KELUARGA DEPOK",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0547",
+    "source_id": "548",
+    "name": "RUMAH SAKIT MITRA KELUARGA KEMAYORAN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0548",
+    "source_id": "549",
+    "name": "RUMAH SAKIT OMNI INTERNASIONAL",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0549",
+    "source_id": "550",
+    "name": "RUMAH SAKIT PELABUHAN JAKARTA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0550",
+    "source_id": "551",
+    "name": "RUMAH SAKIT PELNI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0551",
+    "source_id": "552",
+    "name": "RUMAH SAKIT PONDOK INDAH",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0552",
+    "source_id": "553",
+    "name": "RUMAH SAKIT PONDOK INDAH - PURI INDAH",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0553",
+    "source_id": "554",
+    "name": "RUMAH SAKIT PREMIER BINTARO",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0554",
+    "source_id": "555",
+    "name": "RUMAH SAKIT PREMIER JATINEGARA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0555",
+    "source_id": "556",
+    "name": "RUMAH SAKIT QADR",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0556",
+    "source_id": "557",
+    "name": "RUMAH SAKIT ROYAL PROGRESS",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0557",
+    "source_id": "558",
+    "name": "RUMAH SAKIT SATYA NEGARA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0558",
+    "source_id": "559",
+    "name": "RUMAH SAKIT SILOAM HOSPITALS KEBON JERUK",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0559",
+    "source_id": "560",
+    "name": "RUMAH SAKIT SILOAM HOSPITALS LIPPO VILLAGE",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0560",
+    "source_id": "561",
+    "name": "RUMAH SUNATAN INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0561",
+    "source_id": "562",
+    "name": "RUSAMAS SARANA USAHA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0562",
+    "source_id": "563",
+    "name": "SABENA ERAKA LAUDA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0563",
+    "source_id": "564",
+    "name": "SABERINDO PACIFIC, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0564",
+    "source_id": "565",
+    "name": "SAFEMAX INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0565",
+    "source_id": "566",
+    "name": "SAGATI MITRA SOLUSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0566",
+    "source_id": "567",
+    "name": "SAHABATAGUNG CITRA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0567",
+    "source_id": "568",
+    "name": "SAHABAT INVESTASI INDOTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0568",
+    "source_id": "569",
+    "name": "SAINS ANALITIKA PRIMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0569",
+    "source_id": "570",
+    "name": "SAIRO HARUM INDAH, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0570",
+    "source_id": "571",
+    "name": "SALIPI NAGARI PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0571",
+    "source_id": "572",
+    "name": "SAMAFITRO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0572",
+    "source_id": "573",
+    "name": "SAMEN MULTI KREASI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0573",
+    "source_id": "574",
+    "name": "SAMIDI UDAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0574",
+    "source_id": "575",
+    "name": "SAMIU MITRA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0575",
+    "source_id": "576",
+    "name": "SAMSON TIARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0576",
+    "source_id": "577",
+    "name": "SAMUDRA MAS NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0577",
+    "source_id": "578",
+    "name": "SANATORIUM DHARMAWANGSA, RS",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0578",
+    "source_id": "579",
+    "name": "SANBILA BERKAH PERSADA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0579",
+    "source_id": "580",
+    "name": "SANGGADELIMA NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0580",
+    "source_id": "581",
+    "name": "SARANA INSTRUMENT, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0581",
+    "source_id": "582",
+    "name": "SARANA MAJU LESTARI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0582",
+    "source_id": "583",
+    "name": "SARANA MITRATAMA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0583",
+    "source_id": "584",
+    "name": "SARANI CIKAL MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0584",
+    "source_id": "585",
+    "name": "SARASINDO PRIMA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0585",
+    "source_id": "586",
+    "name": "SARI SARANA KIMIATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0586",
+    "source_id": "587",
+    "name": "SATRIANGGA BHUMI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0587",
+    "source_id": "588",
+    "name": "SATRIA PERKASA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0588",
+    "source_id": "589",
+    "name": "SATYA ABADI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0589",
+    "source_id": "590",
+    "name": "SAUDARA KEMBAR SEJATI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0590",
+    "source_id": "591",
+    "name": "SCHNEIDER INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0591",
+    "source_id": "592",
+    "name": "SEDJAHTERA MOTOR, PD",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0592",
+    "source_id": "593",
+    "name": "SEDJAHTERA PERKASA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0593",
+    "source_id": "594",
+    "name": "SEFAS KELIANTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0594",
+    "source_id": "595",
+    "name": "SEKAWAN INDONESIA WISATA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0595",
+    "source_id": "596",
+    "name": "SENTANA NALDO, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0596",
+    "source_id": "597",
+    "name": "SENTRAL GRAHA ELLECTRA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0597",
+    "source_id": "598",
+    "name": "SENTRA NETCOMINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0598",
+    "source_id": "599",
+    "name": "SEPAKAT KARYA BERSAMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0599",
+    "source_id": "600",
+    "name": "SERASAN CIPTA ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0600",
+    "source_id": "601",
+    "name": "SETIA JAYA MAKMUR, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0601",
+    "source_id": "602",
+    "name": "SETLIEN NUSAPADMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0602",
+    "source_id": "603",
+    "name": "SGS INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0603",
+    "source_id": "604",
+    "name": "SHELLINDO UTAMA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0604",
+    "source_id": "605",
+    "name": "SHRIKHRISNA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0605",
+    "source_id": "606",
+    "name": "SIANJUR MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0606",
+    "source_id": "607",
+    "name": "SIEMENS INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0607",
+    "source_id": "608",
+    "name": "SIGMA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0608",
+    "source_id": "609",
+    "name": "SILOAM INTERNATIONAL HOSPITALS TBK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0609",
+    "source_id": "610",
+    "name": "SINARA & BROTHERS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0610",
+    "source_id": "611",
+    "name": "SINARMAS ENERGI NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0611",
+    "source_id": "612",
+    "name": "SINARSAKTI MATRA NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0612",
+    "source_id": "613",
+    "name": "SINAR ARIFIN UNGGUL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0613",
+    "source_id": "614",
+    "name": "SINAR BERLIAN INDAH, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0614",
+    "source_id": "615",
+    "name": "SINAR CIKUASA ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0615",
+    "source_id": "616",
+    "name": "SINAR SURYA CEMERLANG, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0616",
+    "source_id": "617",
+    "name": "SINERGI CITRA SELARAS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0617",
+    "source_id": "618",
+    "name": "SINERGI INTI MEGATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0618",
+    "source_id": "619",
+    "name": "SINERGI KARYA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0619",
+    "source_id": "620",
+    "name": "SINERGI REKTA DENTA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0620",
+    "source_id": "621",
+    "name": "SIRARA AGUNG JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0621",
+    "source_id": "622",
+    "name": "SISIR KATARINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0622",
+    "source_id": "623",
+    "name": "SISWA PRAJABATAN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0623",
+    "source_id": "624",
+    "name": "SJI NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0624",
+    "source_id": "625",
+    "name": "SKF INDUSTRIAL INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0625",
+    "source_id": "626",
+    "name": "SLS BEARINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0626",
+    "source_id": "627",
+    "name": "SMART MITRA SOLUTIONS, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0627",
+    "source_id": "628",
+    "name": "SOCIAL INVESTMENT INDONESIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0628",
+    "source_id": "629",
+    "name": "SOLID ENERGI INTERNASIONAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0629",
+    "source_id": "630",
+    "name": "SORA KREATIF INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0630",
+    "source_id": "631",
+    "name": "STARVI NUSA GEMILANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0631",
+    "source_id": "632",
+    "name": "STAR KATUP INTERNATIONAL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0632",
+    "source_id": "633",
+    "name": "SUCOFINDO (PERSERO), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0633",
+    "source_id": "634",
+    "name": "SUKU DINAS PEMADAM KEBAKARAN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0634",
+    "source_id": "635",
+    "name": "SULZER HICKHAM INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0635",
+    "source_id": "636",
+    "name": "SULZER INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0636",
+    "source_id": "637",
+    "name": "SUNY MANDIRI JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0637",
+    "source_id": "638",
+    "name": "SURVEYOR CARBON CONSULTING INDONESIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0638",
+    "source_id": "639",
+    "name": "SURVEYOR INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0639",
+    "source_id": "640",
+    "name": "SURYAMAKMUR AGUNGLESTARI, PT.",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0640",
+    "source_id": "641",
+    "name": "SURYAMAKMUR AGUNG LESTARI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0641",
+    "source_id": "642",
+    "name": "SURYATAMA KENCANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0642",
+    "source_id": "643",
+    "name": "SURYA ALAM GEMILANG, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0643",
+    "source_id": "644",
+    "name": "SURYA GILANG GEMILANG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0644",
+    "source_id": "645",
+    "name": "SURYA INTI MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0645",
+    "source_id": "646",
+    "name": "SURYA KENCANA ABADI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0646",
+    "source_id": "647",
+    "name": "SURYA KENCANA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0647",
+    "source_id": "648",
+    "name": "SURYA PRANOESA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0648",
+    "source_id": "649",
+    "name": "SURYA SUDECO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0649",
+    "source_id": "650",
+    "name": "SWADHARMA DUTA DATA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0650",
+    "source_id": "651",
+    "name": "SYAHIRA MITRA SEJATI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0651",
+    "source_id": "652",
+    "name": "SYILA BERKAH SEJAHTERA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0652",
+    "source_id": "653",
+    "name": "SYMPAC INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0653",
+    "source_id": "654",
+    "name": "SYSTECH GLOBAL INFORMASI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0654",
+    "source_id": "655",
+    "name": "TAJI MULYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0655",
+    "source_id": "656",
+    "name": "TAKA TURBOMACHINERY INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0656",
+    "source_id": "657",
+    "name": "TANJUNG ENIM KARYA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0657",
+    "source_id": "658",
+    "name": "TAPIANTA SUMBER HIDUP, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0658",
+    "source_id": "659",
+    "name": "TATA INDRA INETAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0659",
+    "source_id": "660",
+    "name": "TEGAR MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0660",
+    "source_id": "661",
+    "name": "TEKNIKA UTAMA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0661",
+    "source_id": "662",
+    "name": "TEKNIK ENERGI UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0662",
+    "source_id": "663",
+    "name": "TEKNO FLUIDA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0663",
+    "source_id": "664",
+    "name": "TELKOM INDONESIA (PERSERO) TBK, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0664",
+    "source_id": "665",
+    "name": "TERAVISINDO SUKSES, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0665",
+    "source_id": "666",
+    "name": "TERRANDO AGUNG MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0666",
+    "source_id": "667",
+    "name": "TERRANDO AGUNG MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0667",
+    "source_id": "668",
+    "name": "TERUS SENTOSA SEMPURNA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0668",
+    "source_id": "669",
+    "name": "THREDIO ENGINEERING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0669",
+    "source_id": "670",
+    "name": "TIARA VIBRASINDO PRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0670",
+    "source_id": "671",
+    "name": "TIGA GADING MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0671",
+    "source_id": "672",
+    "name": "TIGA LAPISAN ENERGI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0672",
+    "source_id": "673",
+    "name": "TIRTA JAYA PRIMAKARSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0673",
+    "source_id": "674",
+    "name": "TJOKRO BERSAUDARA (SEMARANG), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0674",
+    "source_id": "675",
+    "name": "TOKO MAS TIGA BERLIAN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0675",
+    "source_id": "676",
+    "name": "TOKYO KEISO INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0676",
+    "source_id": "677",
+    "name": "TOMMY ADJI PRASETYO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0677",
+    "source_id": "678",
+    "name": "TORISHIMA GUNA ENGINEERING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0678",
+    "source_id": "679",
+    "name": "TORSINOPA PRIMA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0679",
+    "source_id": "680",
+    "name": "TOTAL ABADI SOLUSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0680",
+    "source_id": "681",
+    "name": "TOTAL FLUID CONTROL, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0681",
+    "source_id": "682",
+    "name": "TRAFOINDO PRIMA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0682",
+    "source_id": "683",
+    "name": "TRAINOCATE NETWORKS INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0683",
+    "source_id": "684",
+    "name": "TRANFEXCO INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0684",
+    "source_id": "685",
+    "name": "TRANINDO PRATAMA MULIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0685",
+    "source_id": "686",
+    "name": "TRANSAVIA OTOMASI PRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0686",
+    "source_id": "687",
+    "name": "TRESSA LESTARI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0687",
+    "source_id": "688",
+    "name": "TRIAKARYA TOSAN JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0688",
+    "source_id": "689",
+    "name": "TRIAS ENERGY INDONUSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0689",
+    "source_id": "690",
+    "name": "TRICON INTER MULTIJASA KONSULTAN, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0690",
+    "source_id": "691",
+    "name": "TRIGUNA GARDA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0691",
+    "source_id": "692",
+    "name": "TRIGUNA MANDALA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0692",
+    "source_id": "693",
+    "name": "TRIMITRA WISESA ABADI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0693",
+    "source_id": "694",
+    "name": "TRIPUTRA PERKASA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0694",
+    "source_id": "695",
+    "name": "TRIPUTRA PRIMA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0695",
+    "source_id": "696",
+    "name": "TRISTAN COM, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0696",
+    "source_id": "697",
+    "name": "TRI BINTANG TIMUR PRIMA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0697",
+    "source_id": "698",
+    "name": "TRI MITRA AGUNG, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0698",
+    "source_id": "699",
+    "name": "TRI PRAMITHA FASTINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0699",
+    "source_id": "700",
+    "name": "TUGU KRESNA PRATAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0700",
+    "source_id": "701",
+    "name": "TUNAS DESA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0701",
+    "source_id": "702",
+    "name": "T&E SYSTEM, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0702",
+    "source_id": "703",
+    "name": "ULTRA DELTA MAJU, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0703",
+    "source_id": "704",
+    "name": "UMAN SURYA ALAM, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0704",
+    "source_id": "705",
+    "name": "UMI DARAJATIN, dr",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0705",
+    "source_id": "706",
+    "name": "UNELEC INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0706",
+    "source_id": "707",
+    "name": "UNGGUL PAWENANG SENTOSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0707",
+    "source_id": "708",
+    "name": "UNITECHNINDO PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0708",
+    "source_id": "709",
+    "name": "UNITED TRAINING CONSULTING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0709",
+    "source_id": "710",
+    "name": "UNIVERSITAS PADJADJARAN",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0710",
+    "source_id": "711",
+    "name": "UPAYA RIKSA PATRA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0711",
+    "source_id": "712",
+    "name": "USAHA JAYA PRIMA KARYA PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0712",
+    "source_id": "713",
+    "name": "UTAMA MAKMUR, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0713",
+    "source_id": "714",
+    "name": "UTILITI BINA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0714",
+    "source_id": "715",
+    "name": "VARLEY INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0715",
+    "source_id": "716",
+    "name": "VENETA NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0716",
+    "source_id": "717",
+    "name": "VICOTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0717",
+    "source_id": "718",
+    "name": "VIDA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0718",
+    "source_id": "719",
+    "name": "WAHANA TOTALITA KONSULTAN, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0719",
+    "source_id": "720",
+    "name": "WANI PRIMA ENGINEERING, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0720",
+    "source_id": "721",
+    "name": "WARSO DHARMA UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0721",
+    "source_id": "722",
+    "name": "WASKITA MITRA BANTEN, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0722",
+    "source_id": "723",
+    "name": "WASKITA NIAGAPRIMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0723",
+    "source_id": "724",
+    "name": "WASTEFORCHANGE ALAM INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0724",
+    "source_id": "725",
+    "name": "WATERMART PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0725",
+    "source_id": "726",
+    "name": "WATER LABORATORY NUSANTARA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0726",
+    "source_id": "727",
+    "name": "WELIZER MATAHARI INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0727",
+    "source_id": "728",
+    "name": "WESTINDO PUTRA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0728",
+    "source_id": "729",
+    "name": "WEWO KINARYA BANGSA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0729",
+    "source_id": "730",
+    "name": "WIBON KREASI MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0730",
+    "source_id": "731",
+    "name": "WIDYA MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0731",
+    "source_id": "732",
+    "name": "WIGUNA SARANA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0732",
+    "source_id": "733",
+    "name": "WIJAYA KARYA (PERSERO), PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0733",
+    "source_id": "734",
+    "name": "WIRATMAN & ASSOCIATES, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0734",
+    "source_id": "735",
+    "name": "WIRA KARYA PRADANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0735",
+    "source_id": "736",
+    "name": "WIRIA INDAH NUSANTARA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0736",
+    "source_id": "737",
+    "name": "WIROMAS DHIYANKENCANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0737",
+    "source_id": "738",
+    "name": "WISESA YASA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0738",
+    "source_id": "739",
+    "name": "WISMAR INSPECSINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0739",
+    "source_id": "740",
+    "name": "WITRACO PERDANA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0740",
+    "source_id": "741",
+    "name": "YAYASAN BINA NURUL FIKRI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0741",
+    "source_id": "742",
+    "name": "YAYASAN KREATIF USAHA MANDIRI ALAMI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0742",
+    "source_id": "743",
+    "name": "YAYASAN LAPI ITB",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0743",
+    "source_id": "744",
+    "name": "YAYASAN LEMBAGA MANAJEMEN FORMASI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0744",
+    "source_id": "745",
+    "name": "YAYASAN MATSUSHITA GOBEL",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0745",
+    "source_id": "746",
+    "name": "YAYASAN MEMAJUKAN ILMU DAN KEBUDAYAAN-UNIVERSITAS NASIONAL",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0746",
+    "source_id": "747",
+    "name": "YAYASAN PENDIDIKAN DAN KESEJAHTERAAN PT. INDONESIA POWER",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0747",
+    "source_id": "748",
+    "name": "YAY. LEMBAGA TEKNOLOGI FTUI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0748",
+    "source_id": "749",
+    "name": "YOKOGAWA INDONESIA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0749",
+    "source_id": "750",
+    "name": "ZAYAN PUTRA PERKASA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0750",
+    "source_id": "751",
+    "name": "ZEFA VALINDO JAYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0751",
+    "source_id": "752",
+    "name": "(DUPLIKAT)SEDJAHTERA PERKASA MANDIRI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0752",
+    "source_id": "753",
+    "name": "SHOPEE (MARKETPLACE)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0753",
+    "source_id": "754",
+    "name": "TOKOPEDIA (MARKETPLACE)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0754",
+    "source_id": "755",
+    "name": "BPN 088 Polres Pelabuhan Tanjung Priok",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0755",
+    "source_id": "756",
+    "name": "RIDHO FARM",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0756",
+    "source_id": "757",
+    "name": "KOSAMA MANDIRI UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0757",
+    "source_id": "758",
+    "name": "KOPERASI SEJAHTERA BERSAMA (KOSAMA)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0758",
+    "source_id": "759",
+    "name": "VERANI RIHI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0759",
+    "source_id": "760",
+    "name": "BKB PAUD BUNGA CEMPAKA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0760",
+    "source_id": "761",
+    "name": "PAUD MELATI BUDI INSANI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0761",
+    "source_id": "762",
+    "name": "YAY HIKMATUL BAROKAH",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0762",
+    "source_id": "763",
+    "name": "PAUD KIDS CLUB",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0763",
+    "source_id": "764",
+    "name": "PT. BIGAR FAMOJA KREASI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0764",
+    "source_id": "765",
+    "name": "PT PUTRA PUNCAK",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0765",
+    "source_id": "766",
+    "name": "PT NURFITA KARYA MANDIRI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0766",
+    "source_id": "767",
+    "name": "PH&H (P AMBAGIO, HARTOYO & HINCA)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0767",
+    "source_id": "768",
+    "name": "PCNU KOTA JAKARTA UTARA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0768",
+    "source_id": "769",
+    "name": "PT PRIMAXINDO KARYA UTAMA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0769",
+    "source_id": "770",
+    "name": "KARYA ABI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0770",
+    "source_id": "771",
+    "name": "SWAKARYA BINAR UTAMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0771",
+    "source_id": "772",
+    "name": "FORUM KEBERLANJUTAN SOSIAL INDONESIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0772",
+    "source_id": "773",
+    "name": "DEMI NAMA KEDUA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0773",
+    "source_id": "774",
+    "name": "YAYASAN INSPIRASI IDE BERDAYA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0774",
+    "source_id": "775",
+    "name": "LINGGA BUANA TEKNOLOGI, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0775",
+    "source_id": "776",
+    "name": "MITRA BINA MAJU BERSAMA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0776",
+    "source_id": "777",
+    "name": "PT ANGKASA PRIMA JAYA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0777",
+    "source_id": "778",
+    "name": "LEMBAGA RW 05 WARAKAS",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0778",
+    "source_id": "779",
+    "name": "PANITIA PELAKSANA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0779",
+    "source_id": "780",
+    "name": "PT. TERRANDO AGUNG MANDIRI",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0780",
+    "source_id": "781",
+    "name": "PRIMAXINDO KARYA PRIMA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0781",
+    "source_id": "782",
+    "name": "Lembaga/Instansi",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0782",
+    "source_id": "783",
+    "name": "OBORMAS MITRA ELEKTRINDO, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0783",
+    "source_id": "784",
+    "name": "YAYASAN ACITYA PIPPO ADIYASA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0784",
+    "source_id": "785",
+    "name": "Masjid Nurul Falah Priok",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0785",
+    "source_id": "786",
+    "name": "ANUGRAH KARYA MANDIRI, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0786",
+    "source_id": "787",
+    "name": "Cfcd Foundation",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0787",
+    "source_id": "788",
+    "name": "Cinta Quran Foundation",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0788",
+    "source_id": "789",
+    "name": "LANGKAH KECIL BERMAKNA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0789",
+    "source_id": "790",
+    "name": "KHARISMA PERSONA KOMUNIKA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0790",
+    "source_id": "791",
+    "name": "JAKARTA PLUS CENTER",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0791",
+    "source_id": "792",
+    "name": "IKA-ITS JAKARTA RAYA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0792",
+    "source_id": "793",
+    "name": "RESILIENSIA NUSA INTEGRA, CV",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0793",
+    "source_id": "794",
+    "name": "FORUM ALUMNI KESATUAN MAHASISWA HINDU DHARMA INDONESIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0794",
+    "source_id": "795",
+    "name": "HUMAN INITIATIVE",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0795",
+    "source_id": "796",
+    "name": "Panconvince Mitra International, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0796",
+    "source_id": "797",
+    "name": "HASYABA CONSULTING",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0797",
+    "source_id": "798",
+    "name": "Indonesian Social Sustainability Forum",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0798",
+    "source_id": "799",
+    "name": "PT. Intan Mega Mandiri",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0799",
+    "source_id": "800",
+    "name": "FASA MEGA KARYA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0800",
+    "source_id": "801",
+    "name": "AVELINDO KARUNIA SEJAHTERA, PT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0801",
+    "source_id": "802",
+    "name": "UNIVERSITAS NASIONAL",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0802",
+    "source_id": "803",
+    "name": "Kelurahan Kalibaru Kecamatan Cilincing",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0803",
+    "source_id": "804",
+    "name": "Palang Merah Indonesia (PMI) Jakarta Utara",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0804",
+    "source_id": "805",
+    "name": "SMAN 34 Jakarta",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0805",
+    "source_id": "806",
+    "name": "Social Development and Welfare - Fisipol UGM",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0806",
+    "source_id": "807",
+    "name": "PT Solusi Esensial Indonesia",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0807",
+    "source_id": "808",
+    "name": "CORPORATE FORUM FOR CSR DEVELOPMENT",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0808",
+    "source_id": "809",
+    "name": "UNHCR",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0809",
+    "source_id": "810",
+    "name": "PT SEHASTA ASA KREATIF",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0810",
+    "source_id": "811",
+    "name": "SEHASTA ASA KREATIF",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0811",
+    "source_id": "812",
+    "name": "Arah Baik Semesta",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0812",
+    "source_id": "813",
+    "name": "[Kitabisa.com](http://Kitabisa.com)",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0813",
+    "source_id": "814",
+    "name": "PT TRANS NEWS PRODUCTION",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0814",
+    "source_id": "815",
+    "name": "PT. VISI TALENTA MULIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0815",
+    "source_id": "816",
+    "name": "PT ASKHARA KREATIF INDONESIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0816",
+    "source_id": "817",
+    "name": "PT LISTRIK INDONESIA MEDIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0817",
+    "source_id": "818",
+    "name": "PT FEQU ENERGI MULIA",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0818",
+    "source_id": "819",
+    "name": "Dewan Kemakmuran Masjid Nurul Falah PT PLN OP UBP Priok",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0819",
+    "source_id": "820",
+    "name": "United Nations High Commissioner for Refugees",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0820",
+    "source_id": "821",
+    "name": "UNIVERSITAS GADJAH MADA FISIP",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0821",
+    "source_id": "822",
+    "name": "PT AKRESIA PRODUCTION",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0822",
+    "source_id": "823",
+    "name": "PT. Primaxindo Karya Prima",
+    "category": null
+  },
+  {
+    "id": "ORG-SOURCE-0823",
+    "source_id": null,
+    "name": "Yayasan Kita Bisa",
+    "category": null
+  }
+]

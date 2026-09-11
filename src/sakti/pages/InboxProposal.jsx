@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import { DOC_STATUS, STATUS_META } from "../../lib/data";
-import { fileToDataUrl, buildSignatureStamp, hasSavedSignature } from "../../lib/signature";
+import { buildSignatureStamp, hasSavedSignature } from "../../lib/signature";
 import Card from "../../components/Card";
 import Button from "../../components/Button";
 import Modal from "../../components/Modal";
@@ -86,7 +86,7 @@ function IconBtn({ children, onClick, title }) {
   );
 }
 
-export default function InboxProposalPage({ user, proposals, onUpdateProposal, notify, dokumenTambahanProposal = [], signProposal, openTargetId, onConsumeOpenTarget, evaluasiList = [] }) {
+export default function InboxProposalPage({ user, proposals, onUpdateProposal, notify, signProposal, openTargetId, onConsumeOpenTarget, evaluasiList = [] }) {
   const [tab, setTab] = useState("masuk");
   const [detail, setDetail] = useState(null);
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -107,24 +107,14 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
     }
   }, [openTargetId, proposals]);
 
-  // Form Evaluasi terkait Proposal ini - relasinya lewat proposalId, sama
-  // seperti dokumenTambahanByProposalId di bawah. Dipakai di panel detail
-  // untuk menampilkan skor/keputusan evaluasi yang sudah diisi Humas.
+  // Form Evaluasi terkait Proposal ini - relasinya lewat proposalId, dipakai
+  // di panel detail untuk menampilkan skor/keputusan evaluasi yang sudah
+  // diisi Humas.
   const evaluasiByProposalId = useMemo(() => {
     const map = {};
     evaluasiList.forEach((e) => { map[e.proposalId] = e; });
     return map;
   }, [evaluasiList]);
-
-  // Lampiran lama disimpan terpisah; bukan sumber status dokumen Proposal (lihat
-  // ProposalDokumenTambahan.jsx), disimpan pakai proposalId sebagai kunci -
-  // pola PERSIS sama seperti Form Evaluasi. Di sini Asman CUMA MENARIK dan
-  // MELIHAT data itu (read-only), tidak ada upload di sisi Asman sama sekali.
-  const dokumenTambahanByProposalId = useMemo(() => {
-    const map = {};
-    dokumenTambahanProposal.forEach((d) => { map[d.proposalId] = d; });
-    return map;
-  }, [dokumenTambahanProposal]);
 
   const counts = useMemo(() => {
     const c = { masuk: 0, disetujui: 0, ditolak: 0, diproses: 0 };
@@ -475,11 +465,9 @@ export default function InboxProposalPage({ user, proposals, onUpdateProposal, n
             <div style={{ margin: "14px 0", fontWeight: 700 }}>Dokumen Proposal</div>
             {[["bast", "BAST", bastStepFields()], ["pi", "PI", paktaStepFields()]].map(([key, label, fields]) => {
               const record = proposalDocuments(liveDetail, evaluasiList)[key];
-              const attachment = dokumenTambahanByProposalId[liveDetail.id]?.[key];
               return <section key={key} style={{ padding: 12, marginBottom: 10, border: `1px solid ${T.border}`, borderRadius: 8 }}>
                 <div style={{ fontWeight: 700 }}>{label} {record ? "✓" : "—"}</div>
                 {record ? fields.map((f) => <div key={f.key} style={{ fontSize: 12.5, marginTop: 5, overflowWrap: "anywhere" }}><span style={{ color: T.muted }}>{f.label}: </span>{record[f.key] || "—"}</div>) : <p>Belum ada record {label}.</p>}
-                {attachment?.fileUrl && <a href={attachment.fileUrl} download={attachment.fileName}>Lampiran lama: {attachment.fileName}</a>}
               </section>;
             })}
 

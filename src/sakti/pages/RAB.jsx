@@ -17,7 +17,9 @@ import ReviewModal from "../../components/ReviewModal";
 import { DEFAULT_SATUAN, SatuanSelect, SatuanSettingsModal } from "../../components/SatuanPicker";
 import { RabDocPreview } from "../../components/DocTemplatePreview";
 import SignaturePanel from "../../components/SignaturePanel";
+import PaymentTrackingCard from "../../components/PaymentTrackingCard";
 import { buildSignatureStamp, hasSavedSignature } from "../../lib/signature";
+import { getPaymentStage } from "../../lib/paymentStage";
 
 const STEPS = ["Data RAB", "Uraian RAB", "Konfirmasi RAB", "Simpan"];
 const PPN_OPTIONS = ["Non PPN", "11%"];
@@ -92,7 +94,17 @@ function nextRabIdNumber(rab) {
   return String(maxNum + 1).padStart(3, "0");
 }
 
-export default function RABPage({ rab, setRab, vendors, notify, user, packages = [], defaultKategori, signRab, saveMySignature, tor = [], openTargetId, onConsumeOpenTarget }) {
+export default function RABPage({
+  rab, setRab, vendors, notify, user, packages = [], defaultKategori, signRab, saveMySignature, tor = [], openTargetId, onConsumeOpenTarget,
+  // Data tambahan buat menghitung "Tahap Saat Ini" (getPaymentStage) - semua
+  // opsional, kalau tidak dilewatkan kolom Tahap Saat Ini tetap aman (cuma
+  // berhenti di "Siap Dibuat ..." karena tidak tahu master pembayarannya).
+  nonpoSubmissions = [], ccList = [], poDocuments = {},
+  lmp1 = [], lmp2 = [], formVerif = [], bast = [], pakta = [], bapp = [],
+  ccItems = [], ccVerifikasi = [], ccPermintaan = [], ccRencana = [],
+  ccBast = [], ccPakta = [], ccTtd = [], ccBapp = [], ccPertanggungjawaban = [],
+  paymentPackages = [],
+}) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(0);
   const [items, setItems] = useState([]);
@@ -406,7 +418,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
               <thead>
                 <tr>
                   {[
-                    "ID Number", "Judul Kegiatan", "Kategori", "Bidang", "Vendor", "Total Eval. Vendor",
+                    "ID Number", "Judul Kegiatan", "Kategori", "ID/No. Pembayaran", "Tahap Saat Ini", "Bidang", "Vendor", "Total Eval. Vendor",
                     "TOR", "TTD Asman", "TTD MADM", "Aksi",
                   ].map((h) => (
                     <th key={h} style={h.startsWith("TTD") || h === "TOR" ? { ...th, textAlign: "center" } : th}>{h}</th>
@@ -415,7 +427,7 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
               </thead>
               <tbody>
                 {displayRab.length === 0 ? (
-                  <tr><td colSpan={10} style={{ textAlign: "center", color: T.muted, padding: "28px 12px" }}>
+                  <tr><td colSpan={12} style={{ textAlign: "center", color: T.muted, padding: "28px 12px" }}>
                     Belum ada data RAB{defaultKategori ? ` kategori ${defaultKategori}` : ""}. Klik &quot;{addLabel}&quot; untuk membuat pengajuan pertama.
                   </td></tr>
                 ) : displayRab.map((r, i) => {
@@ -427,11 +439,22 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
                   // tidak pernah lihat tombol ini, cuma kolom status.
                   const canQuickSignAsman = user?.role === "asman" && !asmanSigned;
                   const canQuickSignMadm = user?.role === "madm" && asmanSigned && !madmSigned;
+                  // Tahap Saat Ini - dihitung dari getPaymentStage() (lib/paymentStage.js),
+                  // helper TERPUSAT yang sama dipakai di NonPoPage/CashCard/PoErpData,
+                  // supaya labelnya selalu konsisten di semua halaman.
+                  const stage = getPaymentStage(r, {
+                    nonPoList: nonpoSubmissions, ccList, poDocuments,
+                    lmp1, lmp2, formVerif, bast, pakta, bapp,
+                    ccItems, ccVerifikasi, ccPermintaan, ccRencana, ccBast, ccPakta, ccTtd, ccBapp, ccPertanggungjawaban,
+                    paymentPackages,
+                  });
                   return (
                     <tr key={r.idNumber} onClick={() => setReviewRow(r)} style={{ cursor: "pointer", background: i % 2 ? T.rowAlt : T.card }}>
                       <td style={td}>{r.idNumber}</td>
                       <td style={td}>{r.judulKegiatan}</td>
                       <td style={td}>{r.kategori || "-"}</td>
+                      <td style={td}>{stage.paymentId || "-"}</td>
+                      <td style={td}><StageBadge label={stage.label} /></td>
                       <td style={td}>{r.bidang || "-"}</td>
                       <td style={td}>{r.vendor || "-"}</td>
                       <td style={{ ...td, textAlign: "right" }}>{rupiah(r.totalEvaluasiVendor || r.totalEvaluasi || 0)}</td>
@@ -468,6 +491,34 @@ export default function RABPage({ rab, setRab, vendors, notify, user, packages =
             </table>
           </div>
         </Card>
+
+        {displayRab.length > 0 && (
+          <div style={{ marginTop: 18 }}>
+            <SectionLabel>Tracking Tahapan RAB sampai Pembayaran</SectionLabel>
+            {displayRab.map((r) => {
+              const stage = getPaymentStage(r, {
+                nonPoList: nonpoSubmissions, ccList, poDocuments,
+                lmp1, lmp2, formVerif, bast, pakta, bapp,
+                ccItems, ccVerifikasi, ccPermintaan, ccRencana, ccBast, ccPakta, ccTtd, ccBapp, ccPertanggungjawaban,
+                paymentPackages,
+              });
+              const paymentRecord = r.kategori === "Cash Card"
+                ? ccList.find((c) => c.rabId === r.idNumber)
+                : nonpoSubmissions.find((n) => n.rabId === r.idNumber && (!n.kategori || n.kategori === r.kategori));
+              const paymentPackage = paymentPackages.find((pkg) => pkg.idRab === r.idNumber);
+              return (
+                <PaymentTrackingCard
+                  key={`tracking-${r.idNumber}`}
+                  rab={r}
+                  stage={stage}
+                  kategori={r.kategori}
+                  paymentCreatedAt={paymentRecord?.createdAt}
+                  paymentPackage={paymentPackage}
+                />
+              );
+            })}
+          </div>
+        )}
 
         {/* ---- Review modal ---- */}
         <ReviewModal
@@ -891,6 +942,26 @@ function TtdDot({ signed }) {
       }}
     >
       {signed ? "✓" : "•"}
+    </span>
+  );
+}
+
+// Badge label "Tahap Saat Ini" - warna hijau kalau Selesai, kuning untuk
+// tahap proses, abu untuk tahap awal (menunggu TTD) - murni tampilan, label
+// & logikanya semua datang dari getPaymentStage() (lib/paymentStage.js).
+function StageBadge({ label }) {
+  const isDone = label === "Selesai";
+  const isEarly = label.startsWith("Menunggu TTD");
+  const color = isDone ? T.success : isEarly ? "#9AA3AD" : "#8A6D00";
+  const bg = isDone ? T.successSoft : isEarly ? "#EEF0F3" : "#FFF4D6";
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 700,
+      color, background: bg, whiteSpace: "nowrap",
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+      {label}
     </span>
   );
 }

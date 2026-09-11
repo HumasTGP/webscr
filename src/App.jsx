@@ -20,6 +20,8 @@ import {
   paktaCcFields,
 } from "./lib/wizardFields";
 
+import useNotificationSound from "./lib/useNotificationSound";
+import organizationMaster from "./lib/organizationMaster.json";
 import { OrganizationContext } from "./components/OrganizationInput";
 import Sidebar from "./sakti/components/Sidebar";
 import Topbar from "./sakti/components/Topbar";
@@ -289,6 +291,8 @@ export default function App() {
     }))
   );
   const [vendors, setVendors] = useState(() => seed("VND", VENDOR_SEED));
+  const [organizations, setOrganizations] = useState(() => organizationMaster);
+  const addOrganization = (name) => setOrganizations((prev) => [...prev, { id: uid("ORG"), source_id: null, name, category: null }]);
   // signatureAsman/signatureMadm: field baru untuk TTD digital Proposal (pola
   // sama seperti RAB, lihat signRab). Ditambahkan lewat .map() tambahan di sini
   // (bukan mengubah PROPOSAL_SEED atau fungsi seed()) supaya data asli Proposal
@@ -318,6 +322,7 @@ export default function App() {
     () => buildActiveNotifications({ user, rab, nonPoList: nonpoSubmissions, ccList, proposals }),
     [user, rab, nonpoSubmissions, ccList, proposals]
   );
+  useNotificationSound(user, activeNotifications);
   const notificationHistory = useMemo(
     () => buildNotificationHistory({ user, rab, nonPoList: nonpoSubmissions, ccList, proposals }),
     [user, rab, nonpoSubmissions, ccList, proposals]
@@ -362,11 +367,6 @@ export default function App() {
   const [konten, setKonten] = useState(() => seed("KTN", KONTEN_SEED));
   const [komunikasiNarasumberOptions, setKomunikasiNarasumberOptions] = useState(OPT.komunikasiNarasumber);
   const [evaluasi, setEvaluasi] = useState([]);
-  // TOR/BAST/PI khusus konteks Proposal (bukan RAB) - diisi Humas di
-  // ProposalDokumenTambahan.jsx, ditarik read-only oleh Asman di
-  // InboxProposal.jsx. Kunci datanya proposalId, pola sama seperti Form
-  // Evaluasi (evaluasi di atas).
-  const [dokumenTambahanProposal, setDokumenTambahanProposal] = useState([]);
   const [history, setHistory] = useState([]);
   const [mitraList, setMitraList] = useState(() => seed("MTR", MITRA_SEED));
 
@@ -461,6 +461,7 @@ export default function App() {
         <Dashboard
           user={user}
           data={{ rab, tor, bast, pakta, laporan, proposals, konten, nonpoSubmissions }}
+          history={history}
           packages={packages}
           goto={setActive}
         />
@@ -507,6 +508,11 @@ export default function App() {
           rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user}
           packages={packages} signRab={signRab} saveMySignature={saveMySignature} tor={tor}
           openTargetId={openTargetId} onConsumeOpenTarget={consumeOpenTarget}
+          nonpoSubmissions={nonpoSubmissions} ccList={ccList} poDocuments={poDocuments}
+          lmp1={lmp1List} lmp2={lmp2List} formVerif={formVerifList} bast={bast} pakta={pakta} bapp={bapp}
+          ccItems={ccItems} ccVerifikasi={ccVerifikasi} ccPermintaan={ccPermintaan} ccRencana={ccRencana}
+          ccBast={ccBast} ccPakta={ccPakta} ccTtd={ccTtd} ccBapp={ccBapp} ccPertanggungjawaban={ccPertanggungjawaban}
+          paymentPackages={paymentPackages}
         />
       ),
       tor: <TORPage tor={tor} setTor={setTor} rab={rab} notify={notify} />,
@@ -528,6 +534,10 @@ export default function App() {
           setCombo={setNonpoCombo}
           rabIdsWithDokumentasi={rabIdsWithDokumentasi}
           user={user}
+          ccList={ccList} poDocuments={poDocuments}
+          ccItems={ccItems} ccVerifikasi={ccVerifikasi} ccPermintaan={ccPermintaan} ccRencana={ccRencana}
+          ccBast={ccBast} ccPakta={ccPakta} ccTtd={ccTtd} ccBapp={ccBapp} ccPertanggungjawaban={ccPertanggungjawaban}
+          paymentPackages={paymentPackages}
         />
       ),
       "po-overview": (
@@ -548,16 +558,21 @@ export default function App() {
           setCombo={setNonpoCombo}
           rabIdsWithDokumentasi={rabIdsWithDokumentasi}
           user={user}
+          ccList={ccList} poDocuments={poDocuments}
+          ccItems={ccItems} ccVerifikasi={ccVerifikasi} ccPermintaan={ccPermintaan} ccRencana={ccRencana}
+          ccBast={ccBast} ccPakta={ccPakta} ccTtd={ccTtd} ccBapp={ccBapp} ccPertanggungjawaban={ccPertanggungjawaban}
+          paymentPackages={paymentPackages}
         />
       ),
 
-      // ---- Tracking Pembayaran (Asman, read-only) ----
+      // ---- Tracking Pembayaran (Asman & MADM, read-only) ----
       // Route TERPISAH dari nonpo-overview/po-overview/cc-overview di atas,
       // supaya bisa dibatasi role sendiri di sidebar tanpa membuka akses edit
-      // Humas ke Asman. Komponennya SAMA PERSIS (NonPoPage/CashCardPage sudah
-      // punya logika canEdit = user.role === "humas"), cuma dipanggil ulang
-      // lewat key routing baru dengan user Asman yang dipaksakan eksplisit -
-      // jadi walau suatu saat menu ini kebuka role lain, tetap read-only.
+      // Humas ke Asman/MADM. Komponennya SAMA PERSIS (NonPoPage/CashCardPage
+      // sudah punya logika canEdit = user.role === "humas"), cuma dipanggil
+      // ulang lewat key routing baru dengan user ASLI yang sedang login
+      // (bukan hardcode role) - permission tetap mengikuti role sungguhan,
+      // Asman dan MADM sama-sama read-only otomatis karena bukan "humas".
       "tracking-nonpo": (
         <NonPoPage
           rab={rabByKategori["NON PO"]}
@@ -575,7 +590,11 @@ export default function App() {
           combo={nonpoCombo}
           setCombo={setNonpoCombo}
           rabIdsWithDokumentasi={rabIdsWithDokumentasi}
-          user={{ role: "asman" }}
+          user={user}
+          ccList={ccList} poDocuments={poDocuments}
+          ccItems={ccItems} ccVerifikasi={ccVerifikasi} ccPermintaan={ccPermintaan} ccRencana={ccRencana}
+          ccBast={ccBast} ccPakta={ccPakta} ccTtd={ccTtd} ccBapp={ccBapp} ccPertanggungjawaban={ccPertanggungjawaban}
+          paymentPackages={paymentPackages}
         />
       ),
       "tracking-po": (
@@ -595,7 +614,11 @@ export default function App() {
           combo={nonpoCombo}
           setCombo={setNonpoCombo}
           rabIdsWithDokumentasi={rabIdsWithDokumentasi}
-          user={{ role: "asman" }}
+          user={user}
+          ccList={ccList} poDocuments={poDocuments}
+          ccItems={ccItems} ccVerifikasi={ccVerifikasi} ccPermintaan={ccPermintaan} ccRencana={ccRencana}
+          ccBast={ccBast} ccPakta={ccPakta} ccTtd={ccTtd} ccBapp={ccBapp} ccPertanggungjawaban={ccPertanggungjawaban}
+          paymentPackages={paymentPackages}
         />
       ),
       "tracking-cc": (
@@ -609,7 +632,8 @@ export default function App() {
           notify={notify}
           onNavigate={openDocument}
           rab={rab}
-          user={{ role: "asman" }}
+          user={user}
+          paymentPackages={paymentPackages}
         />
       ),
 
@@ -628,6 +652,7 @@ export default function App() {
           onNavigate={openDocument}
           rab={rab}
           user={user}
+          paymentPackages={paymentPackages}
         />
       ),
       "detail-cc": (
@@ -713,7 +738,6 @@ export default function App() {
           proposals={proposals}
           onUpdateProposal={updateProposal}
           notify={notify}
-          dokumenTambahanProposal={dokumenTambahanProposal}
           signProposal={signProposal}
           openTargetId={openTargetId}
           onConsumeOpenTarget={consumeOpenTarget}
@@ -831,8 +855,8 @@ export default function App() {
       })(),
       // PO punya alur beda (lewat ERP) — BAST & BAPB-nya cukup dicatat ID-nya aja,
       // bukan dokumen lengkap kayak NON PO/CC.
-      "bast-po": <PoErpDataPage records={poDocuments} setRecords={setPoDocuments} {...documentProps} rab={rabByKategori["PO"]} notify={notify} />,
-      "bapp-po": <PoErpDataPage records={poDocuments} setRecords={setPoDocuments} {...documentProps} rab={rabByKategori["PO"]} notify={notify} />,
+      "bast-po": <PoErpDataPage records={poDocuments} setRecords={setPoDocuments} {...documentProps} rab={rabByKategori["PO"]} notify={notify} paymentPackages={paymentPackages} nonPoList={nonpoSubmissions} />,
+      "bapp-po": <PoErpDataPage records={poDocuments} setRecords={setPoDocuments} {...documentProps} rab={rabByKategori["PO"]} notify={notify} paymentPackages={paymentPackages} nonPoList={nonpoSubmissions} />,
       // BAST-CC/PI-CC/BAPP-CC - Cash Card berdiri sendiri, ID-nya dari ccList
       // (bukan rab). Struktur wizard tetap sama polanya dengan NON PO/PO.
       "bast-cc": (
@@ -920,7 +944,7 @@ export default function App() {
       // Ditambahkan (poin 16) - sebelumnya state ini dipakai di dalam modules
       // tapi tidak masuk dependency array, jadi tabel/status bisa nampilkan
       // nilai lama (stale closure) setelah upload/update.
-      dokumenTambahanProposal, ccVerifikasi, ccPermintaan, ccRencana, ccPertanggungjawaban,
+      ccVerifikasi, ccPermintaan, ccRencana, ccPertanggungjawaban,
       notificationHistory, signRab, saveMySignature, signProposal, openTargetId, evaluasi, documentTarget, active, poDocuments,
     ]
   );
@@ -1040,7 +1064,7 @@ export default function App() {
             animation: "fade-in .2s ease",
           }}
         >
-          <OrganizationContext.Provider value={vendors}>{modules[active]}</OrganizationContext.Provider>
+          <OrganizationContext.Provider value={{ entities: [...organizations, ...vendors], addEntity: addOrganization }}>{modules[active]}</OrganizationContext.Provider>
         </div>
       </div>
       <Toast toast={toast} />

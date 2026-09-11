@@ -513,7 +513,7 @@ function KategoriBarChart({ submissions, proposals, goto }) {
   );
 }
 
-export default function Dashboard({ data, packages = [], goto, user }) {
+export default function Dashboard({ data, packages = [], goto, user, history = [] }) {
   const fullyApprovedRab = data.rab
     .map((r) => ({ ...r, pkg: packages.find((p) => p.idRab === r.idNumber) }))
     .filter((r) => r.pkg?.status === DOC_STATUS.PROCESSED)
@@ -553,6 +553,24 @@ export default function Dashboard({ data, packages = [], goto, user }) {
           <LiveClock />
         </div>
       </div>
+
+      {user?.role === "humas" && (
+        <Card style={{ marginBottom: 20 }}>
+          <h3 style={{ marginTop: 0 }}>Aktivitas Saya</h3>
+          {history
+            .filter((h) => h.username === user.username && h.role === "humas")
+            .slice(0, 10)
+            .map((h) => (
+              <div key={h.id} style={{ padding: "7px 0", borderBottom: `1px solid ${T.border}`, fontSize: 13 }}>
+                {h.jenis}
+                <div style={{ color: T.muted, fontSize: 11 }}>{h.tanggal} · {h.waktu}</div>
+              </div>
+            ))}
+          {!history.some((h) => h.username === user.username && h.role === "humas") && (
+            <p style={{ color: T.muted }}>Belum ada aktivitas tercatat untuk akun ini.</p>
+          )}
+        </Card>
+      )}
 
       {/* Grafik dokumen masuk per kategori (NON PO / PO / Cash Card) */}
       <KategoriBarChart submissions={data.nonpoSubmissions} proposals={data.proposals} goto={goto} />

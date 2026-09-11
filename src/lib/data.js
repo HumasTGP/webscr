@@ -452,11 +452,12 @@ export const MENU_TREE = [
   // tombol aksi apapun. Datanya sama persis, cuma halamannya route terpisah
   // supaya bisa dibatasi role tanpa bentrok sama menu Humas.
   {
-    key: "grp-tracking-pembayaran", label: "Tracking Pembayaran", icon: ClipboardList, roles: ["asman"],
+    key: "grp-tracking-pembayaran", label: "Tracking Pembayaran", icon: ClipboardList, roles: ["asman", "madm"],
     children: [
       { key: "tracking-nonpo", label: "NON PO",    icon: FileText },
       { key: "tracking-po",    label: "PO",         icon: FileText },
       { key: "tracking-cc",    label: "Cash Card",  icon: FileText },
+      { key: "checklist-dokumen", label: "Tracking Dokumen Selesai", icon: CheckSquare, roles: ["asman"] },
     ],
   },
 

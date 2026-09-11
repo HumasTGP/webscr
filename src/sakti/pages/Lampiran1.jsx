@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Check, Download, Eye, FileText, Pencil, Plus,
   Printer, Trash2, X,
@@ -13,6 +13,7 @@ import Modal from "../../components/Modal";
 import PageHeader from "../../components/PageHeader";
 import DatePicker from "../../components/DatePicker";
 import ComboManaged from "../../components/ComboManaged";
+import OrganizationInput from "../../components/OrganizationInput";
 import ReviewModal from "../../components/ReviewModal";
 import { DEFAULT_SATUAN, SatuanSelect, SatuanSettingsModal, hitungTotalDenganSatuan } from "../../components/SatuanPicker";
 import { Lampiran1Preview } from "../../components/DocTemplatePreview";
@@ -85,7 +86,7 @@ function formatTanggal(dateStr) {
   return `${d.getDate()} ${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-export default function Lampiran1Page({ rab, notify, list = [], setList }) {
+export default function Lampiran1Page({ rab, notify, list = [], setList, openParentId, onConsumeParent }) {
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(0);
   const [activeRab, setActiveRab] = useState(null);
@@ -148,7 +149,16 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
     setReviewRow(null);
   };
 
+  useEffect(() => {
+    if (!openParentId) return;
+    const record = list.find((r) => r.submissionId === openParentId);
+    if (record) startEdit(record);
+    else { startWizard(); pickRab(openParentId); }
+    onConsumeParent?.();
+  }, [openParentId]);
   const pickRab = (id) => {
+    const existing = list.find((r) => r.submissionId === id);
+    if (existing) { startEdit(existing); return; }
     const r = rab.find((x) => x.idNumber === id);
     setActiveRab(r || null);
     if (r) {
@@ -397,9 +407,9 @@ export default function Lampiran1Page({ rab, notify, list = [], setList }) {
 
           <SectionLabel dashed>Vendor</SectionLabel>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px 20px" }} className="responsive-form-grid">
-            <FieldBlock label="Vendor 1"><ComboManaged value={form.vendor1} options={combo.vendor} onChange={(v) => set("vendor1", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih Vendor 1…" /></FieldBlock>
-            <FieldBlock label="Vendor 2" hint="(opsional)"><ComboManaged value={form.vendor2} options={combo.vendor} onChange={(v) => set("vendor2", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih Vendor 2..." /></FieldBlock>
-            <FieldBlock label="Vendor 3" hint="(opsional)"><ComboManaged value={form.vendor3} options={combo.vendor} onChange={(v) => set("vendor3", v)} onOptions={(o) => setComboOpts("vendor", o)} placeholder="Pilih Vendor 3..." /></FieldBlock>
+            <FieldBlock label="Vendor 1"><OrganizationInput value={form.vendor1} onChange={(v) => set("vendor1", v)} placeholder="Cari Vendor 1…" /></FieldBlock>
+            <FieldBlock label="Vendor 2" hint="(opsional)"><OrganizationInput value={form.vendor2} onChange={(v) => set("vendor2", v)} placeholder="Cari Vendor 2…" /></FieldBlock>
+            <FieldBlock label="Vendor 3" hint="(opsional)"><OrganizationInput value={form.vendor3} onChange={(v) => set("vendor3", v)} placeholder="Cari Vendor 3…" /></FieldBlock>
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>

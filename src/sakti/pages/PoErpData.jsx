@@ -3,6 +3,8 @@ import { Save } from "lucide-react";
 import { T, font } from "../../lib/theme";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
+import PaymentTrackingCard from "../../components/PaymentTrackingCard";
+import { getPaymentStage } from "../../lib/paymentStage";
 
 const EMPTY = { nomorPR: "", nomorPO: "", idBast: "", idBapb: "" };
 
@@ -21,12 +23,32 @@ function StatusDot({ filled }) {
   );
 }
 
+// Badge "Tahap Saat Ini" - sama persis (warna & logika) dengan RAB.jsx,
+// NonPoPage.jsx, CashCard.jsx. Label & logikanya SELALU dari
+// getPaymentStage() yang sama.
+function StageBadge({ label }) {
+  const isDone = label === "Selesai";
+  const isEarly = label.startsWith("Menunggu TTD");
+  const color = isDone ? "#1E7F3E" : isEarly ? "#9AA3AD" : "#8A6D00";
+  const bg = isDone ? "#DEF6E5" : isEarly ? "#EEF0F3" : "#FFF4D6";
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 700,
+      color, background: bg, whiteSpace: "nowrap",
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+      {label}
+    </span>
+  );
+}
+
 /**
  * Alur PO beda dari NON PO/CC — ada proses ERP (Nomor PR -> diproses PCR -> Nomor PO),
  * dan begitu kerjaan selesai, BAST + BAPB dibuat di luar sistem (di ERP) - yang perlu
  * dicatat di sini cukup Nomor PR/PO dan ID BAST/BAPB-nya, bukan dokumen lengkap.
  */
-export default function PoErpDataPage({ rab, notify , openParentId, onConsumeParent, records, setRecords }) {
+export default function PoErpDataPage({ rab, notify , openParentId, onConsumeParent, records, setRecords, paymentPackages = [], nonPoList = [] }) {
   const [localData, setLocalData] = useState({});
   const dataByRab = records ?? localData;
   const setDataByRab = setRecords ?? setLocalData;
@@ -48,7 +70,21 @@ export default function PoErpDataPage({ rab, notify , openParentId, onConsumePar
 
   const save = () => {
     if (!activeRab) return;
-    setDataByRab((prev) => ({ ...prev, [activeRab.idNumber]: form }));
+    const now = new Date().toISOString();
+    setDataByRab((prev) => {
+      const existing = prev[activeRab.idNumber] || {};
+      const next = { ...existing, ...form, createdAt: existing.createdAt || now, updatedAt: now };
+      [
+        ["nomorPR", "nomorPRAt"],
+        ["nomorPO", "nomorPOAt"],
+        ["idBast", "idBastAt"],
+        ["idBapb", "idBapbAt"],
+      ].forEach(([key, atKey]) => {
+        if (!form[key]) next[atKey] = null;
+        else if (form[key] !== existing[key]) next[atKey] = now;
+      });
+      return { ...prev, [activeRab.idNumber]: next };
+    });
     notify?.(`Data ERP untuk ${activeRab.idNumber} disimpan.`, "success", "Data PO");
   };
 
@@ -80,6 +116,7 @@ export default function PoErpDataPage({ rab, notify , openParentId, onConsumePar
                 const isActive = activeRab?.idNumber === r.idNumber;
                 const saved = dataByRab[r.idNumber];
                 const hasSaved = !!saved;
+                const stage = getPaymentStage(r, { nonPoList, poDocuments: dataByRab, paymentPackages, paymentTrackingOnly: true });
                 return (
                   <button key={r.idNumber} onClick={() => select(r)} style={{
                     padding: "10px 12px", borderRadius: 8, textAlign: "left",
@@ -97,6 +134,7 @@ export default function PoErpDataPage({ rab, notify , openParentId, onConsumePar
                     <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3, lineHeight: 1.45, overflowWrap: "anywhere" }}>
                       {r.judulKegiatan}{hasSaved && <span style={{ color: "#1E7F3E", fontWeight: 700 }}> · tersimpan</span>}
                     </div>
+                    <div style={{ marginTop: 6 }}><StageBadge label={stage.label} /></div>
                   </button>
                 );
               })}
@@ -114,6 +152,9 @@ export default function PoErpDataPage({ rab, notify , openParentId, onConsumePar
               <div style={{ marginBottom: 17 }}>
                 <div style={{ fontFamily: font.mono, fontSize: 12, fontWeight: 700, color: T.blue }}>{activeRab.idNumber}</div>
                 <div style={{ fontSize: 14.5, fontWeight: 700, color: T.heading, marginTop: 3 }}>{activeRab.judulKegiatan}</div>
+                <div style={{ marginTop: 8 }}>
+                  <StageBadge label={getPaymentStage(activeRab, { nonPoList, poDocuments: dataByRab, paymentPackages, paymentTrackingOnly: true }).label} />
+                </div>
               </div>
 
               <div style={{ fontSize: 11, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 8 }}>
@@ -155,6 +196,29 @@ export default function PoErpDataPage({ rab, notify , openParentId, onConsumePar
           )}
         </Card>
       </div>
+
+      {!!rab?.length && (
+        <div style={{ marginTop: 18 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>
+            Tracking Aktivitas Dokumen PO
+          </div>
+          {rab.map((r) => {
+            const stage = getPaymentStage(r, { nonPoList, poDocuments: dataByRab, paymentPackages, paymentTrackingOnly: true });
+            const master = nonPoList.find((n) => n.rabId === r.idNumber && (!n.kategori || n.kategori === "PO"));
+            return (
+              <PaymentTrackingCard
+                key={`tracking-po-${r.idNumber}`}
+                rab={r}
+                stage={stage}
+                kategori="PO"
+                paymentCreatedAt={master?.createdAt || dataByRab[r.idNumber]?.createdAt}
+                paymentPackage={paymentPackages.find((pkg) => pkg.idRab === r.idNumber)}
+                scope="payment"
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

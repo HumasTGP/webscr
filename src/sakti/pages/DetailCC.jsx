@@ -278,6 +278,8 @@ export default function DetailCCPage({
             ? {
                 ...it,
                 ...itemForm,
+                createdAt: it.createdAt || editingItem.createdAt || new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
               }
             : it
         )
@@ -296,6 +298,8 @@ export default function DetailCCPage({
           ...itemForm,
           id,
           ccId: selectedCcId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
           tanggal: new Date()
             .toISOString()
             .slice(0, 10),

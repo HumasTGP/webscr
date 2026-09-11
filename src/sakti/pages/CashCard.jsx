@@ -4,6 +4,7 @@ import { T, font } from "../../lib/theme";
 import { nextNumericId, parseLocalDate, rupiah, terbilang as toTerbilang } from "../../lib/utils";
 import { OPT } from "../../lib/data";
 import { availablePaymentRabs, duplicatePayment } from "../../lib/recordLinks";
+import { getPaymentStage } from "../../lib/paymentStage";
 import Button from "../../components/Button";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
@@ -11,6 +12,7 @@ import PageHeader from "../../components/PageHeader";
 import ComboManaged from "../../components/ComboManaged";
 import DatePicker from "../../components/DatePicker";
 import EmptyState from "../../components/EmptyState";
+import PaymentTrackingCard from "../../components/PaymentTrackingCard";
 
 const MONTHS_ID = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 function monthKey(dateStr) {
@@ -81,6 +83,26 @@ function StatusDot({ status, title, onClick }) {
   );
 }
 
+// Badge "Tahap Saat Ini" - sama persis (warna & logika) dengan RAB.jsx dan
+// NonPoPage.jsx, ditulis ulang di sini biar tidak saling impor lintas-
+// halaman. Label & logikanya sendiri SELALU dari getPaymentStage() yang sama.
+function StageBadge({ label }) {
+  const isDone = label === "Selesai";
+  const isEarly = label.startsWith("Menunggu TTD");
+  const color = isDone ? "#1E7F3E" : isEarly ? "#9AA3AD" : "#8A6D00";
+  const bg = isDone ? "#DEF6E5" : isEarly ? "#EEF0F3" : "#FFF4D6";
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 5,
+      padding: "3px 9px", borderRadius: 999, fontSize: 11, fontWeight: 700,
+      color, background: bg, whiteSpace: "nowrap",
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+      {label}
+    </span>
+  );
+}
+
 const EMPTY_CC = {
   judulCc: "", tanggal: "", bidang: "", saldoKas: "", procost: "", rabId: "",
 };
@@ -93,6 +115,7 @@ export default function CashCardPage({
   ccList, setCcList, ccItems, ccBast, ccPakta, ccBapp, ccTtd = [],
   ccVerifikasi = [], ccPermintaan = [], ccRencana = [], ccPertanggungjawaban = [],
   rab = [], combo, setCombo, notify, onNavigate, user,
+  paymentPackages = [],
 }) {
   // Sama seperti NonPoPage - Asman cuma boleh LIHAT tracking, tidak bisa
   // tambah/edit/hapus. Humas tetap penuh seperti sebelumnya.
@@ -217,6 +240,7 @@ export default function CashCardPage({
                   <th style={thStyle}>ID</th>
                   <th style={thStyle}>Submission ID</th>
                   <th style={thStyle}>Judul CC</th>
+                  <th style={thStyle}>Tahap Saat Ini</th>
                   <th style={thStyle}>Bidang</th>
                   <th style={{ ...thStyle, textAlign: "right" }}>Saldo Kas</th>
                   <th style={{ ...thStyle, textAlign: "center" }}>Detail/Item</th>
@@ -246,6 +270,17 @@ export default function CashCardPage({
                   const piStatus = paktaRow ? (paktaRow.tanggalPi && paktaRow.namaPenerima ? "done" : "draft") : "none";
                   const bappStatus = bappRow ? "done" : "none";
                   const ttdStatus = ttdRow ? "done" : "none";
+                  // Tahap Saat Ini - RAB terkait ditemukan lewat row.rabId,
+                  // dihitung dengan helper terpusat getPaymentStage() yang
+                  // sama dipakai di RAB.jsx & NonPoPage.jsx.
+                  const rabRecord = rab.find((r) => r.idNumber === row.rabId);
+                  const stage = rabRecord
+                    ? getPaymentStage(rabRecord, {
+                        ccList,
+                        ccItems, ccVerifikasi, ccPermintaan, ccRencana, ccBast, ccPakta, ccTtd, ccBapp, ccPertanggungjawaban,
+                        paymentPackages, paymentTrackingOnly: true,
+                      })
+                    : null;
                   return (
                     <tr key={row.id} style={{ background: i % 2 === 1 ? T.rowAlt : undefined }}>
                       <td style={tdStyle}>
@@ -253,6 +288,7 @@ export default function CashCardPage({
                       </td>
                       <td style={tdStyle}>{row.id}</td>
                       <td style={tdStyle}>{row.judulCc}</td>
+                      <td style={tdStyle}>{stage && <StageBadge label={stage.label} />}</td>
                       <td style={tdStyle}>{row.bidang || "-"}</td>
                       <td style={tdNumStyle}>{row.saldoKas ? rupiah(row.saldoKas) : "-"}</td>
                       <td style={tdCenterStyle}><StatusDot status={hasItems ? "done" : "none"} onClick={() => onNavigate?.("detail-cc", row.id)} /></td>
@@ -288,6 +324,33 @@ export default function CashCardPage({
       <div style={{ fontSize: 11.5, color: T.muted, margin: "10px 2px 0", lineHeight: 1.6 }}>
         ✓ hijau = dokumen sudah dibuat, • kuning = masih draft, — abu = belum dibuat. Klik titik status untuk langsung buka dokumen terkait.
       </div>
+
+      {displayList.length > 0 && (
+        <div style={{ marginTop: 18 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>
+            Tracking Aktivitas Dokumen Cash Card
+          </div>
+          {displayList.map((row) => {
+            const rabRecord = rab.find((r) => r.idNumber === row.rabId);
+            if (!rabRecord) return null;
+            const stage = getPaymentStage(rabRecord, {
+              ccList, ccItems, ccVerifikasi, ccPermintaan, ccRencana, ccBast, ccPakta, ccTtd, ccBapp, ccPertanggungjawaban,
+              paymentPackages, paymentTrackingOnly: true,
+            });
+            return (
+              <PaymentTrackingCard
+                key={`tracking-${row.id}`}
+                rab={rabRecord}
+                stage={stage}
+                kategori="Cash Card"
+                paymentCreatedAt={row.createdAt}
+                paymentPackage={paymentPackages.find((pkg) => pkg.idRab === row.rabId)}
+                scope="payment"
+              />
+            );
+          })}
+        </div>
+      )}
 
       {/* Modal Tambah/Edit Cash Card */}
       <Modal open={addOpen} onClose={() => { setAddOpen(false); setEditingRow(null); }} title={editingRow ? "Edit Cash Card" : "Tambah Cash Card"} width={560}>
