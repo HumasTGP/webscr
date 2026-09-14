@@ -1,0 +1,9 @@
+.silapak-view-frame{max-width:100%;min-width:0}
+.silapak-framed-content{min-width:0}
+.silapak-framed-content.silapak-help-content>div>h2:first-child,.silapak-framed-content.silapak-help-content>div>h2:first-child+p{display:none!important}
+@media(max-width:720px){
+  .silapak-framed-content>div[style*="max-width: 640"],.silapak-framed-content>div[style*="max-width: 460"],.silapak-framed-content>div[style*="max-width: 420"]{max-width:100%!important}
+  .silapak-framed-content table{min-width:620px}
+  .silapak-framed-content>div>div[style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr!important}
+  .silapak-framed-content button{max-width:100%}
+}
