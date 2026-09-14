@@ -1,6 +1,6 @@
 # Portal Digital PLN Indonesia Power UBP Priok
 
-Portal web terpadu untuk **SAKTI**, **Si Lapak Priok**, dan **GANDENG** di PLN Indonesia Power UBP Priok.
+Portal web terpadu untuk **SAKTI**, **Si Lapak Priok**, dan **Si Cepat** di PLN Indonesia Power UBP Priok.
 
 ## Sistem
 
@@ -8,7 +8,7 @@ Portal web terpadu untuk **SAKTI**, **Si Lapak Priok**, dan **GANDENG** di PLN I
 |---|---|---|
 | **SAKTI** | Humas, Asman, MADM | Proposal, evaluasi, RAB, TOR, pelaksanaan, pembayaran, dokumen, rekap anggaran, inbox review, dan administrasi. |
 | **Si Lapak Priok** | Petugas/operator | Paket masuk/keluar, pengambilan paket, buku tamu, petugas jaga, riwayat, dan bantuan. |
-| **GANDENG** | Perusahaan/lembaga dan admin GANDENG | Registrasi akun, pengajuan proposal, riwayat, tracking Humas → Asman → MADM, bantuan, dan isolasi data per akun. |
+| **Si Cepat** | Perusahaan/lembaga dan admin Si Cepat | Registrasi akun, pengajuan proposal, riwayat, tracking Humas → Asman → MADM, bantuan, dan isolasi data per akun. |
 
 ## Struktur Source
 
@@ -17,7 +17,7 @@ src/
 ├── portal/             # Portal utama dan login bersama
 ├── sakti/              # SAKTI - Humas, Asman, MADM
 ├── si-lapak-priok/     # Si Lapak Priok
-├── gandeng/            # GANDENG
+├── si-cepat/           # Si Cepat
 ├── components/         # Komponen bersama
 ├── lib/                # Data, helper, generator dokumen
 └── styles/             # Styling global dan responsif
@@ -27,7 +27,7 @@ src/
 
 - **SAKTI:** `#036D9A`
 - **Si Lapak Priok:** `#FDEA6F`
-- **GANDENG:** `#CF0000`
+- **Si Cepat:** `#CF0000`
 
 ## Menjalankan Project
 
@@ -328,6 +328,6 @@ git push origin main
 
 ## Catatan Arsitektur
 
-Authentication dan business flow existing dipertahankan. Manajemen akses SAKTI + Si Lapak Priok tetap terpisah dari Manajemen Akun GANDENG. Data GANDENG tetap difilter berdasarkan akun/perusahaan yang login.
+Authentication dan business flow existing dipertahankan. Manajemen akses SAKTI + Si Lapak Priok tetap terpisah dari Manajemen Akun Si Cepat. Data Si Cepat tetap difilter berdasarkan akun/perusahaan yang login.
 
 **PLN Indonesia Power UBP Priok**

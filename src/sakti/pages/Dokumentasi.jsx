@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
 import UploadDocModal from "../../components/UploadDocModal";
+import { uploadFile } from "../../lib/api";
 
 function rabNumber(id = "") {
   const match = String(id).match(/(\d+)(?!.*\d)/);
@@ -28,15 +29,27 @@ export default function DokumentasiPage({ rab, setRab, notify, docs = [], setDoc
     );
   };
 
-  const handleSave = (rabItem, files, keterangan) => {
+  const handleSave = async (rabItem, files, keterangan) => {
     if (!rabItem) return;
-    const newDocs = files.map((f) => ({
-      id: uid("DOK"), rabId: rabItem.idNumber, judulRab: rabItem.judulKegiatan,
-      fileName: f.name, fileSize: f.size, fileType: f.type, keterangan,
-      uploadedAt: new Date().toISOString(), url: URL.createObjectURL(f),
-    }));
-    setDocs((prev) => [...prev, ...newDocs]);
-    notify?.(`${newDocs.length} file dokumentasi berhasil disimpan.`, "success", "Upload Dokumentasi");
+    try {
+      const newDocs = [];
+      for (let i = 0; i < files.length; i += 1) {
+        const result = await uploadFile(files[i], "dokumentasi", {
+          documentType: "DOKUMENTASI",
+          recordId: rabItem.idNumber,
+          title: `${rabItem.idNumber}_${rabItem.judulKegiatan}`,
+          sequence: i + 1,
+        });
+        newDocs.push({
+          id: uid("DOK"), rabId: rabItem.idNumber, judulRab: rabItem.judulKegiatan,
+          ...result.file, keterangan, uploadedAt: new Date().toISOString(),
+        });
+      }
+      setDocs((prev) => [...prev, ...newDocs]);
+      notify?.(`${newDocs.length} file dokumentasi berhasil disimpan.`, "success", "Upload Dokumentasi");
+    } catch (error) {
+      notify?.(`Upload dokumentasi gagal: ${error.message}`, "error");
+    }
   };
 
   const handleDelete = (docId) => {

@@ -7,16 +7,17 @@ import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
 import UploadDocModal from "../../components/UploadDocModal";
+import { uploadFile } from "../../lib/api";
 
 const rabNo=(id="")=>Number(String(id).match(/(\d+)(?!.*\d)/)?.[1]||-1);
-export default function DaftarHadirPage({rab,notify}){
-  const [lists,setLists]=useState([]),[docs,setDocs]=useState([]),[query,setQuery]=useState(""),[showForm,setShowForm]=useState(null),[showUpload,setShowUpload]=useState(null),[preview,setPreview]=useState(null),[name,setName]=useState(""),[instansi,setInstansi]=useState("");
+export default function DaftarHadirPage({rab,notify,lists,setLists,docs,setDocs}){
+  const [query,setQuery]=useState(""),[showForm,setShowForm]=useState(null),[showUpload,setShowUpload]=useState(null),[preview,setPreview]=useState(null),[name,setName]=useState(""),[instansi,setInstansi]=useState("");
   const sorted=useMemo(()=>[...(rab||[])].sort((a,b)=>rabNo(b.idNumber)-rabNo(a.idNumber)||String(b.idNumber).localeCompare(String(a.idNumber),"id",{numeric:true})),[rab]);
   const filtered=useMemo(()=>{const q=query.trim().toLowerCase();return q?sorted.filter((r)=>String(r.idNumber).toLowerCase().includes(q)||String(r.judulKegiatan||"").toLowerCase().includes(q)):sorted},[query,sorted]);
   const has=(r)=>lists.some((x)=>x.rabId===r.idNumber)||docs.some((x)=>x.rabId===r.idNumber);
   const done=filtered.filter(has),pending=filtered.filter((r)=>!has(r));
   const add=(rabId)=>{if(!name.trim())return;setLists((p)=>[...p,{id:uid("DH"),rabId,nama:name.trim(),instansi:instansi.trim(),waktu:new Date().toISOString()}]);setName("");setInstansi("");notify?.("Peserta ditambahkan.","success")};
-  const upload=(r,files)=>{if(!r)return;setDocs((p)=>[...p,...files.map((f)=>({id:uid("DH-DOC"),rabId:r.idNumber,fileName:f.name,fileSize:f.size,fileType:f.type,url:URL.createObjectURL(f)}))]);notify?.("File daftar hadir berhasil disimpan.","success","Upload Daftar Hadir")};
+  const upload=async(r,files)=>{if(!r)return;try{const saved=[];for(let i=0;i<files.length;i+=1){const result=await uploadFile(files[i],"daftarHadir",{documentType:"DAFTAR_HADIR",recordId:r.idNumber,title:`${r.idNumber}_${r.judulKegiatan}`,sequence:i+1});saved.push({id:uid("DH-DOC"),rabId:r.idNumber,...result.file})}setDocs((p)=>[...p,...saved]);notify?.("File daftar hadir berhasil disimpan.","success","Upload Daftar Hadir")}catch(error){notify?.(`Upload daftar hadir gagal: ${error.message}`,"error")}};
   const print=(r)=>{const rows=lists.filter((x)=>x.rabId===r.idNumber).map((x,i)=>`${i+1}. ${x.nama} | ${x.instansi||"-"}`).join("\n");const w=window.open("","_blank");if(!w)return;w.document.write(`<pre style="font:14px Arial;white-space:pre-wrap;padding:32px"><b>DAFTAR HADIR</b>\n${r.idNumber}\n${r.judulKegiatan}\n\n${rows||"Belum ada peserta"}</pre>`);w.document.close();setTimeout(()=>w.print(),150)};
 
   return <div>

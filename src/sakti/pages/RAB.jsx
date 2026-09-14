@@ -20,6 +20,7 @@ import SignaturePanel from "../../components/SignaturePanel";
 import PaymentTrackingCard from "../../components/PaymentTrackingCard";
 import { buildSignatureStamp, hasSavedSignature } from "../../lib/signature";
 import { getPaymentStage } from "../../lib/paymentStage";
+import { uploadFile } from "../../lib/api";
 
 const STEPS = ["Data RAB", "Uraian RAB", "Konfirmasi RAB", "Simpan"];
 const PPN_OPTIONS = ["Non PPN", "11%"];
@@ -242,10 +243,20 @@ export default function RABPage({
 
   const setH = (key, val) => setHeader((p) => ({ ...p, [key]: val }));
 
-  const onUploadTor = (e) => {
+  const onUploadTor = async (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    setH("dokumenTor", { fileName: f.name, fileSize: f.size, url: URL.createObjectURL(f) });
+    try {
+      const result = await uploadFile(f, "rabTor", {
+        documentType: "TOR",
+        recordId: header.idNumber || "",
+        title: `${header.idNumber || "RAB"}_${header.judulKegiatan || "KEGIATAN"}`,
+      });
+      setH("dokumenTor", result.file);
+      notify?.("Dokumen TOR berhasil diunggah.", "success");
+    } catch (error) {
+      notify?.(`Upload dokumen TOR gagal: ${error.message}`, "error");
+    }
   };
 
   // savingRow = kunci sesaat biar klik ganda / event dobel gak nambahin baris 2x.

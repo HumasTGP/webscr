@@ -72,7 +72,10 @@ export default function FormGrid({ fields, values, onChange, minWidth = 240, ali
                 )}
               </label>
               <FieldInput
-                field={f}
+                field={{
+                  ...f,
+                  uploadRecordId: f.uploadRecordId || values.id || values.idNumber || values.rabId || "",
+                }}
                 value={values[f.key]}
                 onChange={(v) => onChange(f.key, v)}
               />

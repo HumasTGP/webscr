@@ -6,6 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
 import Modal from "../../components/Modal";
 import UploadDocModal from "../../components/UploadDocModal";
+import { uploadFile } from "../../lib/api";
 
 function iconForType(type) {
   if (type?.startsWith("image/")) return ImageIcon;
@@ -13,25 +14,30 @@ function iconForType(type) {
   return FileText;
 }
 
-export default function EvidenPage({ rab, notify }) {
-  const [evidens, setEvidens] = useState([]);
+export default function EvidenPage({ rab, notify, evidens, setEvidens }) {
   const [showUpload, setShowUpload] = useState(null);
   const [preview, setPreview] = useState(null);
 
-  const handleSave = (rabItem, files, keterangan) => {
-    const newItems = files.map((f) => ({
-      id: uid("EVD"),
-      rabId: rabItem.idNumber,
-      judulRab: rabItem.judulKegiatan,
-      fileName: f.name,
-      fileSize: f.size,
-      fileType: f.type,
-      keterangan,
-      uploadedAt: new Date().toISOString(),
-      url: URL.createObjectURL(f),
-    }));
-    setEvidens((prev) => [...prev, ...newItems]);
-    if (notify) notify(`${newItems.length} eviden berhasil disimpan.`, "success", "Upload Eviden");
+  const handleSave = async (rabItem, files, keterangan) => {
+    try {
+      const newItems = [];
+      for (let i = 0; i < files.length; i += 1) {
+        const result = await uploadFile(files[i], "eviden", {
+          documentType: "EVIDEN",
+          recordId: rabItem.idNumber,
+          title: `${rabItem.idNumber}_${rabItem.judulKegiatan}`,
+          sequence: i + 1,
+        });
+        newItems.push({
+          id: uid("EVD"), rabId: rabItem.idNumber, judulRab: rabItem.judulKegiatan,
+          ...result.file, keterangan, uploadedAt: new Date().toISOString(),
+        });
+      }
+      setEvidens((prev) => [...prev, ...newItems]);
+      if (notify) notify(`${newItems.length} eviden berhasil disimpan.`, "success", "Upload Eviden");
+    } catch (error) {
+      notify?.(`Upload eviden gagal: ${error.message}`, "error");
+    }
   };
 
   const handleDelete = (id) => {

@@ -87,7 +87,6 @@ export default function TambahPaket({ duty, onSaved }) {
       status: "Belum Diambil",
       diterimaTanggal: nowTanggal(),
       diterimaJam: nowJam(),
-      tanggalKey: new Date().toDateString(),
       ...(isSurat
         ? { asalSurat, noSurat: noSurat.trim(), perihal: perihal.trim() }
         : { ekspedisi, noResi: noResi.trim() }),

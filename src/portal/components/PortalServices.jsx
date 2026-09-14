@@ -20,9 +20,9 @@ const SERVICES = [
   },
   {
     key: "mitra",
-    logo: "/gandeng-logo.svg",
-    name: "Gandeng",
-    kepanjangan: "Gerbang Administrasi & Pengajuan Proposal Mitra",
+    logo: "/logo-gandeng.png",
+    name: "Si Cepat",
+    kepanjangan: "Sistem Informasi Cepat & Pengajuan Proposal Mitra",
     desc:
       "Platform pengajuan dan pengelolaan proposal kerjasama mitra UBP Priok. Mempermudah proses administrasi dan pengelolaan kemitraan bisnis.",
   },

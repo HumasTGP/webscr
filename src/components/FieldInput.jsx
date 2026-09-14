@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Calendar, Check, FileText, Trash2, Upload, X } from "lucide-react";
 import OrganizationInput from "./OrganizationInput";
 import { T, font } from "../lib/theme";
+import { uploadFile } from "../lib/api";
 
 const baseInput = (disabled) => ({
   width: "100%",
@@ -242,12 +243,13 @@ function formatBytes(bytes) {
 function RealFileUpload({ field, value, onChange, disabled, commonStyle }) {
   const inputRef = useRef(null);
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const pick = () => {
     if (!disabled) inputRef.current?.click();
   };
 
-  const handleFile = (file) => {
+  const handleFile = async (file) => {
     if (!file) return;
     const ext = "." + (file.name.split(".").pop() || "").toLowerCase();
     const typeOk = ALLOWED_UPLOAD_TYPES.includes(file.type) || ALLOWED_UPLOAD_EXT.includes(ext);
@@ -259,8 +261,20 @@ function RealFileUpload({ field, value, onChange, disabled, commonStyle }) {
       setError("Ukuran file melebihi 5MB.");
       return;
     }
-    setError("");
-    onChange(file);
+    try {
+      setError("");
+      setUploading(true);
+      const result = await uploadFile(file, field.folderKey || "default", {
+        documentType: field.documentType || field.key || "LAMPIRAN",
+        recordId: field.uploadRecordId || field.rabId || field.id || "",
+        title: field.uploadTitle || file.name.replace(/\.[^.]+$/, ""),
+      });
+      onChange(result.file);
+    } catch (uploadError) {
+      setError(`Upload gagal: ${uploadError.message}`);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const clear = (e) => {
@@ -293,8 +307,10 @@ function RealFileUpload({ field, value, onChange, disabled, commonStyle }) {
             whiteSpace: "nowrap",
           }}
         >
-          {value
-            ? `${value.name} · ${formatBytes(value.size)}`
+          {uploading
+            ? "Mengunggah file ke Google Drive..."
+            : value
+            ? `${value.name || value.fileName} · ${formatBytes(value.size ?? value.fileSize)}`
             : field.placeholder || "Klik untuk pilih file PDF/Word (maks 5MB)"}
         </span>
         <span style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -318,7 +334,7 @@ function RealFileUpload({ field, value, onChange, disabled, commonStyle }) {
         ref={inputRef}
         type="file"
         accept={ALLOWED_UPLOAD_EXT.join(",")}
-        disabled={disabled}
+        disabled={disabled || uploading}
         style={{ display: "none" }}
         onChange={(e) => handleFile(e.target.files?.[0])}
       />

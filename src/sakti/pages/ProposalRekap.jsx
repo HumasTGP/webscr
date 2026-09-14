@@ -48,7 +48,7 @@ const STEPS = ["Isi Formulir", "Isi BAST", "Isi PI", "Konfirmasi", "Simpan"];
 
 function fieldValue(f, v) {
   if (v === undefined || v === null || v === "") return "-";
-  if (f.type === "file-upload") return v?.name ? `${v.name}` : "-";
+  if (f.type === "file-upload") return v?.name || v?.fileName || "-";
   return String(v);
 }
 

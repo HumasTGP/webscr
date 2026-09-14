@@ -27,8 +27,9 @@ const DISPLAY_ROLE = {
   asman: "SAKTI - Asman",
   madm: "SAKTI - MADM",
   silapak: "Si Lapak Priok",
-  mitra: "GANDENG",
-  gandeng: "GANDENG",
+  mitra: "Si Cepat",
+  gandeng: "Si Cepat",
+  sicepat: "Si Cepat",
 };
 
 export const roleLabel = (roleValue) =>

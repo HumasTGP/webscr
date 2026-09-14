@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Check, Upload } from "lucide-react";
 import { T } from "../../lib/theme";
 import { fileToDataUrl } from "../../lib/signature";
+import { uploadFile } from "../../lib/api";
 import Card from "../../components/Card";
 import Button from "../../components/Button";
 import PageHeader from "../../components/PageHeader";
@@ -14,6 +15,8 @@ import PageHeader from "../../components/PageHeader";
  */
 export default function PengaturanProfilPage({ user, saveMySignature, notify }) {
   const [preview, setPreview] = useState(user?.signatureUrl || "");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [saving, setSaving] = useState(false);
   const inputRef = useRef(null);
 
   const handleFile = async (file) => {
@@ -24,15 +27,32 @@ export default function PengaturanProfilPage({ user, saveMySignature, notify }) 
     }
     const dataUrl = await fileToDataUrl(file);
     setPreview(dataUrl);
+    setSelectedFile(file);
   };
 
-  const save = () => {
+  const save = async () => {
     if (!preview) {
       notify?.("Pilih gambar tanda tangan dulu sebelum disimpan.", "error");
       return;
     }
-    saveMySignature?.(user.id, preview, user.nama || user.username);
-    notify?.("Tanda tangan berhasil disimpan ke profil kamu.", "success");
+    try {
+      setSaving(true);
+      const signatureUrl = selectedFile
+        ? (await uploadFile(selectedFile, "signature", {
+            documentType: "TTD",
+            recordId: user.id,
+            title: user.nama || user.username || user.id,
+          })).file.url
+        : preview;
+      setPreview(signatureUrl);
+      setSelectedFile(null);
+      saveMySignature?.(user.id, signatureUrl, user.nama || user.username);
+      notify?.("Tanda tangan berhasil disimpan ke profil kamu.", "success");
+    } catch (error) {
+      notify?.(`Upload tanda tangan gagal: ${error.message}`, "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -84,7 +104,7 @@ export default function PengaturanProfilPage({ user, saveMySignature, notify }) 
         </div>
 
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 24 }}>
-          <Button icon={Check} onClick={save}>Simpan Tanda Tangan</Button>
+          <Button icon={Check} onClick={save} disabled={saving}>{saving ? "Menyimpan..." : "Simpan Tanda Tangan"}</Button>
         </div>
       </Card>
     </div>

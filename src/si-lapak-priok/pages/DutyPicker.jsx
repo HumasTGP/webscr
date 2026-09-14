@@ -51,10 +51,30 @@ export function DutyPickerModal({ open, onClose, duty, onSave, satpamList, onAdd
   };
 
   const addFreeName = () => {
-    const trimmed = newName.trim();
-    if (!trimmed) return;
-    if (!satpamList.includes(trimmed)) onAddSatpam(trimmed);
-    if (!checked.includes(trimmed)) setChecked((prev) => [...prev, trimmed]);
+    const trimmed = String(newName || "").trim();
+    if (!trimmed) {
+      window.alert("Masukkan nama satpam terlebih dahulu.");
+      return;
+    }
+
+    // Nama satpam dibuat unik tanpa membedakan huruf besar/kecil.
+    const existing = (satpamList || []).find(
+      (name) => String(name || "").trim().toLowerCase() === trimmed.toLowerCase()
+    );
+    const canonicalName = existing || trimmed;
+
+    // Simpan ke daftar master terlebih dahulu. Parent akan menyimpan daftar
+    // ini ke dataset `silapakSatpam` sehingga ikut masuk ke Google Sheets.
+    if (!existing && typeof onAddSatpam === "function") {
+      onAddSatpam(trimmed);
+    }
+
+    // Langsung centang nama baru agar terlihat dan dapat dipilih pada shift
+    // yang sedang diedit tanpa harus menutup/membuka modal.
+    setChecked((prev) => {
+      const exists = prev.some((name) => String(name || "").trim().toLowerCase() === canonicalName.toLowerCase());
+      return exists ? prev : [...prev, canonicalName];
+    });
     setNewName("");
   };
 
@@ -176,16 +196,16 @@ export function DutyPickerModal({ open, onClose, duty, onSave, satpamList, onAdd
             e.stopPropagation();
             addFreeName();
           }}
-          disabled={!newName.trim()}
+          disabled={false}
           style={{
             padding: "7px 14px",
             fontSize: 11,
             fontWeight: 600,
             borderRadius: 8,
             border: `1px solid ${T.border}`,
-            background: newName.trim() ? T.bg : "transparent",
-            color: newName.trim() ? T.text : T.muted,
-            cursor: newName.trim() ? "pointer" : "not-allowed",
+            background: T.bg,
+            color: T.text,
+            cursor: "pointer",
             flexShrink: 0,
           }}
         >

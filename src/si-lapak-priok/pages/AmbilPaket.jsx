@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Upload, X } from "lucide-react";
 import { T } from "../../lib/theme";
 import { bulanIni, JENIS_OPT } from "../../lib/siLapakPriokData";
+import { uploadFile } from "../../lib/api";
 
 const MAX_SIZE = 5 * 1024 * 1024;
 const inputStyle = { width:"100%", boxSizing:"border-box", border:`1px solid ${T.border}`, borderRadius:8, padding:"10px 12px", fontSize:12.5, color:T.text, background:T.card, outline:"none" };
@@ -16,6 +17,7 @@ export default function AmbilPaket({ paket, prefillId, duty, onSaved }) {
   const [satpamTugas, setSatpamTugas] = useState(duty?.names?.[0] || "");
   const [foto, setFoto] = useState(null);
   const [fotoError, setFotoError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef(null);
 
   const selectedItem = belumDiambilSemua.find((p) => p.id === selectedId);
@@ -27,13 +29,25 @@ export default function AmbilPaket({ paket, prefillId, duty, onSaved }) {
     if (file.size > MAX_SIZE) return setFotoError("Ukuran file maksimal 5 MB.");
     setFotoError("");
     const reader = new FileReader();
-    reader.onload = () => setFoto({ name: file.name, dataUrl: reader.result });
+    reader.onload = () => setFoto({ file, name: file.name, dataUrl: reader.result });
     reader.readAsDataURL(file);
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (!selectedId || !pengambil.trim() || !foto) return;
-    onSaved({ id:selectedId, pengambil:pengambil.trim(), satpamTugas:satpamTugas || "-", bulanKeluar:bulanIni(), fotoBukti:foto });
+    try {
+      setSubmitting(true);
+      const result = await uploadFile(foto.file, "fotoSiLapak", {
+        documentType: "BUKTI_SERAH_TERIMA",
+        recordId: selectedId,
+        title: selectedId,
+      });
+      onSaved({ id:selectedId, pengambil:pengambil.trim(), satpamTugas:satpamTugas || "-", bulanKeluar:bulanIni(), fotoBukti:result.file });
+    } catch (error) {
+      setFotoError(`Upload foto gagal: ${error.message}`);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return <div style={{ maxWidth:460 }}>
@@ -56,7 +70,7 @@ export default function AmbilPaket({ paket, prefillId, duty, onSaved }) {
         <div style={{fontSize:10.5,color:T.muted,marginTop:5}}>Format gambar (JPG/PNG), ukuran maksimal 5 MB.</div>
       </div>
       <div style={{background:"#FDF3DD",border:"1px solid #F0DBA6",borderRadius:8,padding:"10px 12px",fontSize:11,color:"#B7791F"}}>Nomor pengambilan dan bulan keluar tercatat otomatis, sama seperti sistem sebelumnya.</div>
-      <button type="button" onClick={submit} disabled={!selectedId || !pengambil.trim() || !foto} style={{width:"100%",padding:12,borderRadius:8,border:"none",background:(!selectedId || !pengambil.trim() || !foto) ? T.border : T.navy,color:"#fff",fontWeight:700,fontSize:13.5,cursor:(!selectedId || !pengambil.trim() || !foto) ? "not-allowed" : "pointer"}}>Konfirmasi serah terima</button>
+      <button type="button" onClick={submit} disabled={!selectedId || !pengambil.trim() || !foto || submitting} style={{width:"100%",padding:12,borderRadius:8,border:"none",background:(!selectedId || !pengambil.trim() || !foto || submitting) ? T.border : T.navy,color:"#fff",fontWeight:700,fontSize:13.5,cursor:(!selectedId || !pengambil.trim() || !foto || submitting) ? "not-allowed" : "pointer"}}>{submitting ? "Mengunggah..." : "Konfirmasi serah terima"}</button>
     </div>}
   </div>;
 }

@@ -4,7 +4,7 @@ import "../styles/glass-login.css";
 const APP_LOGOS = {
   SAKTI: "/logo-sakti.png",
   "SI LAPAK PRIOK": "/logo-silapak.png",
-  GANDENG: "/logo-gandeng.png",
+  "SI CEPAT": "/logo-gandeng.png",
 };
 
 export default function GlassLoginShell({

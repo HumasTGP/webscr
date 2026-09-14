@@ -22,7 +22,11 @@ export default function SiLapakMenu({ duty, onOpenDuty, paket, tamu }) {
   const hanyaPaket = paket.filter((p) => p.jenis !== "Surat");
   const hanyaSurat = paket.filter((p) => p.jenis === "Surat");
   const belumDiambil = paket.filter((p) => p.status === "Belum Diambil").length;
-  const tamuHariIni = tamu.filter((t) => t.tanggalKey === new Date().toDateString()).length;
+  const todayKey = new Date().toDateString();
+  const tamuHariIni = tamu.filter((t) => {
+    const date = t.tanggal ? new Date(`${t.tanggal}T00:00:00`) : null;
+    return date && !Number.isNaN(date.getTime()) && date.toDateString() === todayKey;
+  }).length;
   const paketMasukPerBulan = groupByBulan(hanyaPaket, (p) => p.diterimaTanggal);
   const suratMasukPerBulan = groupByBulan(hanyaSurat, (s) => s.diterimaTanggal);
   const tamuPerBulan = groupByBulan(tamu, (t) => t.tanggal, true);

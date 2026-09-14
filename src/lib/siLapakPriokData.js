@@ -7,7 +7,9 @@ export const SHIFTS = [
   { value: "malam", label: "Malam", time: "22.00 - 06.00" },
 ];
 
-export const SATPAM_SEED = ["Tyo", "Andra", "Rizky", "Bagus"];
+// Daftar petugas dimulai kosong dan diisi pengguna dari menu petugas/shift.
+// Jangan menambahkan nama contoh di sini karena akan tersinkron ke Spreadsheet.
+export const SATPAM_SEED = [];
 
 // Jenis catatan Tambah/Data/Ambil Paket-Surat - satu set halaman menampung
 // keduanya (bukan modul terpisah), dibedakan lewat field `jenis` ini.

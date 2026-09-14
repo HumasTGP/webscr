@@ -85,7 +85,7 @@ export default function PortalFooter({ onSelect }) {
             <ul className="portal-footer-links">
               <li><button onClick={() => onSelect("sikas")}>Sakti</button></li>
               <li><button onClick={() => onSelect("silapak")}>Si Lapak Priok</button></li>
-              <li><button onClick={() => onSelect("mitra")}>Gandeng</button></li>
+              <li><button onClick={() => onSelect("mitra")}>Si Cepat</button></li>
               <li>
                 <a href={PORTAL_CONFIG.rukoPriok.url} target="_blank" rel="noopener noreferrer">
                   Ruko Priok

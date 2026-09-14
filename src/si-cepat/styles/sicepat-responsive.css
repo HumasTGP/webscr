@@ -1,0 +1,64 @@
+/* Si Cepat shell layout: full-width header at top, sidebar+content below */
+.sicepat-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--text);
+}
+.sicepat-shell-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+.sicepat-shell .system-sidebar-wrap {
+  height: 100%;
+}
+.sicepat-shell .system-sidebar {
+  height: calc(100% - 32px);
+}
+.sicepat-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.sicepat-topbar-identity{min-width:0}
+.sicepat-product-chip{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:0 10px;border-radius:999px;background:#edf3ff;color:#0b46c8;font-size:10.5px;font-weight:800;letter-spacing:.5px;white-space:nowrap}
+.sicepat-user-card{padding:5px 8px 5px 5px;border:1px solid #e3e9f2;border-radius:14px;background:#fff;box-shadow:0 4px 14px rgba(29,55,94,.04)}
+.sicepat-user-avatar{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#ff9a2f,#ff7a00);display:grid;place-items:center;color:#fff;font-weight:800;flex-shrink:0;box-shadow:0 7px 16px rgba(255,122,0,.2)}
+
+@media(max-width:760px){
+  .sicepat-admin-hero-art{width:104px!important;height:104px!important;right:14px!important;opacity:.68!important}
+  .sicepat-admin-hero-art svg{width:56px;height:56px}
+  .sicepat-admin-hero-copy{padding-right:110px!important}
+  .sicepat-topbar{min-height:52px!important}
+  .sicepat-product-chip{min-height:26px;padding:0 8px;font-size:9.5px}
+}
+
+@media(max-width:560px){
+  .sicepat-admin-hero{padding:20px 18px!important}
+  .sicepat-admin-hero-art{display:none!important}
+  .sicepat-admin-hero-copy{padding-right:0!important;max-width:none!important}
+  .sicepat-topbar-identity{display:none!important}
+  .sicepat-user-card{padding:4px;border-radius:12px}
+  .sicepat-user-avatar{width:32px;height:32px;border-radius:10px}
+  .sicepat-topbar-left{gap:6px!important}
+  .sicepat-active-label{font-size:11.5px!important}
+  .sicepat-main { padding-bottom: env(safe-area-inset-bottom, 0px); }
+}
+
+/* Prevent horizontal overflow on all Si Cepat pages */
+.sicepat-main > * { max-width: 100%; box-sizing: border-box; }
+.sicepat-shell table { word-break: break-word; }
+.sicepat-shell .responsive-card-grid { display: grid !important; }
+@media(max-width:640px){
+  .sicepat-shell .responsive-card-grid[style*="repeat(4"] { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .sicepat-shell .responsive-card-grid[style*="repeat(3"] { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .sicepat-shell .responsive-form-grid { grid-template-columns: 1fr !important; }
+  .sicepat-shell .responsive-actions { flex-wrap: wrap !important; }
+  .sicepat-shell .responsive-actions button { flex: 1 1 auto; min-width: 0; }
+}

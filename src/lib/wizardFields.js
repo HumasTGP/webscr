@@ -46,6 +46,8 @@ export const proposalFields = () => () => [
     key: "fileProposal",
     label: "File Proposal/Surat Permohonan Bantuan",
     type: "file-upload",
+    folderKey: "proposalSiCepat",
+    documentType: "PROPOSAL_STAKEHOLDER",
     section: "Lampiran",
   },
 ];

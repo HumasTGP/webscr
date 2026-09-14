@@ -1,12 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { T, font, setTheme } from "./lib/theme";
 import {
-  KONTEN_SEED,
   MENU,
   OPT,
-  PROPOSAL_SEED,
-  VENDOR_SEED,
-  MITRA_SEED,
 } from "./lib/data";
 import { uid } from "./lib/utils";
 import { formatTanggalPanjang } from "./lib/docxGenerate";
@@ -31,6 +27,7 @@ import Toast from "./components/Toast";
 import LandingGateway from "./portal/pages/LandingGateway";
 import SiLapakLogin from "./si-lapak-priok/pages/SiLapakLogin";
 import SiLapakApp from "./si-lapak-priok/pages/SiLapakApp";
+import { defaultSatpamList } from "./si-lapak-priok/pages/DutyPicker";
 import LoginScreen from "./sakti/pages/Login";
 import NamaPenggunaModal from "./sakti/components/NamaPenggunaModal";
 import Dashboard from "./sakti/pages/Dashboard";
@@ -57,8 +54,8 @@ import MADMDashboard from "./sakti/madm/pages/MADMDashboard";
 import PaketKasPage from "./sakti/pages/PaketKas";
 import ManajemenAksesPage from "./sakti/pages/ManajemenAkses";
 import LogAktivitasPage from "./sakti/pages/LogAktivitas";
-import GandengDashboardPage from "./gandeng/pages/GandengDashboard";
-import GandengTrackingPage from "./gandeng/pages/GandengTracking";
+import SiCepatDashboardPage from "./si-cepat/pages/SiCepatDashboard";
+import SiCepatTrackingPage from "./si-cepat/pages/SiCepatTracking";
 import DokumentasiPage from "./sakti/pages/Dokumentasi";
 import DaftarHadirPage from "./sakti/pages/DaftarHadir";
 import EvidenPage from "./sakti/pages/Eviden";
@@ -74,13 +71,8 @@ import TtdSerahTerimaPage from "./sakti/pages/TtdSerahTerima";
 import PoErpDataPage from "./sakti/pages/PoErpData";
 import RKAPage from "./sakti/pages/RKAPage";
 import RekapAnggaranPage from "./sakti/pages/RekapAnggaranPage";
-import { DEFAULT_USERS, DOC_STATUS, authenticateUser } from "./lib/data";
-
-const seed = (prefix, rows) =>
-  rows.map((v, i) => ({
-    ...v,
-    id: `${prefix}-${String(i + 1).padStart(3, "0")}`,
-  }));
+import { DEFAULT_USERS, authenticateUser } from "./lib/data";
+import { loadDatabase, saveDatabase, saveDataset } from "./lib/api";
 
 const splitLines = (s) =>
   String(s || "")
@@ -161,28 +153,8 @@ export default function App() {
     return () => window.removeEventListener("resize", applyResponsive);
   }, []);
 
-  const PACKAGE_SEED = [
-    { idRab: "001", judul: "Bantuan Perbaikan Jalan Metro Marina Ancol", kategori: "NON PO",    status: DOC_STATUS.SUBMITTED },
-    { idRab: "002", judul: "Fasilitasi Kegiatan Sinergi Kota Hijau",     kategori: "Cash Card", status: DOC_STATUS.APPROVED,  submittedAt: "2026-04-20T09:00:00Z", reviewedAt: "2026-04-21T10:00:00Z", reviewedBy: "asman" },
-    { idRab: "003", judul: "Bantuan Rehabilitasi Mangrove Cilincing",    kategori: "NON PO",    status: DOC_STATUS.PROCESSED, submittedAt: "2026-03-15T09:00:00Z", reviewedAt: "2026-03-16T09:00:00Z", reviewedBy: "asman", processedAt: "2026-03-17T14:00:00Z", processedBy: "madm" },
-  ];
-  const seedSubDoc = (idField, judulField) =>
-    PACKAGE_SEED.map((p) => ({
-      [idField]: p.idRab,
-      [judulField]: p.judul,
-      kategori: p.kategori,
-    }));
-  const [rab, setRab] = useState(() =>
-    PACKAGE_SEED.map((p) => ({
-      idNumber: p.idRab, judulKegiatan: p.judul, kategori: p.kategori,
-      tanggalRab: "2026-04-20", totalEvaluasi: 15000000,
-      // Field tanda tangan digital: null = belum TTD, kalau sudah berisi
-      // { signatureUrl, signatureName, signedAt } (lihat lib/signature.js).
-      // MADM baru bisa TTD setelah signatureAsman terisi.
-      signatureAsman: null,
-      signatureMadm: null,
-    }))
-  );
+  // Data transaksi selalu dimulai kosong; sumber utama adalah Spreadsheet.
+  const [rab, setRab] = useState([]);
 
   // Tempel tanda tangan Asman/MADM ke sebuah RAB. `stage` = "asman" | "madm".
   const signRab = (idNumber, stage, stamp) => {
@@ -194,14 +166,17 @@ export default function App() {
       )
     );
   };
-  const [tor, setTor] = useState(() => seedSubDoc("id", "judulKegiatan"));
-  const [bast, setBast] = useState(() => seedSubDoc("id", "judulBantuan"));
-  const [pakta, setPakta] = useState(() => seedSubDoc("id", "judulBantuan"));
+  const [tor, setTor] = useState([]);
+  const [bast, setBast] = useState([]);
+  const [pakta, setPakta] = useState([]);
   const [bapp, setBapp] = useState([]);
   const [lmp1List, setLmp1List] = useState([]);
   const [lmp2List, setLmp2List] = useState([]);
   const [formVerifList, setFormVerifList] = useState([]);
   const [dokumentasiDocs, setDokumentasiDocs] = useState([]);
+  const [daftarHadirList, setDaftarHadirList] = useState([]);
+  const [daftarHadirDocs, setDaftarHadirDocs] = useState([]);
+  const [evidens, setEvidens] = useState([]);
   const [nonpoSubmissions, setNonpoSubmissions] = useState([]);
   const [poDocuments, setPoDocuments] = useState({});
   const [nonpoCombo, setNonpoCombo] = useState(DEFAULT_COMBO);
@@ -231,6 +206,12 @@ export default function App() {
   const [ccRencana, setCcRencana] = useState([]);
   const [ccPertanggungjawaban, setCcPertanggungjawaban] = useState([]);
   const [ccCombo, setCcCombo] = useState(DEFAULT_CC_COMBO);
+
+  // Data SI LAPAK juga diletakkan di level App agar ikut tersinkron ke Spreadsheet.
+  const [silapakPaket, setSilapakPaket] = useState([]);
+  const [silapakTamu, setSilapakTamu] = useState([]);
+  const [silapakDuty, setSilapakDuty] = useState(null);
+  const [silapakSatpam, setSilapakSatpam] = useState(defaultSatpamList);
 
   // Notifikasi: pop-up muncul di login/refresh selama masih ada item aktif.
   // `notifDismissed` = ditutup sementara untuk SESI ini saja (klik "Nanti
@@ -279,27 +260,11 @@ export default function App() {
     setUser((prev) => (prev && prev.id === userId ? { ...prev, signatureUrl, signatureName } : prev));
   };
 
-  const [packages, setPackages] = useState(() =>
-    PACKAGE_SEED.map((p) => ({
-      idRab: p.idRab, judul: p.judul, kategori: p.kategori,
-      formEvaluasi: true,
-      status: p.status,
-      submittedAt: p.submittedAt || new Date().toISOString(),
-      reviewedAt: p.reviewedAt || "", reviewedBy: p.reviewedBy || "",
-      reviewNote: "",
-      processedAt: p.processedAt || "", processedBy: p.processedBy || "",
-    }))
-  );
-  const [vendors, setVendors] = useState(() => seed("VND", VENDOR_SEED));
+  const [packages, setPackages] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [organizations, setOrganizations] = useState(() => organizationMaster);
   const addOrganization = (name) => setOrganizations((prev) => [...prev, { id: uid("ORG"), source_id: null, name, category: null }]);
-  // signatureAsman/signatureMadm: field baru untuk TTD digital Proposal (pola
-  // sama seperti RAB, lihat signRab). Ditambahkan lewat .map() tambahan di sini
-  // (bukan mengubah PROPOSAL_SEED atau fungsi seed()) supaya data asli Proposal
-  // tidak tersentuh sama sekali.
-  const [proposals, setProposals] = useState(() =>
-    seed("PRP", PROPOSAL_SEED).map((p) => ({ ...p, signatureAsman: p.signatureAsman ?? null, signatureMadm: p.signatureMadm ?? null }))
-  );
+  const [proposals, setProposals] = useState([]);
 
   // Tempel tanda tangan Asman/MADM ke sebuah Proposal - pola SAMA PERSIS
   // seperti signRab() di atas, cuma target state-nya proposals.
@@ -364,11 +329,11 @@ export default function App() {
   // karena openTargetId masih menyimpan id lama.
   const consumeOpenTarget = () => setOpenTargetId(null);
 
-  const [konten, setKonten] = useState(() => seed("KTN", KONTEN_SEED));
+  const [konten, setKonten] = useState([]);
   const [komunikasiNarasumberOptions, setKomunikasiNarasumberOptions] = useState(OPT.komunikasiNarasumber);
   const [evaluasi, setEvaluasi] = useState([]);
   const [history, setHistory] = useState([]);
-  const [mitraList, setMitraList] = useState(() => seed("MTR", MITRA_SEED));
+  const [mitraList, setMitraList] = useState([]);
 
   const addHistory = (jenis) => {
     const now = new Date();
@@ -400,6 +365,42 @@ export default function App() {
     if (type === "success" && jenis) addHistory(jenis);
   };
 
+  // Daftar satpam adalah master data. Simpan perubahan tambah nama secara
+  // langsung ke database agar tidak bergantung pada debounce saveDatabase.
+  // Ini juga mencegah daftar baru hilang ketika loadDatabase selesai setelah
+  // user menambahkan nama.
+  const silapakSatpamRef = useRef(Array.isArray(defaultSatpamList) ? defaultSatpamList : []);
+  useEffect(() => {
+    silapakSatpamRef.current = Array.isArray(silapakSatpam) ? silapakSatpam : [];
+  }, [silapakSatpam]);
+
+  const handleAddSatpam = async (name) => {
+    const trimmed = String(name || "").trim();
+    if (!trimmed) return;
+
+    const current = Array.isArray(silapakSatpamRef.current) ? silapakSatpamRef.current : [];
+    const exists = current.find(
+      (item) => String(item || "").trim().toLowerCase() === trimmed.toLowerCase()
+    );
+    if (exists) return;
+
+    const payload = [...current, trimmed];
+    silapakSatpamRef.current = payload;
+    setSilapakSatpam(payload);
+
+    try {
+      await saveDataset("silapakSatpam", payload);
+      lastSyncedRef.current.silapakSatpam = payload;
+      setDatabaseError("");
+    } catch (error) {
+      console.error("Gagal menyimpan nama satpam:", error);
+      silapakSatpamRef.current = current;
+      setSilapakSatpam(current);
+      setDatabaseError(error.message || "Nama satpam gagal disimpan.");
+      setToast({ message: `Nama satpam gagal disimpan: ${error.message}`, type: "error" });
+    }
+  };
+
   const updatePackage = (idRab, patch) => {
     setPackages((prev) => prev.map((p) => (p.idRab === idRab ? { ...p, ...patch } : p)));
   };
@@ -410,6 +411,197 @@ export default function App() {
     setProposals((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
   };
   const [paymentPackages, setPaymentPackages] = useState([]);
+
+  // ===== Sinkronisasi database Google Apps Script =====
+  const [databaseStatus, setDatabaseStatus] = useState("loading");
+  const [databaseError, setDatabaseError] = useState("");
+  const databaseReadyRef = useRef(false);
+  const lastSyncedRef = useRef({});
+  const saveTimerRef = useRef(null);
+
+  const databaseSnapshot = useMemo(() => ({
+    users,
+    organizations,
+    vendors,
+    rab,
+    tor,
+    bast,
+    pakta,
+    bapp,
+    lmp1List,
+    lmp2List,
+    formVerifList,
+    dokumentasiDocs,
+    daftarHadirList,
+    daftarHadirDocs,
+    evidens,
+    nonpoSubmissions,
+    poDocuments,
+    laporan,
+    rka,
+    ccList,
+    ccItems,
+    ccBast,
+    ccPakta,
+    ccBapp,
+    ccTtd,
+    ccVerifikasi,
+    ccPermintaan,
+    ccRencana,
+    ccPertanggungjawaban,
+    packages,
+    paymentPackages,
+    proposals,
+    evaluasi,
+    konten,
+    mitraList,
+    history,
+    nonpoCombo,
+    ccCombo,
+    komunikasiNarasumberOptions,
+    silapakPaket,
+    silapakTamu,
+    silapakDuty,
+    silapakSatpam,
+  }), [
+    users, organizations, vendors, rab, tor, bast, pakta, bapp, lmp1List,
+    lmp2List, formVerifList, dokumentasiDocs, daftarHadirList, daftarHadirDocs,
+    evidens, nonpoSubmissions, poDocuments, laporan, rka, ccList, ccItems,
+    ccBast, ccPakta, ccBapp, ccTtd, ccVerifikasi, ccPermintaan, ccRencana,
+    ccPertanggungjawaban, packages, paymentPackages, proposals, evaluasi,
+    konten, mitraList, history, nonpoCombo, ccCombo,
+    komunikasiNarasumberOptions, silapakPaket, silapakTamu, silapakDuty,
+    silapakSatpam,
+  ]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setDatabaseStatus("loading");
+        setDatabaseError("");
+        const result = await loadDatabase();
+        if (cancelled) return;
+
+        const d = result.datasets || {};
+        const loaded = {};
+        const apply = (key, setter, fallback) => {
+          const value = Object.prototype.hasOwnProperty.call(d, key) ? d[key] : fallback;
+          loaded[key] = value;
+          setter(value);
+        };
+        const applySeeded = (key, setter, fallback) => {
+          const stored = d[key];
+          const storedEmpty = stored == null ||
+            (Array.isArray(stored) && stored.length === 0) ||
+            (!Array.isArray(stored) && typeof stored === "object" && Object.keys(stored).length === 0);
+          const fallbackHasData = Array.isArray(fallback)
+            ? fallback.length > 0
+            : fallback && typeof fallback === "object" && Object.keys(fallback).length > 0;
+          // Jangan menimpa perubahan lokal yang sudah dibuat user ketika
+          // loadDatabase() masih berjalan. Ini penting untuk daftar satpam:
+          // database lama bisa kosong, sementara user sudah menambahkan nama
+          // sebelum respons load selesai.
+          const current = key === "silapakSatpam" ? silapakSatpam : fallback;
+          const currentHasData = Array.isArray(current)
+            ? current.length > 0
+            : current && typeof current === "object" && Object.keys(current).length > 0;
+          const value = storedEmpty && currentHasData ? current : (storedEmpty && fallbackHasData ? fallback : stored);
+          loaded[key] = Object.prototype.hasOwnProperty.call(d, key) ? (storedEmpty && currentHasData ? current : stored) : undefined;
+          setter(value ?? fallback);
+        };
+
+        applySeeded("users", setUsers, users);
+        applySeeded("organizations", setOrganizations, organizations);
+        applySeeded("vendors", setVendors, vendors);
+        applySeeded("rab", setRab, rab);
+        applySeeded("tor", setTor, tor);
+        applySeeded("bast", setBast, bast);
+        applySeeded("pakta", setPakta, pakta);
+        apply("bapp", setBapp, bapp);
+        apply("lmp1List", setLmp1List, lmp1List);
+        apply("lmp2List", setLmp2List, lmp2List);
+        apply("formVerifList", setFormVerifList, formVerifList);
+        apply("dokumentasiDocs", setDokumentasiDocs, dokumentasiDocs);
+        apply("daftarHadirList", setDaftarHadirList, daftarHadirList);
+        apply("daftarHadirDocs", setDaftarHadirDocs, daftarHadirDocs);
+        apply("evidens", setEvidens, evidens);
+        apply("nonpoSubmissions", setNonpoSubmissions, nonpoSubmissions);
+        apply("poDocuments", setPoDocuments, poDocuments);
+        apply("laporan", setLaporan, laporan);
+        apply("rka", setRka, rka);
+        apply("ccList", setCcList, ccList);
+        apply("ccItems", setCcItems, ccItems);
+        apply("ccBast", setCcBast, ccBast);
+        apply("ccPakta", setCcPakta, ccPakta);
+        apply("ccBapp", setCcBapp, ccBapp);
+        apply("ccTtd", setCcTtd, ccTtd);
+        apply("ccVerifikasi", setCcVerifikasi, ccVerifikasi);
+        apply("ccPermintaan", setCcPermintaan, ccPermintaan);
+        apply("ccRencana", setCcRencana, ccRencana);
+        apply("ccPertanggungjawaban", setCcPertanggungjawaban, ccPertanggungjawaban);
+        applySeeded("packages", setPackages, packages);
+        apply("paymentPackages", setPaymentPackages, paymentPackages);
+        applySeeded("proposals", setProposals, proposals);
+        apply("evaluasi", setEvaluasi, evaluasi);
+        applySeeded("konten", setKonten, konten);
+        applySeeded("mitraList", setMitraList, mitraList);
+        apply("history", setHistory, history);
+        applySeeded("nonpoCombo", setNonpoCombo, nonpoCombo);
+        applySeeded("ccCombo", setCcCombo, ccCombo);
+        applySeeded("komunikasiNarasumberOptions", setKomunikasiNarasumberOptions, komunikasiNarasumberOptions);
+        apply("silapakPaket", setSilapakPaket, silapakPaket);
+        apply("silapakTamu", setSilapakTamu, silapakTamu);
+        apply("silapakDuty", setSilapakDuty, silapakDuty);
+        applySeeded("silapakSatpam", setSilapakSatpam, silapakSatpam);
+
+        lastSyncedRef.current = loaded;
+        databaseReadyRef.current = true;
+        setDatabaseStatus("ready");
+      } catch (error) {
+        if (cancelled) return;
+        databaseReadyRef.current = false;
+        setDatabaseError(error.message || "Database tidak dapat dimuat.");
+        setDatabaseStatus("error");
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+    // Data hanya dimuat sekali ketika aplikasi pertama dibuka.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!databaseReadyRef.current) return;
+
+    const changed = {};
+    Object.entries(databaseSnapshot).forEach(([key, value]) => {
+      if (JSON.stringify(value) !== JSON.stringify(lastSyncedRef.current[key])) {
+        changed[key] = value;
+      }
+    });
+    if (!Object.keys(changed).length) return;
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      try {
+        await saveDatabase(changed);
+        Object.assign(lastSyncedRef.current, changed);
+        setDatabaseError("");
+      } catch (error) {
+        console.error("Penyimpanan database gagal:", error);
+        setDatabaseError(error.message || "Perubahan gagal disimpan.");
+        setToast({ message: `Data gagal disimpan: ${error.message}`, type: "error" });
+      }
+    }, 900);
+
+    return () => clearTimeout(saveTimerRef.current);
+  }, [databaseSnapshot]);
   const updatePaymentPackage = (id, patch) => {
     setPaymentPackages((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
   };
@@ -494,7 +686,7 @@ export default function App() {
         />
       ),
       "mitra-overview": (
-        <GandengDashboardPage
+        <SiCepatDashboardPage
           mitraList={mitraList}
           user={{ ...user, isAdmin: true }}
           setMitraList={setMitraList}
@@ -502,7 +694,7 @@ export default function App() {
           onGoto={(page) => { if (page === "tracking") setActive("mitra-tracking"); }}
         />
       ),
-      "mitra-tracking": <GandengTrackingPage mitraList={mitraList} />,
+      "mitra-tracking": <SiCepatTrackingPage mitraList={mitraList} />,
       rab: (
         <RABPage
           rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user}
@@ -912,8 +1104,8 @@ export default function App() {
         />
       ),
       dokumentasi: <DokumentasiPage rab={rab} setRab={setRab} notify={notify} docs={dokumentasiDocs} setDocs={setDokumentasiDocs} />,
-      "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} />,
-      eviden: <EvidenPage rab={rab} notify={notify} />,
+      "daftar-hadir": <DaftarHadirPage rab={rab} notify={notify} lists={daftarHadirList} setLists={setDaftarHadirList} docs={daftarHadirDocs} setDocs={setDaftarHadirDocs} />,
+      eviden: <EvidenPage rab={rab} notify={notify} evidens={evidens} setEvidens={setEvidens} />,
       "checklist-dokumen": <ChecklistDokumenPage rab={rab} tor={tor} bast={bast} pakta={pakta} notify={notify} paymentPackages={paymentPackages} setPaymentPackages={setPaymentPackages} user={user} />,
       "proposal-evaluasi-pembayaran": (
         <ProposalEvaluasiPage
@@ -938,7 +1130,8 @@ export default function App() {
       rab, tor, bast, pakta, bapp, lmp1List, lmp2List, laporan, vendors, history,
       proposals, konten, komunikasiNarasumberOptions, evaluasi, rabIdOptions, packages, users, rka,
       rabByKategori, rabIdOptionsByKategori, mitraList,
-      nonpoSubmissions, formVerifList, nonpoCombo, dokumentasiDocs, rabIdsWithDokumentasi,
+      nonpoSubmissions, formVerifList, nonpoCombo, dokumentasiDocs, daftarHadirList,
+      daftarHadirDocs, evidens, rabIdsWithDokumentasi,
       paymentPackages,
       ccList, ccItems, ccBast, ccPakta, ccBapp, ccTtd, ccCombo,
       // Ditambahkan (poin 16) - sebelumnya state ini dipakai di dalam modules
@@ -948,6 +1141,11 @@ export default function App() {
       notificationHistory, signRab, saveMySignature, signProposal, openTargetId, evaluasi, documentTarget, active, poDocuments,
     ]
   );
+
+  // Database dimuat di background. Jangan menahan seluruh portal hanya karena
+  // Spreadsheet/Apps Script masih merespons; halaman awal tetap bisa langsung
+  // dibuka seperti sebelumnya. Status tetap dipakai untuk sinkronisasi dan error,
+  // tetapi tidak lagi mengganti seluruh tampilan dengan halaman loading.
 
   if (!portal) {
     return <LandingGateway onSelect={setPortal} />;
@@ -965,6 +1163,15 @@ export default function App() {
     }
     return (
       <SiLapakApp
+        paket={silapakPaket}
+        setPaket={setSilapakPaket}
+        tamu={silapakTamu}
+        setTamu={setSilapakTamu}
+        duty={silapakDuty}
+        setDuty={setSilapakDuty}
+        satpamList={silapakSatpam}
+        setSatpamList={setSilapakSatpam}
+        onAddSatpam={handleAddSatpam}
         onLogout={() => {
           setSilapakLoggedIn(false);
           setPortal(null);
