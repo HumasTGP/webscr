@@ -1,0 +1,32 @@
+import { T, font } from "../lib/theme";
+
+// Deskripsi di bawah judul menu sengaja gak pernah dirender lagi (permintaan:
+// hapus semua deskripsi di bawah judul menu) — prop description masih diterima
+// biar caller lama gak perlu diubah satu-satu, tapi gak dipakai buat rendering.
+export default function PageHeader({ eyebrow, title, description, meta, right }) {
+  return (
+    <div
+      className="app-page-header"
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        marginBottom: 24,
+        paddingBottom: 18,
+        borderBottom: `1px solid ${T.border}`,
+        flexWrap: "wrap",
+        gap: 12,
+      }}
+    >
+      <div style={{ display: "flex", gap: 14, alignItems: "stretch", minWidth: 0, flex: "1 1 520px" }}>
+        <div style={{ width: 4, borderRadius: 2, background: T.blue, flexShrink: 0, alignSelf: "stretch" }} />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          {eyebrow && <span style={{ fontFamily: font.mono, fontSize: 10.5, color: T.blue, letterSpacing: 1.2, textTransform: "uppercase", fontWeight: 600 }}>{eyebrow}</span>}
+          <h1 style={{ fontFamily: font.display, fontSize: 22, margin: eyebrow ? "4px 0 0" : 0, color: T.heading, lineHeight: 1.25, overflowWrap: "anywhere" }}>{title}</h1>
+          {meta && meta.length > 0 && <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>{meta.map((m) => <span key={m.label} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 999, background: T.bg, border: `1px solid ${T.border}`, fontSize: 12, color: T.text }}><span style={{ color: T.muted }}>{m.label}</span><b style={{ color: T.heading }}>{m.value}</b></span>)}</div>}
+        </div>
+      </div>
+      {right && <div style={{flex:"0 1 auto",minWidth:0}}>{right}</div>}
+    </div>
+  );
+}

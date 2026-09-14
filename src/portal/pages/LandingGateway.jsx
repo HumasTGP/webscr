@@ -1,0 +1,83 @@
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ExternalLink } from "lucide-react";
+import "../styles/portal-showcase.css";
+
+const SAKTI_ROLES = [
+  { value: "humas", label: "HUMAS" },
+  { value: "asman", label: "ASMAN" },
+  { value: "madm", label: "MADM" },
+];
+
+export default function LandingGateway({ onSelect }) {
+  const [saktiOpen, setSaktiOpen] = useState(false);
+  const saktiRef = useRef(null);
+
+  useEffect(() => {
+    const close = (event) => {
+      if (!saktiRef.current?.contains(event.target)) setSaktiOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+
+  const openSakti = (role) => {
+    try { window.localStorage.setItem("portal.sakti.role", role); } catch (_) {}
+    onSelect("sikas");
+  };
+
+  return (
+    <div className="gateway-page">
+      <header className="gateway-header">
+        <button className="gateway-brand" type="button" aria-label="PLN Indonesia Power">
+          <img src="/logo-pln.png" alt="PLN Indonesia Power" className="gateway-logo" />
+        </button>
+
+        <nav className="gateway-nav" aria-label="Navigasi portal">
+          <button className="gateway-nav-link active" type="button">Beranda</button>
+
+          <div className="gateway-sakti" ref={saktiRef}>
+            <button
+              className="gateway-nav-link"
+              type="button"
+              onClick={() => setSaktiOpen((value) => !value)}
+              aria-expanded={saktiOpen}
+            >
+              Sakti <ChevronDown size={17} strokeWidth={2.2} />
+            </button>
+            {saktiOpen && (
+              <div className="gateway-dropdown">
+                {SAKTI_ROLES.map((item) => (
+                  <button key={item.value} type="button" onClick={() => openSakti(item.value)}>
+                    SAKTI - {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button className="gateway-nav-link" type="button" onClick={() => onSelect("silapak")}>
+            Si Lapak Priok <ExternalLink size={17} strokeWidth={2.1} />
+          </button>
+          <a className="gateway-nav-link" href="https://rukopriok.com/" target="_blank" rel="noopener noreferrer">
+            Ruko Priok <ExternalLink size={17} strokeWidth={2.1} />
+          </a>
+        </nav>
+      </header>
+
+      <main className="gateway-hero">
+        <div className="gateway-hero-fade" aria-hidden="true" />
+        <section className="gateway-copy">
+          <div className="gateway-eyebrow">Portal Layanan Terintegrasi</div>
+          <h1>
+            Satu Portal,<br />
+            Berbagai Solusi<span>.</span>
+          </h1>
+          <div className="gateway-accent" />
+          <p>Akses berbagai sistem dan layanan digital dalam satu portal untuk mendukung kebutuhan kerja dan kolaborasi di PLN Indonesia Power.</p>
+        </section>
+      </main>
+
+      <footer className="gateway-footer">© 2026. All rights reserved.</footer>
+    </div>
+  );
+}

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="PLN UBP Priok">
+  <!-- Background -->
+  <rect width="120" height="120" rx="18" fill="#0A1628"/>
+
+  <!-- Yellow accent bar top -->
+  <rect x="0" y="0" width="120" height="6" rx="3" fill="#FFC72C"/>
+
+  <!-- Lightning bolt - PLN motif -->
+  <polygon points="68,14 42,62 58,62 50,106 82,54 64,54 72,14"
+           fill="#FFC72C"/>
+
+  <!-- White highlight on bolt -->
+  <polygon points="68,14 60,38 64,38 58,62 74,30 68,30 72,14"
+           fill="rgba(255,255,255,0.22)"/>
+
+  <!-- Text: PLN -->
+  <text x="60" y="116" text-anchor="middle"
+        font-family="Arial, sans-serif" font-weight="800"
+        font-size="11" fill="#FFC72C" letter-spacing="3">PLN</text>
+</svg>
