@@ -4,7 +4,7 @@ import { T, font } from "../../lib/theme";
 import { OPT } from "../../lib/data";
 import { uid, rupiah, terbilang as toTerbilang } from "../../lib/utils";
 import { generateDocxFromTemplate, formatTanggalPanjang } from "../../lib/docxGenerate";
-import { PENANDA_TANGAN } from "../../lib/data";
+import { getPenandaTangan } from "../../lib/data";
 import { FormVerifikasiPreview } from "../../components/DocTemplatePreview";
 import PageHeader from "../../components/PageHeader";
 import Card from "../../components/Card";
@@ -21,7 +21,10 @@ const EMPTY = {
   procost: "",
 };
 
-export default function FormVerifikasiPage({ rab, notify, forms = [], setForms }) {
+export default function FormVerifikasiPage({ rab, notify, forms = [], setForms, users = [] }) {
+  // Nama Asman di preview mengikuti akun yang sedang aktif dengan role
+  // tsb (lihat getPenandaTangan di lib/data.js), bukan nama yang di-hardcode.
+  const penandaTangan = getPenandaTangan(users);
   const [activeRab, setActiveRab] = useState(null);
   const [formData, setFormData] = useState(EMPTY);
   const [procostOptions, setProcostOptions] = useState(OPT.procost);
@@ -265,7 +268,7 @@ export default function FormVerifikasiPage({ rab, notify, forms = [], setForms }
                   jumlahBiaya={formData.jumlahBiaya ? Number(formData.jumlahBiaya) : null}
                   terbilang={formData.terbilang}
                   kepada={formData.kepada}
-                  asmanKas={PENANDA_TANGAN.asmanKas}
+                  asmanKas={penandaTangan.asmanKas}
                 />
               </div>
             </div>

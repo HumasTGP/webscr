@@ -128,6 +128,38 @@ const DOCX_TEMPLATES = {
   },
 };
 
+// Banner kecil yang muncul di atas layar (fixed) kalau koneksi ke database
+// (Apps Script) gagal. Sebelum ini databaseStatus/databaseError sudah
+// ditangkap dengan benar di effect load(), tapi tidak pernah ditampilkan ke
+// UI - jadi gejalanya cuma "loading selamanya" tanpa pesan apapun ke user.
+// Dirender di semua kondisi (LandingGateway, LoginScreen, dashboard utama)
+// supaya errornya langsung kelihatan dari layar manapun, termasuk sebelum
+// login (mis. gagal login karena daftar user belum termuat, bukan karena
+// salah password).
+function DatabaseStatusBanner({ status, error }) {
+  if (status !== "error") return null;
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        background: "#B01818",
+        color: "#fff",
+        fontSize: 12.5,
+        fontWeight: 700,
+        padding: "8px 16px",
+        textAlign: "center",
+        lineHeight: 1.5,
+      }}
+    >
+      Gagal terhubung ke database: {error || "Terjadi kesalahan tidak diketahui."} — data mungkin tidak lengkap atau tidak tersimpan. Coba muat ulang halaman.
+    </div>
+  );
+}
+
 export default function App() {
   const [portal, setPortal] = useState(null);
   const [silapakLoggedIn, setSilapakLoggedIn] = useState(false);
@@ -418,6 +450,10 @@ export default function App() {
   const databaseReadyRef = useRef(false);
   const lastSyncedRef = useRef({});
   const saveTimerRef = useRef(null);
+  // Snapshot state lokal terkini, diakses dari closure polling (dibuat
+  // sekali saat mount) supaya polling tahu key mana yang sedang punya
+  // perubahan lokal belum ke-save tanpa perlu me-recreate effect-nya.
+  const databaseSnapshotRef = useRef({});
 
   const databaseSnapshot = useMemo(() => ({
     users,
@@ -474,24 +510,53 @@ export default function App() {
     silapakSatpam,
   ]);
 
+  // Jaga databaseSnapshotRef tetap sinkron dengan snapshot terbaru, supaya
+  // closure polling di bawah (dibuat sekali saat mount) selalu baca state
+  // lokal yang up-to-date, bukan nilai lama dari saat mount.
+  useEffect(() => {
+    databaseSnapshotRef.current = databaseSnapshot;
+  }, [databaseSnapshot]);
+
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
+    // silent=true dipakai untuk polling berkala (lihat effect di bawah):
+    // tidak menampilkan status "loading" supaya UI tidak flicker, dan
+    // melewati key yang datasetSnapshot lokalnya sudah beda dari
+    // lastSyncedRef (berarti user sedang mengedit / belum ke-save) supaya
+    // polling tidak menimpa perubahan yang belum sempat terkirim ke server.
+    const load = async ({ silent = false } = {}) => {
       try {
-        setDatabaseStatus("loading");
-        setDatabaseError("");
+        if (!silent) {
+          setDatabaseStatus("loading");
+          setDatabaseError("");
+        }
         const result = await loadDatabase();
         if (cancelled) return;
 
         const d = result.datasets || {};
         const loaded = {};
         const apply = (key, setter, fallback) => {
+          if (silent && databaseReadyRef.current) {
+            const localValue = databaseSnapshotRef.current[key];
+            const lastSynced = lastSyncedRef.current[key];
+            if (JSON.stringify(localValue) !== JSON.stringify(lastSynced)) {
+              // Ada perubahan lokal yang belum ke-save - jangan ditimpa oleh
+              // hasil polling, biarkan auto-save (effect terpisah) yang
+              // mengirimkannya dulu.
+              return;
+            }
+          }
           const value = Object.prototype.hasOwnProperty.call(d, key) ? d[key] : fallback;
           loaded[key] = value;
           setter(value);
         };
         const applySeeded = (key, setter, fallback) => {
+          if (silent && databaseReadyRef.current) {
+            const localValue = databaseSnapshotRef.current[key];
+            const lastSynced = lastSyncedRef.current[key];
+            if (JSON.stringify(localValue) !== JSON.stringify(lastSynced)) return;
+          }
           const stored = d[key];
           const storedEmpty = stored == null ||
             (Array.isArray(stored) && stored.length === 0) ||
@@ -556,23 +621,37 @@ export default function App() {
         apply("silapakDuty", setSilapakDuty, silapakDuty);
         applySeeded("silapakSatpam", setSilapakSatpam, silapakSatpam);
 
-        lastSyncedRef.current = loaded;
+        // Mode silent (polling): key yang dilewati (ada perubahan lokal
+        // belum ke-save) tidak ada di `loaded`, jadi di-merge, bukan
+        // menimpa seluruh lastSyncedRef - supaya perbandingan berikutnya
+        // tetap benar untuk key tersebut.
+        lastSyncedRef.current = silent ? { ...lastSyncedRef.current, ...loaded } : loaded;
         databaseReadyRef.current = true;
         setDatabaseStatus("ready");
       } catch (error) {
         if (cancelled) return;
-        databaseReadyRef.current = false;
-        setDatabaseError(error.message || "Database tidak dapat dimuat.");
-        setDatabaseStatus("error");
+        if (!silent) {
+          databaseReadyRef.current = false;
+          setDatabaseError(error.message || "Database tidak dapat dimuat.");
+          setDatabaseStatus("error");
+        }
+        // Poll silent yang gagal (mis. jaringan sempat putus) tidak
+        // menampilkan error ke user - cukup dicoba lagi di interval
+        // berikutnya, supaya tidak mengganggu kerja user dengan toast error
+        // yang berulang.
       }
     };
 
     load();
+    const pollTimer = setInterval(() => load({ silent: true }), 15000);
     return () => {
       cancelled = true;
+      clearInterval(pollTimer);
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-    // Data hanya dimuat sekali ketika aplikasi pertama dibuka.
+    // Data dimuat sekali di awal, lalu di-poll berkala (setiap 15 detik)
+    // supaya perubahan dari pengguna lain (mis. status pengajuan mitra atau
+    // approval asman/madm) muncul tanpa perlu refresh manual.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -697,7 +776,7 @@ export default function App() {
       "mitra-tracking": <SiCepatTrackingPage mitraList={mitraList} />,
       rab: (
         <RABPage
-          rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user}
+          rab={rab} setRab={setRab} vendors={vendors} notify={notify} user={user} users={users}
           packages={packages} signRab={signRab} saveMySignature={saveMySignature} tor={tor}
           openTargetId={openTargetId} onConsumeOpenTarget={consumeOpenTarget}
           nonpoSubmissions={nonpoSubmissions} ccList={ccList} poDocuments={poDocuments}
@@ -852,7 +931,7 @@ export default function App() {
           ccList={ccList} setCcList={setCcList}
           ccItems={ccItems} setCcItems={setCcItems}
           combo={ccCombo} setCombo={setCcCombo}
-          notify={notify}
+          notify={notify} users={users}
           ccBast={ccBast} ccPakta={ccPakta} ccTtd={ccTtd} ccBapp={ccBapp}
           onNavigate={openDocument}
           ccVerifikasi={ccVerifikasi} setCcVerifikasi={setCcVerifikasi}
@@ -1034,7 +1113,7 @@ export default function App() {
             />
           );
           routes[`form-verifikasi-${suffix}`] = (
-            <FormVerifikasiPage {...documentProps} rab={rabByKategori[kategori]} notify={notify} forms={formVerifList} setForms={setFormVerifList} />
+            <FormVerifikasiPage {...documentProps} rab={rabByKategori[kategori]} notify={notify} forms={formVerifList} setForms={setFormVerifList} users={users} />
           );
           routes[`lmp1-${suffix}`] = (
             <Lampiran1Page {...documentProps} rab={rabByKategori[kategori]} notify={notify} list={lmp1List} setList={setLmp1List} />
@@ -1148,69 +1227,86 @@ export default function App() {
   // tetapi tidak lagi mengganti seluruh tampilan dengan halaman loading.
 
   if (!portal) {
-    return <LandingGateway onSelect={setPortal} />;
+    return (
+      <>
+        <DatabaseStatusBanner status={databaseStatus} error={databaseError} />
+        <LandingGateway onSelect={setPortal} />
+      </>
+    );
   }
 
   if (portal === "silapak") {
     if (!silapakLoggedIn) {
       return (
-        <SiLapakLogin
-          authenticate={authenticate}
-          onLogin={() => setSilapakLoggedIn(true)}
-          onBack={() => setPortal(null)}
-        />
+        <>
+          <DatabaseStatusBanner status={databaseStatus} error={databaseError} />
+          <SiLapakLogin
+            authenticate={authenticate}
+            onLogin={() => setSilapakLoggedIn(true)}
+            onBack={() => setPortal(null)}
+          />
+        </>
       );
     }
     return (
-      <SiLapakApp
-        paket={silapakPaket}
-        setPaket={setSilapakPaket}
-        tamu={silapakTamu}
-        setTamu={setSilapakTamu}
-        duty={silapakDuty}
-        setDuty={setSilapakDuty}
-        satpamList={silapakSatpam}
-        setSatpamList={setSilapakSatpam}
-        onAddSatpam={handleAddSatpam}
-        onLogout={() => {
-          setSilapakLoggedIn(false);
-          setPortal(null);
-        }}
-      />
+      <>
+        <DatabaseStatusBanner status={databaseStatus} error={databaseError} />
+        <SiLapakApp
+          paket={silapakPaket}
+          setPaket={setSilapakPaket}
+          tamu={silapakTamu}
+          setTamu={setSilapakTamu}
+          duty={silapakDuty}
+          setDuty={setSilapakDuty}
+          satpamList={silapakSatpam}
+          setSatpamList={setSilapakSatpam}
+          onAddSatpam={handleAddSatpam}
+          onLogout={() => {
+            setSilapakLoggedIn(false);
+            setPortal(null);
+          }}
+        />
+      </>
     );
   }
 
 
   if (pendingLoginUser)
     return (
-      <NamaPenggunaModal
-        open
-        onSubmit={(nama) => {
-          const u = { ...pendingLoginUser, username: nama };
-          setPendingLoginUser(null);
-          setUser(u);
-          setActive("dashboard");
-        }}
-      />
+      <>
+        <DatabaseStatusBanner status={databaseStatus} error={databaseError} />
+        <NamaPenggunaModal
+          open
+          onSubmit={(nama) => {
+            const u = { ...pendingLoginUser, username: nama };
+            setPendingLoginUser(null);
+            setUser(u);
+            setActive("dashboard");
+          }}
+        />
+      </>
     );
 
   if (!user)
     return (
-      <LoginScreen
-        authenticate={authenticate}
-        onBack={() => setPortal(null)}
-        onLogin={(u) => {
-          if (u.role === "humas" && !u.isAdmin) {
-            // Login humas (akun bersama "pkl humas") ditahan dulu - popup
-            // nama wajib diisi sebelum masuk ke dashboard (lihat
-            // pendingLoginUser di bawah). Akun admin dikecualikan.
-            setPendingLoginUser(u);
-            return;
-          }
-          setUser(u);
-          setActive(u.role === "madm" ? "madm-dashboard" : u.role === "humas" ? "dashboard" : "asman-dashboard");
-        }}
-      />
+      <>
+        <DatabaseStatusBanner status={databaseStatus} error={databaseError} />
+        <LoginScreen
+          authenticate={authenticate}
+          onBack={() => setPortal(null)}
+          onLogin={(u) => {
+            if (u.role === "humas" && !u.isAdmin) {
+              // Login humas (akun bersama "pkl humas") ditahan dulu - popup
+              // nama wajib diisi sebelum masuk ke dashboard (lihat
+              // pendingLoginUser di bawah). Akun admin dikecualikan.
+              setPendingLoginUser(u);
+              return;
+            }
+            setUser(u);
+            setActive(u.role === "madm" ? "madm-dashboard" : u.role === "humas" ? "dashboard" : "asman-dashboard");
+          }}
+        />
+      </>
     );
 
   const activeLabel = MENU.find((m) => m.key === active)?.label || "";
@@ -1226,6 +1322,7 @@ export default function App() {
         color: T.text,
       }}
     >
+      <DatabaseStatusBanner status={databaseStatus} error={databaseError} />
       <Sidebar
         active={active}
         onSelect={setActive}

@@ -1,4 +1,10 @@
+// URL Apps Script diambil dari environment variable VITE_API_URL (di-set di
+// Vercel Project Settings > Environment Variables) supaya bisa diganti tanpa
+// ubah kode - misal saat deploy ulang Apps Script dan dapat URL /exec baru.
+// Fallback ke URL lama dipakai kalau env var belum di-set sama sekali (mis.
+// waktu dev lokal tanpa file .env), supaya app tetap jalan.
 const API_URL =
+  import.meta.env.VITE_API_URL ||
   "https://script.google.com/macros/s/AKfycbwqyf3VLrSlapQ9OUj1_DK32aiqcIV6goaGU8dor_gV9-QJxpwRHBAbpkN8OtfJsiC-/exec";
 
 async function parseResponse(response) {

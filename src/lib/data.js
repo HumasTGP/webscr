@@ -308,13 +308,45 @@ export const SUB_DOCS = [
   { key: "pakta", label: "Pakta Integritas", matchKey: "id",       required: true },
 ];
 
-// Penanda tangan baku di dokumen RAB/BAST/PI/Form Evaluasi dsb - selalu sama,
-// gak dinamis dari user login atau data review. Dipakai konsisten di semua
-// preview, docx, dan PDF biar gak ada versi yang beda-beda.
+// Fallback kalau belum ada akun Asman/MADM sama sekali di database (mis.
+// database kosong / baru pertama kali load). getPenandaTangan() di bawah
+// ini yang dipakai di komponen-komponen dokumen, BUKAN konstanta ini
+// langsung - supaya nama penanda tangan otomatis ikut akun yang aktif.
 export const PENANDA_TANGAN = {
   madm: { role: "MADM", nama: "Donny Ureansyah" },
   asmanKas: { role: "ASMAN KAS", nama: "Astri Oktavina" },
 };
+
+// Cari akun Asman/MADM yang sedang aktif dari daftar user (lihat
+// DEFAULT_USERS / ManajemenAkses.jsx) supaya nama penanda tangan di semua
+// dokumen (RAB, Form Verifikasi, Cash Card dsb) otomatis mengikuti siapa
+// yang login dengan role tsb, bukan nama yang di-hardcode. Kalau ada lebih
+// dari satu akun per role, ambil yang statusnya aktif berdasarkan
+// activeFrom/activeTo hari ini; kalau tidak ada yang aktif, ambil akun
+// pertama dengan role itu sebagai fallback; kalau role itu tidak punya akun
+// sama sekali, pakai PENANDA_TANGAN statis di atas.
+export function getPenandaTangan(users = []) {
+  const today = localDateStr();
+  const isActiveToday = (u) => {
+    if (!u) return false;
+    if (u.activeFrom && u.activeFrom > today) return false;
+    if (u.activeTo && u.activeTo < today) return false;
+    return true;
+  };
+  const pick = (role, roleLabelText, fallback) => {
+    const candidates = (users || []).filter((u) => u?.role === role);
+    const chosen = candidates.find(isActiveToday) || candidates[0];
+    if (!chosen) return fallback;
+    return {
+      role: roleLabelText,
+      nama: chosen.nama || chosen.signatureName || fallback.nama,
+    };
+  };
+  return {
+    madm: pick("madm", "MADM", PENANDA_TANGAN.madm),
+    asmanKas: pick("asman", "ASMAN KAS", PENANDA_TANGAN.asmanKas),
+  };
+}
 
 export const HELP_CONTACT = {
   phone: "+62 831-9904-4249",

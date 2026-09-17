@@ -12,7 +12,7 @@ import {
 
 import { T, font } from "../../lib/theme";
 import { rupiah, terbilang as toTerbilang } from "../../lib/utils";
-import { PENANDA_TANGAN } from "../../lib/data";
+import { getPenandaTangan } from "../../lib/data";
 import {
   generateDocxFromTemplate,
   formatTanggalPanjang,
@@ -101,7 +101,12 @@ export default function DetailCCPage({
   ccPermintaan = [], setCcPermintaan,
   ccRencana = [], setCcRencana,
   ccPertanggungjawaban = [], setCcPertanggungjawaban,
+  users = [],
 }) {
+  // Nama Asman/MADM di preview dokumen CC mengikuti akun yang sedang aktif
+  // dengan role tsb (lihat getPenandaTangan di lib/data.js), bukan nama
+  // yang di-hardcode.
+  const penandaTangan = getPenandaTangan(users);
   const [selectedCcId, setSelectedCcId] = useState(
     ccList[ccList.length - 1]?.id || ""
   );
@@ -525,7 +530,7 @@ export default function DetailCCPage({
         nomorLpj: formatWeekBulanTahun(),
         judulKegiatan: selectedCc?.judulCc || form1.judulPengajuan || "",
         jumlahBiaya: totalRealisasi,
-        asmanKas: PENANDA_TANGAN.asmanKas,
+        asmanKas: penandaTangan.asmanKas,
       };
     }
     if (key === "permintaan") {
@@ -537,8 +542,8 @@ export default function DetailCCPage({
         tanggal: tanggalHariIni,
         items: itemsForCc.slice(0, 4).map((it) => ({ expType: it.expType, harga: totalHargaOf(it) })),
         totalPengajuan: total,
-        asmanKas: PENANDA_TANGAN.asmanKas,
-        madm: PENANDA_TANGAN.madm,
+        asmanKas: penandaTangan.asmanKas,
+        madm: penandaTangan.madm,
       };
     }
     if (key === "rencana") {
@@ -549,7 +554,7 @@ export default function DetailCCPage({
         nominalSaldoKas: total,
         terbilang: toTerbilang(total),
         tanggal: tanggalHariIni,
-        asmanKas: PENANDA_TANGAN.asmanKas,
+        asmanKas: penandaTangan.asmanKas,
       };
     }
     if (key === "pertanggungjawaban") {
@@ -558,8 +563,8 @@ export default function DetailCCPage({
         nomorWeek: formatWeekBulanTahun(),
         items: itemsForCc.slice(0, 2).map((it) => ({ expType: it.expType, harga: totalHargaOf(it) })),
         totalPengajuan: totalRealisasi,
-        madm: PENANDA_TANGAN.madm,
-        asmanKas: PENANDA_TANGAN.asmanKas,
+        madm: penandaTangan.madm,
+        asmanKas: penandaTangan.asmanKas,
       };
     }
     return {};

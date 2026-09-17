@@ -4,7 +4,7 @@ import {
   Printer, Settings, Trash2, Upload, X,
 } from "lucide-react";
 import { T, font } from "../../lib/theme";
-import { PENANDA_TANGAN } from "../../lib/data";
+import { getPenandaTangan } from "../../lib/data";
 import { printChecklist, rupiah, uid } from "../../lib/utils";
 import { generateRabPdf } from "../../lib/pdf";
 import { generateDocxFromTemplate } from "../../lib/docxGenerate";
@@ -96,7 +96,7 @@ function nextRabIdNumber(rab) {
 }
 
 export default function RABPage({
-  rab, setRab, vendors, notify, user, packages = [], defaultKategori, signRab, saveMySignature, tor = [], openTargetId, onConsumeOpenTarget,
+  rab, setRab, vendors, notify, user, users = [], packages = [], defaultKategori, signRab, saveMySignature, tor = [], openTargetId, onConsumeOpenTarget,
   // Data tambahan buat menghitung "Tahap Saat Ini" (getPaymentStage) - semua
   // opsional, kalau tidak dilewatkan kolom Tahap Saat Ini tetap aman (cuma
   // berhenti di "Siap Dibuat ..." karena tidak tahu master pembayarannya).
@@ -106,6 +106,9 @@ export default function RABPage({
   ccBast = [], ccPakta = [], ccTtd = [], ccBapp = [], ccPertanggungjawaban = [],
   paymentPackages = [],
 }) {
+  // Nama Asman/MADM di dokumen mengikuti akun yang sedang aktif dengan role
+  // tsb (lihat getPenandaTangan di lib/data.js), bukan nama yang di-hardcode.
+  const penandaTangan = useMemo(() => getPenandaTangan(users), [users]);
   const [mode, setMode] = useState("list");
   const [step, setStep] = useState(0);
   const [items, setItems] = useState([]);
@@ -328,8 +331,8 @@ export default function RABPage({
       idNumber: record.idNumber || "",
       tanggalRab: record.tanggalRab ? formatTanggal(record.tanggalRab) : "",
       judulKegiatan: record.judulKegiatan || "",
-      namaPembuat: PENANDA_TANGAN.asmanKas.nama,
-      namaAsman: PENANDA_TANGAN.madm.nama,
+      namaPembuat: penandaTangan.asmanKas.nama,
+      namaAsman: penandaTangan.madm.nama,
       jumlahPengajuan: rupiah(jumlahPengajuan),
       ppnPengajuan: rupiah(ppnPengajuan),
       totalPengajuan: rupiah(record.totalVendor || 0),
@@ -372,8 +375,8 @@ export default function RABPage({
         jumlahEvaluasi: its.reduce((s, it) => s + (it.baseEvaluasiVendor || 0), 0),
         ppnEvaluasi: its.reduce((s, it) => s + (it.ppnNilaiEvaluasiVendor || 0), 0),
         totalEvaluasi: record.totalEvaluasiVendor || 0,
-        sigLeft: PENANDA_TANGAN.madm,
-        sigRight: PENANDA_TANGAN.asmanKas,
+        sigLeft: penandaTangan.madm,
+        sigRight: penandaTangan.asmanKas,
         filename: `RAB-${record.idNumber || "record"}`,
       });
       notify("RAB (.pdf) berhasil diunduh.", "success");
@@ -428,7 +431,7 @@ export default function RABPage({
                 Tanggal RAB: {formatTanggal(previewRecord.tanggalRab)} · Total Evaluasi Vendor: {rupiah(previewRecord.totalEvaluasiVendor || previewRecord.totalEvaluasi || 0)}
               </div>
               <div style={{ marginBottom: 12 }}>
-                <RabDocPreview values={previewRecord} madm={PENANDA_TANGAN.madm} asmanKas={PENANDA_TANGAN.asmanKas} />
+                <RabDocPreview values={previewRecord} madm={penandaTangan.madm} asmanKas={penandaTangan.asmanKas} />
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <Button icon={Download} onClick={() => downloadDocx(previewRecord)}>Unduh Word (.docx)</Button>
@@ -869,8 +872,8 @@ export default function RABPage({
           <div style={{ marginBottom: 16 }}>
             <RabDocPreview
               values={{ ...header, items, totalVendor, totalEvaluasiVendor }}
-              madm={PENANDA_TANGAN.madm}
-              asmanKas={PENANDA_TANGAN.asmanKas}
+              madm={penandaTangan.madm}
+              asmanKas={penandaTangan.asmanKas}
             />
           </div>
 
@@ -897,8 +900,8 @@ export default function RABPage({
           <div style={{ maxWidth: 780, margin: "0 auto 18px" }}>
             <RabDocPreview
               values={{ ...header, items, totalVendor, totalEvaluasiVendor }}
-              madm={PENANDA_TANGAN.madm}
-              asmanKas={PENANDA_TANGAN.asmanKas}
+              madm={penandaTangan.madm}
+              asmanKas={penandaTangan.asmanKas}
             />
           </div>
 
