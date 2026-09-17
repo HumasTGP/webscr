@@ -29,6 +29,31 @@ src/
 - **Si Lapak Priok:** `#FDEA6F`
 - **Si Cepat:** `#CF0000`
 
+## Konfigurasi & Environment Variables
+
+Aplikasi terhubung dengan database Google Sheets via Google Apps Script Web App.
+
+| Variable | Deskripsi | Default / Fallback |
+|---|---|---|
+| `VITE_API_URL` | URL deployment Google Apps Script (`/exec`) | URL bawaan di `src/lib/api.js` |
+
+Untuk mengatur URL baru (misalnya saat redeploy Apps Script):
+- Buat file `.env` di root project:
+  ```env
+  VITE_API_URL=https://script.google.com/macros/s/AKfycb.../exec
+  ```
+- Atau set di platform hosting (seperti Vercel Environment Variables).
+
+## Sinkronisasi & Penanda Tangan
+
+1. **Background Polling:**
+   Frontend melakukan polling data secara otomatis setiap 15 detik untuk memuat pembaruan data secara real-time dari backend/spreadsheet tanpa memerlukan reload halaman secara manual.
+2. **Penanda Tangan Dinamis:**
+   Nama penanda tangan dokumen SAKTI (RAB, Form Verifikasi, Detail Cash Card, dsb.) otomatis mendeteksi dan menggunakan akun dengan role **ASMAN KAS** dan **MADM** yang aktif di Manajemen Akses. Jika akun belum terdaftar, sistem akan menggunakan konfigurasi fallback bawaan.
+3. **Petunjuk Pembaruan Database:**
+   Lihat panduan lengkap pengaturan skrip dan spreadsheet di [DATABASE_UPDATE_INSTRUCTIONS.md](DATABASE_UPDATE_INSTRUCTIONS.md).
+
+
 ## Menjalankan Project
 
 ### Pertama kali clone repository
